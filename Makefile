@@ -1,6 +1,3 @@
-NAME = webserv
-
-
 #----COLORS----#
 DEF_COLOR = \033[0m
 WHITE_BOLD = \033[1;39m
@@ -12,7 +9,6 @@ YELLOW = \033[1;33m
 BLUE = \033[1;34m
 PINK = \033[1;35m
 CYAN = \033[1;36m
-
 
 #----OS COMPATIBILITY----#
 ifeq ($(OS),Windows_NT)
@@ -49,6 +45,8 @@ else
     endif
 endif
 
+#----NAME----#
+NAME = webserv
 
 #----COMPILER----#
 CC = c++
@@ -122,8 +120,8 @@ bonusre: fclean bonus
 
 bre: bonusre
 
-# test:
-# 	cd tester && ./tester.sh
+test:
+	cd tests/subject; ./ubuntu_tester "http://localhost:8080"
 
 # min-test:
 # 	cd tester && ./tester.sh -n
@@ -139,7 +137,7 @@ bre: bonusre
 		b \
 		bonusre \
 		bre \
-		# test \
+		test \
 		# min-test \
 		# test-clean
 
