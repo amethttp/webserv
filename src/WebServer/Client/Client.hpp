@@ -7,7 +7,7 @@
 class Client
 {
 private:
-	fd_t fd;
-	Request request;
-	Response response;
+	fd_t fd_;
+	Request request_;
+	Response response_;
 };

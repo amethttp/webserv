@@ -5,15 +5,14 @@
 #include "Session/Session.hpp"
 #include "Location/Location.hpp"
 
-using namespace std;
-
 class Server
 {
 private:
-	vector<Location> locations;
-	vector<int> ports;
-	vector<string> names;
-	vector<Session> sessions;
+	std::vector<Location> locations_;
+	std::vector<int> ports_;
+	std::vector<Session> sessions_;
+	std::vector<std::string> names_;
+	std::string uploadPath_;
 
 public:
 };

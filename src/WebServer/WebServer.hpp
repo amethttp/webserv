@@ -4,17 +4,15 @@
 #include "utils/fd.hpp"
 #include "Server/Server.hpp"
 
-using namespace std;
-
 class WebServer
 {
 private:
-	vector<Server> servers;
-	vector<fd_t> listeners;
+	std::vector<Server> servers_;
+	std::vector<fd_t> listeners_;
 
 public:
-	vector<Server> getServers();
-	vector<fd_t> getListeners();
+	std::vector<Server> getServers();
+	std::vector<fd_t> getListeners();
 
 	void serve();
 };
