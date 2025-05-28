@@ -75,11 +75,26 @@ INCLUDES = -I$(SRC)
 
 
 #----VPATH----#
-vpath %.cpp	$(SRC):\
+vpath %.cpp $(SRC): \
+            $(SRC)utils: \
+            $(SRC)WebServer: \
+            $(SRC)WebServer/Client: \
+            $(SRC)WebServer/Client/Request: \
+            $(SRC)WebServer/Client/Response: \
+            $(SRC)WebServer/Server: \
+            $(SRC)WebServer/Server/Location: \
+            $(SRC)WebServer/Server/Session: \
 
 
 #----SHARED----#
 SRCS = webserv.cpp \
+        WebServer.cpp \
+        Client.cpp \
+        Request.cpp \
+        Response.cpp \
+        Server.cpp \
+        Location.cpp \
+        Session.cpp \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
@@ -101,7 +116,7 @@ $(BIN_DIR)%.o: %.cpp Makefile
 	@mkdir -p $(BIN_DIR)
 	@$(CC) $(CCFLAGS) $(INCLUDES) -MMD -c $< -o $@
 
-clean: 
+clean:
 	@rm -rf $(BIN_DIR)
 	@echo "$(RED)Binaries deleted$(DEF_COLOR)\n"
 
