@@ -44,7 +44,7 @@ int main(void)
 		std::cout << std::endl;
 		dots = (dots + 1) % 4;
 
-		nfds = epoll_wait(epfd, events, 1024, -1);
+		nfds = epoll_wait(epfd, events, 1024, 1000); // -1 For indefinite waiting(blocking)
 		for (int i = 0; i < nfds; ++i) {
 			if (events[i].data.fd == serverSocket) {
 				memset(&client, 0, sizeof(client));
@@ -64,6 +64,7 @@ int main(void)
 						if (strstr(buffer, "exit")) {
 							close(serverSocket);
     						close(epfd);
+							std::cout << "Exiting..." << std::endl;
 							return 0;
 						}
 						write(events[i].data.fd , buffer , bytesRead);
