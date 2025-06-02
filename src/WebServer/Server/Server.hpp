@@ -15,4 +15,8 @@ private:
 	std::string uploadPath_;
 
 public:
+	Server();
+	~Server();
+
+	std::vector<int> getPorts();
 };

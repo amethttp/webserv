@@ -1,23 +1,33 @@
 #include <iostream>
-#include <limits.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include "WebServer/WebServer.hpp"
 
 int main(void)
 {
-	std::cout << "Hello world" << std::endl;
+    WebServer webServer = WebServer();
 
-	sockaddr_in	serverAddress;
+    // std::vector<Server> servers;
+    // Server server;
 
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(8080);
-	serverAddress.sin_addr.s_addr = INADDR_ANY;
+    // server.ports_.push_back(8080);
+    // server.ports_.push_back(9000);
+    // webServer.servers_.push_back(server);
 
-	int	serverSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+    // server.ports_.clear();
+    // server.ports_.push_back(3004);
+    // webServer.servers_.push_back(server);
 
-	bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+    // server.ports_.clear();
+    // server.ports_.push_back(4444);
+    // server.ports_.push_back(5555);
+    // server.ports_.push_back(6000);
+    // webServer.servers_.push_back(server);
 
-	listen(serverSocket, INT_MAX);
+    // server.ports_.clear();
+    // server.ports_.push_back(3000);
+    // server.ports_.push_back(3241);
+    // webServer.servers_.push_back(server);
 
-	return 1;
+    webServer.serve();
+
+    return 0;
 }
