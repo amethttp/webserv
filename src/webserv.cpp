@@ -19,12 +19,12 @@ int main(void)
     memset(&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(PORT);
-    serverAddress.sin_addr.s_addr = INADDR_ANY;   
-    
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
+
     int c = sizeof(struct sockaddr_in);
-    
+
     int serverSocket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-    
+
     if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
         std::cerr << "Bind failed: Rebinding:" << errno << std::endl;
         serverAddress.sin_port = htons(PORT + 1);
@@ -34,7 +34,7 @@ int main(void)
         }
     }
     listen(serverSocket, SOMAXCONN);
-    
+
     int dots = 1;
     int bytesRead;
     char buffer[BUFFER_SIZE + 1];
@@ -42,7 +42,7 @@ int main(void)
     epoll_event events[EVENT_SIZE];
     int nfds;
     int epfd = epoll_create1(0);
-    
+
     evSetter.events = EPOLLIN;
     evSetter.data.fd = serverSocket;
     epoll_ctl(epfd, EPOLL_CTL_ADD, serverSocket, &evSetter);
@@ -88,9 +88,9 @@ int main(void)
                             }
                         }
                     } else if (bytesRead == 0) {
-                        delete client;
                         epoll_ctl(epfd, EPOLL_CTL_DEL, client->fd_, NULL);
                         close(client->fd_);
+                        delete client;
                         std::cout << "Client disconnected" << std::endl;
                         continue ;
                     } else if (bytesRead < 0) {
