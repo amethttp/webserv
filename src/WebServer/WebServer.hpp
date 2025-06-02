@@ -13,7 +13,7 @@ private:
 public:
 	std::vector<Server> getServers();
 	std::vector<fd_t> getListeners();
-	void readConfigFile(std::string path);
+	void setConfigFromFile(std::string path);
 
 	void serve();
 };

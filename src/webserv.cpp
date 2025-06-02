@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 		configFile = argv[1];
 	else
 		configFile = "/default.conf";
-	webserver.readConfigFile(configFile);
+	webserver.setConfigFromFile(configFile);
 	webserver.serve();
 	return 0;
 }

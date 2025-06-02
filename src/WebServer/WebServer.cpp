@@ -1,9 +1,20 @@
 #include "WebServer.hpp"
 #include <iostream>
+#include "Config/ConfigReader/ConfigReader.hpp"
 
-void WebServer::readConfigFile(std::string path)
+void WebServer::setConfigFromFile(std::string path)
 {
-	path.rfind(".");
+	try
+	{
+		ConfigReader::getConfigs(path);
+	}
+	catch (std::exception e)
+	{
+		std::cout << "Couldn't read config file <<"
+				  << path << ">> because " << e.what()
+				  << std::endl;
+	}
+	// path.rfind(".");
 }
 
 void WebServer::serve()
@@ -11,6 +22,5 @@ void WebServer::serve()
 	std::cout << "Serving..." << std::endl;
 	while (42)
 	{
-
 	}
 }
