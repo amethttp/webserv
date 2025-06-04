@@ -27,6 +27,8 @@ public:
 	void setFd(fd_t fd);
 	void setResponseBuffer(const std::string &stringResponse);
 
+	bool hasFullRequestHeaders();
+	bool parseRequest();
 	void appendRequest(char *request);
 	void eraseRequest(int bytesToErase);
 	void eraseResponse(int bytesToErase);

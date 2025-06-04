@@ -42,6 +42,16 @@ std::string Client::getStringifiedRequest()
 	return this->request_.getBuffer();
 }
 
+bool Client::hasFullRequestHeaders()
+{
+	return this->request_.hasFullHeaders();
+}
+
+bool Client::parseRequest()
+{
+	return this->request_.parseFromBuffer();
+}
+
 void Client::appendRequest(char *request)
 {
 	this->request_.appendBuffer(request);

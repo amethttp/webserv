@@ -113,9 +113,17 @@ void WebServer::disconnectClient(Client *client, t_epoll &epoll)
 	delete client;
 }
 
-void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
+bool WebServer::tryParseRequest(Client *client, char *buffer)
 {
 	client->appendRequest(buffer);
+	if (!client->hasFullRequestHeaders())
+		return false;
+	client->parseRequest();
+	return true;
+}
+
+void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
+{
 	client->setResponseBuffer(client->getStringifiedRequest());
 	client->eraseRequest(client->getStringifiedRequest().length());
 	epoll.eventConfig.events = EPOLLOUT;
@@ -132,7 +140,11 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	bzero(buffer, sizeof(buffer));
 	bytesReceived = recv(client->getFd(), buffer, READ_BUFFER_SIZE, 0);
 	if (bytesReceived > 0)
+	{
+		if (!tryParseRequest(client, buffer))
+			return;
 		buildResponse(client, epoll, buffer);
+	}
 	else if (bytesReceived == 0)
 		disconnectClient(client, epoll);
 	else
