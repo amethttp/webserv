@@ -19,4 +19,5 @@ public:
 	~Server();
 
 	std::vector<int> getPorts();
+	void setPorts(std::vector<int> &ports);
 };

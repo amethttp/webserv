@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <iostream>
@@ -71,22 +72,29 @@ fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
 
 void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 {
-	Client *newClient = new Client();
 	sockaddr_in newClientAddress;
 	socklen_t socketSize = sizeof(newClientAddress);
 
-	bzero(&newClientAddress, sizeof(newClientAddress));
-	fd_t newClientFd = accept(serverFd, (struct sockaddr *)&newClientAddress, &socketSize);
-	if (newClientFd < 0)
-		throw std::runtime_error("Couldn't accept new client");
-	if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
-		throw std::runtime_error("Couldn't set NONBLOCKING flag to client fd");
-	newClient->setFd(newClientFd);
-	epoll.eventConfig.data.ptr = newClient;
-	epoll.eventConfig.events = EPOLLIN;
-	if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newClientFd, &epoll.eventConfig) == -1)
-		throw std::runtime_error("Couldn't add client fd to epoll");
-	std::cout << "New Client (ID: " << newClient->getId() << ") connected" << std::endl;
+	while (true)
+	{
+		Client *newClient = new Client();
+		bzero(&newClientAddress, sizeof(newClientAddress));
+		fd_t newClientFd = accept(serverFd, (struct sockaddr *)&newClientAddress, &socketSize);
+		if (newClientFd < 0)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				break ;
+			throw std::runtime_error("Couldn't accept new client");
+		}
+		if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
+			throw std::runtime_error("Couldn't set NONBLOCKING flag to client fd");
+		newClient->setFd(newClientFd);
+		epoll.eventConfig.data.ptr = newClient;
+		epoll.eventConfig.events = EPOLLIN;
+		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newClientFd, &epoll.eventConfig) == -1)
+			throw std::runtime_error("Couldn't add client fd to epoll");
+		std::cout << "New Client (ID: " << newClient->getId() << ") connected" << std::endl;
+	}
 }
 
 void WebServer::disconnectClient(Client *client, t_epoll &epoll)
@@ -173,6 +181,11 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 				checkClientEvent(epoll, i);
 		}
 	}
+}
+
+void WebServer::setServers(std::vector<Server> &servers)
+{
+	this->servers_ = servers;
 }
 
 void WebServer::serve()

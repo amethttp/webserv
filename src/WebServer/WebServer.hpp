@@ -12,7 +12,6 @@ class WebServer
 {
 private:
 	std::vector<Server> servers_;
-	std::vector<fd_t> listeners_;
 
 	std::vector<fd_t> createServerFds();
 	void setEpoll(t_epoll &epoll, std::vector<fd_t> &serversFds);
@@ -30,7 +29,7 @@ public:
 	~WebServer();
 
 	std::vector<Server> getServers();
-	std::vector<fd_t> getListeners();
+	void setServers(std::vector<Server> &servers);
 
 	void serve();
 };
