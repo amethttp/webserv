@@ -23,4 +23,6 @@ public:
 	fd_t getFd();
 	void setFd(fd_t fd);
 	std::string getStringifiedResponse();
+
+	void eraseResponse(int bytesToErase);
 };

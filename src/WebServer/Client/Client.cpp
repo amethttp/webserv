@@ -31,3 +31,8 @@ std::string Client::getStringifiedResponse()
 {
 	return this->response_.toString();
 }
+
+void Client::eraseResponse(int bytesToErase)
+{
+	this->response_.eraseBuffer(bytesToErase);
+}

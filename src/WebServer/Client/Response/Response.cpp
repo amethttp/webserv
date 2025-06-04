@@ -2,5 +2,10 @@
 
 std::string Response::toString()
 {
-	return std::string("response!");
+	return this->buffer_;
+}
+
+void Response::eraseBuffer(int bytesToErase)
+{
+	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
 }

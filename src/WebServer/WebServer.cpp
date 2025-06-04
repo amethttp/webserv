@@ -83,7 +83,7 @@ void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 		if (newClientFd < 0)
 		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break ;
+				break;
 			throw std::runtime_error("Couldn't accept new client");
 		}
 		if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
@@ -138,17 +138,14 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 	if (bytesSent < 0)
 		throw std::runtime_error("Couldn't send response");
 
-	if (bytesSent >= stringifiedResponse.size())
-	{
-		epoll.eventConfig.events = EPOLLIN;
-		epoll.eventConfig.data.ptr = static_cast<Client *>(client);
-		if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
-			throw std::runtime_error("Couldn't add POLLIN flag to client fd");
-	}
-	else
-	{
-		// handle incomplete response
-	}
+	client->eraseResponse(bytesSent);
+	if (bytesSent < stringifiedResponse.length())
+		return;
+
+	epoll.eventConfig.events = EPOLLIN;
+	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
+	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
+		throw std::runtime_error("Couldn't add POLLIN flag to client fd");
 }
 
 void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
