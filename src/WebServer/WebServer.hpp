@@ -19,11 +19,11 @@ private:
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
 	void disconnectClient(Client *client, t_epoll &epoll);
-	void handleRequestResponse(Client *client, t_epoll &epoll);
-	void handleRequestEvent(Client *client, char *buffer, t_epoll &epoll);
-	void handleResponseEvent(Client *client, t_epoll &epoll);
-	void handleClientEvent(char *buffer, t_epoll &epoll, const int &eventIndex);
-	void handleConnections(std::vector<fd_t> &serversFds, t_epoll &epoll);
+	void buildResponse(Client *client, t_epoll &epoll);
+	void receiveRequest(Client *client, t_epoll &epoll);
+	void sendResponse(Client *client, t_epoll &epoll);
+	void checkClientEvent(t_epoll &epoll, const int &eventIndex);
+	void handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll);
 
 public:
 	WebServer();

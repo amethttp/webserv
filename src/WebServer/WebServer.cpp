@@ -99,7 +99,7 @@ void WebServer::disconnectClient(Client *client, t_epoll &epoll)
 	delete client;
 }
 
-void WebServer::handleRequestResponse(Client *client, t_epoll &epoll)
+void WebServer::buildResponse(Client *client, t_epoll &epoll)
 {
 	epoll.eventConfig.events = EPOLLOUT;
 	epoll.eventConfig.data.ptr = static_cast<void *>(client);
@@ -107,23 +107,28 @@ void WebServer::handleRequestResponse(Client *client, t_epoll &epoll)
 		throw std::runtime_error("Couldn't add POLLOUT flag to client fd");
 }
 
-void WebServer::handleRequestEvent(Client *client, char *buffer, t_epoll &epoll)
+void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 {
-	bzero(buffer, sizeof(buffer));
-	int bytesRead = recv(client->getFd(), buffer, READ_BUFFER_SIZE, 0);
+	int bytesReceived;
+	char buffer[READ_BUFFER_SIZE + 1];
 
-	if (bytesRead > 0)
-		handleRequestResponse(client, epoll);
-	else if (bytesRead == 0)
+	bzero(buffer, sizeof(buffer));
+	bytesReceived = recv(client->getFd(), buffer, READ_BUFFER_SIZE, 0);
+	if (bytesReceived > 0)
+		buildResponse(client, epoll);
+	else if (bytesReceived == 0)
 		disconnectClient(client, epoll);
 	else
 		throw std::runtime_error("Couldn't receive data from client fd");
 }
 
-void WebServer::handleResponseEvent(Client *client, t_epoll &epoll)
+void WebServer::sendResponse(Client *client, t_epoll &epoll)
 {
 	std::string stringifiedResponse = client->getStringifiedResponse();
 	size_t bytesSent = send(client->getFd(), stringifiedResponse.c_str(), stringifiedResponse.length(), 0);
+
+	if (bytesSent < 0)
+		throw std::runtime_error("Couldn't send response");
 
 	if (bytesSent >= stringifiedResponse.size())
 	{
@@ -132,22 +137,25 @@ void WebServer::handleResponseEvent(Client *client, t_epoll &epoll)
 		if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
 			throw std::runtime_error("Couldn't add POLLIN flag to client fd");
 	}
+	else
+	{
+		// handle incomplete response
+	}
 }
 
-void WebServer::handleClientEvent(char *buffer, t_epoll &epoll, const int &eventIndex)
+void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
 {
 	Client *client = static_cast<Client *>(epoll.eventBuffer[eventIndex].data.ptr);
 
 	if (epoll.eventBuffer[eventIndex].events & EPOLLIN)
-		handleRequestEvent(client, buffer, epoll);
+		receiveRequest(client, epoll);
 	else if (epoll.eventBuffer[eventIndex].events & EPOLLOUT)
-		handleResponseEvent(client, epoll);
+		sendResponse(client, epoll);
 }
 
-void WebServer::handleConnections(std::vector<fd_t> &serversFds, t_epoll &epoll)
+void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll)
 {
 	int readyFds;
-	char buffer[READ_BUFFER_SIZE + 1];
 
 	while (true)
 	{
@@ -162,7 +170,7 @@ void WebServer::handleConnections(std::vector<fd_t> &serversFds, t_epoll &epoll)
 			if (serverFd != -1)
 				acceptNewClient(serverFd, epoll);
 			else
-				handleClientEvent(buffer, epoll, i);
+				checkClientEvent(epoll, i);
 		}
 	}
 }
@@ -172,17 +180,10 @@ void WebServer::serve()
 	if (this->servers_.empty())
 		return;
 
-	try
-	{
-		t_epoll epoll;
-		std::vector<fd_t> serversFds;
+	t_epoll epoll;
+	std::vector<fd_t> serversFds;
 
-		serversFds = createServerFds();
-		setEpoll(epoll, serversFds);
-		handleConnections(serversFds, epoll);
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << "Error: " << e.what() << std::endl;
-	}
+	serversFds = createServerFds();
+	setEpoll(epoll, serversFds);
+	handleConnectionEvents(serversFds, epoll);
 }
