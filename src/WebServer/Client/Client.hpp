@@ -21,8 +21,13 @@ public:
 
 	int getId();
 	fd_t getFd();
-	void setFd(fd_t fd);
 	std::string getStringifiedResponse();
+	std::string getStringifiedRequest();
 
+	void setFd(fd_t fd);
+	void setResponseBuffer(const std::string &stringResponse);
+
+	void appendRequest(char *request);
+	void eraseRequest(int bytesToErase);
 	void eraseResponse(int bytesToErase);
 };

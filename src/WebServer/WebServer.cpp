@@ -22,6 +22,8 @@ std::vector<fd_t> WebServer::createServerFds()
 {
 	sockaddr_in serverAddress;
 	std::vector<fd_t> serversFds;
+	// TODO: ERASE THIS VAR
+	int enable = 1;
 
 	bzero(&serverAddress, sizeof(serverAddress));
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
@@ -33,6 +35,9 @@ std::vector<fd_t> WebServer::createServerFds()
 		{
 			serverAddress.sin_port = htons(*portsIt);
 			int socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+			// TODO: ERASE SETSOCKOPT
+			if (setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
+				throw std::runtime_error("Couldn't set SO_REUSEADDR");
 			if (socketFd < 0)
 				throw std::runtime_error("Couldn't create socket");
 			if (bind(socketFd, (struct sockaddr *)(&serverAddress), sizeof(serverAddress)) == -1)
@@ -72,12 +77,12 @@ fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
 
 void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 {
+	Client *newClient;
 	sockaddr_in newClientAddress;
 	socklen_t socketSize = sizeof(newClientAddress);
 
 	while (true)
 	{
-		Client *newClient = new Client();
 		bzero(&newClientAddress, sizeof(newClientAddress));
 		fd_t newClientFd = accept(serverFd, (struct sockaddr *)&newClientAddress, &socketSize);
 		if (newClientFd < 0)
@@ -88,6 +93,7 @@ void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 		}
 		if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
 			throw std::runtime_error("Couldn't set NONBLOCKING flag to client fd");
+		newClient = new Client();
 		newClient->setFd(newClientFd);
 		epoll.eventConfig.data.ptr = newClient;
 		epoll.eventConfig.events = EPOLLIN;
@@ -107,8 +113,11 @@ void WebServer::disconnectClient(Client *client, t_epoll &epoll)
 	delete client;
 }
 
-void WebServer::buildResponse(Client *client, t_epoll &epoll)
+void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
 {
+	client->appendRequest(buffer);
+	client->setResponseBuffer(client->getStringifiedRequest());
+	client->eraseRequest(client->getStringifiedRequest().length());
 	epoll.eventConfig.events = EPOLLOUT;
 	epoll.eventConfig.data.ptr = static_cast<void *>(client);
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
@@ -123,7 +132,7 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	bzero(buffer, sizeof(buffer));
 	bytesReceived = recv(client->getFd(), buffer, READ_BUFFER_SIZE, 0);
 	if (bytesReceived > 0)
-		buildResponse(client, epoll);
+		buildResponse(client, epoll, buffer);
 	else if (bytesReceived == 0)
 		disconnectClient(client, epoll);
 	else

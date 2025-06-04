@@ -18,7 +18,7 @@ private:
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
 	void disconnectClient(Client *client, t_epoll &epoll);
-	void buildResponse(Client *client, t_epoll &epoll);
+	void buildResponse(Client *client, t_epoll &epoll, char *buffer);
 	void receiveRequest(Client *client, t_epoll &epoll);
 	void sendResponse(Client *client, t_epoll &epoll);
 	void checkClientEvent(t_epoll &epoll, const int &eventIndex);

@@ -9,5 +9,6 @@ private:
 public:
 	std::string toString();
 
+	void setBuffer(const std::string &buffer);
 	void eraseBuffer(int bytesToErase);
 };

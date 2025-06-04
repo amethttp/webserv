@@ -32,6 +32,26 @@ std::string Client::getStringifiedResponse()
 	return this->response_.toString();
 }
 
+void Client::setResponseBuffer(const std::string &stringResponse)
+{
+	this->response_.setBuffer(stringResponse);
+}
+
+std::string Client::getStringifiedRequest()
+{
+	return this->request_.getBuffer();
+}
+
+void Client::appendRequest(char *request)
+{
+	this->request_.appendBuffer(request);
+}
+
+void Client::eraseRequest(int bytesToErase)
+{
+	this->request_.eraseBuffer(bytesToErase);
+}
+
 void Client::eraseResponse(int bytesToErase)
 {
 	this->response_.eraseBuffer(bytesToErase);
