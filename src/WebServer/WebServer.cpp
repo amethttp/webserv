@@ -28,10 +28,10 @@ std::vector<fd_t> WebServer::createServerFds()
 	bzero(&serverAddress, sizeof(serverAddress));
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 	serverAddress.sin_family = AF_INET;
-	for (std::vector<Server>::iterator serversIt = this->servers_.begin(); serversIt < this->servers_.end(); ++serversIt)
+	for (std::vector<Server>::iterator serversIt = this->servers_.begin(); serversIt != this->servers_.end(); ++serversIt)
 	{
 		std::vector<int> serverPorts = serversIt->getPorts();
-		for (std::vector<int>::iterator portsIt = serverPorts.begin(); portsIt < serverPorts.end(); ++portsIt)
+		for (std::vector<int>::iterator portsIt = serverPorts.begin(); portsIt != serverPorts.end(); ++portsIt)
 		{
 			serverAddress.sin_port = htons(*portsIt);
 			int socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
@@ -57,7 +57,7 @@ void WebServer::setEpoll(t_epoll &epoll, std::vector<fd_t> &serversFds)
 		throw std::runtime_error("Couldn't create epoll");
 
 	epoll.eventConfig.events = EPOLLIN;
-	for (std::vector<fd_t>::iterator it = serversFds.begin(); it < serversFds.end(); ++it)
+	for (std::vector<fd_t>::iterator it = serversFds.begin(); it != serversFds.end(); ++it)
 	{
 		epoll.eventConfig.data.fd = *it;
 		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, *it, &epoll.eventConfig) == -1)
@@ -67,7 +67,7 @@ void WebServer::setEpoll(t_epoll &epoll, std::vector<fd_t> &serversFds)
 
 fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
 {
-	for (std::vector<fd_t>::iterator it = serversFds.begin(); it < serversFds.end(); ++it)
+	for (std::vector<fd_t>::iterator it = serversFds.begin(); it != serversFds.end(); ++it)
 	{
 		if (eventFd == *it)
 			return *it;
@@ -113,12 +113,12 @@ void WebServer::disconnectClient(Client *client, t_epoll &epoll)
 	removeClient(client);
 }
 
-bool WebServer::tryParseRequest(Client *client, char *buffer)
+bool WebServer::tryBuildRequest(Client *client, char *buffer)
 {
 	client->appendRequest(buffer);
 	if (!client->hasFullRequestHeaders())
 		return false;
-	client->parseRequest();
+	client->tryBuildRequest();
 	return true;
 }
 
@@ -142,7 +142,7 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	if (bytesReceived > 0)
 	{
 		client->updateLastReceivedPacket();
-		if (!tryParseRequest(client, buffer))
+		if (!tryBuildRequest(client, buffer))
 			return;
 		buildResponse(client, epoll, buffer);
 	}
@@ -208,7 +208,7 @@ void WebServer::removeClient(Client *client)
 {
 	uint32_t clientId = client->getId();
 
-	for (std::vector<Client>::iterator it = this->clients_.begin(); it < this->clients_.end(); ++it)
+	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
 	{
 		if (it->getId() == clientId)
 		{
@@ -222,7 +222,7 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 {
 	time_t now = std::time(NULL);
 
-	for (std::vector<Client>::iterator it = this->clients_.begin(); it < this->clients_.end();)
+	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end();)
 	{
 		if ((now - it->getLastReceivedPacket()) * 1000 <= TIMEOUT)
 		{

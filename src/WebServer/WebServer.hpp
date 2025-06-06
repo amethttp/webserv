@@ -20,7 +20,7 @@ private:
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
 	void disconnectClient(Client *client, t_epoll &epoll);
-	bool tryParseRequest(Client *client, char *buffer);
+	bool tryBuildRequest(Client *client, char *buffer);
 	void buildResponse(Client *client, t_epoll &epoll, char *buffer);
 	void receiveRequest(Client *client, t_epoll &epoll);
 	void sendResponse(Client *client, t_epoll &epoll);
