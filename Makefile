@@ -77,6 +77,8 @@ INCLUDES = -I$(SRC)
 #----VPATH----#
 vpath %.cpp $(SRC): \
             $(SRC)utils: \
+            $(SRC)utils/string: \
+            $(SRC)utils/numeric: \
             $(SRC)WebServer: \
             $(SRC)WebServer/Client: \
             $(SRC)WebServer/Client/Request: \
@@ -95,6 +97,8 @@ SRCS = webserv.cpp \
         Server.cpp \
         Location.cpp \
         Session.cpp \
+        string.cpp \
+        numeric.cpp \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
