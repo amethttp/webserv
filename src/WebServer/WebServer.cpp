@@ -183,6 +183,7 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 {
 	int readyFds;
 
+	std::cout << "Waiting for connections..." << std::endl;
 	while (true)
 	{
 		readyFds = epoll_wait(epoll.fd, epoll.eventBuffer, EVENT_BUFFER_SIZE, -1);

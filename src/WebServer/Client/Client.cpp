@@ -22,24 +22,24 @@ fd_t Client::getFd()
 	return this->fd_;
 }
 
-void Client::setFd(fd_t fd)
-{
-	this->fd_ = fd;
-}
-
 std::string Client::getStringifiedResponse()
 {
 	return this->response_.toString();
 }
 
-void Client::setResponseBuffer(const std::string &stringResponse)
-{
-	this->response_.setBuffer(stringResponse);
-}
-
 std::string Client::getStringifiedRequest()
 {
 	return this->request_.getBuffer();
+}
+
+void Client::setFd(fd_t fd)
+{
+	this->fd_ = fd;
+}
+
+void Client::setResponseBuffer(const std::string &stringResponse)
+{
+	this->response_.setBuffer(stringResponse);
 }
 
 bool Client::hasFullRequestHeaders()
