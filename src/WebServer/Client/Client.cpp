@@ -5,6 +5,7 @@ uint32_t Client::idCounter_ = 1;
 Client::Client()
 {
 	this->id_ = Client::idCounter_;
+	this->lastReceivedPacket_ = std::time(NULL);
 	Client::idCounter_++;
 }
 
@@ -20,6 +21,11 @@ int Client::getId()
 fd_t Client::getFd()
 {
 	return this->fd_;
+}
+
+time_t Client::getLastReceivedPacket()
+{
+    return this->lastReceivedPacket_;
 }
 
 std::string Client::getStringifiedResponse()
@@ -40,6 +46,11 @@ void Client::setFd(fd_t fd)
 void Client::setResponseBuffer(const std::string &stringResponse)
 {
 	this->response_.setBuffer(stringResponse);
+}
+
+void Client::updateLastReceivedPacket()
+{
+	this->lastReceivedPacket_ = std::time(NULL);
 }
 
 bool Client::hasFullRequestHeaders()

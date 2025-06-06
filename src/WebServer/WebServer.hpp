@@ -7,11 +7,13 @@
 #include "Server/Server.hpp"
 
 #define READ_BUFFER_SIZE 4096
+#define TIMEOUT 5000
 
 class WebServer
 {
 private:
 	std::vector<Server> servers_;
+	std::vector<Client> clients_;
 
 	std::vector<fd_t> createServerFds();
 	void setEpoll(t_epoll &epoll, std::vector<fd_t> &serversFds);
@@ -24,12 +26,13 @@ private:
 	void sendResponse(Client *client, t_epoll &epoll);
 	void checkClientEvent(t_epoll &epoll, const int &eventIndex);
 	void handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll);
+	void removeClient(Client *client);
+	void disconnectTimedoutClients(t_epoll &epoll);
 
 public:
 	WebServer();
 	~WebServer();
 
-	std::vector<Server> getServers();
 	void setServers(std::vector<Server> &servers);
 
 	void serve();
