@@ -124,7 +124,7 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
 {
 	client->setResponseBuffer(client->getStringifiedRequest());
-	client->eraseRequest(client->getStringifiedRequest().length());
+	client->clearRequest();
 	epoll.eventConfig.events = EPOLLOUT;
 	epoll.eventConfig.data.ptr = static_cast<void *>(client);
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)

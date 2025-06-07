@@ -74,9 +74,9 @@ void Client::appendRequest(char *request)
 	this->request_.appendBuffer(request);
 }
 
-void Client::eraseRequest(int bytesToErase)
+void Client::clearRequest()
 {
-	this->request_.eraseBuffer(bytesToErase);
+	this->request_.clear();
 }
 
 void Client::eraseResponse(int bytesToErase)

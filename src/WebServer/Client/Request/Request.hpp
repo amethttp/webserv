@@ -16,6 +16,8 @@
 class Request
 {
 private:
+	static const std::string tchars;
+
 	method_t method_;
 	std::string target_;
 	std::string httpVersion_;
@@ -25,6 +27,10 @@ private:
 	bool complete_;
 
 	method_t getHTTPMethod(const std::string &method);
+	bool isValidHeaderKey(const std::string &key);
+	bool isValidHeaderValue(const std::string &value);
+	bool isValidHeader(const std::string &key, const std::string &value);
+	bool shouldWaitForData(const std::string &str);
 	bool tryParseRequestLine(const std::string &string);
 	bool tryParseHeaders(std::vector<std::string> &headers);
 	bool tryParseFullBody(std::vector<std::string>::iterator &bodyIt, std::vector<std::string>::iterator &bodyEnd);
@@ -36,7 +42,7 @@ public:
 	~Request();
 
 	std::string getBuffer();
-	void eraseBuffer(int bytesToErase);
+	void clear();
 	void appendBuffer(char *buffer);
 
 	bool hasFullHeaders();

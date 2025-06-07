@@ -4,8 +4,11 @@
 #include <iostream>
 #include <algorithm>
 
+const std::string Request::tchars = "!#$%&'*+-.^_`|~";
+
 Request::Request()
 {
+	this->method_ = NOT_ALLOWED;
 	this->complete_ = false;
 }
 
@@ -22,6 +25,55 @@ method_t Request::getHTTPMethod(const std::string &method)
 	else if (method == "DELETE")
 		return DELETE;
 	return NOT_ALLOWED;
+}
+
+bool Request::isValidHeaderKey(const std::string &key)
+{
+	u_char c;
+
+	for (int i = 0; i < key.length(); i++)
+	{
+		c = static_cast<u_char>(key[i]);
+
+		if (!isalpha(c) && tchars.find(c) == std::string::npos)
+			return false;
+	}
+    return true;
+}
+
+bool Request::isValidHeaderValue(const std::string &value)
+{
+	u_char c;
+
+	for (int i = 0; i < value.length(); i++)
+	{
+		c = static_cast<u_char>(value[i]);
+
+		if (!isprint(c) && c != '\t')
+			return false;
+	}
+    return true;
+}
+
+bool Request::isValidHeader(const std::string &key, const std::string &value)
+{
+    return isValidHeaderKey(key) && isValidHeaderValue(value);
+}
+
+bool Request::shouldWaitForData(const std::string &str)
+{
+	if (str.empty())
+		return true;
+
+	int i = 0;
+	while (i < str.length())
+	{
+		if (!isdigit(str[i]))
+			break;
+		i++;
+	}
+
+	return (str[i] == '\r' && i == str.length() - 1);
 }
 
 bool Request::tryParseRequestLine(const std::string &string)
@@ -51,6 +103,8 @@ bool Request::tryParseHeaders(std::vector<std::string> &headers)
 
 		if (splittedHeader.size() != 2)
 			return false;
+		if (!isValidHeader(splittedHeader[0], splittedHeader[1]))
+			return false;
 
 		this->headers_[splittedHeader[0]] = splittedHeader[1];
 	}
@@ -70,7 +124,7 @@ bool Request::tryParseHeaders(std::vector<std::string> &headers)
 
 bool Request::tryParseFullBody(std::vector<std::string>::iterator &bodyIt, std::vector<std::string>::iterator &bodyEnd)
 {
-	std::string tempBuffer = *bodyIt;
+	std::string tempBuffer;
 
 	while (bodyIt != bodyEnd)
 	{
@@ -78,13 +132,23 @@ bool Request::tryParseFullBody(std::vector<std::string>::iterator &bodyIt, std::
 		++bodyIt;
 	}
 
-	long contentLength = atol(this->headers_.find(CONTENT_LENGTH)->second.c_str());
-	this->body_ = tempBuffer.substr(0, contentLength);
+	if (this->headers_.find(CONTENT_LENGTH) == this->headers_.end())
+	{
+		if (!tempBuffer.empty())
+			return false;
+		if (this->method_ != POST)
+			this->complete_ = true;
+		return true;
+	}
 
-	if (this->body_.length() == contentLength)
+	long contentLength = atol(this->headers_.find(CONTENT_LENGTH)->second.c_str());
+
+	if (tempBuffer.length() == contentLength)
 		this->complete_ = true;
-	if (this->body_.length() > contentLength)
+	if (tempBuffer.length() > contentLength)
 		return false;
+
+	this->body_ = tempBuffer.substr(0, contentLength);
 
 	return true;
 }
@@ -97,15 +161,9 @@ bool Request::tryParseChunkedBody(std::vector<std::string>::iterator &bodyIt, st
 	do
 	{
 		if (!isLong(*bodyIt))
-			return false;
+			return shouldWaitForData(*bodyIt);
 
 		lineLength = atoi((*bodyIt).c_str());
-
-		if (lineLength != (bodyIt + 1)->length())
-			return false;
-
-		std::cout << "Length: " << lineLength << " | Line: " << *(bodyIt + 1) << std::endl;
-
 		tempBuffer += *(bodyIt + 1);
 		bodyIt += 2;
 	} while (bodyIt != bodyEnd && lineLength > 0);
@@ -126,10 +184,10 @@ bool Request::tryParseBody(std::vector<std::string> &body)
 	std::vector<std::string>::iterator bodyIt = std::find_if(body.begin(), body.end(), isEmpty) + 1;
 	std::vector<std::string>::iterator bodyEnd = body.end();
 
-	if (this->headers_.find(CONTENT_LENGTH) != this->headers_.end())
-		return tryParseFullBody(bodyIt, bodyEnd);
+	if (this->headers_.find(TRANSFER_ENCODING) != this->headers_.end())
+		return tryParseChunkedBody(bodyIt, bodyEnd);
 
-	return tryParseChunkedBody(bodyIt, bodyEnd);
+	return tryParseFullBody(bodyIt, bodyEnd);
 }
 
 std::string Request::getBuffer()
@@ -137,9 +195,15 @@ std::string Request::getBuffer()
 	return this->buffer_;
 }
 
-void Request::eraseBuffer(int bytesToErase)
+void Request::clear()
 {
-	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
+	this->method_ = NOT_ALLOWED;
+	this->target_.clear();
+	this->httpVersion_.clear();
+	this->headers_.clear();
+	this->body_.clear();
+	this->buffer_.clear();
+	this->complete_ = false;
 }
 
 void Request::appendBuffer(char *buffer)
@@ -161,11 +225,8 @@ bool Request::tryParseFromBuffer()
 
 	if (this->headers_.empty() && !tryParseHeaders(bufferLines))
 		return true;
-	
-	if (this->method_ == GET || this->method_ == DELETE)
-		this->complete_ = true;
-	
-	if (this->method_ == POST && !tryParseBody(bufferLines))
+
+	if (!tryParseBody(bufferLines))
 		return true;
 
 	return this->complete_;
@@ -212,6 +273,7 @@ std::ostream &operator<<(std::ostream &stream, Request &request)
 	stream << "  - Buffer:" << std::endl;
 	stream << request.buffer_ << std::endl;
 
+	stream << std::endl;
 	stream << "+-------------------------------------+" << std::endl;
 	stream << "|           REQUEST FINISHED          |" << std::endl;
 	stream << "+-------------------------------------+";

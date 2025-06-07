@@ -34,6 +34,6 @@ public:
 	bool hasFullRequestHeaders();
 	bool tryBuildRequest();
 	void appendRequest(char *request);
-	void eraseRequest(int bytesToErase);
+	void clearRequest();
 	void eraseResponse(int bytesToErase);
 };

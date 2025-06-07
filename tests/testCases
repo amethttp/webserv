@@ -1,0 +1,80 @@
+# 1. Single request, works
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n") | nc localhost 8080
+
+# 2. Single request, works
+(printf "GET /index.html HTTP/1.1\r\nHost: localhost\r\nUser-Agent: nc\r\nAccept: */*\r\n\r\n") | nc localhost 8080
+
+# 3. Missing Host header, 400 Bad Request
+(printf "GET / HTTP/1.1\r\n\r\n") | nc localhost 8080
+
+# 4. Wrong request line (double space), 400 Bad Request
+(printf "GET  / HTTP/1.1\r\nHost: localhost\r\n\r\n") | nc localhost 8080
+
+# 5. Well-formed GET with body, works ignoring the body
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 5\r\n\r\nHello") | nc localhost 8080
+
+# 6. Single request, works
+(printf "POST /submit HTTP/1.1\r\nHost: localhost\r\nContent-Length: 8\r\n\r\nfoo=bar\n") | nc localhost 8080
+
+# 7. POST without Content-Length, 411 Length Required
+(printf "POST /submit HTTP/1.1\r\nHost: localhost\r\n\r\nfoo=bar\n") | nc localhost 8080
+
+# 8. Content-Length not numeric, 400 Bad Request
+(printf "POST /submit HTTP/1.1\r\nHost: localhost\r\nContent-Length: abc\r\n\r\nfoo=bar") | nc localhost 8080
+
+# 9. Single request, works
+(printf "POST /api/data HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 15\r\n\r\n{\"key\":\"value\"}") | nc localhost 8080
+
+# 10.Content-Length bigger than real body, 408 Request Timeout (or 400 Bad Request as the request has content)
+(printf "POST /form HTTP/1.1\r\nHost: localhost\r\nContent-Length: 20\r\n\r\nshort body") | nc localhost 8080
+
+# 11. Multiple requests, works
+(printf "POST /form HTTP/1.1\r\nHost: localhost\r\nContent-Length: 20\r\n\r\nshort body" && sleep 3 && printf "short body") | nc localhost 8080
+
+# 12. Single request, works
+(printf "DELETE /resource HTTP/1.1\r\nHost: localhost\r\n\r\n") | nc localhost 8080
+
+# 13. Has body without Content-Length, 411 Length Required
+(printf "DELETE /resource HTTP/1.1\r\nHost: localhost\r\n\r\nsome body") | nc localhost 8080
+
+# 14. Well-formed DELETE with body, works ignoring the body
+(printf "DELETE /resource HTTP/1.1\r\nHost: localhost\r\nContent-Length: 9\r\n\r\nsome body") | nc localhost 8080
+
+# 15. Single request, works
+(printf "GET /search?q=calistenia HTTP/1.1\r\nHost: localhost\r\n\r\n") | nc localhost 8080
+
+# 16. Invalid HTTP version, 505 HTPP Version Not Supported
+(printf "GET / HTTP/1.5\r\nHost: localhost\r\n\r\n") | nc localhost 8080
+
+# 17. Well-formed request with repeated headers, works with the second header overriding the first one
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\nHost: cfidalgo.42.fr\r\n\r\n") | nc localhost 8080
+
+# 18. Doesn't end the headers with \r\n\r\n, 408 Request Timeout (or 400 Bad Request as the request has content)
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\n") | nc localhost 8080
+
+# 19. Multiple requests, works
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\n" && sleep 3 && printf "\r\n") | nc localhost 8080
+
+# 20. "Really long" request (works?)
+(printf "GET /%02048d HTTP/1.1\r\nHost: localhost\r\n\r\n" 1) | nc localhost 8080
+
+# 21. Header key contains a non-tchar (https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6), 400 Bad Request
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\nUser-:Agent: nc\r\n\r\n") | nc localhost 8080
+
+# 22. Header key contains control chars, 400 Bad Request
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\nUser-Agent\t: nc\r\n\r\n") | nc localhost 8080
+
+# 23. Header value contains control chars and is not \t or ' ', 400 Bad Request
+(printf "GET / HTTP/1.1\r\nHost: localhost\r\r\nUser-Agent: nc\r\n\r\n") | nc localhost 8080
+
+# 24. Single request, works
+(printf "POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ndata\r\n0\r\n\r\n") | nc localhost 8080
+
+# 25. Multiple requests, works
+(printf "POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r" && sleep 3 && printf "\nda" && sleep 3 && printf "ta\r\n0\r\n\r\n" ) | nc localhost 8080
+
+# 26. Multiple requests. First doesn't work as chunk-size is non-numeric (abc). Second (last 2 printfs) don't work, as all headers are missing
+(printf "POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\nabc\r" && sleep 3 && printf "\nda" && sleep 3 && printf "ta\r\n0\r\n\r\n" ) | nc localhost 8080
+
+# 27. Multiple requests. First doesn't work as chunk-size is non-numeric (4\r). Second (last 2 printfs) don't work, as all headers are missing
+(printf "POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\r" && sleep 3 && printf "\nda" && sleep 3 && printf "ta\r\n0\r\n\r\n" ) | nc localhost 8080
