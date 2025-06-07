@@ -16,7 +16,7 @@
 class Request
 {
 private:
-	int method_;
+	method_t method_;
 	std::string target_;
 	std::string httpVersion_;
 	std::map<std::string, std::string> headers_;
@@ -24,7 +24,7 @@ private:
 	std::string buffer_;
 	bool complete_;
 
-	int getHTTPMethod(const std::string &method);
+	method_t getHTTPMethod(const std::string &method);
 	bool tryParseRequestLine(const std::string &string);
 	bool tryParseHeaders(std::vector<std::string> &headers);
 	bool tryParseFullBody(std::vector<std::string>::iterator &bodyIt, std::vector<std::string>::iterator &bodyEnd);

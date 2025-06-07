@@ -13,7 +13,7 @@ Request::~Request()
 {
 }
 
-int Request::getHTTPMethod(const std::string &method)
+method_t Request::getHTTPMethod(const std::string &method)
 {
 	if (method == "GET")
 		return GET;
@@ -21,7 +21,7 @@ int Request::getHTTPMethod(const std::string &method)
 		return POST;
 	else if (method == "DELETE")
 		return DELETE;
-	return -1;
+	return NOT_ALLOWED;
 }
 
 bool Request::tryParseRequestLine(const std::string &string)
@@ -31,7 +31,7 @@ bool Request::tryParseRequestLine(const std::string &string)
 		return false;
 
 	this->method_ = getHTTPMethod(splittedLine[0]);
-	if (this->method_ == -1)
+	if (this->method_ == NOT_ALLOWED)
 		return false;
 
 	this->target_ = splittedLine[1];
@@ -186,7 +186,7 @@ std::ostream &operator<<(std::ostream &stream, Request &request)
 	else if (request.method_ == DELETE)
 		stream << "DELETE" << std::endl;
 	else
-		stream << "UNKNOWN" << std::endl;
+		stream << "NOT ALLOWED" << std::endl;
 
 	stream << "  - Target: " << request.target_ << std::endl;
 

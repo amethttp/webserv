@@ -4,5 +4,6 @@ typedef enum method_e
 {
 	GET,
 	POST,
-	DELETE
+	DELETE,
+	NOT_ALLOWED
 } method_t;
