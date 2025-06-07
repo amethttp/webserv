@@ -1,5 +1,7 @@
 #include "Client.hpp"
 
+#include <iostream>
+
 uint32_t Client::idCounter_ = 1;
 
 Client::Client()
@@ -58,9 +60,13 @@ bool Client::hasFullRequestHeaders()
 	return this->request_.hasFullHeaders();
 }
 
-bool Client::parseRequest()
+bool Client::tryBuildRequest()
 {
-	return this->request_.parseFromBuffer();
+	bool result = this->request_.tryParseFromBuffer();
+	
+	std::cout << this->request_ << std::endl;
+	std::cout << "Should build a response: " << (result ? "true" : "false") << std::endl;
+	return result;
 }
 
 void Client::appendRequest(char *request)

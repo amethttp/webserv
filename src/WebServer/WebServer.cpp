@@ -118,8 +118,7 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 	client->appendRequest(buffer);
 	if (!client->hasFullRequestHeaders())
 		return false;
-	client->tryBuildRequest();
-	return true;
+	return client->tryBuildRequest();
 }
 
 void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)

@@ -32,7 +32,7 @@ public:
 
 	void updateLastReceivedPacket();
 	bool hasFullRequestHeaders();
-	bool parseRequest();
+	bool tryBuildRequest();
 	void appendRequest(char *request);
 	void eraseRequest(int bytesToErase);
 	void eraseResponse(int bytesToErase);
