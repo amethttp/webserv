@@ -63,7 +63,7 @@ bool Request::isValidHeader(const std::string &key, const std::string &value)
 bool Request::shouldWaitForData(const std::string &str)
 {
 	if (str.empty())
-		return true;
+		return false;
 
 	int i = 0;
 	while (i < str.length())
@@ -87,6 +87,8 @@ bool Request::tryParseRequestLine(const std::string &string)
 		return false;
 
 	this->target_ = splittedLine[1];
+	if (this->target_.empty() || this->target_.at(0) != '/')
+		return false;
 
 	this->httpVersion_ = splittedLine[2];
 	if (this->httpVersion_ != VALID_PROTOCOL)
@@ -131,8 +133,7 @@ bool Request::tryParseFullBody()
 	{
 		if (!tempBuffer.empty())
 			return false;
-		if (this->method_ != POST)
-			this->complete_ = true;
+		this->complete_ = true;
 		return true;
 	}
 

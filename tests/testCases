@@ -81,3 +81,9 @@
 
 # 28. Single request, works
 (printf "POST /data HTTP/1.1\r\nHost: localhost\r\nContent-Length: 6\r\n\r\ndata\r\n") | nc localhost 8080
+
+# 29. Chunk size is empty, 411 Length Required
+(printf "POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\r\ndata\r\n0\r\n\r\n") | nc localhost 8080
+
+# 30. Single request, works
+(printf "POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" && sleep 3 && printf "0\r\n\r\n") | nc localhost 8080
