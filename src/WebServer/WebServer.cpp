@@ -123,7 +123,10 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 
 void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
 {
+	Request currRequest = client->getRequest();
+
 	client->setResponseBuffer(client->getStringifiedRequest());
+	client->tryBuildResponse(currRequest);
 	client->clearRequest();
 	epoll.eventConfig.events = EPOLLOUT;
 	epoll.eventConfig.data.ptr = static_cast<void *>(client);

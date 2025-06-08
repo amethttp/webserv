@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "Request/Request.hpp"
 
 std::string Response::toString()
 {
@@ -13,4 +14,21 @@ void Response::setBuffer(const std::string &buffer)
 void Response::eraseBuffer(int bytesToErase)
 {
 	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
+}
+
+void Response::methodGet()
+{
+}
+
+void Response::methodPOST()
+{
+}
+
+void Response::methodDELETE()
+{
+}
+
+bool Response::tryBuild(Request &request)
+{
+
 }

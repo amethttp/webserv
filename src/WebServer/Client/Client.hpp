@@ -26,6 +26,7 @@ public:
 	time_t getLastReceivedPacket();
 	std::string getStringifiedResponse();
 	std::string getStringifiedRequest();
+	Request getRequest();
 
 	void setFd(fd_t fd);
 	void setResponseBuffer(const std::string &stringResponse);
@@ -36,4 +37,6 @@ public:
 	void appendRequest(char *request);
 	void clearRequest();
 	void eraseResponse(int bytesToErase);
+
+	bool tryBuildResponse(Request &Request);
 };

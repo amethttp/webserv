@@ -40,6 +40,11 @@ std::string Client::getStringifiedRequest()
 	return this->request_.getBuffer();
 }
 
+Request Client::getRequest()
+{
+    return this->request_;
+}
+
 void Client::setFd(fd_t fd)
 {
 	this->fd_ = fd;
@@ -82,4 +87,9 @@ void Client::clearRequest()
 void Client::eraseResponse(int bytesToErase)
 {
 	this->response_.eraseBuffer(bytesToErase);
+}
+
+bool Client::tryBuildResponse(Request &Request)
+{
+    return this->response_.tryBuild(request_);
 }
