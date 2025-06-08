@@ -122,15 +122,10 @@ bool Request::tryParseHeaders(std::vector<std::string> &headers)
 	return true;
 }
 
-bool Request::tryParseFullBody(std::vector<std::string>::iterator &bodyIt, std::vector<std::string>::iterator &bodyEnd)
+bool Request::tryParseFullBody()
 {
-	std::string tempBuffer;
-
-	while (bodyIt != bodyEnd)
-	{
-		tempBuffer += *bodyIt;
-		++bodyIt;
-	}
+	size_t bodyStartingPoint = this->buffer_.find(HEADERS_DELIM) + 4;
+	std::string tempBuffer = this->buffer_.substr(bodyStartingPoint);
 
 	if (this->headers_.find(CONTENT_LENGTH) == this->headers_.end())
 	{
@@ -187,7 +182,7 @@ bool Request::tryParseBody(std::vector<std::string> &body)
 	if (this->headers_.find(TRANSFER_ENCODING) != this->headers_.end())
 		return tryParseChunkedBody(bodyIt, bodyEnd);
 
-	return tryParseFullBody(bodyIt, bodyEnd);
+	return tryParseFullBody();
 }
 
 std::string Request::getBuffer()

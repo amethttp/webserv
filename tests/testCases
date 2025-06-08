@@ -78,3 +78,6 @@
 
 # 27. Multiple requests. First doesn't work as chunk-size is non-numeric (4\r). Second (last 2 printfs) don't work, as all headers are missing
 (printf "POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\r" && sleep 3 && printf "\nda" && sleep 3 && printf "ta\r\n0\r\n\r\n" ) | nc localhost 8080
+
+# 28. Single request, works
+(printf "POST /data HTTP/1.1\r\nHost: localhost\r\nContent-Length: 6\r\n\r\ndata\r\n") | nc localhost 8080

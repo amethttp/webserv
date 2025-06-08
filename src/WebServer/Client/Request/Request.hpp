@@ -33,7 +33,7 @@ private:
 	bool shouldWaitForData(const std::string &str);
 	bool tryParseRequestLine(const std::string &string);
 	bool tryParseHeaders(std::vector<std::string> &headers);
-	bool tryParseFullBody(std::vector<std::string>::iterator &bodyIt, std::vector<std::string>::iterator &bodyEnd);
+	bool tryParseFullBody();
 	bool tryParseChunkedBody(std::vector<std::string>::iterator &bodyIt, std::vector<std::string>::iterator &bodyEnd);
 	bool tryParseBody(std::vector<std::string> &headers);
 	
