@@ -114,7 +114,14 @@
 # #########################
 #
 # 17. A header field (field line) consists of: case-insensitive field-name ":" OWS field-value OWS. For example:
-#     (Host:[ ]locahost[ ]). The OWS MUST be trimmed
+#     (Host:[ ]locahost[ ]). The OWS MUST be trimmed. Headers SHOULD follow:
+#     - Host and Connection headers SHOULD be recognized by all HTTP implementations
+#     - Receivers SHOULD ignore unrecognized header and trailer fields
+#     - A server that receives a header larger that it wishes to parse MUST respond with a 4xx (Client error) response.
+#     - Header keys SHOULD contain only ALPHA, DIGIT and hyphens ('-'). But MUST NOT contain other characters that are not tchars:
+#       ALPHA DIGIT ! # $ % & ' * + - . ^ _ ` | ~
+#     - Header values MUST NOT contain control characters (except for HTAB)
+#     - Header values
 #
 #
 # 18. A server MUST reject with 400 Bad Request any received request message that contains whitespace between the header key and colon.
