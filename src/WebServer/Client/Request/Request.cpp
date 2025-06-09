@@ -8,8 +8,8 @@ const std::string Request::tchars = "!#$%&'*+-.^_`|~";
 
 Request::Request()
 {
-	this->method_ = NOT_ALLOWED;
-	this->complete_ = false;
+	this->method_ = NOT_IMPLEMENTED;
+	this->valid_ = false;
 }
 
 Request::~Request()
@@ -24,7 +24,7 @@ method_t Request::getHTTPMethod(const std::string &method)
 		return POST;
 	else if (method == "DELETE")
 		return DELETE;
-	return NOT_ALLOWED;
+	return NOT_IMPLEMENTED;
 }
 
 bool Request::isValidHeaderKey(const std::string &key)
@@ -83,7 +83,7 @@ bool Request::tryParseRequestLine(const std::string &string)
 		return false;
 
 	this->method_ = getHTTPMethod(splittedLine[0]);
-	if (this->method_ == NOT_ALLOWED)
+	if (this->method_ == NOT_IMPLEMENTED)
 		return false;
 
 	this->target_ = splittedLine[1];
@@ -133,14 +133,14 @@ bool Request::tryParseFullBody()
 	{
 		if (!tempBuffer.empty())
 			return false;
-		this->complete_ = true;
+		this->valid_ = true;
 		return true;
 	}
 
 	long contentLength = atol(this->headers_.find(CONTENT_LENGTH)->second.c_str());
 
 	if (tempBuffer.length() == contentLength)
-		this->complete_ = true;
+		this->valid_ = true;
 	if (tempBuffer.length() > contentLength)
 		return false;
 
@@ -168,7 +168,7 @@ bool Request::tryParseChunkedBody(std::vector<std::string>::iterator &bodyIt, st
 	{
 		if (bodyIt != bodyEnd && !bodyIt->empty())
 			return false;
-		this->complete_ = true;
+		this->valid_ = true;
 	}
 
 	this->body_ = tempBuffer.substr();
@@ -193,13 +193,13 @@ std::string Request::getBuffer()
 
 void Request::clear()
 {
-	this->method_ = NOT_ALLOWED;
+	this->method_ = NOT_IMPLEMENTED;
 	this->target_.clear();
 	this->httpVersion_.clear();
 	this->headers_.clear();
 	this->body_.clear();
 	this->buffer_.clear();
-	this->complete_ = false;
+	this->valid_ = false;
 }
 
 void Request::appendBuffer(char *buffer)
@@ -225,7 +225,7 @@ bool Request::tryParseFromBuffer()
 	if (!tryParseBody(bufferLines))
 		return true;
 
-	return this->complete_;
+	return this->valid_;
 }
 
 std::ostream &operator<<(std::ostream &stream, Request &request)
@@ -259,7 +259,7 @@ std::ostream &operator<<(std::ostream &stream, Request &request)
 		stream << "    - " << it->first << ": " << it->second << std::endl;
 	}
 
-	stream << "  - Is complete: " << (request.complete_ ? "true" : "false") << std::endl;
+	stream << "  - Is valid: " << (request.valid_ ? "true" : "false") << std::endl;
 
 	stream << "  - Body:" << std::endl;
 	stream << request.body_ << std::endl;

@@ -5,5 +5,5 @@ typedef enum method_e
 	GET,
 	POST,
 	DELETE,
-	NOT_ALLOWED
+	NOT_IMPLEMENTED
 } method_t;

@@ -1,3 +1,203 @@
+###########################################################################################
+#
+# Prior knowledge to parse and build HTTP 1.1 messages:
+#
+# #########################
+# #     HTTP MESSAGES     #
+# #########################
+#
+# 1.  HTTP message consists of:
+#     - start-line CRLF -------------> start-line followed by CRLF
+#     - *( header section CRLF ) ----> zero or more headers followed by CRLF
+#     - CRLF ------------------------> empty line followed by CRLF
+#     - [ message-body ] ------------> optional message body
+#
+#
+# 2.  Messages are requests or responses, and syntactically differ only in the start-line
+#     and in the algorithm for determining the length of the message body:
+#     - request start-line ----> request-line
+#     - response start-line ---> status-line
+#
+#  
+# 3.  Normal procedure to parse an HTTP message:
+#     - 1. Read the start-line into a structure
+#     - 2. Read each header into a hash table / map until the empty line
+#     - 3. Determine if a body message is expected using the parsed data
+#        - If a message body has been indicated, it is read as a stream until an amount of
+#          bytes is equal to the body length is read or the connection is closed
+#
+#
+# 4.  Before parsing request data to unicode, you MUST parse it, to prevent missing control characters
+#
+#
+# 5.  You MAY use only LF to separate headers instead of CRLF, but you MUST NOT use only CR to separate them
+#
+#
+# 6.  The user agent MUST NOT preface or follow a request with an extra CRLF. If terminating a request body
+#     with a CRLF is desired, the user agent MUST count the terminating CRLF bytes as part of the body
+#
+#
+# 7.  For robustness, a server SHOULD ignore at least one empty line received prior to the request-line
+#
+#
+# 8.  A sender MUST NOT send whitespaces between the start-line and the first header field. If this happens,
+#     the receiver should reject the message as invalid or ignore the line and any subsequent ones preceded
+#     with whitespaces until a properly formed header is received or the header section is terminated.
+#
+#
+# 9.  If a server receives a sequence of bytes that does not match the HTTP-message grammar described above
+#     (aside from the robustness exceptions), the server SHOULD respond with a 400 Bad Request response and
+#     close the connection
+#
+#
+# 10. The HTTP version used by a server or client is described as HTTP "/" DIGIT "." DIGIT (HTTP/1.1)
+#
+#
+#
+# #########################
+# #     REQUEST LINES     #
+# #########################
+#
+# 11. The request-line is composed as: method SP request-target SP HTTP-version (GET / HTTP/1.1). Although it's
+#     required that each of the component elements is separated by a single SP byte, receivers MAY parse multiple
+#     whitespaces (whitespace deilimited word boundaries), and, aside from CRLF terminator, treat any form of
+#     whitespaces as the SP separator, although this can lead to HTTP smuggling attacks
+#
+#
+# 12. The request-line has no length limit. However, a server SHOULD parse a received protocoll element defensively:
+#     - As a minimum, a server MUST parse at least the length used in the responses it builds. For example, if the server
+#       creates a response for a resource with a length of 1000 bytes, it MUST parse at least 1000 bytes of request line length
+#     - A server that receives a method longer than any that it implements (or a method it doesn't understand) SHOULD respond
+#       with a 501 Not Implemented
+#     - A server that receives a request-target longer than any URI it wishes to parse MUST respond with a 414 URI Too Long
+#     - It is RECOMMENDED that senders and receivers support, at a minimum, lengths of 8000 bytes
+#
+#
+# 13. The request-target identifies the target resource upon which to apply the request. No whitespace is allowed in the
+#     request-target (if this happen, it SHOULD respond with either a 400 Bad Request or a 301 Moved Permanently redirect with
+#     the request-target properly encoded).
+#
+#
+# 14. A client MUST send a Host header in all HTTP/1.1 request messages. The Host field MUST follow the next guidelines (in case
+#     of failure, the server MUST send a 400 Bad Request):
+#     - It SHOULD be the first field to appear (not strictly necessary)
+#     - The next composition: uri-host [ ":" port] (domain.com[:80]). The uri-host may be:
+#        - Valid domain name
+#        - IPv4 direction
+#        - IPv6 direction using [] ([::1])
+#     - MUST NOT be empty
+#     - MUST NOT contain prohibited characters (whitespace or non-printable characters)
+#     - MUST NOT contain non-numeric port
+#     - MUST NOT contain malformed ":" or multiple ports
+#     - MUST NOT be missing or duplicated
+#     - MUST NOT contain an IPv6 malformed (e.g., missing [])
+#
+#
+# 15. The request-target has four distinct formats. The origin-form is the only one necessary here. The origin-form consists of:
+#     absolute-path [ "?" query ] (/file.txt?param=value) --- this is the URL ---> http://my.domain.com/file.txt?param=value
+#
+#
+#
+# #########################
+# #     STATUS  LINES     #
+# #########################
+#
+# 16. The status-line consists of: HTTP-version SP status-code SP [ reason-phrase ] (HTTP/1.1 404 Not Found). The SP MAY be replaced
+#     the same way as in request-line. The status-code element is a 3-digit integer code. The reason-phrase SHOULD be ignored by the
+#     client, as its optional and can varie, therefore its not a reliable channel for information. Thus, the server MUST send the SP
+#     that separates the status-code from the reason-phrase, even if the latter is absent (i.e., the status-line would end with SP).
+#
+#
+#
+# #########################
+# #     HEADER SYNTAX     #
+# #########################
+#
+# 17. A header field (field line) consists of: case-insensitive field-name ":" OWS field-value OWS. For example:
+#     (Host:[ ]locahost[ ]). The OWS MUST be trimmed
+#
+#
+# 18. A server MUST reject with 400 Bad Request any received request message that contains whitespace between the header key and colon.
+#     (e.g., "Host :localhost")
+#
+#
+#
+# #########################
+# #     MESSAGES BODY     #
+# #########################
+#
+# 19. The rules to determine when a message body is present in an HTTP/1.1 differs for requests and responses:
+#     - Requests: Determined by the presence of Content-Length or Transfer-Encoding (independent of the request method)
+#     - Responses: Determined by the method to which it is responding to and the response status code
+#
+#
+# 20. A receiver MUST be able to parse the chunked transfer coding (Transfer-Encoding: chunked), as its crucial when bodies are not known
+#     in advance. A sender MUST NOT apply the chunked transfer coding more than once to a message body. If any transfer coding other than
+#     chunked is applied to a request's content, the sender MUST apply chunked as the final transfer coding. If any transfer coding other
+#     than chunked is applied to a response's content, the sender MUST either apply chunked as the final coding or close the connection.
+#     Example: Transfer-Encoding: gzip, chunked -------> First compressed with gzip coding and then sent in chunks.
+#
+#
+# 21. Transfer-Encoding MUST follow:
+#     - It MAY be sent in a 304 Not Modified response to a GET request
+#     - A server MUST NOT send Transfer-Encoding header in any response with status code of 1xx (Informational) or 204 No Content.
+#     - A server that receives a request message with a transfer coding it does not understand SHOULD respond with 501 Not Implemented
+#     - A client or server that receives an HTTP/1.0 (yes, 1.0) containing Transfer-Encoding MUST treat the message as faulty.
+#
+#
+# 22. A server MAY reject a request that contains both Content-Length and Transfer-Encoding or process such a request in acordance with the
+#     Transfer-Encoding alone. Regardless, the server MUST close the conection after responding to such a request to avoid attacks.
+#
+#
+# 23. Content-Length appears when Transfer-Encoding is not present. A sender MUST NOT send a Content-Length header in any message that
+#     contains a Transfer-Encoding field
+#
+#
+# 24. Message body length is determined by:
+#     - Any response with a 1xx (Informational), 204 No Content or 304 Not Modified status code is always terminated by the first empty line
+#       after the header fields, regardless of the headers present in the message, thus cannot contain a message body
+#     - If a message contains an invalid Content-Length, the receiver MUST treat it as an unrecoverable error. If this happens in a request,
+#       the server must respond with 400 Bad Request and close the connection.
+#     - If a valid Content-Length is present, the decimal value represents the exact length. If the sender clsoes the connection or the receiver
+#       times out before the number of bytes are received, the recipient MUST consider the message to be incomplet and close the connection
+#     - If this is a request message and none of the above are true, then the message body length is zero, thus no message body is present
+#
+#
+# 25. A server SHOULD generate encoding or length-delimited messages whenever possible, as there is no way to distinguish a successfully completed
+#     close-delimited response message from a partially received message interrupted by a network failure
+#
+#
+# 26. Transfer-Encoding names (chunked) is case-insensitive
+#
+#
+# 27. A chunked body consists of:
+#     1. *chunk -------------------------> zero or multiple chunks (chunk-size [ chunk-ext ] CRLF)
+#     2. last-chunk ---------------------> a chunk with 0 chunk-size
+#     3. trailer-section ----------------> dynamic metadata
+#     4. CRLF
+#
+#
+# 28. The chunk-size field is a string of hexadecimal digits indicating the size of the chunk-data in bytes. The chunked body is complete when a chunk
+#     with a chunk-size of zero is received, OPTIONALLY followed by a trailer section and finally terminated by an empty line (CRLF)
+#
+#
+# 29. Chunks MAY include chunk-ext or chunk extensions, metadata for each chunk. It consists of: ";" chunk-ext-name [ "=" chunk-ext-val ]. It is immediately
+#     following the chunk-size. Example: 5;ext-key=ext-value\r\n. A receiver MUST ignore unrecognized chunk extensions. It ought limit the extensions length.
+#
+#
+# 30. The trailer section is used to add dynamically generated metada. It consists of: *( field-line CRLF ). A receiver that builds the chunked body MAY discard
+#     the received trailer fields. 
+#
+#
+# Sources:
+# RFC key words: https://www.rfc-editor.org/rfc/rfc2119.txt
+# HTTP 1.1 documentation: https://www.rfc-editor.org/rfc/rfc9112.html
+# HTTP Semantics documentation: https://www.rfc-editor.org/rfc/rfc9110.html
+#
+###########################################################################################
+
+# TESTS:
+
 # 1. Single request, works
 (printf "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n") | nc localhost 8080
 

@@ -24,7 +24,7 @@ private:
 	std::map<std::string, std::string> headers_;
 	std::string body_;
 	std::string buffer_;
-	bool complete_;
+	bool valid_;
 
 	method_t getHTTPMethod(const std::string &method);
 	bool isValidHeaderKey(const std::string &key);
