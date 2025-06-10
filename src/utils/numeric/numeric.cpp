@@ -9,3 +9,24 @@ bool isLong(const std::string &str)
     stream >> std::noskipws >> num;
     return stream.eof() && !stream.fail();
 }
+
+bool isHex(const std::string &str)
+{
+    size_t num;
+    std::istringstream stream(str);
+
+    stream >> std::hex >> std::noskipws >> num;
+    return stream.eof() && !stream.fail();
+}
+
+size_t hexToDec(const std::string &hexNumber)
+{
+    if (!isHex(hexNumber))
+        throw std::invalid_argument("The string argument is not an hexadecimal number");
+
+    size_t num;
+    std::istringstream stream(hexNumber);
+
+    stream >> std::hex >> num;
+    return num;
+}

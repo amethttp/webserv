@@ -179,6 +179,7 @@
 #
 # 27. A chunked body consists of:
 #     1. *chunk -------------------------> zero or multiple chunks (chunk-size [ chunk-ext ] CRLF)
+#                                                                  (chunk-value CRLF)
 #     2. last-chunk ---------------------> a chunk with 0 chunk-size
 #     3. trailer-section ----------------> dynamic metadata
 #     4. CRLF

@@ -27,24 +27,38 @@ method_t Request::getHTTPMethod(const std::string &method)
 	return NOT_IMPLEMENTED;
 }
 
-bool Request::isValidHeaderKey(const std::string &key)
+bool Request::isTokenChar(const char c)
 {
+	return isalnum(c) || tchars.find(c) != std::string::npos;
+}
+
+bool Request::isToken(const std::string &string)
+{
+	if (string.empty())
+		return false;
+
 	u_char c;
-
-	for (int i = 0; i < key.length(); i++)
+	for (int i = 0; i < string.length(); i++)
 	{
-		c = static_cast<u_char>(key[i]);
+		c = static_cast<u_char>(string[i]);
 
-		if (!isalpha(c) && tchars.find(c) == std::string::npos)
+		if (!isTokenChar(string[i]))
 			return false;
 	}
-    return true;
+	return true;
+}
+
+bool Request::isValidHeaderKey(const std::string &key)
+{
+    return isToken(key);
 }
 
 bool Request::isValidHeaderValue(const std::string &value)
 {
+	if (value.empty())
+		return false;
+	
 	u_char c;
-
 	for (int i = 0; i < value.length(); i++)
 	{
 		c = static_cast<u_char>(value[i]);
@@ -60,20 +74,125 @@ bool Request::isValidHeader(const std::string &key, const std::string &value)
     return isValidHeaderKey(key) && isValidHeaderValue(value);
 }
 
+bool Request::hasValidHost()
+{
+	std::map<std::string, std::string>::iterator hostIt = this->headers_.find("Host");
+
+	if (hostIt == this->headers_.end())
+		return false;
+	
+	if (hostIt->second.empty())
+		return false;
+
+	return true;
+}
+
+bool Request::isValidChunkExtensionValue(const std::string &chunkExtensionValue)
+{
+	if (chunkExtensionValue.empty())
+		return false;
+
+	size_t firstquotePos = chunkExtensionValue.find_first_of('"');
+	size_t lastQuotePos = chunkExtensionValue.find_first_of('"', firstquotePos + 1);
+
+	if (firstquotePos != std::string::npos)
+	{
+		if (firstquotePos != 0 || lastQuotePos != chunkExtensionValue.length() - 1)
+			return false;
+		return true;
+	}
+
+	return isToken(chunkExtensionValue);
+}
+
+bool Request::isValidChunkExtension(const std::string &chunkExtension)
+{
+	if (chunkExtension.empty())
+		return false;
+
+	std::vector<std::string> splittedExtension = split(chunkExtension, "=");
+
+	if (splittedExtension.size() > 2)
+		return false;
+	if (!isToken(splittedExtension[0]))
+		return false;
+	if (splittedExtension.size() == 2
+		&& !isValidChunkExtensionValue(splittedExtension[1]))
+		return false;
+
+	return true;
+}
+
+bool Request::isValidChunkSize(const std::string &string)
+{
+	if (string.empty())
+		return false;
+
+	std::vector<std::string> splittedChunk = split(string, ";");
+
+	if (!isHex(splittedChunk[0]))
+		return false;
+	
+	for (std::vector<std::string>::iterator it = splittedChunk.begin() + 1; it != splittedChunk.end(); ++it)
+	{
+		if (!isValidChunkExtension(*it) || it->length() > MAX_URI_LENGTH)
+			return false;
+	}
+	return true;
+}
+
+size_t Request::getChunkSize(const std::string &string)
+{
+	size_t extPos = string.find(";");
+	std::string chunkSizeStr = string.substr(0, extPos);
+
+	return hexToDec(chunkSizeStr);
+}
+
 bool Request::shouldWaitForData(const std::string &str)
 {
 	if (str.empty())
 		return false;
 
-	int i = 0;
-	while (i < str.length())
-	{
-		if (!isdigit(str[i]))
-			break;
-		i++;
-	}
+	std::vector<std::string> splittedChunk = split(str, ";");
 
-	return (str[i] == '\r' && i == str.length() - 1);
+	for (int i = 0; i < splittedChunk[0].length(); i++)
+	{		
+		if (!isHex(&splittedChunk[0][i]))
+			return splittedChunk[0][i] == '\r' && i == splittedChunk[0].length() - 1;
+	}
+	
+	for (std::vector<std::string>::iterator it = splittedChunk.begin() + 1; it != splittedChunk.end(); ++it)
+	{
+		if (it->length() > MAX_URI_LENGTH)
+			return false;
+		if (!isValidChunkExtension(*it))
+		{
+			if (it->empty() || it != splittedChunk.end() - 1)
+				return false;
+
+			std::vector<std::string> splittedExtension = split(*it, "=");
+
+			if (splittedExtension.size() > 2)
+				return false;
+			if (!isToken(splittedExtension[0]))
+				return false;
+			if (splittedExtension[1].empty())
+				return false;
+
+			size_t firstquotePos = splittedExtension[1].find_first_of('"');
+
+			if (firstquotePos != std::string::npos)
+				return false;
+
+			for (int i = 0; i < splittedExtension[1].length(); i++)
+			{		
+				if (!isTokenChar(splittedExtension[1][i]))
+					return splittedExtension[1][i] == '\r' && i == splittedChunk[0].length() - 1;
+			}
+		}
+	}
+	return true;
 }
 
 bool Request::tryParseRequestLine(const std::string &string)
@@ -87,7 +206,8 @@ bool Request::tryParseRequestLine(const std::string &string)
 		return false;
 
 	this->target_ = splittedLine[1];
-	if (this->target_.empty() || this->target_.at(0) != '/')
+	if (this->target_.empty() || this->target_.length() > MAX_URI_LENGTH
+		|| this->target_.at(0) != '/' || this->target_.find('\t') != std::string::npos)
 		return false;
 
 	this->httpVersion_ = splittedLine[2];
@@ -101,20 +221,22 @@ bool Request::tryParseHeaders(std::vector<std::string> &headers)
 {
 	for (std::vector<std::string>::iterator it = headers.begin() + 1; it != headers.end() && !it->empty(); ++it)
 	{
-		std::vector<std::string> splittedHeader = split(*it, ": ");
+		std::vector<std::string> splittedHeader = split(*it, ":");
 
 		if (splittedHeader.size() != 2)
 			return false;
 		if (!isValidHeader(splittedHeader[0], splittedHeader[1]))
 			return false;
+		if (splittedHeader[0] == "Host" && this->headers_.find(splittedHeader[0]) != this->headers_.end())
+			return false;
 
-		this->headers_[splittedHeader[0]] = splittedHeader[1];
+		this->headers_[splittedHeader[0]] = trim(splittedHeader[1], " \t");
 	}
 
 	std::map<std::string, std::string>::iterator contentLengthIt = this->headers_.find(CONTENT_LENGTH);
 	std::map<std::string, std::string>::iterator transferEncodingIt = this->headers_.find(TRANSFER_ENCODING);
 
-	if ((this->headers_.find("Host") == this->headers_.end())
+	if (!hasValidHost()
 		|| (this->method_ == POST && contentLengthIt == this->headers_.end() && transferEncodingIt == this->headers_.end())
 		|| (contentLengthIt != this->headers_.end() && transferEncodingIt != this->headers_.end())
 		|| (contentLengthIt != this->headers_.end() && !isLong(contentLengthIt->second) && atol(contentLengthIt->second.c_str()) >= 0)
@@ -156,10 +278,10 @@ bool Request::tryParseChunkedBody(std::vector<std::string>::iterator &bodyIt, st
 
 	do
 	{
-		if (!isLong(*bodyIt))
+		if (!isValidChunkSize(*bodyIt))
 			return shouldWaitForData(*bodyIt);
-
-		lineLength = atoi((*bodyIt).c_str());
+		
+		lineLength = getChunkSize(*bodyIt);
 		tempBuffer += *(bodyIt + 1);
 		bodyIt += 2;
 	} while (bodyIt != bodyEnd && lineLength > 0);

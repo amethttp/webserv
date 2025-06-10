@@ -6,6 +6,7 @@
 #include <ostream>
 #include "utils/http.hpp"
 
+#define MAX_URI_LENGTH 8000
 #define VALID_PROTOCOL "HTTP/1.1"
 #define HEADERS_DELIM "\r\n\r\n"
 #define HEADER_LINE_SEP "\r\n"
@@ -27,9 +28,16 @@ private:
 	bool valid_;
 
 	method_t getHTTPMethod(const std::string &method);
+	bool isTokenChar(const char c);
+	bool isToken(const std::string &string);
 	bool isValidHeaderKey(const std::string &key);
 	bool isValidHeaderValue(const std::string &value);
 	bool isValidHeader(const std::string &key, const std::string &value);
+	bool hasValidHost();
+	bool isValidChunkExtensionValue(const std::string &chunkExtensionValue);
+	bool isValidChunkExtension(const std::string &chunkExtension);
+	bool isValidChunkSize(const std::string &string);
+	size_t getChunkSize(const std::string &string);
 	bool shouldWaitForData(const std::string &str);
 	bool tryParseRequestLine(const std::string &string);
 	bool tryParseHeaders(std::vector<std::string> &headers);
