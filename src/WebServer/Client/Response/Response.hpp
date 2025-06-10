@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include "utils/http.hpp"
+#include "Request/Request.hpp"
 
 class Response
 {
@@ -18,8 +20,8 @@ public:
 	void setBuffer(const std::string &buffer);
 	void eraseBuffer(int bytesToErase);
 
-	void methodGet();
-	void methodPOST();
-	void methodDELETE();
+	bool methodGet();
+	bool methodPost();
+	bool methodDelete();
 	bool tryBuild(Request &request);
 };

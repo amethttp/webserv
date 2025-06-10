@@ -228,6 +228,11 @@ bool Request::tryParseFromBuffer()
 	return this->complete_;
 }
 
+method_t Request::getMethod()
+{
+    return this->method_;
+}
+
 std::ostream &operator<<(std::ostream &stream, Request &request)
 {
 	stream << "+-------------------------------------+" << std::endl;

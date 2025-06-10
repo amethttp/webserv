@@ -48,5 +48,7 @@ public:
 	bool hasFullHeaders();
 	bool tryParseFromBuffer();
 
+	method_t getMethod();
+
 	friend std::ostream &operator<<(std::ostream &stream, Request &request);
 };
