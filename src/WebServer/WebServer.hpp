@@ -9,6 +9,7 @@ class WebServer
 private:
 	std::vector<Server> servers_;
 	std::vector<fd_t> listeners_;
+	std::vector<int> ports_;
 
 public:
 	std::vector<Server> getServers();
@@ -16,4 +17,5 @@ public:
 	void setConfigFromFile(std::string path);
 
 	void serve();
+	~WebServer();
 };

@@ -50,7 +50,7 @@ NAME = webserv
 
 #----COMPILER----#
 CC = c++
-CCFLAGS += -std=c++98 #-Wall -Werror -Wextra -fsanitize=address -g # -Ofast
+CCFLAGS += -std=c++98 -g -fsanitize=address -g #-Wall -Werror -Wextra # -Ofast
 
 
 #----DIRS----#
@@ -84,6 +84,8 @@ vpath %.cpp $(SRC): \
             $(SRC)WebServer/Server: \
             $(SRC)WebServer/Server/Location: \
             $(SRC)WebServer/Server/Session: \
+            $(SRC)WebServer/Config: \
+            $(SRC)WebServer/Config/ConfigReader: \
 
 
 #----SHARED----#
@@ -95,6 +97,8 @@ SRCS = webserv.cpp \
         Server.cpp \
         Location.cpp \
         Session.cpp \
+        Config.cpp \
+        ConfigReader.cpp 
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)

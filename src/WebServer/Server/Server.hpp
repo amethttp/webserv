@@ -4,8 +4,9 @@
 #include <vector>
 #include "Session/Session.hpp"
 #include "Location/Location.hpp"
+#include "WebServer/Config/Config.hpp"
 
-class Server
+class Server: public Config
 {
 private:
 	std::vector<Location> locations_;
@@ -15,4 +16,6 @@ private:
 	std::string uploadPath_;
 
 public:
+	Server();
+	void addLocation(Location &location);
 };
