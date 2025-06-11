@@ -29,6 +29,7 @@ bin/
 
 # Executables
 webserv
+/tests/amethyst/tester
 *.exe
 *.out
 *.app

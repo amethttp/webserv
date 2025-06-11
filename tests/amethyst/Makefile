@@ -46,7 +46,7 @@ else
 endif
 
 #----NAME----#
-NAME = webserv
+NAME = tester
 
 #----COMPILER----#
 CC = c++
@@ -75,30 +75,15 @@ INCLUDES = -I$(SRC)
 
 
 #----VPATH----#
-vpath %.cpp $(SRC): \
-            $(SRC)utils: \
-            $(SRC)utils/string: \
-            $(SRC)utils/numeric: \
-            $(SRC)WebServer: \
-            $(SRC)WebServer/Client: \
-            $(SRC)WebServer/Client/Request: \
-            $(SRC)WebServer/Client/Response: \
-            $(SRC)WebServer/Server: \
-            $(SRC)WebServer/Server/Location: \
-            $(SRC)WebServer/Server/Session: \
+vpath %.cpp $(SRC):\
+            $(SRC)amethtest\
+            $(SRC)tests/request
 
 
 #----SHARED----#
-SRCS = webserv.cpp \
-        WebServer.cpp \
-        Client.cpp \
-        Request.cpp \
-        Response.cpp \
-        Server.cpp \
-        Location.cpp \
-        Session.cpp \
-        string.cpp \
-        numeric.cpp \
+SRCS = main.cpp \
+       test.cpp \
+       request.cpp
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
@@ -141,15 +126,6 @@ bre: bonusre
 
 test:
 	cd tests/subject; ./ubuntu_tester "http://localhost:8080"
-
-tester:
-	$(MAKE) --no-print-directory -C tests/amethyst && ./tests/amethyst/tester
-
-testercl:
-	$(MAKE) --no-print-directory -C tests/amethyst clean
-
-testerfcl:
-	$(MAKE) --no-print-directory -C tests/amethyst fclean
 
 # min-test:
 # 	cd tester && ./tester.sh -n
