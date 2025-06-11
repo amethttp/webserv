@@ -15,7 +15,7 @@
 
 class Request
 {
-private:
+public:
 	static const std::string tchars;
 
 	method_t method_;

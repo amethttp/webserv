@@ -31,4 +31,11 @@ private:
 	std::set<error_page_t> errorPages_;
 
 public:
+	void setPath(const std::string &path);
+	void setRoot(const std::string &root);
+	void setMethods(const std::set<method_t> &methods);
+
+	std::string getPath();
+	std::string getRoot();
+	std::set<method_t> getMethods();
 };

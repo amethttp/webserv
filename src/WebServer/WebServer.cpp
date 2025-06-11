@@ -125,7 +125,6 @@ void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
 {
 	Request currRequest = client->getRequest();
 
-	client->setResponseBuffer(client->getStringifiedRequest());
 	client->tryBuildResponse(currRequest);
 	client->clearRequest();
 	epoll.eventConfig.events = EPOLLOUT;
@@ -166,6 +165,7 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 	if (bytesSent < stringifiedResponse.length())
 		return;
 
+	std::cout << "holasdasdad" << std::endl;
 	epoll.eventConfig.events = EPOLLIN;
 	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)

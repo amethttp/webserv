@@ -2,26 +2,36 @@
 
 #include <string>
 #include "utils/http.hpp"
-#include "Request/Request.hpp"
+#include "StatusLine/StatusLine.hpp"
+#include "../Request/Request.hpp"
+
+#include "../../Server/Server.hpp"
+#include "../../Server/Location/Location.hpp"
 
 class Response
 {
 private:
+	static std::map<int, std::string> errorDict_;
+
 	std::string buffer_;
 
-	method_t method_;
-	std::string target_;
-	std::string httpVersion_;
+	StatusLine statusLine;
 	std::map<std::string, std::string> headers_;
 	std::string body_;
+
+	bool methodGet(Request &request, Server &server, Location &location);
+	bool methodPost(Request &request, Server &server, Location &location);
+	bool methodDelete(Request &request, Server &server, Location &location);
 public:
 	std::string toString();
 
 	void setBuffer(const std::string &buffer);
-	void eraseBuffer(int bytesToErase);
+	void setBody(const std::string &body);
 
-	bool methodGet();
-	bool methodPost();
-	bool methodDelete();
+	std::string getBuffer();
+	std::string getBody();
+
+	void eraseBuffer(size_t bytesToErase);
+
 	bool tryBuild(Request &request);
 };

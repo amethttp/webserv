@@ -36,7 +36,7 @@ public:
 	bool tryBuildRequest();
 	void appendRequest(char *request);
 	void clearRequest();
-	void eraseResponse(int bytesToErase);
+	void eraseResponse(size_t bytesToErase);
 
 	bool tryBuildResponse(Request &Request);
 };

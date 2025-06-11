@@ -83,6 +83,7 @@ vpath %.cpp $(SRC): \
             $(SRC)WebServer/Client: \
             $(SRC)WebServer/Client/Request: \
             $(SRC)WebServer/Client/Response: \
+			$(SRC)WebServer/Client/Response/StatusLine: \
             $(SRC)WebServer/Server: \
             $(SRC)WebServer/Server/Location: \
             $(SRC)WebServer/Server/Session: \
@@ -94,6 +95,7 @@ SRCS = webserv.cpp \
         Client.cpp \
         Request.cpp \
         Response.cpp \
+		StatusLine.cpp \
         Server.cpp \
         Location.cpp \
         Session.cpp \

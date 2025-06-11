@@ -32,7 +32,7 @@ time_t Client::getLastReceivedPacket()
 
 std::string Client::getStringifiedResponse()
 {
-	return this->response_.toString();
+	return this->response_.getBuffer();
 }
 
 std::string Client::getStringifiedRequest()
@@ -84,7 +84,7 @@ void Client::clearRequest()
 	this->request_.clear();
 }
 
-void Client::eraseResponse(int bytesToErase)
+void Client::eraseResponse(size_t bytesToErase)
 {
 	this->response_.eraseBuffer(bytesToErase);
 }
