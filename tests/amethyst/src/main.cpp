@@ -9,7 +9,8 @@
 
 int main()
 {
-    int failures = 0;
+    size_t failures = 0;
+    size_t totalTests = 0;
     std::vector<TestSuite_t> &suites = getTestSuites();
 
     for (size_t i = 0; i < suites.size(); ++i)
@@ -26,17 +27,20 @@ int main()
             catch (TestFailure &e)
             {
                 std::cerr << FAIL << suites[i].tests[j].name << " ---> " << e.what() << RESET << std::endl;
+                ++failures;
             }
             catch (std::exception &e)
             {
                 std::cerr << EXCP << "Uncaught exception in test: " << e.what() << RESET << std::endl;
                 ++failures;
             }
+            ++totalTests;
         }
         std::cout << std::endl;
     }
 
-    std::cout << "Total: " << YELLOW << suites.size() << RESET
+    std::cout << "Total: " << YELLOW << totalTests << RESET
+              << " | Passed: " << GREEN << totalTests - failures << RESET
               << " | Failures: " << RED << failures << std::endl;
 
     return 0;
