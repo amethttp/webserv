@@ -50,7 +50,7 @@ NAME = tester
 
 #----COMPILER----#
 CC = c++
-CCFLAGS += -std=c++98 -fsanitize=address -g # -Ofast
+CCFLAGS += -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g # -Ofast
 
 
 #----DIRS----#

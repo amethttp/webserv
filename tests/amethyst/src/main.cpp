@@ -4,21 +4,24 @@
 
 int main() {
     int failures = 0;
-    std::vector<std::pair<std::string, TestFunc> > &tests = getTests();
+    std::vector<TestSuite_t> &suites = getTestSuites();
 
-    for (size_t i = 0; i < tests.size(); ++i) {
-        std::cout << GREY << "[ TEST ] " << tests[i].first << RESET << std::endl;
+    for (size_t i = 0; i < suites.size(); ++i) {
+        std::cout << YELLOW_BOLD << "[ SUITE ] " << YELLOW << suites[i].name << RESET << std::endl;
+
         try {
-            tests[i].second();
-            std::cout << GREEN_BOLD << "[  OK  ] " << GREEN << tests[i].first << RESET << std::endl;
-        } catch (...) {
-            std::cerr << RED_BOLD << "[ EXCP ] Uncaught exception in test" << RESET << std::endl;
+            for (size_t j = 0; j < suites[i].tests.size(); ++j) {
+                suites[i].tests[j].testFunc();
+                std::cout << GREEN_BOLD << "    [ ✔ ] " << GREEN << suites[i].tests[j].name << RESET << std::endl;
+            }
+        } catch (std::exception &e) {
+            std::cerr << RED_BOLD << "    [ ! ] Uncaught exception in test: " << e.what() << RESET << std::endl;
             ++failures;
         }
+        std::cout << std::endl;
     }
 
-    std::cout << std::endl;
-    std::cout << "Total: " << GREY << tests.size()
+    std::cout << "Total: " << YELLOW << suites.size() << RESET
               << " | Failures: " << RED << failures << std::endl;
 
     return failures ? 1 : 0;

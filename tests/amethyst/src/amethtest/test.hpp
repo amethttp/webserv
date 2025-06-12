@@ -6,9 +6,21 @@
 
 typedef void (*TestFunc)();
 
-extern std::vector<std::pair<std::string, TestFunc> > &getTests();
+typedef struct TestCase_s
+{
+    std::string name;
+    TestFunc testFunc;
+} TestCase_t;
 
-void registerTest(const std::string& name, TestFunc f);
+typedef struct TestSuite_s
+{
+    std::string name;
+    std::vector<TestCase_t> tests;
+} TestSuite_t;
+
+extern std::vector<TestSuite_t> &getTestSuites();
+
+void registerTest(const std::string &suiteName, const std::string &testName, TestFunc f);
 
 #define TEST(name) \
     void name(); \
@@ -16,7 +28,7 @@ void registerTest(const std::string& name, TestFunc f);
     { \
         Register_##name() \
         { \
-            registerTest(#name, name); \
+            registerTest("temp", #name, name); \
         } \
     }; \
     static Register_##name instance_##name; \

@@ -3,7 +3,7 @@
 #include "utils/colors.hpp"
 #include <iostream>
 
-#define FAIL RED_BOLD << "[ FAIL ] " << RED
+#define FAIL RED_BOLD << "    [ ✘ ] " << RED
 
 #define ASSERT_TRUE(condition) \
     if ((condition) == false) \
@@ -26,8 +26,8 @@
     { \
         std::cerr << FAIL << __FILE__ << ":" << __LINE__ \
                   << ": ASSERT_EQUALS(" << #expected << ", " << #actual << ") failed\n" \
-                  << "         Expected: " << (expected) << "\n" \
-                  << "         Actual: " << (actual) << RESET << std::endl; \
+                  << "          Expected: " << (expected) << "\n" \
+                  << "          Actual: " << (actual) << RESET << std::endl; \
         return; \
     }
 
@@ -36,7 +36,7 @@
     { \
         std::cerr << FAIL << __FILE__ << ":" << __LINE__ \
                   << ": ASSERT_NOT_EQUALS(" << #expected << ", " << #actual << ") failed\n" \
-                  << "         Expected: " << (expected) << "\n" \
-                  << "         Actual: " << (actual) << RESET << std::endl; \
+                  << "          Expected: " << (expected) << "\n" \
+                  << "          Actual: " << (actual) << RESET << std::endl; \
         return; \
     }
