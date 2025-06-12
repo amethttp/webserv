@@ -24,6 +24,14 @@ std::string getSuiteName(const std::string &file)
     return suiteName;
 }
 
+static void pushNewSuite(std::vector<TestSuite_t> &suites, const std::string &suiteName)
+{
+    TestSuite_t newSuite;
+
+    newSuite.name = suiteName;
+    suites.push_back(newSuite);
+}
+
 void registerTest(const std::string &suiteName, const std::string &testName, TestFunc f)
 {
     TestCase_t test;
@@ -41,8 +49,6 @@ void registerTest(const std::string &suiteName, const std::string &testName, Tes
         }
     }
 
-    TestSuite_t newSuite;
-    newSuite.name = suiteName;
-    newSuite.tests.push_back(test);
-    suites.push_back(newSuite);
+    pushNewSuite(suites, suiteName);
+    suites.back().tests.push_back(test);
 }

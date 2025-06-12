@@ -78,14 +78,16 @@ INCLUDES = -I$(SRC)
 vpath %.cpp $(SRC):\
             $(SRC)amethtest\
             $(SRC)amethtest/TestFailure\
-            $(SRC)suites/request
+            $(SRC)suites/request\
+            $(SRC)suites/testSuite
 
 
 #----SHARED----#
 SRCS = main.cpp \
        test.cpp \
+       TestFailure.cpp \
        request.cpp \
-       TestFailure.cpp
+       testSuite.cpp \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
