@@ -5,10 +5,10 @@ StatusLine::StatusLine()
 {
 }
 
-void StatusLine::setStatusLine(int code, const std::string &version, const std::string &message)
+void StatusLine::setStatusLine(int code, const std::string &message)
 {
 	this->code_ = code;
-	this->httpVersion_ = version;
+	this->httpVersion_ = "HTTP/1.1";
 	this->statusMessage_ = message;
 }
 

@@ -6,55 +6,79 @@
 #include <sys/stat.h>
 #include <ctime>
 
-static std::map<int, std::string> initializeDict()
+static std::map<int, std::string> initializeErrorDict()
 {
 	std::map<int, std::string> tempMap;
 
-	tempMap.insert(std::pair<int, std::string>(100, "Continue"));
-	tempMap.insert(std::pair<int, std::string>(101, "Switching Protocols"));
-	tempMap.insert(std::pair<int, std::string>(200, "OK"));
-	tempMap.insert(std::pair<int, std::string>(201, "Created"));
-	tempMap.insert(std::pair<int, std::string>(202, "Accepted"));
-	tempMap.insert(std::pair<int, std::string>(203, "Non-Authoritative Information"));
-	tempMap.insert(std::pair<int, std::string>(204, "No Content"));
-	tempMap.insert(std::pair<int, std::string>(205, "Reset Content"));
-	tempMap.insert(std::pair<int, std::string>(206, "Partial Content"));
-	tempMap.insert(std::pair<int, std::string>(300, "Multiple Choices"));
-	tempMap.insert(std::pair<int, std::string>(301, "Moved Permanently"));
-	tempMap.insert(std::pair<int, std::string>(302, "Found"));
-	tempMap.insert(std::pair<int, std::string>(303, "See Other"));
-	tempMap.insert(std::pair<int, std::string>(304, "Not Modified"));
-	tempMap.insert(std::pair<int, std::string>(305, "Use Proxy"));
-	tempMap.insert(std::pair<int, std::string>(307, "Temporary Redirect"));
-	tempMap.insert(std::pair<int, std::string>(400, "Bad Request"));
-	tempMap.insert(std::pair<int, std::string>(401, "Unauthorized"));
-	tempMap.insert(std::pair<int, std::string>(402, "Payment Required"));
-	tempMap.insert(std::pair<int, std::string>(403, "Forbidden"));
-	tempMap.insert(std::pair<int, std::string>(404, "Not Found"));
-	tempMap.insert(std::pair<int, std::string>(405, "Method Not Allowed"));
-	tempMap.insert(std::pair<int, std::string>(406, "Not Acceptable"));
-	tempMap.insert(std::pair<int, std::string>(407, "Proxy Authentication Required"));
-	tempMap.insert(std::pair<int, std::string>(408, "Request Time-out"));
-	tempMap.insert(std::pair<int, std::string>(409, "Conflict"));
-	tempMap.insert(std::pair<int, std::string>(410, "Gone"));
-	tempMap.insert(std::pair<int, std::string>(411, "Length Required"));
-	tempMap.insert(std::pair<int, std::string>(412, "Precondition Failed"));
-	tempMap.insert(std::pair<int, std::string>(413, "Request Entity Too Large"));
-	tempMap.insert(std::pair<int, std::string>(414, "Request-URI Too Large"));
-	tempMap.insert(std::pair<int, std::string>(415, "Unsupported Media Type"));
-	tempMap.insert(std::pair<int, std::string>(416, "Requested range not satisfiable"));
-	tempMap.insert(std::pair<int, std::string>(417, "Expectation Failed"));
-	tempMap.insert(std::pair<int, std::string>(500, "Internal Server Error"));
-	tempMap.insert(std::pair<int, std::string>(501, "Not Implemented"));
-	tempMap.insert(std::pair<int, std::string>(502, "Bad Gateway"));
-	tempMap.insert(std::pair<int, std::string>(503, "Service Unavailable"));
-	tempMap.insert(std::pair<int, std::string>(504, "Gateway Time-out"));
-	tempMap.insert(std::pair<int, std::string>(505, "HTTP Version not supported"));
+	tempMap[100] = "Continue";
+	tempMap[101] = "Switching Protocols";
+	tempMap[200] = "OK";
+	tempMap[201] = "Created";
+	tempMap[202] = "Accepted";
+	tempMap[203] = "Non-Authoritative Information";
+	tempMap[204] = "No Content";
+	tempMap[205] = "Reset Content";
+	tempMap[206] = "Partial Content";
+	tempMap[300] = "Multiple Choices";
+	tempMap[301] = "Moved Permanently";
+	tempMap[302] = "Found";
+	tempMap[303] = "See Other";
+	tempMap[304] = "Not Modified";
+	tempMap[305] = "Use Proxy";
+	tempMap[307] = "Temporary Redirect";
+	tempMap[400] = "Bad Request";
+	tempMap[401] = "Unauthorized";
+	tempMap[402] = "Payment Required";
+	tempMap[403] = "Forbidden";
+	tempMap[404] = "Not Found";
+	tempMap[405] = "Method Not Allowed";
+	tempMap[406] = "Not Acceptable";
+	tempMap[407] = "Proxy Authentication Required";
+	tempMap[408] = "Request Time-out";
+	tempMap[409] = "Conflict";
+	tempMap[410] = "Gone";
+	tempMap[411] = "Length Required";
+	tempMap[412] = "Precondition Failed";
+	tempMap[413] = "Request Entity Too Large";
+	tempMap[414] = "Request-URI Too Large";
+	tempMap[415] = "Unsupported Media Type";
+	tempMap[416] = "Requested range not satisfiable";
+	tempMap[417] = "Expectation Failed";
+	tempMap[500] = "Internal Server Error";
+	tempMap[501] = "Not Implemented";
+	tempMap[502] = "Bad Gateway";
+	tempMap[503] = "Service Unavailable";
+	tempMap[504] = "Gateway Time-out";
+	tempMap[505] = "HTTP Version not supported";
 
 	return tempMap;
 }
 
-std::map<int, std::string> Response::errorDict_ = initializeDict();
+std::map<int, std::string> Response::errorDict_ = initializeErrorDict();
+
+static std::map<std::string, std::string> initializeExtensionDict()
+{
+	std::map<std::string, std::string> tempMap;
+
+    tempMap[".txt"]  = "text/plain";
+    tempMap[".html"] = "text/html";
+    tempMap[".css"]  = "text/css";
+    tempMap[".js"]   = "application/javascript";
+    tempMap[".json"] = "application/json";
+    tempMap[".xml"]  = "application/xml";
+    tempMap[".png"]  = "image/png";
+    tempMap[".jpg"]  = "image/jpeg";
+    tempMap[".jpeg"] = "image/jpeg";
+    tempMap[".gif"]  = "image/gif";
+    tempMap[".ico"]  = "image/x-icon";
+    tempMap[".pdf"]  = "application/pdf";
+    tempMap[".zip"]  = "application/zip";
+    tempMap[".tar"]  = "application/x-tar";
+
+	return tempMap;
+}
+
+std::map<std::string, std::string> Response::extensionTypesDict_ = initializeExtensionDict();
 
 std::string Response::toString()
 {
@@ -73,11 +97,6 @@ std::string Response::toString()
 void Response::setBuffer(const std::string &buffer)
 {
 	this->buffer_ = buffer;
-}
-
-void Response::setBody(const std::string &body)
-{
-	this->body_ = body;
 }
 
 std::string Response::getBuffer()
@@ -104,7 +123,7 @@ static void readFileToString(const char *filePath, std::string &str)
     if (!file.is_open())
 	{
 		file.close();
-        throw (std::runtime_error("Couldn't open file"));
+        throw (std::runtime_error("404? Couldn't open file"));
 	}
 	if (stat(filePath, &st))
 	{
@@ -139,37 +158,52 @@ void Response::setResponseHeaders()
 	this->headers_.insert(std::pair<std::string, std::string>("Date", getImfFixdate()));
 }
 
-void Response::setRepresentationHeaders()
+std::string Response::getMIME(std::string &target)
+{
+	int pos;
+	std::string res = "text/plain";
+
+	pos = target.rfind('.');
+	if (pos != std::string::npos)
+	{
+		try
+		{
+			res = this->extensionTypesDict_.at(target.substr(pos));
+		}
+		catch(const std::out_of_range& e) {}
+	}
+	
+	return res;
+}
+
+void Response::setRepresentationHeaders(std::string &target)
 {
 	std::ostringstream length;
 
-	this->headers_.insert(std::pair<std::string, std::string>("Content-Type", "text/plain"));
+	this->headers_.insert(std::pair<std::string, std::string>("Content-Type", this->getMIME(target)));
 	length << this->body_.length();
 	this->headers_.insert(std::pair<std::string, std::string>("Content-Length", length.str()));
 }
 
 // match the location outside this func and let it only receive the path to file
 // status line OK outside this func when checked the return?
-bool Response::methodGet(Request &request, Server &server, Location &location)
+bool Response::methodGet(std::string &path)
 {
-	std::string path;
-
-	path = location.getPath() + request.target_;
 	readFileToString(path.c_str(), this->body_);
 	this->setResponseHeaders();
-	this->setRepresentationHeaders();
-	this->statusLine.setStatusLine(200, "HTTP/1.1", "OK");
+	this->setRepresentationHeaders(path);
+	this->statusLine.setStatusLine(200, this->errorDict_.at(200));
 
 	return true;
 }
 
-bool Response::methodPost(Request &request, Server &server, Location &location)
+bool Response::methodPost(std::string &path)
 {
 	std::cout << "POSTTT" << std::endl;
 	return true;
 }
 
-bool Response::methodDelete(Request &request, Server &server, Location &location)
+bool Response::methodDelete(std::string &path)
 {
 	std::cout << "DELETE" << std::endl;
 	return true;
@@ -181,6 +215,7 @@ bool Response::methodDelete(Request &request, Server &server, Location &location
 // finally execute method and set headers accordingly
 bool Response::tryBuild(Request &request)
 {
+	std::string path;
 	Server testServer;
 	Location testLocation;
 	std::set<method_t> allowedMethods;
@@ -191,16 +226,18 @@ bool Response::tryBuild(Request &request)
 	testLocation.setRoot("/");
 	testLocation.setMethods(allowedMethods);
 
+	path = testLocation.getPath() + request.target_;
+
 	switch (request.getMethod())
 	{
 		case GET:
-			this->methodGet(request, testServer, testLocation);
+			this->methodGet(path);
 			break ;
 		case POST:
-			this->methodPost(request, testServer, testLocation);
+			this->methodPost(path);
 			break ;
 		case DELETE:
-			this->methodDelete(request, testServer, testLocation);
+			this->methodDelete(path);
 			break ;
 		
 		default:

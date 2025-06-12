@@ -11,7 +11,7 @@ public:
 	StatusLine();
 	~StatusLine();
 
-	void setStatusLine(int code, const std::string &version, const std::string &message);
+	void setStatusLine(int code, const std::string &message);
 
 	friend std::string &operator+=(std::string &string, StatusLine &statusLine);
 	friend std::ostream &operator<<(std::ostream &stream, StatusLine &statusLine);

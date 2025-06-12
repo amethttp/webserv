@@ -12,6 +12,7 @@ class Response
 {
 private:
 	static std::map<int, std::string> errorDict_;
+	static std::map<std::string, std::string> extensionTypesDict_;
 
 	std::string buffer_;
 
@@ -20,16 +21,17 @@ private:
 	std::string body_;
 
 	void setResponseHeaders();
-	void setRepresentationHeaders();
+	void setRepresentationHeaders(std::string &target);
 
-	bool methodGet(Request &request, Server &server, Location &location);
-	bool methodPost(Request &request, Server &server, Location &location);
-	bool methodDelete(Request &request, Server &server, Location &location);
+	std::string getMIME(std::string &target);
+
+	bool methodGet(std::string &path);
+	bool methodPost(std::string &path);
+	bool methodDelete(std::string &path);
 public:
 	std::string toString();
 
 	void setBuffer(const std::string &buffer);
-	void setBody(const std::string &body);
 
 	std::string getBuffer();
 	std::string getBody();
