@@ -19,6 +19,9 @@ private:
 	std::map<std::string, std::string> headers_;
 	std::string body_;
 
+	void setResponseHeaders();
+	void setRepresentationHeaders();
+
 	bool methodGet(Request &request, Server &server, Location &location);
 	bool methodPost(Request &request, Server &server, Location &location);
 	bool methodDelete(Request &request, Server &server, Location &location);

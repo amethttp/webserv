@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <sys/stat.h>
+#include <ctime>
 
 static std::map<int, std::string> initializeDict()
 {
@@ -120,17 +121,43 @@ static void readFileToString(const char *filePath, std::string &str)
     file.close();
 }
 
+static std::string getImfFixdate()
+{
+    std::time_t timeNow = std::time(NULL);
+    std::tm *gmt = std::gmtime(&timeNow);
+    std::string res;
+	
+	res.resize(30);
+    if (std::strftime(&res[0], res.size(), "%a, %d %b %Y %H:%M:%S GMT", gmt))
+        return res;
+	return std::string("");
+}
+
+void Response::setResponseHeaders()
+{
+	this->headers_.insert(std::pair<std::string, std::string>("Server", "Amethttp"));
+	this->headers_.insert(std::pair<std::string, std::string>("Date", getImfFixdate()));
+}
+
+void Response::setRepresentationHeaders()
+{
+	std::ostringstream length;
+
+	this->headers_.insert(std::pair<std::string, std::string>("Content-Type", "text/plain"));
+	length << this->body_.length();
+	this->headers_.insert(std::pair<std::string, std::string>("Content-Length", length.str()));
+}
+
 // match the location outside this func and let it only receive the path to file
+// status line OK outside this func when checked the return?
 bool Response::methodGet(Request &request, Server &server, Location &location)
 {
 	std::string path;
-	std::ostringstream length;
 
 	path = location.getPath() + request.target_;
 	readFileToString(path.c_str(), this->body_);
-	this->headers_.insert(std::pair<std::string, std::string>("content-type", "text/html")); // getMIME
-	length << this->body_.length();
-	this->headers_.insert(std::pair<std::string, std::string>("content-length", length.str()));
+	this->setResponseHeaders();
+	this->setRepresentationHeaders();
 	this->statusLine.setStatusLine(200, "HTTP/1.1", "OK");
 
 	return true;
