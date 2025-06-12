@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
 
 static std::map<int, std::string> initializeDict()
 {
@@ -56,16 +57,16 @@ std::map<int, std::string> Response::errorDict_ = initializeDict();
 
 std::string Response::toString()
 {
-	std::string res = "";
+	std::ostringstream res;
 
-	res += this->statusLine;
+	res << this->statusLine;
 	for (std::map<std::string, std::string>::iterator it = this->headers_.begin(); it != this->headers_.end(); ++it) {
-		res += (*it).first + " " + (*it).second + "\r\n";
+		res << (*it).first << ": " << (*it).second << "\r\n";
 	}
-	res += "\r\n";
-	res += body_;
+	res << "\r\n";
+	res << body_;
 
-	return res;
+	return res.str();
 }
 
 void Response::setBuffer(const std::string &buffer)
@@ -93,24 +94,41 @@ void Response::eraseBuffer(size_t bytesToErase)
 	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
 }
 
+static void readFileToString(const char *filePath, std::string &str)
+{
+	struct stat st;
+	std::ifstream file;
+
+	file.open(filePath, std::ifstream::binary);
+    if (!file.is_open())
+	{
+		file.close();
+        throw (std::runtime_error("Couldn't open file"));
+	}
+	if (stat(filePath, &st))
+	{
+		file.close();
+		throw (std::runtime_error("Stat operation failed"));
+	}
+	str.resize(static_cast<size_t>(st.st_size));
+	file.read(&str[0], static_cast<size_t>(st.st_size));
+	if (!file)
+	{
+		file.close();
+		throw (std::runtime_error("Reading operation failed"));
+	}
+    file.close();
+}
+
+// match the location outside this func and let it only receive the path to file
 bool Response::methodGet(Request &request, Server &server, Location &location)
 {
-	std::fstream file;
-	std::ostringstream length;
 	std::string path;
 
 	path = location.getPath() + request.target_;
-    file.open(path.c_str());
-    if (file.is_open())
-    {
-        while (getline(file, this->body_, '\0')) { }
-    }
-    else
-        throw (std::runtime_error("Error: Couldn't open file"));
-    file.close();
+	readFileToString(path.c_str(), this->body_);
 	this->headers_.insert(std::pair<std::string, std::string>("content-type", "text/html"));
-	length << this->body_.size();
-	this->headers_.insert(std::pair<std::string, std::string>("content-length", length.str()));
+	this->headers_.insert(std::pair<std::string, std::string>("content-length", std::to_string(this->body_.length())));
 	this->statusLine.setStatusLine(200, "HTTP/1.1", "OK");
 
 	return true;
@@ -128,7 +146,8 @@ bool Response::methodDelete(Request &request, Server &server, Location &location
 	return true;
 }
 
-// first check that the method is valid
+// (We will get the server--> match the location)
+// check that the method is valid (determined by location as well)
 // then check for keep alive / other headers of interest 
 // finally execute method and set headers accordingly
 bool Response::tryBuild(Request &request)
