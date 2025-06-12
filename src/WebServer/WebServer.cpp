@@ -123,9 +123,9 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 
 void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
 {
-	Request currRequest = client->getRequest();
+	Request clientRequest = client->getRequest();
 
-	client->tryBuildResponse(currRequest);
+	client->tryBuildResponse(clientRequest);
 	client->clearRequest();
 	epoll.eventConfig.events = EPOLLOUT;
 	epoll.eventConfig.data.ptr = static_cast<void *>(client);
@@ -165,7 +165,6 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 	if (bytesSent < stringifiedResponse.length())
 		return;
 
-	std::cout << "holasdasdad" << std::endl;
 	epoll.eventConfig.events = EPOLLIN;
 	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)

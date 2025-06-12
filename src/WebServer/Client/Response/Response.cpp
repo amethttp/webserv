@@ -124,11 +124,13 @@ static void readFileToString(const char *filePath, std::string &str)
 bool Response::methodGet(Request &request, Server &server, Location &location)
 {
 	std::string path;
+	std::ostringstream length;
 
 	path = location.getPath() + request.target_;
 	readFileToString(path.c_str(), this->body_);
-	this->headers_.insert(std::pair<std::string, std::string>("content-type", "text/html"));
-	this->headers_.insert(std::pair<std::string, std::string>("content-length", std::to_string(this->body_.length())));
+	this->headers_.insert(std::pair<std::string, std::string>("content-type", "text/html")); // getMIME
+	length << this->body_.length();
+	this->headers_.insert(std::pair<std::string, std::string>("content-length", length.str()));
 	this->statusLine.setStatusLine(200, "HTTP/1.1", "OK");
 
 	return true;
