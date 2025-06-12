@@ -20,6 +20,8 @@ typedef struct TestSuite_s
 
 extern std::vector<TestSuite_t> &getTestSuites();
 
+std::string getSuiteName(const std::string &file);
+
 void registerTest(const std::string &suiteName, const std::string &testName, TestFunc f);
 
 #define TEST(name) \
@@ -28,7 +30,8 @@ void registerTest(const std::string &suiteName, const std::string &testName, Tes
     { \
         Register_##name() \
         { \
-            registerTest("temp", #name, name); \
+            std::string fullPath = getSuiteName(__FILE__); \
+            registerTest(fullPath, #name, name); \
         } \
     }; \
     static Register_##name instance_##name; \

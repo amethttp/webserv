@@ -8,6 +8,22 @@ std::vector<TestSuite_t> &getTestSuites()
     return testSuites;
 }
 
+std::string getSuiteName(const std::string &file)
+{
+    std::string fullPath = file; 
+    std::string suiteName = fullPath;
+    size_t pos = fullPath.find_last_of("/\\");
+
+    if (pos != std::string::npos)
+        suiteName = fullPath.substr(pos + 1);
+
+    size_t dot = suiteName.find_last_of('.');
+    suiteName = suiteName.substr(0, dot);
+    suiteName[0] = toupper(suiteName[0]);
+    
+    return suiteName;
+}
+
 void registerTest(const std::string &suiteName, const std::string &testName, TestFunc f)
 {
     TestCase_t test;
