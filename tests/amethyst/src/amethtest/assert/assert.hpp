@@ -1,42 +1,49 @@
 #pragma once
 
-#include "utils/colors.hpp"
+#include "amethtest/TestFailure/TestFailure.hpp"
 #include <iostream>
+#include <sstream>
 
-#define FAIL RED_BOLD << "    [ ✘ ] " << RED
+#define ASSERT_TRUE(condition)                                           \
+    if ((condition) == true)                                             \
+        return;                                                          \
+                                                                         \
+    std::ostringstream oss;                                              \
+    oss << __FILE__ << ":" << __LINE__ << "\n"                           \
+        << "          Reason: ASSERT_TRUE(" << #condition << ") failed"; \
+                                                                         \
+    throw TestFailure(oss.str());
 
-#define ASSERT_TRUE(condition)                                                           \
-    if ((condition) == false)                                                            \
-    {                                                                                    \
-        std::cerr << FAIL << __FILE__ << ":" << __LINE__                                 \
-                  << ": ASSERT_TRUE(" << #condition << ") failed" << RESET << std::endl; \
-        return;                                                                          \
-    }
+#define ASSERT_FALSE(condition)                                           \
+    if ((condition) == false)                                             \
+        return;                                                           \
+                                                                          \
+    std::ostringstream oss;                                               \
+    oss << __FILE__ << ":" << __LINE__ << "\n"                            \
+        << "          Reason: ASSERT_FALSE(" << #condition << ") failed"; \
+                                                                          \
+    throw TestFailure(oss.str());
 
-#define ASSERT_FALSE(condition)                                                           \
-    if ((condition) == true)                                                              \
-    {                                                                                     \
-        std::cerr << FAIL << __FILE__ << ":" << __LINE__                                  \
-                  << ": ASSERT_FALSE(" << #condition << ") failed" << RESET << std::endl; \
-        return;                                                                           \
-    }
+#define ASSERT_EQUALS(expected, actual)                                                       \
+    if ((expected) == (actual))                                                               \
+        return;                                                                               \
+                                                                                              \
+    std::ostringstream oss;                                                                   \
+    oss << __FILE__ << ":" << __LINE__ << "\n"                                                \
+        << "          Reason: ASSERT_EQUALS(" << #expected << ", " << #actual << ") failed\n" \
+        << "          Expected: " << (expected) << "\n"                                       \
+        << "          Actual: " << (actual);                                                  \
+                                                                                              \
+    throw TestFailure(oss.str());
 
-#define ASSERT_EQUALS(expected, actual)                                                 \
-    if (!((expected) == (actual)))                                                      \
-    {                                                                                   \
-        std::cerr << FAIL << __FILE__ << ":" << __LINE__                                \
-                  << ": ASSERT_EQUALS(" << #expected << ", " << #actual << ") failed\n" \
-                  << "          Expected: " << (expected) << "\n"                       \
-                  << "          Actual: " << (actual) << RESET << std::endl;            \
-        return;                                                                         \
-    }
-
-#define ASSERT_NOT_EQUALS(expected, actual)                                                 \
-    if (!((expected) != (actual)))                                                          \
-    {                                                                                       \
-        std::cerr << FAIL << __FILE__ << ":" << __LINE__                                    \
-                  << ": ASSERT_NOT_EQUALS(" << #expected << ", " << #actual << ") failed\n" \
-                  << "          Expected: " << (expected) << "\n"                           \
-                  << "          Actual: " << (actual) << RESET << std::endl;                \
-        return;                                                                             \
-    }
+#define ASSERT_NOT_EQUALS(expected, actual)                                                       \
+    if ((expected) != (actual))                                                                   \
+        return;                                                                                   \
+                                                                                                  \
+    std::ostringstream oss;                                                                       \
+    oss << __FILE__ << ":" << __LINE__ << "\n"                                                    \
+        << "          Reason: ASSERT_NOT_EQUALS(" << #expected << ", " << #actual << ") failed\n" \
+        << "          Expected: " << (expected) << "\n"                                           \
+        << "          Actual: " << (actual);                                                      \
+                                                                                                  \
+    throw TestFailure(oss.str());
