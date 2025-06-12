@@ -151,6 +151,9 @@ testercl:
 testerfcl:
 	$(MAKE) --no-print-directory -C tests/amethyst fclean
 
+testerre:
+	$(MAKE) --no-print-directory -C tests/amethyst re && ./tests/amethyst/tester
+
 # min-test:
 # 	cd tester && ./tester.sh -n
 

@@ -56,6 +56,7 @@ CCFLAGS += -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g # -Ofast
 #----DIRS----#
 BIN_DIR = bin/
 SRC = src/
+SUITES=suites/
 INCLUDES = -I$(SRC)
 
 
@@ -78,8 +79,8 @@ INCLUDES = -I$(SRC)
 vpath %.cpp $(SRC):\
             $(SRC)amethtest\
             $(SRC)amethtest/TestFailure\
-            $(SRC)suites/request\
-            $(SRC)suites/testSuite
+            $(SUITES)request\
+            $(SUITES)testSuite
 
 
 #----SHARED----#
