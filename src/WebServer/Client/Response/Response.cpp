@@ -205,7 +205,11 @@ bool Response::methodPost(std::string &path)
 
 bool Response::methodDelete(std::string &path)
 {
-	std::cout << "DELETE" << std::endl;
+	if (std::remove(path.c_str()) < 0)
+		throw std::runtime_error("404"); // 204 for consistency/idempotency, widely used...
+	this->setResponseHeaders();
+	this->statusLine.setStatusLine(204, this->errorDict_.at(204));
+
 	return true;
 }
 
