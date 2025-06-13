@@ -1,6 +1,6 @@
 #include "utils/colors.hpp"
-#include "amethtest/test.hpp"
-#include "amethtest/assert/assert.hpp"
+#include "test/test.hpp"
+#include "test/assert/assert.hpp"
 #include <iostream>
 
 #define TEST_IDENTATION "    "

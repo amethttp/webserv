@@ -103,7 +103,7 @@ SRCS = webserv.cpp \
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
 
-
+AMETHTDD=./tests/amethyst/amethtdd
 
 #----- R U L E S -----#
 
@@ -143,7 +143,7 @@ test:
 	cd tests/subject; ./ubuntu_tester "http://localhost:8080"
 
 tester:
-	$(MAKE) --no-print-directory -C tests/amethyst && ./tests/amethyst/tester
+	$(MAKE) --no-print-directory -C tests/amethyst && $(AMETHTDD)
 
 testercl:
 	$(MAKE) --no-print-directory -C tests/amethyst clean
@@ -152,7 +152,7 @@ testerfcl:
 	$(MAKE) --no-print-directory -C tests/amethyst fclean
 
 testerre:
-	$(MAKE) --no-print-directory -C tests/amethyst re && ./tests/amethyst/tester
+	$(MAKE) --no-print-directory -C tests/amethyst re && $(AMETHTDD)
 
 # min-test:
 # 	cd tester && ./tester.sh -n

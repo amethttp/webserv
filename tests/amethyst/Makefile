@@ -46,7 +46,7 @@ else
 endif
 
 #----NAME----#
-NAME = tester
+NAME = amethtdd
 
 #----COMPILER----#
 CC = c++
@@ -60,25 +60,10 @@ SUITES=suites/
 INCLUDES = -I$(SRC)
 
 
-#----LIBS----#
-
-#----MACROS----#
-# ifeq ($(UNAME_S), Darwin)
-# 	WINDOW_WIDTH := $(shell system_profiler -json SPDisplaysDataType 2>/dev/null | grep _spdisplays_resolution | awk 'NR==1{print substr($$3, 2, length($$3)) - 70}')
-# 	WINDOW_HEIGHT := $(shell system_profiler -json SPDisplaysDataType 2>/dev/null | grep _spdisplays_resolution | awk 'NR==1{print $$5 - 70}')
-# 	CCFLAGS += -D WINDOW_WIDTH=$(WINDOW_WIDTH) -D WINDOW_HEIGHT=$(WINDOW_HEIGHT)
-# endif
-# ifeq ($(UNAME_S), Linux)
-# 	WINDOW_WIDTH := $(shell xrandr | grep "*" | awk '{ print $1 }' | cut -d'x' -f 1 | xargs)
-# 	WINDOW_HEIGHT := $(shell xrandr | grep "*" | awk '{ print $1 }' | cut -d'x' -f 2 | cut -d' ' -f 1)
-# 	CCFLAGS += -D WINDOW_WIDTH=$(WINDOW_WIDTH) -D WINDOW_HEIGHT=$(WINDOW_HEIGHT)
-# endif
-
-
 #----VPATH----#
 vpath %.cpp $(SRC):\
-            $(SRC)amethtest\
-            $(SRC)amethtest/TestFailure\
+            $(SRC)test\
+            $(SRC)test/TestFailure\
             $(SUITES)request\
             $(SUITES)testSuite
 
@@ -98,6 +83,7 @@ DEPS = $(OBJS:%.o=%.d)
 #----- R U L E S -----#
 
 all:
+	@mkdir -p $(SUITES)
 	@$(MAKE) --no-print-directory $(NAME)
 
 $(NAME): $(OBJS)
@@ -120,35 +106,10 @@ fclean: clean
 
 re: fclean all
 
-bonus:
-	$(MAKE) --no-print-directory all BONUS=1
-
-b: bonus
-
-bonusre: fclean bonus
-
-bre: bonusre
-
-test:
-	cd tests/subject; ./ubuntu_tester "http://localhost:8080"
-
-# min-test:
-# 	cd tester && ./tester.sh -n
-
-# test_clean:
-# 	$(MAKE) --no-print-directory -C tester/main_test clean
-
 .PHONY: all \
 		clean \
 		fclean \
-		re \
-		bonus \
-		b \
-		bonusre \
-		bre \
-		test \
-		# min-test \
-		# test-clean
+		re
 
 -include $(DEPS)
 -include $(MDEPS)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "amethtest/TestFailure/TestFailure.hpp"
+#include "test/TestFailure/TestFailure.hpp"
 #include <iostream>
 #include <sstream>
 

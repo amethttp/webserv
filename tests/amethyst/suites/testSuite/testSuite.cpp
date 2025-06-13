@@ -1,5 +1,5 @@
-#include "amethtest/test.hpp"
-#include "amethtest/assert/assert.hpp"
+#include "test/test.hpp"
+#include "test/assert/assert.hpp"
 
 TEST(thisIsJustATest)
 {
