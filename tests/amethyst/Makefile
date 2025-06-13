@@ -57,23 +57,25 @@ CCFLAGS += -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g # -Ofast
 BIN_DIR = bin/
 SRC = src/
 SUITES=suites/
+SUITES_DIRECTORIES=$(shell find $(SUITES)* -type d 2>/dev/null | tr '\n' ':')
 INCLUDES = -I$(SRC)
+
+#----VARS----#
+SUITES_FILES=$(shell find $(SUITES)* -type f -name "*.cpp" 2>/dev/null | xargs basename -a 2>/dev/null | tr '\n' ' ')
 
 
 #----VPATH----#
 vpath %.cpp $(SRC):\
-            $(SRC)test\
-            $(SRC)test/TestFailure\
-            $(SUITES)request\
-            $(SUITES)testSuite
-
+            $(SRC)test:\
+            $(SRC)test/TestFailure:\
+            $(SUITES_DIRECTORIES)\
+			
 
 #----SHARED----#
 SRCS = main.cpp \
        test.cpp \
        TestFailure.cpp \
-       request.cpp \
-       testSuite.cpp \
+       $(SUITES_FILES) \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
