@@ -130,10 +130,14 @@ std::vector<Client>::iterator WebServer::disconnectClient(Client *client, t_epol
 	return removeClient(client);
 }
 
-void WebServer::tryBuildRequest(Client *client, char *buffer)
+bool WebServer::tryBuildRequest(Client *client, char *buffer)
 {
 	client->appendRequest(buffer);
-	client->tryBuildRequest();
+	if (!client->hasFullRequestHeaders())
+		return false;
+	client->buildRequest();
+
+	return true;
 }
 
 void WebServer::buildResponse(Client *client, t_epoll &epoll)
@@ -153,7 +157,8 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	if (bytesReceived > 0)
 	{
 		client->updateLastReceivedPacket();
-		this->tryBuildRequest(client, buffer);
+		if (!this->tryBuildRequest(client, buffer))
+			return ;
 		this->buildResponse(client, epoll);
 	}
 	else if (bytesReceived == 0)

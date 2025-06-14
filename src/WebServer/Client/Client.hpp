@@ -36,7 +36,7 @@ public:
 
 	void updateLastReceivedPacket();
 	bool hasFullRequestHeaders();
-	void tryBuildRequest();
+	void buildRequest();
 	void appendRequest(char *request);
 	void clearRequest();
 	void eraseResponse(size_t bytesToErase);

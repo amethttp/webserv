@@ -65,13 +65,10 @@ bool Client::hasFullRequestHeaders()
 	return this->request_.hasFullHeaders();
 }
 
-void Client::tryBuildRequest()
+void Client::buildRequest()
 {
-	if (!this->hasFullRequestHeaders() ||
-		!this->request_.tryParseFromBuffer())
-	{
+	if (!this->request_.tryParseFromBuffer())
 		this->request_.setComplete(false);
-	}
 	
 	std::cout << this->request_ << std::endl;
 	std::cout << "Should build a response: " << (this->request_.isComplete() ? "true" : "false") << std::endl;
