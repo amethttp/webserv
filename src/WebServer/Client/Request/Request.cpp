@@ -82,9 +82,9 @@ bool Request::checkValidHTTPProtocol()
 		return true;
 	else
 	{
-		if (httpVersion_.length() != 8 && httpVersion_.substr(0, 5) != "HTTP/")
+		if (httpVersion_.length() != 8 || httpVersion_.substr(0, 5) != "HTTP/")
 			return false;
-		if (isdigit(httpVersion_.at(6)) && httpVersion_.at(7) == '.' && isdigit(httpVersion_.at(8)))
+		if (isdigit(httpVersion_.at(5)) && httpVersion_.at(6) == '.' && isdigit(httpVersion_.at(7)))
 			return true;
 		return false;
 	}
@@ -231,13 +231,13 @@ bool Request::tryParseFromBuffer()
 	std::vector<std::string> bufferLines = split(this->buffer_, HEADER_LINE_SEP);
 
 	if (this->target_.empty() && !tryParseRequestLine(bufferLines.front()))
-		return true;
+		return false;
 
 	if (this->headers_.empty() && !tryParseHeaders(bufferLines)) // return false || what to do with http version
-		return true;
+		return false;
 
 	if (!tryParseBody(bufferLines))
-		return true;
+		return false;
 
 	return this->complete_;
 }
