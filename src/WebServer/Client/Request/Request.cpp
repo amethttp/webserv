@@ -233,6 +233,16 @@ method_t Request::getMethod()
     return this->method_;
 }
 
+std::string Request::getTarget()
+{
+    return this->target_;
+}
+
+std::map<std::string, std::string> Request::getHeaders()
+{
+    return this->headers_;
+}
+
 std::ostream &operator<<(std::ostream &stream, Request &request)
 {
 	stream << "+-------------------------------------+" << std::endl;

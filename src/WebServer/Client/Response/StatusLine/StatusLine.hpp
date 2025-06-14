@@ -1,17 +1,18 @@
 #include <string>
 #include <iostream>
+#include "utils/http.hpp"
 
 class StatusLine
 {
 private:
-	int code_;
+	httpError_t code_;
 	std::string httpVersion_;
 	std::string statusMessage_;
 public:
 	StatusLine();
 	~StatusLine();
 
-	void setStatusLine(int code, const std::string &message);
+	void setFields(httpError_t code, const std::string &message);
 
 	friend std::string &operator+=(std::string &string, StatusLine &statusLine);
 	friend std::ostream &operator<<(std::ostream &stream, StatusLine &statusLine);

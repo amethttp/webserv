@@ -5,56 +5,57 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <ctime>
+#include <vector>
 
-static std::map<int, std::string> initializeErrorDict()
+static std::map<httpError_t, std::string> initializeErrorDict()
 {
-	std::map<int, std::string> tempMap;
+	std::map<httpError_t, std::string> tempMap;
 
-	tempMap[100] = "Continue";
-	tempMap[101] = "Switching Protocols";
-	tempMap[200] = "OK";
-	tempMap[201] = "Created";
-	tempMap[202] = "Accepted";
-	tempMap[203] = "Non-Authoritative Information";
-	tempMap[204] = "No Content";
-	tempMap[205] = "Reset Content";
-	tempMap[206] = "Partial Content";
-	tempMap[300] = "Multiple Choices";
-	tempMap[301] = "Moved Permanently";
-	tempMap[302] = "Found";
-	tempMap[303] = "See Other";
-	tempMap[304] = "Not Modified";
-	tempMap[305] = "Use Proxy";
-	tempMap[307] = "Temporary Redirect";
-	tempMap[400] = "Bad Request";
-	tempMap[401] = "Unauthorized";
-	tempMap[402] = "Payment Required";
-	tempMap[403] = "Forbidden";
-	tempMap[404] = "Not Found";
-	tempMap[405] = "Method Not Allowed";
-	tempMap[406] = "Not Acceptable";
-	tempMap[407] = "Proxy Authentication Required";
-	tempMap[408] = "Request Time-out";
-	tempMap[409] = "Conflict";
-	tempMap[410] = "Gone";
-	tempMap[411] = "Length Required";
-	tempMap[412] = "Precondition Failed";
-	tempMap[413] = "Request Entity Too Large";
-	tempMap[414] = "Request-URI Too Large";
-	tempMap[415] = "Unsupported Media Type";
-	tempMap[416] = "Requested range not satisfiable";
-	tempMap[417] = "Expectation Failed";
-	tempMap[500] = "Internal Server Error";
-	tempMap[501] = "Not Implemented";
-	tempMap[502] = "Bad Gateway";
-	tempMap[503] = "Service Unavailable";
-	tempMap[504] = "Gateway Time-out";
-	tempMap[505] = "HTTP Version not supported";
+	tempMap[CONTINUE] = "Continue";
+	tempMap[SWITCHING_PROTOCOLS] = "Switching Protocols";
+	tempMap[OK] = "OK";
+	tempMap[CREATED] = "Created";
+	tempMap[ACCEPTED] = "Accepted";
+	tempMap[NON_AUTHORITATIVE_INFORMATION] = "Non-Authoritative Information";
+	tempMap[NO_CONTENT] = "No Content";
+	tempMap[RESET_CONTENT] = "Reset Content";
+	tempMap[PARTIAL_CONTENT] = "Partial Content";
+	tempMap[MULTIPLE_CHOICES] = "Multiple Choices";
+	tempMap[MOVED_PERMANENTLY] = "Moved Permanently";
+	tempMap[FOUND] = "Found";
+	tempMap[SEE_OTHER] = "See Other";
+	tempMap[NOT_MODIFIED] = "Not Modified";
+	tempMap[USE_PROXY] = "Use Proxy";
+	tempMap[TEMPORARY_REDIRECT] = "Temporary Redirect";
+	tempMap[BAD_REQUEST] = "Bad Request";
+	tempMap[UNAUTHORIZED] = "Unauthorized";
+	tempMap[PAYMENT_REQUIRED] = "Payment Required";
+	tempMap[FORBIDDEN] = "Forbidden";
+	tempMap[NOT_FOUND] = "Not Found";
+	tempMap[METHOD_NOT_ALLOWED] = "Method Not Allowed";
+	tempMap[NOT_ACCEPTABLE] = "Not Acceptable";
+	tempMap[PROXY_AUTHENTICATION_REQUIRED] = "Proxy Authentication Required";
+	tempMap[REQUEST_TIME_OUT] = "Request Time-out";
+	tempMap[CONFLICT] = "Conflict";
+	tempMap[GONE] = "Gone";
+	tempMap[LENGTH_REQUIRED] = "Length Required";
+	tempMap[PRECONDITION_FAILED] = "Precondition Failed";
+	tempMap[REQUEST_ENTITY_TOO_LARGE] = "Request Entity Too Large";
+	tempMap[REQUEST_URI_TOO_LARGE] = "Request-URI Too Large";
+	tempMap[UNSUPPORTED_MEDIA_TYPE] = "Unsupported Media Type";
+	tempMap[REQUESTED_RANGE_NOT_SATISFIABLE] = "Requested range not satisfiable";
+	tempMap[EXPECTATION_FAILED] = "Expectation Failed";
+	tempMap[INTERNAL_SERVER_ERROR] = "Internal Server Error";
+	tempMap[NOT_IMPLEMENTED] = "Not Implemented";
+	tempMap[BAD_GATEWAY] = "Bad Gateway";
+	tempMap[SERVICE_UNAVAILABLE] = "Service Unavailable";
+	tempMap[GATEWAY_TIME_OUT] = "Gateway Time-out";
+	tempMap[HTTP_VERSION_NOT_SUPPORTED] = "HTTP Version not supported";
 
 	return tempMap;
 }
 
-std::map<int, std::string> Response::errorDict_ = initializeErrorDict();
+std::map<httpError_t, std::string> Response::errorDict_ = initializeErrorDict();
 
 static std::map<std::string, std::string> initializeExtensionDict()
 {
@@ -62,6 +63,7 @@ static std::map<std::string, std::string> initializeExtensionDict()
 
     tempMap[".txt"]  = "text/plain";
     tempMap[".html"] = "text/html";
+	tempMap[".htm"] = "text/html";
     tempMap[".css"]  = "text/css";
     tempMap[".js"]   = "application/javascript";
     tempMap[".json"] = "application/json";
@@ -80,11 +82,26 @@ static std::map<std::string, std::string> initializeExtensionDict()
 
 std::map<std::string, std::string> Response::extensionTypesDict_ = initializeExtensionDict();
 
+Response::Response()
+{
+	this->connection_ = C_KEEP_ALIVE;
+}
+
+static int checkPath(std::string &path)
+{
+	struct stat st;
+
+	if (stat(path.c_str(), &st))
+		return errno;
+
+	return (st.st_mode & S_IFMT);
+}
+
 std::string Response::toString()
 {
 	std::ostringstream res;
 
-	res << this->statusLine;
+	res << this->statusLine_;
 	for (std::map<std::string, std::string>::iterator it = this->headers_.begin(); it != this->headers_.end(); ++it) {
 		res << (*it).first << ": " << (*it).second << "\r\n";
 	}
@@ -114,18 +131,17 @@ void Response::eraseBuffer(size_t bytesToErase)
 	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
 }
 
-static void readFileToString(const char *filePath, std::string &str)
+static void readFileToString(const char *path, std::string &str)
 {
 	struct stat st;
-	std::ifstream file;
+	std::ifstream file(path, std::ifstream::binary);
 
-	file.open(filePath, std::ifstream::binary);
     if (!file.is_open())
 	{
 		file.close();
-        throw (std::runtime_error("404? Couldn't open file"));
+        throw (std::runtime_error("Couldn't open file"));
 	}
-	if (stat(filePath, &st))
+	if (stat(path, &st))
 	{
 		file.close();
 		throw (std::runtime_error("Stat operation failed"));
@@ -152,10 +168,28 @@ static std::string getImfFixdate()
 	return std::string("");
 }
 
+void Response::setStatusLine(httpError_t code)
+{
+	if (this->errorDict_.find(code) == this->errorDict_.end())
+	{
+		int defaultCode = (code / 100) * 100;
+		if (defaultCode != 100 ||
+			defaultCode != 200 ||
+			defaultCode != 300 ||
+			defaultCode != 400 ||
+			defaultCode != 500)
+		{
+			throw std::runtime_error("Couldn't determine error code");			
+		}
+	}
+	this->statusLine_.setFields(code, this->errorDict_[code]);
+}
+
 void Response::setResponseHeaders()
 {
-	this->headers_.insert(std::pair<std::string, std::string>("Server", "Amethttp"));
-	this->headers_.insert(std::pair<std::string, std::string>("Date", getImfFixdate()));
+	this->headers_["Server"] = "Amethttp";
+	this->headers_["Date"] = getImfFixdate();
+	this->headers_["Connection"] = this->connection_ ? "keep-alive" : "close";
 }
 
 std::string Response::getMIME(std::string &target)
@@ -166,11 +200,8 @@ std::string Response::getMIME(std::string &target)
 	pos = target.rfind('.');
 	if (pos != std::string::npos)
 	{
-		try
-		{
-			res = this->extensionTypesDict_.at(target.substr(pos));
-		}
-		catch(const std::out_of_range& e) {}
+		if (this->extensionTypesDict_.find(target.substr(pos)) != this->extensionTypesDict_.end())
+			res = this->extensionTypesDict_[target.substr(pos)];
 	}
 	
 	return res;
@@ -180,59 +211,142 @@ void Response::setRepresentationHeaders(std::string &target)
 {
 	std::ostringstream length;
 
-	this->headers_.insert(std::pair<std::string, std::string>("Content-Type", this->getMIME(target)));
 	length << this->body_.length();
-	this->headers_.insert(std::pair<std::string, std::string>("Content-Length", length.str()));
+	this->headers_["Content-Type"] = this->getMIME(target);
+	this->headers_["Content-Length"] = length.str();
+}
+
+void Response::generateResponse(httpError_t code)
+{
+	this->setResponseHeaders();
+	setStatusLine(code);
 }
 
 // match the location outside this func and let it only receive the path to file
 // status line OK outside this func when checked the return?
 bool Response::methodGet(std::string &path)
 {
-	readFileToString(path.c_str(), this->body_);
-	this->setResponseHeaders();
-	this->setRepresentationHeaders(path);
-	this->statusLine.setStatusLine(200, this->errorDict_.at(200));
+	int statCheck;
+
+	statCheck = checkPath(path);
+	switch (statCheck)
+	{
+		case S_IFREG:
+			readFileToString(path.c_str(), this->body_);
+			this->setRepresentationHeaders(path);
+			this->generateResponse(OK);
+			break;
+		case S_IFDIR:
+			// autoindex html display...
+			this->generateResponse(OK);
+			break;
+		case EACCES:
+			this->generateResponse(FORBIDDEN);
+			break;
+
+		default:
+			this->generateResponse(NOT_FOUND);
+			break;
+	}
 
 	return true;
 }
 
 bool Response::methodPost(std::string &path)
 {
-	std::cout << "POSTTT" << std::endl;
+	int statCheck;
+
+	statCheck = checkPath(path);
+	switch (statCheck)
+	{
+		case S_IFREG:
+			// POSTTTTTT
+			this->generateResponse(OK);
+			break;
+		case EACCES:
+		case S_IFDIR:
+			this->generateResponse(FORBIDDEN);
+			break;
+
+		default:
+			this->generateResponse(NOT_FOUND);
+			break;
+	}
+
 	return true;
+}
+
+static void removeFile(const char *path)
+{
+	if (std::remove(path) < 0)
+		throw std::runtime_error("Couldn't remove resource");
 }
 
 bool Response::methodDelete(std::string &path)
 {
-	if (std::remove(path.c_str()) < 0)
-		throw std::runtime_error("404"); // 204 for consistency/idempotency, widely used...
-	this->setResponseHeaders();
-	this->statusLine.setStatusLine(204, this->errorDict_.at(204));
+	int statCheck;
+
+	statCheck = checkPath(path);
+	switch (statCheck)
+	{
+		case S_IFREG:
+			removeFile(path.c_str());
+			this->generateResponse(NO_CONTENT);
+			break;
+		case EACCES:
+		case S_IFDIR:
+			this->generateResponse(FORBIDDEN);
+			break;
+
+		default:
+			this->generateResponse(NOT_FOUND);
+			break;
+	}
 
 	return true;
 }
 
-// (We will get the server--> match the location)
-// check that the method is valid (determined by location as well)
-// then check for keep alive / other headers of interest 
-// finally execute method and set headers accordingly
-bool Response::tryBuild(Request &request)
+static Location matchLocation(Server &server, Request &request)
+{
+	return server.getLocations().at(0);
+}
+
+static std::string routeTarget(Location &location, Request &request)
 {
 	std::string path;
-	Server testServer;
-	Location testLocation;
-	std::set<method_t> allowedMethods;
 
-	allowedMethods.insert(GET);
-	allowedMethods.insert(POST);
-	testLocation.setPath("tests");
-	testLocation.setRoot("/");
-	testLocation.setMethods(allowedMethods);
+	path = location.getPath() + request.getTarget();
 
-	path = testLocation.getPath() + request.target_;
+	return path;
+}
 
-	switch (request.getMethod())
+static method_t fitMethod(method_t method, Location &location)
+{
+	std::set<method_t> allowedMethods = location.getMethods();
+
+	if (allowedMethods.find(method) != allowedMethods.end())
+	{
+		return method;
+	}
+
+	return NOT_ALLOWED;
+}
+
+void Response::checkRequestHeaders(Request &request)
+{
+	std::map<std::string, std::string> reqHeaders = request.getHeaders();
+
+	if (reqHeaders.find("Connection") != reqHeaders.end())
+	{
+		if (reqHeaders["Connection"] == "close")
+			this->connection_ = C_CLOSE;
+	}
+	this->connection_ = C_KEEP_ALIVE;
+}
+
+bool Response::executeMethod(method_t method, std::string &path)
+{
+	switch (method)
 	{
 		case GET:
 			this->methodGet(path);
@@ -245,9 +359,46 @@ bool Response::tryBuild(Request &request)
 			break ;
 		
 		default:
-			throw std::runtime_error("Not implemented (501)**");
+			this->generateResponse(NOT_IMPLEMENTED);
+			break ;
 	}
+
+	return true;
+}
+
+// (We will get the server--> match the location)
+// check that the method is valid (determined by location as well)
+// then check for keep alive / other headers of interest 
+// finally execute method and set headers accordingly
+bool Response::tryBuild(Request &request)
+{
+	method_t method;
+	std::string path;
+	Server testServer;
+
+	Location location;
+	std::vector<Location> testLocations;
+	std::set<method_t> allowedMethods;
+
+	allowedMethods.insert(GET);
+	allowedMethods.insert(POST);
+	allowedMethods.insert(DELETE);
+	location.setPath("tests");
+	location.setRoot("/");
+	location.setMethods(allowedMethods);
+	testLocations.push_back(location);
+	testServer.setLocations(testLocations);
+
+	location = matchLocation(testServer, request);
+	path = routeTarget(location, request);
+	method = fitMethod(request.getMethod(), location);
+
+	this->executeMethod(method, path);
 	this->buffer_ = this->toString();
 
 	return true;
+}
+
+Response::~Response()
+{
 }

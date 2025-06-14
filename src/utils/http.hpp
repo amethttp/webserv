@@ -1,5 +1,11 @@
 #pragma once
 
+typedef enum connection_e
+{
+	C_CLOSE,
+	C_KEEP_ALIVE
+} connection_t;
+
 typedef enum method_e
 {
 	GET,
@@ -10,48 +16,48 @@ typedef enum method_e
 
 typedef enum httpError_e
 {
-	Continue=100,
-	Switching_Protocols=101,
+	CONTINUE=100,
+	SWITCHING_PROTOCOLS=101,
 
 	OK=200,
-	Created=201,
-	Accepted=202,
-	Non_Authoritative_Information=203,
-	No_Content=204,
-	Reset_Content=205,
-	Partial_Content=206,
+	CREATED=201,
+	ACCEPTED=202,
+	NON_AUTHORITATIVE_INFORMATION=203,
+	NO_CONTENT=204,
+	RESET_CONTENT=205,
+	PARTIAL_CONTENT=206,
 
-	Multiple_Choices=300,
-	Moved_Permanently=301,
-	Found=302,
-	See_Other=303,
-	Not_Modified=304,
-	Use_Proxy=305,
-	Temporary_Redirect=307,
+	MULTIPLE_CHOICES=300,
+	MOVED_PERMANENTLY=301,
+	FOUND=302,
+	SEE_OTHER=303,
+	NOT_MODIFIED=304,
+	USE_PROXY=305,
+	TEMPORARY_REDIRECT=307,
 
-	Bad_Request=400,
-	Unauthorized=401,
-	Payment_Required=402,
-	Forbidden=403,
-	Not_Found=404,
-	Method_Not_Allowed=405,
-	Not_Acceptable=406,
-	Proxy_Authentication_Required=407,
-	Request_Time_out=408,
-	Conflict=409,
-	Gone=410,
-	Length_Required=411,
-	Precondition_Failed=412,
-	Request_Entity_Too_Large=413,
-	Request_URI_Too_Large=414,
-	Unsupported_Media_Type=415,
-	Requested_range_not_satisfiable=416,
-	Expectation_Failed=417,
+	BAD_REQUEST=400,
+	UNAUTHORIZED=401,
+	PAYMENT_REQUIRED=402,
+	FORBIDDEN=403,
+	NOT_FOUND=404,
+	METHOD_NOT_ALLOWED=405,
+	NOT_ACCEPTABLE=406,
+	PROXY_AUTHENTICATION_REQUIRED=407,
+	REQUEST_TIME_OUT=408,
+	CONFLICT=409,
+	GONE=410,
+	LENGTH_REQUIRED=411,
+	PRECONDITION_FAILED=412,
+	REQUEST_ENTITY_TOO_LARGE=413,
+	REQUEST_URI_TOO_LARGE=414,
+	UNSUPPORTED_MEDIA_TYPE=415,
+	REQUESTED_RANGE_NOT_SATISFIABLE=416,
+	EXPECTATION_FAILED=417,
 
-	Internal_Server_Error=500,
-	Not_Implemented=501,
-	Bad_Gateway=502,
-	Service_Unavailable=503,
-	Gateway_Time_out=504,
-	HTTP_Version_not_supported=505
+	INTERNAL_SERVER_ERROR=500,
+	NOT_IMPLEMENTED=501,
+	BAD_GATEWAY=502,
+	SERVICE_UNAVAILABLE=503,
+	GATEWAY_TIME_OUT=504,
+	HTTP_VERSION_NOT_SUPPORTED=505
 } httpError_t;

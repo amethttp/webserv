@@ -15,7 +15,7 @@
 
 class Request
 {
-public:
+private:
 	static const std::string tchars;
 
 	method_t method_;
@@ -49,6 +49,8 @@ public:
 	bool tryParseFromBuffer();
 
 	method_t getMethod();
+	std::string getTarget();
+	std::map<std::string, std::string>  getHeaders();
 
 	friend std::ostream &operator<<(std::ostream &stream, Request &request);
 };

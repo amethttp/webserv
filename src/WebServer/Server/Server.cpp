@@ -17,3 +17,13 @@ void Server::setPorts(std::vector<int> &ports)
 {
 	this->ports_ = ports;
 }
+
+std::vector<Location> Server::getLocations()
+{
+	return this->locations_;
+}
+
+void Server::setLocations(std::vector<Location> &locations)
+{
+	this->locations_ = locations;
+}

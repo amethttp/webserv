@@ -20,4 +20,7 @@ public:
 
 	std::vector<int> getPorts();
 	void setPorts(std::vector<int> &ports);
+
+	std::vector<Location> getLocations();
+	void setLocations(std::vector<Location> &locations);
 };
