@@ -331,7 +331,7 @@ static method_t fitMethod(method_t method, Location &location)
 
 	return NOT_ALLOWED;
 }
-
+#include "utils/string/string.hpp"
 void Response::checkRequestHeaders(Request &request)
 {
 	std::map<std::string, std::string> reqHeaders = request.getHeaders();
@@ -393,6 +393,7 @@ bool Response::tryBuild(Request &request)
 	path = routeTarget(location, request);
 	method = fitMethod(request.getMethod(), location);
 
+	this->checkRequestHeaders(request);
 	this->executeMethod(method, path);
 	this->buffer_ = this->toString();
 
