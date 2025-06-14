@@ -250,13 +250,19 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 {
 	time_t now = std::time(NULL);
 
-	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
+	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end();)
 	{
 		if ((now - it->getLastReceivedPacket()) * 1000 > TIMEOUT)
 		{
-			this->buildResponse(&(*it), epoll, REQUEST_TIME_OUT, C_CLOSE); 
-			// Second if to check for potentially inactive connection that could close gracefully
+			if (it->hasPendingRequest())
+				this->buildResponse(&(*it), epoll, REQUEST_TIME_OUT, C_CLOSE);
+			else
+			{
+				it = disconnectClient(&(*it), epoll, TIMED_OUT);
+				continue;
+			}
 		}
+		++it;
 	}
 }
 

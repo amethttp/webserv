@@ -39,6 +39,7 @@ public:
 	bool hasFullRequestHeaders();
 	void buildRequest();
 	void appendRequest(char *request);
+	bool hasPendingRequest();
 	void clearRequest();
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();

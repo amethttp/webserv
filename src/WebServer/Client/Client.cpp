@@ -83,6 +83,11 @@ void Client::appendRequest(char *request)
 	this->request_.appendBuffer(request);
 }
 
+bool Client::hasPendingRequest()
+{
+	return !this->request_.getBuffer().empty();
+}
+
 void Client::clearRequest()
 {
 	this->request_.clear();
