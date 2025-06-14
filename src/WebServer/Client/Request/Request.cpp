@@ -243,6 +243,16 @@ std::map<std::string, std::string> Request::getHeaders()
     return this->headers_;
 }
 
+void Request::setComplete(bool status)
+{
+	this->complete_ = status;
+}
+
+bool Request::isComplete()
+{
+    return this->complete_;
+}
+
 std::ostream &operator<<(std::ostream &stream, Request &request)
 {
 	stream << "+-------------------------------------+" << std::endl;

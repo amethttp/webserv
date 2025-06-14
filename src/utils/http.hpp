@@ -2,8 +2,8 @@
 
 typedef enum connection_e
 {
-	C_CLOSE,
-	C_KEEP_ALIVE
+	C_KEEP_ALIVE,
+	C_CLOSE
 } connection_t;
 
 typedef enum method_e

@@ -119,29 +119,26 @@ void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 	}
 }
 
-void WebServer::disconnectClient(Client *client, t_epoll &epoll)
+std::vector<Client>::iterator WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
 {
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, client->getFd(), NULL) == -1)
 		throw std::runtime_error("Couldn't delete client fd from epoll");
 	if (close(client->getFd()) == -1)
 		throw std::runtime_error("Couldn't close client fd");
-	std::cout << "Client (ID: " << client->getId() << ") disconnected" << std::endl;
-	removeClient(client);
+	std::cout << "Client (ID: " << client->getId() << ") " << reason << std::endl;
+
+	return removeClient(client);
 }
 
-bool WebServer::tryBuildRequest(Client *client, char *buffer)
+void WebServer::tryBuildRequest(Client *client, char *buffer)
 {
 	client->appendRequest(buffer);
-	if (!client->hasFullRequestHeaders())
-		return false;
-	return client->tryBuildRequest();
+	client->tryBuildRequest();
 }
 
 void WebServer::buildResponse(Client *client, t_epoll &epoll)
 {
-	Request clientRequest = client->getRequest();
-
-	client->tryBuildResponse(clientRequest);
+	client->buildResponse();
 	client->clearRequest();
 	setEpollWrite(epoll, client);
 }
@@ -156,12 +153,11 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	if (bytesReceived > 0)
 	{
 		client->updateLastReceivedPacket();
-		if (!tryBuildRequest(client, buffer))
-			return;
-		buildResponse(client, epoll);
+		this->tryBuildRequest(client, buffer);
+		this->buildResponse(client, epoll);
 	}
 	else if (bytesReceived == 0)
-		disconnectClient(client, epoll);
+		disconnectClient(client, epoll, DISCONNECTED);
 	else
 		throw std::runtime_error("Couldn't receive data from client fd");
 }
@@ -178,7 +174,10 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 	if (bytesSent < stringifiedResponse.length())
 		return;
 
-	setEpollRead(epoll, client);
+	if (client->shouldClose())
+		disconnectClient(client, epoll, DISCONNECTED);
+	else
+		setEpollRead(epoll, client);
 }
 
 void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
@@ -215,7 +214,7 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 	}
 }
 
-void WebServer::removeClient(Client *client)
+std::vector<Client>::iterator WebServer::removeClient(Client *client)
 {
 	uint32_t clientId = client->getId();
 
@@ -223,10 +222,11 @@ void WebServer::removeClient(Client *client)
 	{
 		if (it->getId() == clientId)
 		{
-			this->clients_.erase(it);
-			return;
+			return this->clients_.erase(it);
 		}
 	}
+
+	return this->clients_.end();
 }
 
 void WebServer::disconnectTimedoutClients(t_epoll &epoll)
@@ -242,12 +242,7 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 		}
 
 		// TODO: Send 408 Request Timeout
-		if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, it->getFd(), NULL) == -1)
-			throw std::runtime_error("Couldn't delete client fd from epoll");
-		if (close(it->getFd()) == -1)
-			throw std::runtime_error("Couldn't close client fd");
-		std::cout << "Client (ID: " << it->getId() << ") timed out" << std::endl;
-		it = this->clients_.erase(it);
+		it = disconnectClient(&(*it), epoll, TIMED_OUT);
 	}
 }
 

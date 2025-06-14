@@ -14,9 +14,12 @@ private:
 	static std::map<httpError_t, std::string> errorDict_;
 	static std::map<std::string, std::string> extensionTypesDict_;
 
-	bool connection_;
+	bool endConnection_;
 
 	std::string buffer_;
+
+	method_t method_;
+	std::string targetPath_;
 
 	StatusLine statusLine_;
 	std::map<std::string, std::string> headers_;
@@ -26,26 +29,28 @@ private:
 	void setStatusLine(httpError_t code);
 	void setResponseHeaders();
 	void setRepresentationHeaders(std::string &target);
+	void setParameters(Request &request);
 	
 	void generateResponse(httpError_t code);
 
 	void checkRequestHeaders(Request &request);
 
-	bool methodGet(std::string &path);
-	bool methodPost(std::string &path);
-	bool methodDelete(std::string &path);
-	bool executeMethod(method_t method, std::string &path);
+	void methodGet();
+	void methodPost();
+	void methodDelete();
+	void executeRequest();
 public:
 	Response();
 	~Response();
 	std::string toString();
 
 	void setBuffer(const std::string &buffer);
+	void eraseBuffer(size_t bytesToErase);
 
 	std::string getBuffer();
 	std::string getBody();
+	bool getConnection();
 
-	void eraseBuffer(size_t bytesToErase);
 
-	bool tryBuild(Request &request);
+	void build(Request &request);
 };

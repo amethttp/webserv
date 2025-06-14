@@ -65,13 +65,16 @@ bool Client::hasFullRequestHeaders()
 	return this->request_.hasFullHeaders();
 }
 
-bool Client::tryBuildRequest()
+void Client::tryBuildRequest()
 {
-	bool result = this->request_.tryParseFromBuffer();
+	if (!this->hasFullRequestHeaders() ||
+		!this->request_.tryParseFromBuffer())
+	{
+		this->request_.setComplete(false);
+	}
 	
 	std::cout << this->request_ << std::endl;
-	std::cout << "Should build a response: " << (result ? "true" : "false") << std::endl;
-	return result;
+	std::cout << "Should build a response: " << (this->request_.isComplete() ? "true" : "false") << std::endl;
 }
 
 void Client::appendRequest(char *request)
@@ -89,7 +92,12 @@ void Client::eraseResponse(size_t bytesToErase)
 	this->response_.eraseBuffer(bytesToErase);
 }
 
-bool Client::tryBuildResponse(Request &Request)
+bool Client::shouldClose()
 {
-    return this->response_.tryBuild(request_);
+    return this->response_.getConnection();
+}
+
+void Client::buildResponse()
+{
+	this->response_.build(this->request_);
 }

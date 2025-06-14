@@ -41,7 +41,6 @@ public:
 	Request();
 	~Request();
 
-	std::string getBuffer();
 	void clear();
 	void appendBuffer(char *buffer);
 
@@ -49,8 +48,12 @@ public:
 	bool tryParseFromBuffer();
 
 	method_t getMethod();
+	std::string getBuffer();
 	std::string getTarget();
 	std::map<std::string, std::string>  getHeaders();
+
+	void setComplete(bool status);
+	bool isComplete();
 
 	friend std::ostream &operator<<(std::ostream &stream, Request &request);
 };

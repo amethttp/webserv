@@ -84,7 +84,7 @@ std::map<std::string, std::string> Response::extensionTypesDict_ = initializeExt
 
 Response::Response()
 {
-	this->connection_ = C_KEEP_ALIVE;
+	this->endConnection_ = C_KEEP_ALIVE;
 }
 
 static int checkPath(std::string &path)
@@ -124,6 +124,11 @@ std::string Response::getBuffer()
 std::string Response::getBody()
 {
 	return this->body_;
+}
+
+bool Response::getConnection()
+{
+    return this->endConnection_;
 }
 
 void Response::eraseBuffer(size_t bytesToErase)
@@ -189,7 +194,7 @@ void Response::setResponseHeaders()
 {
 	this->headers_["Server"] = "Amethttp";
 	this->headers_["Date"] = getImfFixdate();
-	this->headers_["Connection"] = this->connection_ ? "keep-alive" : "close";
+	this->headers_["Connection"] = this->endConnection_ ? "close" : "keep-alive";
 }
 
 std::string Response::getMIME(std::string &target)
@@ -222,18 +227,16 @@ void Response::generateResponse(httpError_t code)
 	setStatusLine(code);
 }
 
-// match the location outside this func and let it only receive the path to file
-// status line OK outside this func when checked the return?
-bool Response::methodGet(std::string &path)
+void Response::methodGet()
 {
 	int statCheck;
 
-	statCheck = checkPath(path);
+	statCheck = checkPath(this->targetPath_);
 	switch (statCheck)
 	{
 		case S_IFREG:
-			readFileToString(path.c_str(), this->body_);
-			this->setRepresentationHeaders(path);
+			readFileToString(this->targetPath_.c_str(), this->body_);
+			this->setRepresentationHeaders(this->targetPath_);
 			this->generateResponse(OK);
 			break;
 		case S_IFDIR:
@@ -248,15 +251,13 @@ bool Response::methodGet(std::string &path)
 			this->generateResponse(NOT_FOUND);
 			break;
 	}
-
-	return true;
 }
 
-bool Response::methodPost(std::string &path)
+void Response::methodPost()
 {
 	int statCheck;
 
-	statCheck = checkPath(path);
+	statCheck = checkPath(this->targetPath_);
 	switch (statCheck)
 	{
 		case S_IFREG:
@@ -273,7 +274,6 @@ bool Response::methodPost(std::string &path)
 			break;
 	}
 
-	return true;
 }
 
 static void removeFile(const char *path)
@@ -282,15 +282,15 @@ static void removeFile(const char *path)
 		throw std::runtime_error("Couldn't remove resource");
 }
 
-bool Response::methodDelete(std::string &path)
+void Response::methodDelete()
 {
 	int statCheck;
 
-	statCheck = checkPath(path);
+	statCheck = checkPath(this->targetPath_);
 	switch (statCheck)
 	{
 		case S_IFREG:
-			removeFile(path.c_str());
+			removeFile(this->targetPath_.c_str());
 			this->generateResponse(NO_CONTENT);
 			break;
 		case EACCES:
@@ -302,8 +302,6 @@ bool Response::methodDelete(std::string &path)
 			this->generateResponse(NOT_FOUND);
 			break;
 	}
-
-	return true;
 }
 
 static Location matchLocation(Server &server, Request &request)
@@ -339,41 +337,32 @@ void Response::checkRequestHeaders(Request &request)
 	if (reqHeaders.find("Connection") != reqHeaders.end())
 	{
 		if (reqHeaders["Connection"] == "close")
-			this->connection_ = C_CLOSE;
+			this->endConnection_ = C_CLOSE;
 	}
-	this->connection_ = C_KEEP_ALIVE;
 }
 
-bool Response::executeMethod(method_t method, std::string &path)
+void Response::executeRequest()
 {
-	switch (method)
+	switch (this->method_)
 	{
 		case GET:
-			this->methodGet(path);
+			this->methodGet();
 			break ;
 		case POST:
-			this->methodPost(path);
+			this->methodPost();
 			break ;
 		case DELETE:
-			this->methodDelete(path);
+			this->methodDelete();
 			break ;
 		
 		default:
 			this->generateResponse(NOT_IMPLEMENTED);
 			break ;
 	}
-
-	return true;
 }
 
-// (We will get the server--> match the location)
-// check that the method is valid (determined by location as well)
-// then check for keep alive / other headers of interest 
-// finally execute method and set headers accordingly
-bool Response::tryBuild(Request &request)
+void Response::setParameters(Request &request)
 {
-	method_t method;
-	std::string path;
 	Server testServer;
 
 	Location location;
@@ -390,14 +379,27 @@ bool Response::tryBuild(Request &request)
 	testServer.setLocations(testLocations);
 
 	location = matchLocation(testServer, request);
-	path = routeTarget(location, request);
-	method = fitMethod(request.getMethod(), location);
+
+	this->targetPath_ = routeTarget(location, request);
+	this->method_ = fitMethod(request.getMethod(), location);
 
 	this->checkRequestHeaders(request);
-	this->executeMethod(method, path);
-	this->buffer_ = this->toString();
+}
 
-	return true;
+void Response::build(Request &request)
+{
+	if (!request.isComplete())
+	{
+		this->endConnection_ = C_CLOSE;
+		this->generateResponse(BAD_REQUEST);
+	}
+	else
+	{
+		this->setParameters(request);
+		this->executeRequest();
+	}
+
+	this->buffer_ = this->toString();
 }
 
 Response::~Response()

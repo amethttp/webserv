@@ -7,6 +7,9 @@
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"
 
+#define DISCONNECTED "disconnected"
+#define TIMED_OUT "timed out"
+
 class Client
 {
 private:
@@ -33,10 +36,11 @@ public:
 
 	void updateLastReceivedPacket();
 	bool hasFullRequestHeaders();
-	bool tryBuildRequest();
+	void tryBuildRequest();
 	void appendRequest(char *request);
 	void clearRequest();
 	void eraseResponse(size_t bytesToErase);
+	bool shouldClose();
 
-	bool tryBuildResponse(Request &Request);
+	void buildResponse();
 };

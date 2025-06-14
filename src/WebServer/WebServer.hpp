@@ -21,14 +21,14 @@ private:
 	void setEpollWrite(t_epoll &epoll, Client *client);
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
-	void disconnectClient(Client *client, t_epoll &epoll);
-	bool tryBuildRequest(Client *client, char *buffer);
+	std::vector<Client>::iterator disconnectClient(Client *client, t_epoll &epoll, const std::string &reason);
+	void tryBuildRequest(Client *client, char *buffer);
 	void buildResponse(Client *client, t_epoll &epoll);
 	void receiveRequest(Client *client, t_epoll &epoll);
 	void sendResponse(Client *client, t_epoll &epoll);
 	void checkClientEvent(t_epoll &epoll, const int &eventIndex);
 	void handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll);
-	void removeClient(Client *client);
+	std::vector<Client>::iterator removeClient(Client *client);
 	void disconnectTimedoutClients(t_epoll &epoll);
 
 public:
