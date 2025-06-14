@@ -5,11 +5,16 @@ StatusLine::StatusLine()
 {
 }
 
-void StatusLine::setFields(httpError_t code, const std::string &message)
+void StatusLine::setFields(httpCode_t code, const std::string &message)
 {
 	this->code_ = code;
 	this->httpVersion_ = "HTTP/1.1";
 	this->statusMessage_ = message;
+}
+
+httpCode_t StatusLine::getCode()
+{
+    return this->code_;
 }
 
 std::string &operator+=(std::string &string, StatusLine &sl)

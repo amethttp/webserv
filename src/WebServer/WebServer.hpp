@@ -24,6 +24,7 @@ private:
 	std::vector<Client>::iterator disconnectClient(Client *client, t_epoll &epoll, const std::string &reason);
 	bool tryBuildRequest(Client *client, char *buffer);
 	void buildResponse(Client *client, t_epoll &epoll);
+	void buildResponse(Client *client, t_epoll &epoll, httpCode_t code, connection_t mode);
 	void receiveRequest(Client *client, t_epoll &epoll);
 	void sendResponse(Client *client, t_epoll &epoll);
 	void checkClientEvent(t_epoll &epoll, const int &eventIndex);

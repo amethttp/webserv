@@ -8,7 +8,7 @@ const std::string Request::tchars = "!#$%&'*+-.^_`|~";
 
 Request::Request()
 {
-	this->method_ = NOT_ALLOWED;
+	this->method_ = M_NOT_IMPLEMENTED;
 	this->complete_ = false;
 }
 
@@ -19,12 +19,12 @@ Request::~Request()
 method_t Request::getHTTPMethod(const std::string &method)
 {
 	if (method == "GET")
-		return GET;
+		return M_GET;
 	else if (method == "POST")
-		return POST;
+		return M_POST;
 	else if (method == "DELETE")
-		return DELETE;
-	return NOT_ALLOWED;
+		return M_DELETE;
+	return M_NOT_IMPLEMENTED;
 }
 
 bool Request::isValidHeaderKey(const std::string &key)
@@ -76,6 +76,20 @@ bool Request::shouldWaitForData(const std::string &str)
 	return (str[i] == '\r' && i == str.length() - 1);
 }
 
+bool Request::checkValidHTTPProtocol()
+{
+	if (httpVersion_ == VALID_PROTOCOL)
+		return true;
+	else
+	{
+		if (httpVersion_.length() != 8 && httpVersion_.substr(0, 5) != "HTTP/")
+			return false;
+		if (isdigit(httpVersion_.at(6)) && httpVersion_.at(7) == '.' && isdigit(httpVersion_.at(8)))
+			return true;
+		return false;
+	}
+}
+
 bool Request::tryParseRequestLine(const std::string &string)
 {
 	std::vector<std::string> splittedLine = split(string, " ");
@@ -83,15 +97,15 @@ bool Request::tryParseRequestLine(const std::string &string)
 		return false;
 
 	this->method_ = getHTTPMethod(splittedLine[0]);
-	if (this->method_ == NOT_ALLOWED)
+	if (splittedLine[0].empty())
 		return false;
 
 	this->target_ = splittedLine[1];
-	if (this->target_.empty() || this->target_.at(0) != '/')
+	if (this->target_.empty() || this->target_.at(0) != '/') // No need to start with /?
 		return false;
 
 	this->httpVersion_ = splittedLine[2];
-	if (this->httpVersion_ != VALID_PROTOCOL)
+	if (!checkValidHTTPProtocol())
 		return false;
 
 	return true;
@@ -115,7 +129,7 @@ bool Request::tryParseHeaders(std::vector<std::string> &headers)
 	std::map<std::string, std::string>::iterator transferEncodingIt = this->headers_.find(TRANSFER_ENCODING);
 
 	if ((this->headers_.find("Host") == this->headers_.end())
-		|| (this->method_ == POST && contentLengthIt == this->headers_.end() && transferEncodingIt == this->headers_.end())
+		|| (this->method_ == M_POST && contentLengthIt == this->headers_.end() && transferEncodingIt == this->headers_.end())
 		|| (contentLengthIt != this->headers_.end() && transferEncodingIt != this->headers_.end())
 		|| (contentLengthIt != this->headers_.end() && !isLong(contentLengthIt->second) && atol(contentLengthIt->second.c_str()) >= 0)
 		|| (transferEncodingIt != this->headers_.end() && transferEncodingIt->second != "chunked"))
@@ -193,7 +207,7 @@ std::string Request::getBuffer()
 
 void Request::clear()
 {
-	this->method_ = NOT_ALLOWED;
+	this->method_ = M_NOT_IMPLEMENTED;
 	this->target_.clear();
 	this->httpVersion_.clear();
 	this->headers_.clear();
@@ -219,7 +233,7 @@ bool Request::tryParseFromBuffer()
 	if (this->target_.empty() && !tryParseRequestLine(bufferLines.front()))
 		return true;
 
-	if (this->headers_.empty() && !tryParseHeaders(bufferLines))
+	if (this->headers_.empty() && !tryParseHeaders(bufferLines)) // return false || what to do with http version
 		return true;
 
 	if (!tryParseBody(bufferLines))
@@ -236,6 +250,11 @@ method_t Request::getMethod()
 std::string Request::getTarget()
 {
     return this->target_;
+}
+
+std::string Request::getHTTPVersion()
+{
+    return this->httpVersion_;
 }
 
 std::map<std::string, std::string> Request::getHeaders()
@@ -261,11 +280,11 @@ std::ostream &operator<<(std::ostream &stream, Request &request)
 	stream << std::endl;
 
 	stream << "  - Method: ";
-	if (request.method_ == GET)
-		stream << "GET" << std::endl;
-	else if (request.method_ == POST)
-		stream << "POST" << std::endl;
-	else if (request.method_ == DELETE)
+	if (request.method_ == M_GET)
+		stream << "DELETE" << std::endl;
+	else if (request.method_ == M_POST)
+		stream << "DELETE" << std::endl;
+	else if (request.method_ == M_DELETE)
 		stream << "DELETE" << std::endl;
 	else
 		stream << "NOT ALLOWED" << std::endl;

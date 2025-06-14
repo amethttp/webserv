@@ -147,6 +147,13 @@ void WebServer::buildResponse(Client *client, t_epoll &epoll)
 	setEpollWrite(epoll, client);
 }
 
+void WebServer::buildResponse(Client *client, t_epoll &epoll, httpCode_t code, connection_t mode)
+{
+	client->buildResponse(code, mode);
+	client->clearRequest();
+	setEpollWrite(epoll, client);
+}
+
 void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 {
 	int bytesReceived;
@@ -180,7 +187,12 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 		return;
 
 	if (client->shouldClose())
-		disconnectClient(client, epoll, DISCONNECTED);
+	{
+		std::string reason = DISCONNECTED;
+		if (client->getResponseStatus() == REQUEST_TIME_OUT)
+			reason = TIMED_OUT;
+		disconnectClient(client, epoll, reason);
+	}
 	else
 		setEpollRead(epoll, client);
 }
@@ -238,16 +250,13 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 {
 	time_t now = std::time(NULL);
 
-	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end();)
+	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
 	{
-		if ((now - it->getLastReceivedPacket()) * 1000 <= TIMEOUT)
+		if ((now - it->getLastReceivedPacket()) * 1000 > TIMEOUT)
 		{
-			++it;
-			continue;
+			this->buildResponse(&(*it), epoll, REQUEST_TIME_OUT, C_CLOSE); 
+			// Second if to check for potentially inactive connection that could close gracefully
 		}
-
-		// TODO: Send 408 Request Timeout
-		it = disconnectClient(&(*it), epoll, TIMED_OUT);
 	}
 }
 

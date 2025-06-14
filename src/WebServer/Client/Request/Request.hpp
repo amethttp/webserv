@@ -31,6 +31,7 @@ private:
 	bool isValidHeaderValue(const std::string &value);
 	bool isValidHeader(const std::string &key, const std::string &value);
 	bool shouldWaitForData(const std::string &str);
+	bool checkValidHTTPProtocol();
 	bool tryParseRequestLine(const std::string &string);
 	bool tryParseHeaders(std::vector<std::string> &headers);
 	bool tryParseFullBody();
@@ -50,6 +51,7 @@ public:
 	method_t getMethod();
 	std::string getBuffer();
 	std::string getTarget();
+	std::string getHTTPVersion();
 	std::map<std::string, std::string>  getHeaders();
 
 	void setComplete(bool status);

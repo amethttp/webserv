@@ -8,13 +8,14 @@ typedef enum connection_e
 
 typedef enum method_e
 {
-	GET,
-	POST,
-	DELETE,
-	NOT_ALLOWED
+	M_GET,
+	M_POST,
+	M_DELETE,
+	M_NOT_IMPLEMENTED,
+	M_NOT_ALLOWED
 } method_t;
 
-typedef enum httpError_e
+typedef enum httpCode_e
 {
 	CONTINUE=100,
 	SWITCHING_PROTOCOLS=101,
@@ -60,4 +61,4 @@ typedef enum httpError_e
 	SERVICE_UNAVAILABLE=503,
 	GATEWAY_TIME_OUT=504,
 	HTTP_VERSION_NOT_SUPPORTED=505
-} httpError_t;
+} httpCode_t;

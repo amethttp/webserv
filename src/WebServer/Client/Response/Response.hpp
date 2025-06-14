@@ -11,7 +11,7 @@
 class Response
 {
 private:
-	static std::map<httpError_t, std::string> errorDict_;
+	static std::map<httpCode_t, std::string> errorDict_;
 	static std::map<std::string, std::string> extensionTypesDict_;
 
 	bool endConnection_;
@@ -26,12 +26,12 @@ private:
 	std::string body_;
 
 	std::string getMIME(std::string &target);
-	void setStatusLine(httpError_t code);
+	void setStatusLine(httpCode_t code);
 	void setResponseHeaders();
 	void setRepresentationHeaders(std::string &target);
 	void setParameters(Request &request);
 	
-	void generateResponse(httpError_t code);
+	void generateResponse(httpCode_t code);
 
 	void checkRequestHeaders(Request &request);
 
@@ -49,8 +49,10 @@ public:
 
 	std::string getBuffer();
 	std::string getBody();
+	httpCode_t getStatusCode();
 	bool getConnection();
 
 
 	void build(Request &request);
+	void build(httpCode_t code, connection_t mode);
 };

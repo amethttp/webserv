@@ -7,9 +7,9 @@
 #include <ctime>
 #include <vector>
 
-static std::map<httpError_t, std::string> initializeErrorDict()
+static std::map<httpCode_t, std::string> initializeErrorDict()
 {
-	std::map<httpError_t, std::string> tempMap;
+	std::map<httpCode_t, std::string> tempMap;
 
 	tempMap[CONTINUE] = "Continue";
 	tempMap[SWITCHING_PROTOCOLS] = "Switching Protocols";
@@ -55,7 +55,7 @@ static std::map<httpError_t, std::string> initializeErrorDict()
 	return tempMap;
 }
 
-std::map<httpError_t, std::string> Response::errorDict_ = initializeErrorDict();
+std::map<httpCode_t, std::string> Response::errorDict_ = initializeErrorDict();
 
 static std::map<std::string, std::string> initializeExtensionDict()
 {
@@ -126,6 +126,11 @@ std::string Response::getBody()
 	return this->body_;
 }
 
+httpCode_t Response::getStatusCode()
+{
+	return this->statusLine_.getCode();
+}
+
 bool Response::getConnection()
 {
     return this->endConnection_;
@@ -173,7 +178,7 @@ static std::string getImfFixdate()
 	return std::string("");
 }
 
-void Response::setStatusLine(httpError_t code)
+void Response::setStatusLine(httpCode_t code)
 {
 	if (this->errorDict_.find(code) == this->errorDict_.end())
 	{
@@ -221,7 +226,7 @@ void Response::setRepresentationHeaders(std::string &target)
 	this->headers_["Content-Length"] = length.str();
 }
 
-void Response::generateResponse(httpError_t code)
+void Response::generateResponse(httpCode_t code)
 {
 	this->setResponseHeaders();
 	setStatusLine(code);
@@ -261,7 +266,7 @@ void Response::methodPost()
 	switch (statCheck)
 	{
 		case S_IFREG:
-			// POSTTTTTT
+			// M_POSTTTTTT
 			this->generateResponse(OK);
 			break;
 		case EACCES:
@@ -309,7 +314,7 @@ static Location matchLocation(Server &server, Request &request)
 	return server.getLocations().at(0);
 }
 
-static std::string routeTarget(Location &location, Request &request)
+static std::string routeTarget(Request &request, Location &location)
 {
 	std::string path;
 
@@ -320,6 +325,9 @@ static std::string routeTarget(Location &location, Request &request)
 
 static method_t fitMethod(method_t method, Location &location)
 {
+	if (method == M_NOT_IMPLEMENTED)
+		return M_NOT_IMPLEMENTED;
+
 	std::set<method_t> allowedMethods = location.getMethods();
 
 	if (allowedMethods.find(method) != allowedMethods.end())
@@ -327,7 +335,7 @@ static method_t fitMethod(method_t method, Location &location)
 		return method;
 	}
 
-	return NOT_ALLOWED;
+	return M_NOT_ALLOWED;
 }
 
 void Response::checkRequestHeaders(Request &request)
@@ -345,14 +353,17 @@ void Response::executeRequest()
 {
 	switch (this->method_)
 	{
-		case GET:
+		case M_GET:
 			this->methodGet();
 			break ;
-		case POST:
+		case M_POST:
 			this->methodPost();
 			break ;
-		case DELETE:
+		case M_DELETE:
 			this->methodDelete();
+			break ;
+		case M_NOT_ALLOWED:
+			this->generateResponse(METHOD_NOT_ALLOWED);
 			break ;
 		
 		default:
@@ -369,9 +380,8 @@ void Response::setParameters(Request &request)
 	std::vector<Location> testLocations;
 	std::set<method_t> allowedMethods;
 
-	allowedMethods.insert(GET);
-	allowedMethods.insert(POST);
-	allowedMethods.insert(DELETE);
+	allowedMethods.insert(M_GET);
+	allowedMethods.insert(M_POST);
 	location.setPath("tests");
 	location.setRoot("/");
 	location.setMethods(allowedMethods);
@@ -380,24 +390,24 @@ void Response::setParameters(Request &request)
 
 	location = matchLocation(testServer, request);
 
-	this->targetPath_ = routeTarget(location, request);
+	this->targetPath_ = routeTarget(request, location);
 	this->method_ = fitMethod(request.getMethod(), location);
 
 	this->checkRequestHeaders(request);
 }
 
-void Response::build(Request &request)
+void Response::build(Request &request) // overload for building standard errror responses
 {
-	if (!request.isComplete())
-	{
-		this->endConnection_ = C_CLOSE;
-		this->generateResponse(BAD_REQUEST);
-	}
-	else
-	{
-		this->setParameters(request);
-		this->executeRequest();
-	}
+	this->setParameters(request);
+	this->executeRequest();
+
+	this->buffer_ = this->toString();
+}
+
+void Response::build(httpCode_t code, connection_t mode)
+{
+	this->endConnection_ = mode;
+	this->generateResponse(code);
 
 	this->buffer_ = this->toString();
 }

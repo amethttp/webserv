@@ -45,6 +45,11 @@ Request Client::getRequest()
     return this->request_;
 }
 
+httpCode_t Client::getResponseStatus()
+{
+    return this->response_.getStatusCode();
+}
+
 void Client::setFd(fd_t fd)
 {
 	this->fd_ = fd;
@@ -67,8 +72,7 @@ bool Client::hasFullRequestHeaders()
 
 void Client::buildRequest()
 {
-	if (!this->request_.tryParseFromBuffer())
-		this->request_.setComplete(false);
+	this->request_.setComplete(request_.tryParseFromBuffer());
 	
 	std::cout << this->request_ << std::endl;
 	std::cout << "Should build a response: " << (this->request_.isComplete() ? "true" : "false") << std::endl;
@@ -96,5 +100,19 @@ bool Client::shouldClose()
 
 void Client::buildResponse()
 {
-	this->response_.build(this->request_);
+	if (this->request_.isComplete())
+	{
+		if (this->request_.getHTTPVersion() == "HTTP/1.1")
+			this->response_.build(this->request_);
+		else
+			this->response_.build(HTTP_VERSION_NOT_SUPPORTED, C_KEEP_ALIVE);
+	}
+	else
+		this->response_.build(BAD_REQUEST, C_CLOSE);
+
+}
+
+void Client::buildResponse(httpCode_t code, connection_t mode)
+{
+	this->response_.build(code, mode);
 }
