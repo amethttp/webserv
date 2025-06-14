@@ -50,7 +50,7 @@ std::vector<fd_t> WebServer::createServerFds()
 	return serversFds;
 }
 
-void WebServer::setEpoll(t_epoll &epoll, std::vector<fd_t> &serversFds)
+void WebServer::setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds)
 {
 	epoll.fd = epoll_create1(0);
 	if (epoll.fd == -1)
@@ -63,6 +63,22 @@ void WebServer::setEpoll(t_epoll &epoll, std::vector<fd_t> &serversFds)
 		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, *it, &epoll.eventConfig) == -1)
 			throw std::runtime_error("Couldn't add server fd to epoll");
 	}
+}
+
+void WebServer::setEpollRead(t_epoll &epoll, Client *client)
+{
+	epoll.eventConfig.events = EPOLLIN;
+	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
+	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
+		throw std::runtime_error("Couldn't add POLLIN flag to client fd");
+}
+
+void WebServer::setEpollWrite(t_epoll &epoll, Client *client)
+{
+	epoll.eventConfig.events = EPOLLOUT;
+	epoll.eventConfig.data.ptr = static_cast<void *>(client);
+	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
+		throw std::runtime_error("Couldn't add POLLOUT flag to client fd");
 }
 
 fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
@@ -121,16 +137,13 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 	return client->tryBuildRequest();
 }
 
-void WebServer::buildResponse(Client *client, t_epoll &epoll, char *buffer)
+void WebServer::buildResponse(Client *client, t_epoll &epoll)
 {
 	Request clientRequest = client->getRequest();
 
 	client->tryBuildResponse(clientRequest);
 	client->clearRequest();
-	epoll.eventConfig.events = EPOLLOUT;
-	epoll.eventConfig.data.ptr = static_cast<void *>(client);
-	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
-		throw std::runtime_error("Couldn't add POLLOUT flag to client fd");
+	setEpollWrite(epoll, client);
 }
 
 void WebServer::receiveRequest(Client *client, t_epoll &epoll)
@@ -145,7 +158,7 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 		client->updateLastReceivedPacket();
 		if (!tryBuildRequest(client, buffer))
 			return;
-		buildResponse(client, epoll, buffer);
+		buildResponse(client, epoll);
 	}
 	else if (bytesReceived == 0)
 		disconnectClient(client, epoll);
@@ -165,10 +178,7 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 	if (bytesSent < stringifiedResponse.length())
 		return;
 
-	epoll.eventConfig.events = EPOLLIN;
-	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
-	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
-		throw std::runtime_error("Couldn't add POLLIN flag to client fd");
+	setEpollRead(epoll, client);
 }
 
 void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
@@ -255,6 +265,6 @@ void WebServer::serve()
 	std::vector<fd_t> serversFds;
 
 	serversFds = createServerFds();
-	setEpoll(epoll, serversFds);
+	setEpollInstance(epoll, serversFds);
 	handleConnectionEvents(serversFds, epoll);
 }

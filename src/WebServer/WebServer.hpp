@@ -16,12 +16,14 @@ private:
 	std::vector<Client> clients_;
 
 	std::vector<fd_t> createServerFds();
-	void setEpoll(t_epoll &epoll, std::vector<fd_t> &serversFds);
+	void setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds);
+	void setEpollRead(t_epoll &epoll, Client *client);
+	void setEpollWrite(t_epoll &epoll, Client *client);
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
 	void disconnectClient(Client *client, t_epoll &epoll);
 	bool tryBuildRequest(Client *client, char *buffer);
-	void buildResponse(Client *client, t_epoll &epoll, char *buffer);
+	void buildResponse(Client *client, t_epoll &epoll);
 	void receiveRequest(Client *client, t_epoll &epoll);
 	void sendResponse(Client *client, t_epoll &epoll);
 	void checkClientEvent(t_epoll &epoll, const int &eventIndex);

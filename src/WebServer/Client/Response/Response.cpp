@@ -331,7 +331,7 @@ static method_t fitMethod(method_t method, Location &location)
 
 	return NOT_ALLOWED;
 }
-#include "utils/string/string.hpp"
+
 void Response::checkRequestHeaders(Request &request)
 {
 	std::map<std::string, std::string> reqHeaders = request.getHeaders();
