@@ -20,27 +20,28 @@ Result<T> Result<T>::ok(T value)
     return Result<T>(value, true, "");
 }
 
-// template<typename T>
-// Result<T> Result<T>::fail(std::string error)
-// {
-// }
+template<typename T>
+Result<T> Result<T>::fail(std::string error)
+{
+    return Result<T>(T(), false, error);
+}
 
 template<typename T>
 bool Result<T>::isSuccess()
 {
-    return true;
+    return this->isSuccess_;
 }
 
 template<typename T>
 bool Result<T>::isFailure()
 {
-    return false;
+    return !this->isSuccess_;
 }
 
 template<typename T>
 std::string Result<T>::getError()
 {
-    return "";
+    return this->error_;
 }
 
 template<typename T>

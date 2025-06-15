@@ -16,7 +16,7 @@ public:
     ~Result();
 
     static Result<T> ok(T value);
-    // static Result<T> fail(std::string error);
+    static Result<T> fail(std::string error);
 
     bool isSuccess();
     bool isFailure();

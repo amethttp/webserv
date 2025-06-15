@@ -14,3 +14,14 @@ TEST(create_succesful_result)
     ASSERT_EQUALS(expectedError, sut.getError());
     ASSERT_EQUALS(expectedValue, sut.getValue());
 }
+
+TEST(create_failed_result)
+{
+    std::string expectedError = std::string("error");
+
+    Result<int> sut = Result<int>::fail(expectedError);
+
+    ASSERT_FALSE(sut.isSuccess());
+    ASSERT_TRUE(sut.isFailure());
+    ASSERT_EQUALS(expectedError, sut.getError());
+}
