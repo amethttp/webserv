@@ -16,8 +16,8 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
     else
         requestInfo.request.method = DELETE;
 
-    requestInfo.request.target = "/";
-    requestInfo.request.httpVersion = "HTTP/1.1";
+    requestInfo.request.target = splittedRequestLine[1];
+    requestInfo.request.httpVersion = splittedRequestLine[2];
     requestInfo.request.headers["Host"] = "localhost";
 
     if (requestInfo.request.method == POST)
