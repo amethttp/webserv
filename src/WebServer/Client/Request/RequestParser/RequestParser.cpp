@@ -1,6 +1,5 @@
 #include "RequestParser.hpp"
 #include "utils/string/string.hpp"
-#include <vector>
 
 static method_t parseRequestMethod(const std::string &requestMethod)
 {
@@ -33,3 +32,17 @@ SimpleResult RequestParser::parseRequestLine(Request_t &request, const std::stri
 
     return SimpleResult::ok();
 }
+
+void RequestParser::parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer)
+{
+    std::vector<std::string> header;
+    std::vector<std::string>::iterator it = splittedRequestBuffer.begin() + 1;
+
+    while (it != splittedRequestBuffer.end() && !it->empty())
+    {
+        header = split(*it, ":");
+        request.headers[header[0]] = trim(header[1], " ");
+        ++it;
+    }
+}
+
