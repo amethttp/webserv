@@ -7,6 +7,6 @@
 class RequestParser
 {
 public:
-    SimpleResult parseRequestLine(Request_t &request, const std::string &requestLine);
+    Result<RequestLineParams_t> parseRequestLine(const std::string &requestLine);
     void parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer);
 };

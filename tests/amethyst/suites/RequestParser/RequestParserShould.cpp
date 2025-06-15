@@ -4,18 +4,20 @@
 
 namespace
 {
-    Request_t request;
     RequestParser sut;
+    RequestLineParams_t requestLineParams;
 }
 
-static void parseValidRequestLine(const std::string &requestLine)
+static RequestLineParams_t createFromValidRequestLine(const std::string &requestLine)
 {
-    sut.parseRequestLine(request, requestLine);
+    Result<RequestLineParams_t> result = sut.parseRequestLine(requestLine);
+
+    return result.getValue();
 }
 
 static void assertRequestLineIsInvalid(const std::string &requestLine, const std::string &errorMessage)
 {
-    SimpleResult result = sut.parseRequestLine(request, requestLine);
+    Result<RequestLineParams_t> result = sut.parseRequestLine(requestLine);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(errorMessage, result.getError());
@@ -23,28 +25,28 @@ static void assertRequestLineIsInvalid(const std::string &requestLine, const std
 
 static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
 {
-    ASSERT_EQUALS(method, request.requestLine.method);
-    ASSERT_EQUALS(target, request.requestLine.target);
-    ASSERT_EQUALS(version, request.requestLine.httpVersion);
+    ASSERT_EQUALS(method, requestLineParams.method);
+    ASSERT_EQUALS(target, requestLineParams.target);
+    ASSERT_EQUALS(version, requestLineParams.httpVersion);
 }
 
 TEST(parse_basic_GET_request_line)
 {
-    parseValidRequestLine("GET / HTTP/1.1");
+    requestLineParams = createFromValidRequestLine("GET / HTTP/1.1");
 
     assertRequestLine(GET, "/", "HTTP/1.1");
 }
 
 TEST(parse_basic_POST_request_line)
 {
-    parseValidRequestLine("POST / HTTP/1.1");
+    requestLineParams = createFromValidRequestLine("POST / HTTP/1.1");
 
     assertRequestLine(POST, "/", "HTTP/1.1");
 }
 
 TEST(parse_basic_DELETE_request_line)
 {
-    parseValidRequestLine("DELETE / HTTP/1.1");
+    requestLineParams = createFromValidRequestLine("DELETE / HTTP/1.1");
 
     assertRequestLine(DELETE, "/", "HTTP/1.1");
 }

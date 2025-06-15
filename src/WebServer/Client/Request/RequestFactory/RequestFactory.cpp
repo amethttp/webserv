@@ -10,10 +10,12 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
 
-    SimpleResult requestLineResult = requestParser.parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
+    Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine(splittedRequestBuffer[0]);
 
     if (requestLineResult.isFailure())
         return Result<RequestInfo_t>::fail(requestLineResult.getError());
+
+    requestInfo.request.requestLine = requestLineResult.getValue();
 
     requestParser.parseHeaders(requestInfo.request, splittedRequestBuffer);
 

@@ -12,25 +12,26 @@ static method_t parseRequestMethod(const std::string &requestMethod)
     return NOT_IMPLEMENTED;
 }
 
-SimpleResult RequestParser::parseRequestLine(Request_t &request, const std::string &requestLine)
+Result<RequestLineParams_t> RequestParser::parseRequestLine(const std::string &requestLine)
 {
+    RequestLineParams_t params;
     std::vector<std::string> splittedRequestLine = split(requestLine, " ");
 
     if (splittedRequestLine.size() != 3)
-        return SimpleResult::fail("400 Bad Request");
+        return Result<RequestLineParams_t>::fail("400 Bad Request");
 
     if (splittedRequestLine[0].empty())
-        return SimpleResult::fail("400 Bad Request");
+        return Result<RequestLineParams_t>::fail("400 Bad Request");
 
-    request.requestLine.method = parseRequestMethod(splittedRequestLine[0]);
+    params.method = parseRequestMethod(splittedRequestLine[0]);
 
-    if (request.requestLine.method == NOT_IMPLEMENTED)
-        return SimpleResult::fail("501 Not Implemented");
+    if (params.method == NOT_IMPLEMENTED)
+        return Result<RequestLineParams_t>::fail("501 Not Implemented");
 
-    request.requestLine.target = splittedRequestLine[1];
-    request.requestLine.httpVersion = splittedRequestLine[2];
+    params.target = splittedRequestLine[1];
+    params.httpVersion = splittedRequestLine[2];
 
-    return SimpleResult::ok();
+    return Result<RequestLineParams_t>::ok(params);
 }
 
 void RequestParser::parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer)
