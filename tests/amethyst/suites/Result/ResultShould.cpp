@@ -2,10 +2,12 @@
 #include "test/assert/assert.hpp"
 #include "utils/Result/Result.hpp"
 
-TEST(create_succesful_result)
+#define ANY_VALUE 5
+
+TEST(create_successful_result)
 {
     std::string expectedError = std::string("");
-    int expectedValue = 5;
+    int expectedValue = ANY_VALUE;
 
     Result<int> sut = Result<int>::ok(expectedValue);
 
@@ -17,7 +19,7 @@ TEST(create_succesful_result)
 
 TEST(create_failed_result)
 {
-    std::string expectedError = std::string("error");
+    std::string expectedError = std::string("any error");
 
     Result<int> sut = Result<int>::fail(expectedError);
 
