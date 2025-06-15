@@ -65,14 +65,14 @@
 #define ASSERT_THROWS(SUT, excp)                                                                                                   \
     {                                                                                                                              \
         std::ostringstream oss;                                                                                                    \
-        bool shouldThrow = false;                                                                                       \
+        bool shouldThrow = false;                                                                                                  \
                                                                                                                                    \
         try                                                                                                                        \
         {                                                                                                                          \
             SUT;                                                                                                                   \
             oss << __FILE__ << ":" << __LINE__ << "\n"                                                                             \
                 << LOG_IDENTATION << "Reason: ASSERT_THROWS(" << #SUT << ", " << #excp << ") failed: Didn't throw an exception\n"; \
-            shouldThrow = true;                                                                                         \
+            shouldThrow = true;                                                                                                    \
         }                                                                                                                          \
         catch (const excp &e)                                                                                                      \
         {                                                                                                                          \
@@ -81,9 +81,9 @@
         {                                                                                                                          \
             oss << __FILE__ << ":" << __LINE__ << "\n"                                                                             \
                 << LOG_IDENTATION << "Reason: ASSERT_THROWS(" << #SUT << ", " << #excp << ") failed: Threw a wrong exception\n";   \
-            shouldThrow = true;                                                                                         \
+            shouldThrow = true;                                                                                                    \
         }                                                                                                                          \
                                                                                                                                    \
-        if (shouldThrow)                                                                                                \
+        if (shouldThrow)                                                                                                           \
             throw TestFailure(oss.str());                                                                                          \
     }
