@@ -2,12 +2,15 @@
 #include "test/assert/assert.hpp"
 #include "utils/Result/Result.hpp"
 
-TEST(created_with_ok)
+TEST(create_succesful_result)
 {
-    Result<int> sut = Result<int>::ok(5);
+    std::string expectedError = std::string("");
+    int expectedValue = 5;
+
+    Result<int> sut = Result<int>::ok(expectedValue);
 
     ASSERT_TRUE(sut.isSuccess());
     ASSERT_FALSE(sut.isFailure());
-    ASSERT_EQUALS(std::string(""), sut.getError());
-    ASSERT_EQUALS(5, sut.getValue());
+    ASSERT_EQUALS(expectedError, sut.getError());
+    ASSERT_EQUALS(expectedValue, sut.getValue());
 }
