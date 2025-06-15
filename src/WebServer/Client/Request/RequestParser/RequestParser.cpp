@@ -22,13 +22,13 @@ SimpleResult RequestParser::parseRequestLine(Request_t &request, const std::stri
     if (splittedRequestLine[0].empty())
         return SimpleResult::fail("400 Bad Request");
 
-    request.method = parseRequestMethod(splittedRequestLine[0]);
+    request.requestLine.method = parseRequestMethod(splittedRequestLine[0]);
 
-    if (request.method == NOT_IMPLEMENTED)
+    if (request.requestLine.method == NOT_IMPLEMENTED)
         return SimpleResult::fail("501 Not Implemented");
 
-    request.target = splittedRequestLine[1];
-    request.httpVersion = splittedRequestLine[2];
+    request.requestLine.target = splittedRequestLine[1];
+    request.requestLine.httpVersion = splittedRequestLine[2];
 
     return SimpleResult::ok();
 }

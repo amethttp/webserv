@@ -23,9 +23,9 @@ static void assertRequestLineIsInvalid(const std::string &requestLine, const std
 
 static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
 {
-    ASSERT_EQUALS(method, request.method);
-    ASSERT_EQUALS(target, request.target);
-    ASSERT_EQUALS(version, request.httpVersion);
+    ASSERT_EQUALS(method, request.requestLine.method);
+    ASSERT_EQUALS(target, request.requestLine.target);
+    ASSERT_EQUALS(version, request.requestLine.httpVersion);
 }
 
 TEST(parse_basic_GET_request_line)
