@@ -33,6 +33,14 @@ static void assertBodyIsEmpty()
     ASSERT_EQUALS("", request.body);
 }
 
+static void assertRequestStringIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
+{
+    Result<RequestInfo_t> result = RequestFactory::create(invalidRequestString);
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(errorMessage, result.getError());
+}
+
 TEST(recognize_basic_HTTP_GET_request)
 {
     request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
@@ -66,22 +74,12 @@ TEST(recognize_basic_HTTP_POST_request)
 
 TEST(take_as_failure_a_not_implemented_HTTP_method)
 {
-    std::string invalidRequestString = "INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n";
-
-    Result<RequestInfo_t> result = RequestFactory::create(invalidRequestString);
-
-    ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("501 Not Implemented", result.getError());
+    assertRequestStringIsInvalid("INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
 }
 
 TEST(take_as_failure_an_empty_HTTP_method)
 {
-    std::string invalidRequestString = " / HTTP/1.1\r\nHost: localhost\r\n\r\n";
-
-    Result<RequestInfo_t> result = RequestFactory::create(invalidRequestString);
-
-    ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError());
+    assertRequestStringIsInvalid(" / HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
 }
 
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
