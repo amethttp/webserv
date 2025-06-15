@@ -5,11 +5,12 @@
 TEST(recognize_basic_HTTP_GET_request)
 {
     Result<RequestInfo_t> actual = RequestFactory::create("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-
-    ASSERT_EQUALS(GET, actual.getValue().request.method);
-    ASSERT_EQUALS("/", actual.getValue().request.target);
-    ASSERT_EQUALS("HTTP/1.1", actual.getValue().request.httpVersion);
-    ASSERT_EQUALS(1, actual.getValue().request.headers.size());
-    ASSERT_EQUALS("localhost", actual.getValue().request.headers.at("Host"));
-    ASSERT_EQUALS("", actual.getValue().request.body);
+    
+    Request_t request = actual.getValue().request;
+    ASSERT_EQUALS(GET, request.method);
+    ASSERT_EQUALS("/", request.target);
+    ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
+    ASSERT_EQUALS(1, request.headers.size());
+    ASSERT_EQUALS("localhost", request.headers.at("Host"));
+    ASSERT_EQUALS("", request.body);
 }
