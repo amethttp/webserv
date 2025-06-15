@@ -8,14 +8,19 @@ namespace
     RequestParser sut;
 }
 
+static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
+{
+    ASSERT_EQUALS(method, request.method);
+    ASSERT_EQUALS(target, request.target);
+    ASSERT_EQUALS(version, request.httpVersion);
+}
+
 TEST(parse_basic_GET_request_line)
 {
     SimpleResult result = sut.parseRequestLine(request, "GET / HTTP/1.1");
 
     ASSERT_TRUE(result.isSuccess());
-    ASSERT_EQUALS(GET, request.method);
-    ASSERT_EQUALS("/", request.target);
-    ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
+    assertRequestLine(GET, "/", "HTTP/1.1");
 }
 
 TEST(parse_basic_POST_request_line)
@@ -23,9 +28,7 @@ TEST(parse_basic_POST_request_line)
     SimpleResult result = sut.parseRequestLine(request, "POST / HTTP/1.1");
 
     ASSERT_TRUE(result.isSuccess());
-    ASSERT_EQUALS(POST, request.method);
-    ASSERT_EQUALS("/", request.target);
-    ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
+    assertRequestLine(POST, "/", "HTTP/1.1");
 }
 
 TEST(parse_basic_DELETE_request_line)
@@ -33,7 +36,5 @@ TEST(parse_basic_DELETE_request_line)
     SimpleResult result = sut.parseRequestLine(request, "DELETE / HTTP/1.1");
 
     ASSERT_TRUE(result.isSuccess());
-    ASSERT_EQUALS(DELETE, request.method);
-    ASSERT_EQUALS("/", request.target);
-    ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
+    assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
