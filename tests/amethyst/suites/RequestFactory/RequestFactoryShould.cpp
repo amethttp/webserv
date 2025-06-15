@@ -2,11 +2,16 @@
 #include "test/assert/assert.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
 
+static Request_t createRequest(const std::string &requestString)
+{
+    Result<RequestInfo_t> result = RequestFactory::create(requestString);
+    
+    return result.getValue().request;
+}
+
 TEST(recognize_basic_HTTP_GET_request)
 {
-    Result<RequestInfo_t> actual = RequestFactory::create("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-    
-    Request_t request = actual.getValue().request;
+    Request_t request = createRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
     ASSERT_EQUALS(GET, request.method);
     ASSERT_EQUALS("/", request.target);
     ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
@@ -17,9 +22,7 @@ TEST(recognize_basic_HTTP_GET_request)
 
 TEST(recognize_basic_HTTP_DELETE_request)
 {
-    Result<RequestInfo_t> actual = RequestFactory::create("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-    
-    Request_t request = actual.getValue().request;
+    Request_t request = createRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
     ASSERT_EQUALS(DELETE, request.method);
     ASSERT_EQUALS("/", request.target);
     ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
@@ -30,9 +33,7 @@ TEST(recognize_basic_HTTP_DELETE_request)
 
 TEST(recognize_basic_HTTP_POST_request)
 {
-    Result<RequestInfo_t> actual = RequestFactory::create("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
-    
-    Request_t request = actual.getValue().request;
+    Request_t request = createRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
     ASSERT_EQUALS(POST, request.method);
     ASSERT_EQUALS("/", request.target);
     ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
