@@ -5,12 +5,11 @@
 namespace
 {
     Request_t request;
+    RequestParser sut;
 }
 
 TEST(parse_basic_GET_request_line)
 {
-    RequestParser sut;
-
     SimpleResult result = sut.parseRequestLine(request, "GET / HTTP/1.1");
 
     ASSERT_TRUE(result.isSuccess());
@@ -21,8 +20,6 @@ TEST(parse_basic_GET_request_line)
 
 TEST(parse_basic_POST_request_line)
 {
-    RequestParser sut;
-
     SimpleResult result = sut.parseRequestLine(request, "POST / HTTP/1.1");
 
     ASSERT_TRUE(result.isSuccess());
@@ -33,8 +30,6 @@ TEST(parse_basic_POST_request_line)
 
 TEST(parse_basic_DELETE_request_line)
 {
-    RequestParser sut;
-
     SimpleResult result = sut.parseRequestLine(request, "DELETE / HTTP/1.1");
 
     ASSERT_TRUE(result.isSuccess());
