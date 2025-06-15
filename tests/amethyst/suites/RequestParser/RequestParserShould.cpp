@@ -58,3 +58,8 @@ TEST(take_as_failure_a_request_line_with_empty_method)
 {
     assertRequestLineIsInvalid(" / HTTP/1.1", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_line_without_method)
+{
+    assertRequestLineIsInvalid("/ HTTP/1.1", "400 Bad Request");
+}
