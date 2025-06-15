@@ -2,12 +2,29 @@
 
 #include <string>
 
-template<typename T>
-class Result
+class SimpleResult
 {
-private:
+protected:
     bool isSuccess_;
     std::string error_;
+
+    SimpleResult(bool isSuccess, const std::string &error);
+
+public:
+    ~SimpleResult();
+
+    static SimpleResult ok();
+    static SimpleResult fail(const std::string &error);
+
+    bool isSuccess();
+    bool isFailure();
+    std::string getError();
+};
+
+template <typename T>
+class Result : public SimpleResult
+{
+private:
     T value_;
 
     Result(T value, bool isSuccess, const std::string &error);
@@ -18,9 +35,6 @@ public:
     static Result<T> ok(T value);
     static Result<T> fail(const std::string &error);
 
-    bool isSuccess();
-    bool isFailure();
-    std::string getError();
     T getValue();
 };
 

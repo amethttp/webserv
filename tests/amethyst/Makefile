@@ -74,6 +74,7 @@ vpath %.cpp $(SRC):\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/\
             $(PROJ_SRC)WebServer/Client/Request/RequestParser/\
             $(PROJ_SRC)utils/string/\
+            $(PROJ_SRC)utils/Result/\
 			
 
 #----SHARED----#
@@ -84,6 +85,7 @@ SRCS = main.cpp \
        RequestFactory.cpp \
        RequestParser.cpp \
        string.cpp \
+       SimpleResult.cpp \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
