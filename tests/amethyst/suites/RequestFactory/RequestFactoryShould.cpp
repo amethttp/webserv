@@ -9,12 +9,18 @@ static Request_t createRequest(const std::string &requestString)
     return result.getValue().request;
 }
 
+static void assertRequestLine(Request_t &request, method_t method, const std::string &target, const std::string &version)
+{
+    ASSERT_EQUALS(method, request.method);
+    ASSERT_EQUALS(target, request.target);
+    ASSERT_EQUALS(version, request.httpVersion);    
+}
+
 TEST(recognize_basic_HTTP_GET_request)
 {
     Request_t request = createRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-    ASSERT_EQUALS(GET, request.method);
-    ASSERT_EQUALS("/", request.target);
-    ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
+
+    assertRequestLine(request, GET, "/", "HTTP/1.1");
     ASSERT_EQUALS(1, request.headers.size());
     ASSERT_EQUALS("localhost", request.headers.at("Host"));
     ASSERT_EQUALS("", request.body);
@@ -23,9 +29,8 @@ TEST(recognize_basic_HTTP_GET_request)
 TEST(recognize_basic_HTTP_DELETE_request)
 {
     Request_t request = createRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-    ASSERT_EQUALS(DELETE, request.method);
-    ASSERT_EQUALS("/", request.target);
-    ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
+
+    assertRequestLine(request, DELETE, "/", "HTTP/1.1");
     ASSERT_EQUALS(1, request.headers.size());
     ASSERT_EQUALS("localhost", request.headers.at("Host"));
     ASSERT_EQUALS("", request.body);
@@ -34,9 +39,8 @@ TEST(recognize_basic_HTTP_DELETE_request)
 TEST(recognize_basic_HTTP_POST_request)
 {
     Request_t request = createRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
-    ASSERT_EQUALS(POST, request.method);
-    ASSERT_EQUALS("/", request.target);
-    ASSERT_EQUALS("HTTP/1.1", request.httpVersion);
+
+    assertRequestLine(request, POST, "/", "HTTP/1.1");
     ASSERT_EQUALS(2, request.headers.size());
     ASSERT_EQUALS("localhost", request.headers.at("Host"));
     ASSERT_EQUALS("0", request.headers.at("Content-Length"));
