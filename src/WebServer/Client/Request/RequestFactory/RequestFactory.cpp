@@ -2,17 +2,21 @@
 #include "utils/string/string.hpp"
 #include <vector>
 
+static method_t parseRequestMethod(const std::string &requestMethod)
+{
+    if (requestMethod == "GET")
+        return GET;
+    else if (requestMethod == "POST")
+        return POST;
+    else
+        return DELETE;
+}
+
 static void parseRequestLine(RequestInfo_t &requestInfo, const std::string &requestLine)
 {
     std::vector<std::string> splittedRequestLine = split(requestLine, " ");
 
-    if (splittedRequestLine[0] == "GET")
-        requestInfo.request.method = GET;
-    else if (splittedRequestLine[0] == "POST")
-        requestInfo.request.method = POST;
-    else
-        requestInfo.request.method = DELETE;
-
+    requestInfo.request.method = parseRequestMethod(splittedRequestLine[0]);
     requestInfo.request.target = splittedRequestLine[1];
     requestInfo.request.httpVersion = splittedRequestLine[2];
 }
