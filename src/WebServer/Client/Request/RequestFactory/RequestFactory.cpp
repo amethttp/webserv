@@ -20,6 +20,9 @@ static Result<bool> parseRequestLine(Request_t &request, const std::string &requ
 {
     std::vector<std::string> splittedRequestLine = split(requestLine, " ");
 
+    if (splittedRequestLine.size() != 3)
+        return Result<bool>::fail("400 Bad Request");
+
     Result<method_t> methodResult = parseRequestMethod(splittedRequestLine[0]);
     
     if (methodResult.isFailure())
