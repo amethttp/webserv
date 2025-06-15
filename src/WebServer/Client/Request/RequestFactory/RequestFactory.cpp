@@ -21,6 +21,19 @@ static void parseRequestLine(Request_t &request, const std::string &requestLine)
     request.httpVersion = splittedRequestLine[2];
 }
 
+static void parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer)
+{
+    std::vector<std::string> header;
+    std::vector<std::string>::iterator it = splittedRequestBuffer.begin() + 1;
+
+    while (it != splittedRequestBuffer.end() && !it->empty())
+    {
+        header = split(*it, ": ");
+        request.headers[header[0]] = header[1];
+        ++it;
+    }
+}
+
 Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 {
     RequestInfo_t requestInfo;
@@ -28,15 +41,7 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
 
     parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
-
-    std::vector<std::string> header;
-    std::vector<std::string>::iterator it = splittedRequestBuffer.begin() + 1;
-    while (it != splittedRequestBuffer.end() && !it->empty())
-    {
-        header = split(*it, ": ");
-        requestInfo.request.headers[header[0]] = header[1];
-        ++it;
-    }
+    parseHeaders(requestInfo.request, splittedRequestBuffer);
 
     return Result<RequestInfo_t>::ok(requestInfo);
 }
