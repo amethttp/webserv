@@ -48,3 +48,10 @@ TEST(parse_basic_DELETE_request_line)
     assertSuccessfulResult(result);
     assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
+
+TEST(take_as_failure_a_request_line_with_invalid_method)
+{
+    SimpleResult result = tryParseRequestLine("INVALID / HTTP/1.1");
+
+    ASSERT_TRUE(result.isFailure());
+}
