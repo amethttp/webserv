@@ -28,8 +28,8 @@ static void parseHeaders(Request_t &request, std::vector<std::string> &splittedR
 
     while (it != splittedRequestBuffer.end() && !it->empty())
     {
-        header = split(*it, ": ");
-        request.headers[header[0]] = header[1];
+        header = split(*it, ":");
+        request.headers[header[0]] = trim(header[1], " ");
         ++it;
     }
 }

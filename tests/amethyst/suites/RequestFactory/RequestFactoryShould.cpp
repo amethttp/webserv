@@ -63,3 +63,14 @@ TEST(recognize_basic_HTTP_POST_request)
     assertHeader("Content-Length", "0");
     assertBodyIsEmpty();
 }
+
+TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
+{
+    request = createFromValidRequest("POST / HTTP/1.1\r\nHost:localhost\r\nContent-Length:0\r\n\r\n");
+
+    assertRequestLine(POST, "/", "HTTP/1.1");
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Content-Length", "0");
+    assertBodyIsEmpty();
+}
