@@ -49,3 +49,24 @@
         << LOG_IDENTATION << "Actual: " << (actual);                                                      \
                                                                                                           \
     throw TestFailure(oss.str());
+
+#define ASSERT_THROWS(SUT, excp)                                                                                               \
+    std::ostringstream oss;                                                                                                    \
+                                                                                                                               \
+    try                                                                                                                        \
+    {                                                                                                                          \
+        SUT();                                                                                                                 \
+        oss << __FILE__ << ":" << __LINE__ << "\n"                                                                             \
+            << LOG_IDENTATION << "Reason: ASSERT_THROWS(" << #SUT << ", " << #excp << ") failed: Didn't throw an exception\n"; \
+    }                                                                                                                          \
+    catch (excp & e)                                                                                                           \
+    {                                                                                                                          \
+        return;                                                                                                                \
+    }                                                                                                                          \
+    catch (const std::exception &e)                                                                                            \
+    {                                                                                                                          \
+        oss << __FILE__ << ":" << __LINE__ << "\n"                                                                             \
+            << LOG_IDENTATION << "Reason: ASSERT_THROWS(" << #SUT << ", " << #excp << ") failed: Threw a wrong exception\n";   \
+    }                                                                                                                          \
+                                                                                                                               \
+    throw TestFailure(oss.str());

@@ -68,6 +68,7 @@ SUITES_FILES=$(shell find $(SUITES)* -type f -name "*.cpp" 2>/dev/null | xargs b
 vpath %.cpp $(SRC):\
             $(SRC)test:\
             $(SRC)test/TestFailure:\
+            $(SUITES):\
             $(SUITES_DIRECTORIES)\
 			
 
