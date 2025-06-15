@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 template<typename T>
-Result<T>::Result(T value, bool isSuccess, std::string error)
+Result<T>::Result(T value, bool isSuccess, const std::string &error)
 {
     this->value_ = value;
     this->isSuccess_ = isSuccess;
@@ -21,7 +21,7 @@ Result<T> Result<T>::ok(T value)
 }
 
 template<typename T>
-Result<T> Result<T>::fail(std::string error)
+Result<T> Result<T>::fail(const std::string &error)
 {
     return Result<T>(T(), false, error);
 }

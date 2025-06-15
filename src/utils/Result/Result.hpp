@@ -10,13 +10,13 @@ private:
     std::string error_;
     T value_;
 
-    Result(T value, bool isSuccess, std::string error);
+    Result(T value, bool isSuccess, const std::string &error);
 
 public:
     ~Result();
 
     static Result<T> ok(T value);
-    static Result<T> fail(std::string error);
+    static Result<T> fail(const std::string &error);
 
     bool isSuccess();
     bool isFailure();
