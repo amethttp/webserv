@@ -53,3 +53,8 @@ TEST(take_as_failure_a_request_line_with_invalid_method)
 {
     assertRequestLineIsInvalid("INVALID / HTTP/1.1", "501 Not Implemented");
 }
+
+TEST(take_as_failure_a_request_line_with_empty_method)
+{
+    assertRequestLineIsInvalid(" / HTTP/1.1", "400 Bad Request");
+}
