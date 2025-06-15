@@ -34,3 +34,12 @@ TEST(throw_invalid_argument_exception_when_creating_failed_result_without_error)
 
     ASSERT_THROWS(Result<int>::fail(invalidError), std::invalid_argument);
 }
+
+TEST(throw_invalid_operation_exception_when_accessing_value_in_a_failed_result)
+{
+    std::string anyError = std::string("any error");
+
+    Result<int> sut = Result<int>::fail(anyError);
+
+    ASSERT_THROWS(sut.getValue(), std::invalid_argument);
+}

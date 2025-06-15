@@ -50,5 +50,8 @@ std::string Result<T>::getError()
 template<typename T>
 T Result<T>::getValue()
 {
+    if (isFailure())
+        throw std::invalid_argument("Cannot access result value if the result failed");
+
     return this->value_;
 }
