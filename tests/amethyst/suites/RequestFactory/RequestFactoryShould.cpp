@@ -2,6 +2,8 @@
 #include "test/assert/assert.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
 
+Request_t request;
+
 static Request_t createRequest(const std::string &requestString)
 {
     Result<RequestInfo_t> result = RequestFactory::create(requestString);
@@ -9,55 +11,55 @@ static Request_t createRequest(const std::string &requestString)
     return result.getValue().request;
 }
 
-static void assertRequestLine(Request_t &request, method_t method, const std::string &target, const std::string &version)
+static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
 {
     ASSERT_EQUALS(method, request.method);
     ASSERT_EQUALS(target, request.target);
     ASSERT_EQUALS(version, request.httpVersion);    
 }
 
-static void assertHeaderSize(Request_t &request, size_t size)
+static void assertHeaderSize(size_t size)
 {
     ASSERT_EQUALS(size, request.headers.size());
 }
 
-static void assertHeader(Request_t &request, const std::string &key, const std::string &value)
+static void assertHeader(const std::string &key, const std::string &value)
 {
     ASSERT_EQUALS(value, request.headers.at(key)); 
 }
 
-static void assertBodyIsEmpty(Request_t &request)
+static void assertBodyIsEmpty()
 {
     ASSERT_EQUALS("", request.body);
 }
 
 TEST(recognize_basic_HTTP_GET_request)
 {
-    Request_t request = createRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    request = createRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
-    assertRequestLine(request, GET, "/", "HTTP/1.1");
-    assertHeaderSize(request, 1);
-    assertHeader(request, "Host", "localhost");
-    assertBodyIsEmpty(request);
+    assertRequestLine(GET, "/", "HTTP/1.1");
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+    assertBodyIsEmpty();
 }
 
 TEST(recognize_basic_HTTP_DELETE_request)
 {
-    Request_t request = createRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    request = createRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
-    assertRequestLine(request, DELETE, "/", "HTTP/1.1");
-    assertHeaderSize(request, 1);
-    assertHeader(request, "Host", "localhost");
-    assertBodyIsEmpty(request);
+    assertRequestLine(DELETE, "/", "HTTP/1.1");
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+    assertBodyIsEmpty();
 }
 
 TEST(recognize_basic_HTTP_POST_request)
 {
-    Request_t request = createRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
+    request = createRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
 
-    assertRequestLine(request, POST, "/", "HTTP/1.1");
-    assertHeaderSize(request, 2);
-    assertHeader(request, "Host", "localhost");
-    assertHeader(request, "Content-Length", "0");
-    assertBodyIsEmpty(request);
+    assertRequestLine(POST, "/", "HTTP/1.1");
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Content-Length", "0");
+    assertBodyIsEmpty();
 }
