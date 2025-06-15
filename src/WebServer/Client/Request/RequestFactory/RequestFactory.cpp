@@ -8,8 +8,10 @@ static method_t parseRequestMethod(const std::string &requestMethod)
         return GET;
     else if (requestMethod == "POST")
         return POST;
-    else
+    else if (requestMethod == "DELETE")
         return DELETE;
+    else
+        return NOT_IMPLEMENTED;
 }
 
 static void parseRequestLine(Request_t &request, const std::string &requestLine)
@@ -41,6 +43,10 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
 
     parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
+
+    if (requestInfo.request.method == NOT_IMPLEMENTED)
+        return Result<RequestInfo_t>::fail("501 Not Implemented");
+
     parseHeaders(requestInfo.request, splittedRequestBuffer);
 
     return Result<RequestInfo_t>::ok(requestInfo);

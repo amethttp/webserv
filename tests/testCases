@@ -213,6 +213,9 @@
 # 2. Basic POST request
 "POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n"
 
+# 3. Fail with invalid HTTP method
+"INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
 # 2. Single request, works
 "GET /index.html HTTP/1.1\r\nHost: localhost\r\nUser-Agent: nc\r\nAccept: */*\r\n\r\n"
 
