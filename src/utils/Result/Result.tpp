@@ -4,6 +4,9 @@
 template<typename T>
 Result<T>::Result(T value, bool isSuccess, const std::string &error)
 {
+    if (!isSuccess && error.empty())
+        throw std::invalid_argument("A failing result must have a valid error message");
+
     this->value_ = value;
     this->isSuccess_ = isSuccess;
     this->error_ = error;

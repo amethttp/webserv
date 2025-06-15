@@ -27,3 +27,10 @@ TEST(create_failed_result)
     ASSERT_TRUE(sut.isFailure());
     ASSERT_EQUALS(expectedError, sut.getError());
 }
+
+TEST(throw_invalid_argument_exception_when_creating_failed_result_without_error)
+{
+    std::string invalidError = std::string("");
+
+    ASSERT_THROWS(Result<int>::fail(invalidError), std::invalid_argument);
+}

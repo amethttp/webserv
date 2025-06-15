@@ -48,17 +48,22 @@ static std::ostringstream oss;
         throw TestFailure(oss.str());                                                                         \
     }
 
+// TODO: Refactor 
 #define ASSERT_THROWS(SUT, excp)                                                                                               \
                                                                                                                                \
     try                                                                                                                        \
     {                                                                                                                          \
-        SUT();                                                                                                                 \
+        SUT;                                                                                                                   \
         oss << __FILE__ << ":" << __LINE__ << "\n"                                                                             \
             << LOG_IDENTATION << "Reason: ASSERT_THROWS(" << #SUT << ", " << #excp << ") failed: Didn't throw an exception\n"; \
         throw TestFailure(oss.str());                                                                                          \
     }                                                                                                                          \
     catch (excp & e)                                                                                                           \
     {                                                                                                                          \
+    }                                                                                                                          \
+    catch (TestFailure & e)                                                                                                    \
+    {                                                                                                                          \
+        throw TestFailure(oss.str());                                                                                          \
     }                                                                                                                          \
     catch (const std::exception &e)                                                                                            \
     {                                                                                                                          \
