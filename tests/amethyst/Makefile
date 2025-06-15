@@ -72,6 +72,7 @@ vpath %.cpp $(SRC):\
             $(SUITES):\
             $(SUITES_DIRECTORIES)\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/\
+            $(PROJ_SRC)utils/string/\
 			
 
 #----SHARED----#
@@ -80,6 +81,7 @@ SRCS = main.cpp \
        TestFailure.cpp \
        $(SUITES_FILES) \
        RequestFactory.cpp \
+       string.cpp \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
