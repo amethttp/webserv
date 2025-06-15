@@ -2,12 +2,15 @@
 #include "test/assert/assert.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
 
-Request_t request;
+namespace
+{
+    Request_t request;
+}
 
 static Request_t createFromValidRequest(const std::string &requestString)
 {
     Result<RequestInfo_t> result = RequestFactory::create(requestString);
-    
+
     return result.getValue().request;
 }
 
@@ -15,7 +18,7 @@ static void assertRequestLine(method_t method, const std::string &target, const 
 {
     ASSERT_EQUALS(method, request.method);
     ASSERT_EQUALS(target, request.target);
-    ASSERT_EQUALS(version, request.httpVersion);    
+    ASSERT_EQUALS(version, request.httpVersion);
 }
 
 static void assertHeaderSize(size_t size)
@@ -25,7 +28,7 @@ static void assertHeaderSize(size_t size)
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, request.headers.at(key)); 
+    ASSERT_EQUALS(value, request.headers.at(key));
 }
 
 static void assertBodyIsEmpty()
