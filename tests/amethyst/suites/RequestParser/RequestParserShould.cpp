@@ -8,19 +8,14 @@ namespace
     RequestParser sut;
 }
 
-static SimpleResult tryParseRequestLine(const std::string &requestLine)
+static void parseValidRequestLine(const std::string &requestLine)
 {
-    return sut.parseRequestLine(request, requestLine);
-}
-
-static void assertSuccessfulResult(SimpleResult &result)
-{
-    ASSERT_TRUE(result.isSuccess());
+    sut.parseRequestLine(request, requestLine);
 }
 
 static void assertRequestLineIsInvalid(const std::string &requestLine, const std::string &errorMessage)
 {
-    SimpleResult result = tryParseRequestLine(requestLine);
+    SimpleResult result = sut.parseRequestLine(request, requestLine);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(errorMessage, result.getError());
@@ -35,25 +30,22 @@ static void assertRequestLine(method_t method, const std::string &target, const 
 
 TEST(parse_basic_GET_request_line)
 {
-    SimpleResult result = tryParseRequestLine("GET / HTTP/1.1");
+    parseValidRequestLine("GET / HTTP/1.1");
 
-    assertSuccessfulResult(result);
     assertRequestLine(GET, "/", "HTTP/1.1");
 }
 
 TEST(parse_basic_POST_request_line)
 {
-    SimpleResult result = tryParseRequestLine("POST / HTTP/1.1");
+    parseValidRequestLine("POST / HTTP/1.1");
 
-    assertSuccessfulResult(result);
     assertRequestLine(POST, "/", "HTTP/1.1");
 }
 
 TEST(parse_basic_DELETE_request_line)
 {
-    SimpleResult result = tryParseRequestLine("DELETE / HTTP/1.1");
+    parseValidRequestLine("DELETE / HTTP/1.1");
 
-    assertSuccessfulResult(result);
     assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
 
