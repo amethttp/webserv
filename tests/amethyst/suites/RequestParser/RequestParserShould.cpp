@@ -18,9 +18,12 @@ static void assertSuccessfulResult(SimpleResult &result)
     ASSERT_TRUE(result.isSuccess());
 }
 
-static void assertFailedResult(SimpleResult &result)
+static void assertRequestLineIsInvalid(const std::string &requestLine, const std::string &errorMessage)
 {
+    SimpleResult result = tryParseRequestLine(requestLine);
+
     ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(errorMessage, result.getError());
 }
 
 static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
@@ -56,7 +59,5 @@ TEST(parse_basic_DELETE_request_line)
 
 TEST(take_as_failure_a_request_line_with_invalid_method)
 {
-    SimpleResult result = tryParseRequestLine("INVALID / HTTP/1.1");
-
-    assertFailedResult(result);
+    assertRequestLineIsInvalid("INVALID / HTTP/1.1", "501 Not Implemented");
 }
