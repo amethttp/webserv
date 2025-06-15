@@ -12,13 +12,13 @@ static method_t parseRequestMethod(const std::string &requestMethod)
         return DELETE;
 }
 
-static void parseRequestLine(RequestInfo_t &requestInfo, const std::string &requestLine)
+static void parseRequestLine(Request_t &request, const std::string &requestLine)
 {
     std::vector<std::string> splittedRequestLine = split(requestLine, " ");
 
-    requestInfo.request.method = parseRequestMethod(splittedRequestLine[0]);
-    requestInfo.request.target = splittedRequestLine[1];
-    requestInfo.request.httpVersion = splittedRequestLine[2];
+    request.method = parseRequestMethod(splittedRequestLine[0]);
+    request.target = splittedRequestLine[1];
+    request.httpVersion = splittedRequestLine[2];
 }
 
 Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
@@ -27,7 +27,7 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
 
-    parseRequestLine(requestInfo, splittedRequestBuffer[0]);
+    parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
 
     std::vector<std::string> header;
     std::vector<std::string>::iterator it = splittedRequestBuffer.begin() + 1;
