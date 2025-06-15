@@ -23,7 +23,7 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
 
-    Result<bool> requestLineResult = requestParser.parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
+    SimpleResult requestLineResult = requestParser.parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
 
     if (requestLineResult.isFailure())
         return Result<RequestInfo_t>::fail(requestLineResult.getError());

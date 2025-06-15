@@ -6,5 +6,5 @@
 class RequestParser
 {
 public:
-    Result<bool> parseRequestLine(Request_t &request, const std::string &requestLine);
+    SimpleResult parseRequestLine(Request_t &request, const std::string &requestLine);
 };
