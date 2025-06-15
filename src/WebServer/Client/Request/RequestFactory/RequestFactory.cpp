@@ -19,10 +19,11 @@ static void parseHeaders(Request_t &request, std::vector<std::string> &splittedR
 Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 {
     RequestInfo_t requestInfo;
+    RequestParser requestParser;
 
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
 
-    Result<bool> requestLineResult = RequestParser::parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
+    Result<bool> requestLineResult = requestParser.parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
 
     if (requestLineResult.isFailure())
         return Result<RequestInfo_t>::fail(requestLineResult.getError());
