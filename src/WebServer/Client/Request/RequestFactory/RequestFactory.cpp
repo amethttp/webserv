@@ -2,12 +2,9 @@
 #include "utils/string/string.hpp"
 #include <vector>
 
-Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
+static void parseRequestLine(RequestInfo_t &requestInfo, const std::string &requestLine)
 {
-    RequestInfo_t requestInfo;
-
-    std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
-    std::vector<std::string> splittedRequestLine = split(splittedRequestBuffer[0], " ");
+    std::vector<std::string> splittedRequestLine = split(requestLine, " ");
 
     if (splittedRequestLine[0] == "GET")
         requestInfo.request.method = GET;
@@ -18,6 +15,15 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 
     requestInfo.request.target = splittedRequestLine[1];
     requestInfo.request.httpVersion = splittedRequestLine[2];
+}
+
+Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
+{
+    RequestInfo_t requestInfo;
+
+    std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
+
+    parseRequestLine(requestInfo, splittedRequestBuffer[0]);
 
     std::vector<std::string> header;
     std::vector<std::string>::iterator it = splittedRequestBuffer.begin() + 1;
