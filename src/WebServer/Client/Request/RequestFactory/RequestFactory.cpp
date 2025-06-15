@@ -18,10 +18,15 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 
     requestInfo.request.target = splittedRequestLine[1];
     requestInfo.request.httpVersion = splittedRequestLine[2];
-    requestInfo.request.headers["Host"] = "localhost";
 
-    if (requestInfo.request.method == POST)
-        requestInfo.request.headers["Content-Length"] = "0";
+    std::vector<std::string> header;
+    std::vector<std::string>::iterator it = splittedRequestBuffer.begin() + 1;
+    while (it != splittedRequestBuffer.end() && !it->empty())
+    {
+        header = split(*it, ": ");
+        requestInfo.request.headers[header[0]] = header[1];
+        ++it;
+    }
 
     return Result<RequestInfo_t>::ok(requestInfo);
 }
