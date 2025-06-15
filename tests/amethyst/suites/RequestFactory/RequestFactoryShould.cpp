@@ -4,7 +4,7 @@
 
 Request_t request;
 
-static Request_t createRequest(const std::string &requestString)
+static Request_t createFromValidRequest(const std::string &requestString)
 {
     Result<RequestInfo_t> result = RequestFactory::create(requestString);
     
@@ -35,7 +35,7 @@ static void assertBodyIsEmpty()
 
 TEST(recognize_basic_HTTP_GET_request)
 {
-    request = createRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
     assertRequestLine(GET, "/", "HTTP/1.1");
     assertHeaderSize(1);
@@ -45,7 +45,7 @@ TEST(recognize_basic_HTTP_GET_request)
 
 TEST(recognize_basic_HTTP_DELETE_request)
 {
-    request = createRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    request = createFromValidRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
     assertRequestLine(DELETE, "/", "HTTP/1.1");
     assertHeaderSize(1);
@@ -55,7 +55,7 @@ TEST(recognize_basic_HTTP_DELETE_request)
 
 TEST(recognize_basic_HTTP_POST_request)
 {
-    request = createRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
+    request = createFromValidRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
 
     assertRequestLine(POST, "/", "HTTP/1.1");
     assertHeaderSize(2);
