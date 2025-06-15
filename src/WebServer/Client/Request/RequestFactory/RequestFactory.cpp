@@ -2,25 +2,34 @@
 #include "utils/string/string.hpp"
 #include <vector>
 
-static method_t parseRequestMethod(const std::string &requestMethod)
+static Result<method_t> parseRequestMethod(const std::string &requestMethod)
 {
     if (requestMethod == "GET")
-        return GET;
+        return Result<method_t>::ok(GET);
     else if (requestMethod == "POST")
-        return POST;
+        return Result<method_t>::ok(POST);
     else if (requestMethod == "DELETE")
-        return DELETE;
+        return Result<method_t>::ok(DELETE);
+    else if (!requestMethod.empty())
+        return Result<method_t>::fail("501 Not Implemented");
     else
-        return NOT_IMPLEMENTED;
+        return Result<method_t>::fail("400 Bad Request");
 }
 
-static void parseRequestLine(Request_t &request, const std::string &requestLine)
+static Result<bool> parseRequestLine(Request_t &request, const std::string &requestLine)
 {
     std::vector<std::string> splittedRequestLine = split(requestLine, " ");
 
-    request.method = parseRequestMethod(splittedRequestLine[0]);
+    Result<method_t> methodResult = parseRequestMethod(splittedRequestLine[0]);
+    
+    if (methodResult.isFailure())
+        return Result<bool>::fail(methodResult.getError());
+        
+    request.method = methodResult.getValue();
     request.target = splittedRequestLine[1];
     request.httpVersion = splittedRequestLine[2];
+
+    return Result<bool>::ok(true);
 }
 
 static void parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer)
@@ -42,10 +51,10 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
 
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
 
-    parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
+    Result<bool> requestLineResult = parseRequestLine(requestInfo.request, splittedRequestBuffer[0]);
 
-    if (requestInfo.request.method == NOT_IMPLEMENTED)
-        return Result<RequestInfo_t>::fail("501 Not Implemented");
+    if (requestLineResult.isFailure())
+        return Result<RequestInfo_t>::fail(requestLineResult.getError());
 
     parseHeaders(requestInfo.request, splittedRequestBuffer);
 

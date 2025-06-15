@@ -74,6 +74,16 @@ TEST(take_as_failure_a_not_implemented_HTTP_method)
     ASSERT_EQUALS("501 Not Implemented", result.getError());
 }
 
+TEST(take_as_failure_an_empty_HTTP_method)
+{
+    std::string invalidRequestString = " / HTTP/1.1\r\nHost: localhost\r\n\r\n";
+
+    Result<RequestInfo_t> result = RequestFactory::create(invalidRequestString);
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS("400 Bad Request", result.getError());
+}
+
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
     request = createFromValidRequest("POST / HTTP/1.1\r\nHost:localhost\r\nContent-Length:0\r\n\r\n");
