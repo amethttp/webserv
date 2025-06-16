@@ -58,30 +58,17 @@ BIN_DIR = bin/
 SRC = src/
 INCLUDES = -I$(SRC)
 
-
-#----LIBS----#
-
-#----MACROS----#
-# ifeq ($(UNAME_S), Darwin)
-# 	WINDOW_WIDTH := $(shell system_profiler -json SPDisplaysDataType 2>/dev/null | grep _spdisplays_resolution | awk 'NR==1{print substr($$3, 2, length($$3)) - 70}')
-# 	WINDOW_HEIGHT := $(shell system_profiler -json SPDisplaysDataType 2>/dev/null | grep _spdisplays_resolution | awk 'NR==1{print $$5 - 70}')
-# 	CCFLAGS += -D WINDOW_WIDTH=$(WINDOW_WIDTH) -D WINDOW_HEIGHT=$(WINDOW_HEIGHT)
-# endif
-# ifeq ($(UNAME_S), Linux)
-# 	WINDOW_WIDTH := $(shell xrandr | grep "*" | awk '{ print $1 }' | cut -d'x' -f 1 | xargs)
-# 	WINDOW_HEIGHT := $(shell xrandr | grep "*" | awk '{ print $1 }' | cut -d'x' -f 2 | cut -d' ' -f 1)
-# 	CCFLAGS += -D WINDOW_WIDTH=$(WINDOW_WIDTH) -D WINDOW_HEIGHT=$(WINDOW_HEIGHT)
-# endif
-
-
 #----VPATH----#
 vpath %.cpp $(SRC): \
             $(SRC)utils: \
             $(SRC)utils/string: \
             $(SRC)utils/numeric: \
+            $(SRC)utils/Result: \
             $(SRC)WebServer: \
             $(SRC)WebServer/Client: \
             $(SRC)WebServer/Client/Request: \
+            $(SRC)WebServer/Client/Request/RequestFactory: \
+            $(SRC)WebServer/Client/Request/RequestParser: \
             $(SRC)WebServer/Client/Response: \
             $(SRC)WebServer/Server: \
             $(SRC)WebServer/Server/Location: \
@@ -99,6 +86,9 @@ SRCS = webserv.cpp \
         Session.cpp \
         string.cpp \
         numeric.cpp \
+        SimpleResult.cpp \
+        RequestFactory.cpp\
+        RequestParser.cpp \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
@@ -153,12 +143,6 @@ testerfcl:
 
 testerre:
 	$(MAKE) --no-print-directory -C tests/amethyst re && $(AMETHTDD)
-
-# min-test:
-# 	cd tester && ./tester.sh -n
-
-# test_clean:
-# 	$(MAKE) --no-print-directory -C tester/main_test clean
 
 .PHONY: all \
 		clean \
