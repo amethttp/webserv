@@ -140,16 +140,8 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 	return true;
 }
 
-void WebServer::buildResponse(Client *client, t_epoll &epoll)
+void WebServer::readySendResponse(Client *client, t_epoll &epoll)
 {
-	client->buildResponse();
-	client->clearRequest();
-	setEpollWrite(epoll, client);
-}
-
-void WebServer::buildResponse(Client *client, t_epoll &epoll, httpCode_t code, connection_t mode)
-{
-	client->buildResponse(code, mode);
 	client->clearRequest();
 	setEpollWrite(epoll, client);
 }
@@ -166,7 +158,8 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 		client->updateLastReceivedPacket();
 		if (!this->tryBuildRequest(client, buffer))
 			return ;
-		this->buildResponse(client, epoll);
+		client->buildResponse(this->servers_);
+		this->readySendResponse(client, epoll);
 	}
 	else if (bytesReceived == 0)
 		disconnectClient(client, epoll, DISCONNECTED);
@@ -255,7 +248,10 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 		if ((now - it->getLastReceivedPacket()) * 1000 > TIMEOUT)
 		{
 			if (it->hasPendingRequest())
-				this->buildResponse(&(*it), epoll, REQUEST_TIME_OUT, C_CLOSE);
+			{
+				it->buildResponse(REQUEST_TIME_OUT, C_CLOSE);
+				this->readySendResponse(&(*it), epoll);
+			}
 			else
 			{
 				it = disconnectClient(&(*it), epoll, TIMED_OUT);

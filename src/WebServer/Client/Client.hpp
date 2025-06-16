@@ -30,7 +30,7 @@ public:
 	std::string getStringifiedResponse();
 	std::string getStringifiedRequest();
 	Request getRequest();
-	httpCode_t getResponseStatus();
+	t_httpCode getResponseStatus();
 
 	void setFd(fd_t fd);
 	void setResponseBuffer(const std::string &stringResponse);
@@ -44,6 +44,6 @@ public:
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	void buildResponse();
-	void buildResponse(httpCode_t code, connection_t mode);
+	void buildResponse(std::vector<Server> &servers);
+	void buildResponse(t_httpCode code, t_connection mode);
 };

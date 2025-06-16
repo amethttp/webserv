@@ -5,15 +5,16 @@
 class StatusLine
 {
 private:
-	httpCode_t code_;
+	t_httpCode code_;
 	std::string httpVersion_;
 	std::string statusMessage_;
 public:
 	StatusLine();
 	~StatusLine();
 
-	void setFields(httpCode_t code, const std::string &message);
-	httpCode_t getCode();
+	void setFields(t_httpCode code, const std::string &message);
+
+	t_httpCode getCode() const;
 
 	friend std::string &operator+=(std::string &string, StatusLine &statusLine);
 	friend std::ostream &operator<<(std::ostream &stream, StatusLine &statusLine);

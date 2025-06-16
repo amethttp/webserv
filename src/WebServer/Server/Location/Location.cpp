@@ -10,7 +10,17 @@ void Location::setRoot(const std::string &root)
 	this->root_ = root;
 }
 
-void Location::setMethods(const std::set<method_t> &methods)
+void Location::setAutoIndex(bool mode)
+{
+	this->autoIndex_ = mode;
+}
+
+void Location::setIndex(const std::vector<std::string> indexes)
+{
+	this->index_ = indexes;
+}
+
+void Location::setMethods(const std::set<t_method> &methods)
 {
 	this->methods_ = methods;
 }
@@ -25,7 +35,17 @@ std::string Location::getRoot()
 	return this->root_;
 }
 
-std::set<method_t> Location::getMethods()
+std::set<t_method> Location::getMethods()
 {
 	return this->methods_;
+}
+
+bool Location::getAutoIndex(bool mode)
+{
+	return this->autoIndex_;
+}
+
+std::vector<std::string> Location::getIndex(const std::vector<std::string> indexes)
+{
+	return this->index_;
 }

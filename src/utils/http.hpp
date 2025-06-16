@@ -1,21 +1,21 @@
 #pragma once
 
-typedef enum connection_e
+typedef enum e_connection
 {
 	C_KEEP_ALIVE,
 	C_CLOSE
-} connection_t;
+} t_connection;
 
-typedef enum method_e
+typedef enum e_method
 {
 	M_GET,
 	M_POST,
 	M_DELETE,
 	M_NOT_IMPLEMENTED,
 	M_NOT_ALLOWED
-} method_t;
+} t_method;
 
-typedef enum httpCode_e
+typedef enum e_httpCode
 {
 	CONTINUE=100,
 	SWITCHING_PROTOCOLS=101,
@@ -61,4 +61,4 @@ typedef enum httpCode_e
 	SERVICE_UNAVAILABLE=503,
 	GATEWAY_TIME_OUT=504,
 	HTTP_VERSION_NOT_SUPPORTED=505
-} httpCode_t;
+} t_httpCode;

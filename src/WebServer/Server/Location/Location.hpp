@@ -26,16 +26,20 @@ private:
 	bool autoIndex_;
 	std::vector<std::string> index_;
 	size_t clientMaxBodySize_; // In bytes
-	std::set<method_t> methods_;
+	std::set<t_method> methods_;
 	return_t return_;
 	std::set<error_page_t> errorPages_;
 
 public:
 	void setPath(const std::string &path);
 	void setRoot(const std::string &root);
-	void setMethods(const std::set<method_t> &methods);
+	void setAutoIndex(bool mode);
+	void setIndex(const std::vector<std::string> indexes);
+	void setMethods(const std::set<t_method> &methods);
 
 	std::string getPath();
 	std::string getRoot();
-	std::set<method_t> getMethods();
+	std::set<t_method> getMethods();
+	bool getAutoIndex(bool mode);
+	std::vector<std::string> getIndex(const std::vector<std::string> indexes);
 };

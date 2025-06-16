@@ -3,42 +3,34 @@
 #include <string>
 #include "utils/http.hpp"
 #include "StatusLine/StatusLine.hpp"
-#include "../Request/Request.hpp"
-
-#include "../../Server/Server.hpp"
-#include "../../Server/Location/Location.hpp"
+#include "Parameters/Parameters.hpp"
+#include "WebServer/Server/Server.hpp"
+#include "WebServer/Client/Request/Request.hpp"
+#include "WebServer/Server/Location/Location.hpp"
 
 class Response
 {
 private:
-	static std::map<httpCode_t, std::string> errorDict_;
+	static std::map<t_httpCode, std::string> errorDict_;
 	static std::map<std::string, std::string> extensionTypesDict_;
 
-	bool endConnection_;
-
 	std::string buffer_;
-
-	method_t method_;
-	std::string targetPath_;
 
 	StatusLine statusLine_;
 	std::map<std::string, std::string> headers_;
 	std::string body_;
 
 	std::string getMIME(std::string &target);
-	void setStatusLine(httpCode_t code);
-	void setResponseHeaders();
+	void setStatusLine(t_httpCode code);
+	void setResponseHeaders(t_connection mode);
 	void setRepresentationHeaders(std::string &target);
-	void setParameters(Request &request);
 	
-	void generateResponse(httpCode_t code);
+	void generateResponse(t_httpCode code, t_connection mode);
 
-	void checkRequestHeaders(Request &request);
-
-	void methodGet();
-	void methodPost();
-	void methodDelete();
-	void executeRequest();
+	t_httpCode methodGet(std::string targetPath);
+	t_httpCode methodPost(std::string targetPath);
+	t_httpCode methodDelete(std::string targetPath);
+	t_httpCode executeRequest(const Parameters &p);
 public:
 	Response();
 	~Response();
@@ -47,12 +39,11 @@ public:
 	void setBuffer(const std::string &buffer);
 	void eraseBuffer(size_t bytesToErase);
 
-	std::string getBuffer();
-	std::string getBody();
-	httpCode_t getStatusCode();
-	bool getConnection();
+	std::string getBuffer() const;
+	std::string getBody() const;
+	t_httpCode getStatusCode() const;
+	bool getConnection() const;
 
-
-	void build(Request &request);
-	void build(httpCode_t code, connection_t mode);
+	void build(const Parameters &responseParams);
+	void build(t_httpCode code, t_connection mode);
 };

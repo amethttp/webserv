@@ -18,7 +18,7 @@ class Request
 private:
 	static const std::string tchars;
 
-	method_t method_;
+	t_method method_;
 	std::string target_;
 	std::string httpVersion_;
 	std::map<std::string, std::string> headers_;
@@ -26,7 +26,7 @@ private:
 	std::string buffer_;
 	bool complete_;
 
-	method_t getHTTPMethod(const std::string &method);
+	t_method getHTTPMethod(const std::string &method);
 	bool isValidHeaderKey(const std::string &key);
 	bool isValidHeaderValue(const std::string &value);
 	bool isValidHeader(const std::string &key, const std::string &value);
@@ -48,14 +48,15 @@ public:
 	bool hasFullHeaders();
 	bool tryParseFromBuffer();
 
-	method_t getMethod();
+	t_method getMethod();
 	std::string getBuffer();
 	std::string getTarget();
 	std::string getHTTPVersion();
 	std::map<std::string, std::string>  getHeaders();
+	bool isComplete();
 
 	void setComplete(bool status);
-	bool isComplete();
+	void setMethod(t_method method);
 
 	friend std::ostream &operator<<(std::ostream &stream, Request &request);
 };

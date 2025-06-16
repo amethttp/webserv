@@ -7,9 +7,9 @@
 #include <ctime>
 #include <vector>
 
-static std::map<httpCode_t, std::string> initializeErrorDict()
+static std::map<t_httpCode, std::string> initializeErrorDict()
 {
-	std::map<httpCode_t, std::string> tempMap;
+	std::map<t_httpCode, std::string> tempMap;
 
 	tempMap[CONTINUE] = "Continue";
 	tempMap[SWITCHING_PROTOCOLS] = "Switching Protocols";
@@ -55,7 +55,7 @@ static std::map<httpCode_t, std::string> initializeErrorDict()
 	return tempMap;
 }
 
-std::map<httpCode_t, std::string> Response::errorDict_ = initializeErrorDict();
+std::map<t_httpCode, std::string> Response::errorDict_ = initializeErrorDict();
 
 static std::map<std::string, std::string> initializeExtensionDict()
 {
@@ -84,7 +84,6 @@ std::map<std::string, std::string> Response::extensionTypesDict_ = initializeExt
 
 Response::Response()
 {
-	this->endConnection_ = C_KEEP_ALIVE;
 }
 
 static int checkPath(std::string &path)
@@ -116,24 +115,30 @@ void Response::setBuffer(const std::string &buffer)
 	this->buffer_ = buffer;
 }
 
-std::string Response::getBuffer()
+std::string Response::getBuffer() const
 {
 	return this->buffer_;
 }
 
-std::string Response::getBody()
+std::string Response::getBody() const
 {
 	return this->body_;
 }
 
-httpCode_t Response::getStatusCode()
+t_httpCode Response::getStatusCode() const
 {
 	return this->statusLine_.getCode();
 }
 
-bool Response::getConnection()
+bool Response::getConnection() const
 {
-    return this->endConnection_;
+    if (this->headers_.find("Connection") != this->headers_.end())
+	{
+		if (this->headers_.at("Connection") == "close")
+			return C_CLOSE;
+	}
+
+	return C_KEEP_ALIVE;
 }
 
 void Response::eraseBuffer(size_t bytesToErase)
@@ -178,7 +183,7 @@ static std::string getImfFixdate()
 	return std::string("");
 }
 
-void Response::setStatusLine(httpCode_t code)
+void Response::setStatusLine(t_httpCode code)
 {
 	if (this->errorDict_.find(code) == this->errorDict_.end())
 	{
@@ -195,11 +200,11 @@ void Response::setStatusLine(httpCode_t code)
 	this->statusLine_.setFields(code, this->errorDict_[code]);
 }
 
-void Response::setResponseHeaders()
+void Response::setResponseHeaders(t_connection mode)
 {
 	this->headers_["Server"] = "Amethttp";
 	this->headers_["Date"] = getImfFixdate();
-	this->headers_["Connection"] = this->endConnection_ ? "close" : "keep-alive";
+	this->headers_["Connection"] = mode ? "close" : "keep-alive";
 }
 
 std::string Response::getMIME(std::string &target)
@@ -226,59 +231,51 @@ void Response::setRepresentationHeaders(std::string &target)
 	this->headers_["Content-Length"] = length.str();
 }
 
-void Response::generateResponse(httpCode_t code)
+void Response::generateResponse(t_httpCode code, t_connection mode)
 {
-	this->setResponseHeaders();
+	this->setResponseHeaders(mode);
 	setStatusLine(code);
 }
 
-void Response::methodGet()
+t_httpCode Response::methodGet(std::string targetPath)
 {
 	int statCheck;
 
-	statCheck = checkPath(this->targetPath_);
+	statCheck = checkPath(targetPath);
 	switch (statCheck)
 	{
 		case S_IFREG:
-			readFileToString(this->targetPath_.c_str(), this->body_);
-			this->setRepresentationHeaders(this->targetPath_);
-			this->generateResponse(OK);
-			break;
+			readFileToString(targetPath.c_str(), this->body_);
+			this->setRepresentationHeaders(targetPath);
+			return OK;
 		case S_IFDIR:
 			// autoindex html display...
-			this->generateResponse(OK);
-			break;
+			return OK;
 		case EACCES:
-			this->generateResponse(FORBIDDEN);
-			break;
+			return FORBIDDEN;
 
 		default:
-			this->generateResponse(NOT_FOUND);
-			break;
+			return NOT_FOUND;
 	}
 }
 
-void Response::methodPost()
+t_httpCode Response::methodPost(std::string targetPath)
 {
 	int statCheck;
 
-	statCheck = checkPath(this->targetPath_);
+	statCheck = checkPath(targetPath);
 	switch (statCheck)
 	{
 		case S_IFREG:
 			// M_POSTTTTTT
-			this->generateResponse(OK);
-			break;
+			return OK;
 		case EACCES:
 		case S_IFDIR:
-			this->generateResponse(FORBIDDEN);
-			break;
+			return FORBIDDEN;
 
 		default:
-			this->generateResponse(NOT_FOUND);
-			break;
+			return NOT_FOUND;
 	}
-
 }
 
 static void removeFile(const char *path)
@@ -287,129 +284,61 @@ static void removeFile(const char *path)
 		throw std::runtime_error("Couldn't remove resource");
 }
 
-void Response::methodDelete()
+t_httpCode Response::methodDelete(std::string targetPath)
 {
 	int statCheck;
 
-	statCheck = checkPath(this->targetPath_);
+	statCheck = checkPath(targetPath);
 	switch (statCheck)
 	{
 		case S_IFREG:
-			removeFile(this->targetPath_.c_str());
-			this->generateResponse(NO_CONTENT);
-			break;
+			removeFile(targetPath.c_str());
+			return NO_CONTENT;
 		case EACCES:
 		case S_IFDIR:
-			this->generateResponse(FORBIDDEN);
-			break;
+			return FORBIDDEN;
 
 		default:
-			this->generateResponse(NOT_FOUND);
-			break;
+			return NOT_FOUND;
 	}
 }
 
-static Location matchLocation(Server &server, Request &request)
+t_httpCode Response::executeRequest(const Parameters &p)
 {
-	return server.getLocations().at(0);
-}
-
-static std::string routeTarget(Request &request, Location &location)
-{
-	std::string path;
-
-	path = location.getPath() + request.getTarget();
-
-	return path;
-}
-
-static method_t fitMethod(method_t method, Location &location)
-{
-	if (method == M_NOT_IMPLEMENTED)
-		return M_NOT_IMPLEMENTED;
-
-	std::set<method_t> allowedMethods = location.getMethods();
-
-	if (allowedMethods.find(method) != allowedMethods.end())
-	{
-		return method;
-	}
-
-	return M_NOT_ALLOWED;
-}
-
-void Response::checkRequestHeaders(Request &request)
-{
-	std::map<std::string, std::string> reqHeaders = request.getHeaders();
-
-	if (reqHeaders.find("Connection") != reqHeaders.end())
-	{
-		if (reqHeaders["Connection"] == "close")
-			this->endConnection_ = C_CLOSE;
-	}
-}
-
-void Response::executeRequest()
-{
-	switch (this->method_)
+	switch (p.getMethod())
 	{
 		case M_GET:
-			this->methodGet();
-			break ;
+			return this->methodGet(p.getTargetPath());
 		case M_POST:
-			this->methodPost();
-			break ;
+			return this->methodPost(p.getTargetPath());
 		case M_DELETE:
-			this->methodDelete();
-			break ;
+			return this->methodDelete(p.getTargetPath());
 		case M_NOT_ALLOWED:
-			this->generateResponse(METHOD_NOT_ALLOWED);
-			break ;
+			return METHOD_NOT_ALLOWED;
 		
 		default:
-			this->generateResponse(NOT_IMPLEMENTED);
-			break ;
+			return NOT_IMPLEMENTED;
 	}
 }
 
-void Response::setParameters(Request &request)
+void Response::build(const Parameters &params) 
 {
-	Server testServer;
+	t_httpCode code;
+	t_connection mode;
 
-	Location location;
-	std::vector<Location> testLocations;
-	std::set<method_t> allowedMethods;
+	this->buffer_.clear();
 
-	allowedMethods.insert(M_GET);
-	allowedMethods.insert(M_POST);
-	location.setPath("tests");
-	location.setRoot("/");
-	location.setMethods(allowedMethods);
-	testLocations.push_back(location);
-	testServer.setLocations(testLocations);
+	code = this->executeRequest(params);
+	mode = params.getConnectionMode();
 
-	location = matchLocation(testServer, request);
-
-	this->targetPath_ = routeTarget(request, location);
-	this->method_ = fitMethod(request.getMethod(), location);
-
-	this->checkRequestHeaders(request);
+	this->generateResponse(code, mode);
 }
 
-void Response::build(Request &request) // overload for building standard errror responses
+void Response::build(t_httpCode code, t_connection mode)
 {
-	this->setParameters(request);
-	this->executeRequest();
+	this->buffer_.clear();
 
-	this->buffer_ = this->toString();
-}
-
-void Response::build(httpCode_t code, connection_t mode)
-{
-	this->endConnection_ = mode;
-	this->generateResponse(code);
-
-	this->buffer_ = this->toString();
+	this->generateResponse(code, mode);
 }
 
 Response::~Response()

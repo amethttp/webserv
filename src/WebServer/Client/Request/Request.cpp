@@ -16,7 +16,7 @@ Request::~Request()
 {
 }
 
-method_t Request::getHTTPMethod(const std::string &method)
+t_method Request::getHTTPMethod(const std::string &method)
 {
 	if (method == "GET")
 		return M_GET;
@@ -145,9 +145,11 @@ bool Request::tryParseFullBody()
 
 	if (this->headers_.find(CONTENT_LENGTH) == this->headers_.end())
 	{
+
 		if (!tempBuffer.empty())
 			return false;
 		this->complete_ = true;
+
 		return true;
 	}
 
@@ -233,7 +235,7 @@ bool Request::tryParseFromBuffer()
 	if (this->target_.empty() && !tryParseRequestLine(bufferLines.front()))
 		return false;
 
-	if (this->headers_.empty() && !tryParseHeaders(bufferLines)) // return false || what to do with http version
+	if (this->headers_.empty() && !tryParseHeaders(bufferLines))
 		return false;
 
 	if (!tryParseBody(bufferLines))
@@ -242,7 +244,7 @@ bool Request::tryParseFromBuffer()
 	return this->complete_;
 }
 
-method_t Request::getMethod()
+t_method Request::getMethod()
 {
     return this->method_;
 }
@@ -265,6 +267,11 @@ std::map<std::string, std::string> Request::getHeaders()
 void Request::setComplete(bool status)
 {
 	this->complete_ = status;
+}
+
+void Request::setMethod(t_method method)
+{
+	this->method_ = method;
 }
 
 bool Request::isComplete()
