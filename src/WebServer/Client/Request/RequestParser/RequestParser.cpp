@@ -2,32 +2,53 @@
 #include "utils/string/string.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 
+RequestParser::RequestParser(const RequestTokenizer &tokenizer)
+    : tokenizer_(tokenizer), currentToken_(tokenizer_.getNextToken())
+{
+}
+
 static method_t parseRequestMethod(const std::string &requestMethod)
 {
-    RequestTokenizer tokenizer(requestMethod);
-    RequestToken token = tokenizer.getNextToken();
-
-    if (token.getValue() == "GET")
+    if (requestMethod == "GET")
         return GET;
-    if (token.getValue() == "POST")
+    if (requestMethod == "POST")
         return POST;
-    if (token.getValue() == "DELETE")
+    if (requestMethod == "DELETE")
         return DELETE;
     return NOT_IMPLEMENTED;
+}
+
+void RequestParser::eat(tokenType_t type)
+{
+    if (this->currentToken_.getType() == type)
+        this->currentToken_ = this->tokenizer_.getNextToken();
+    else
+        error();
+}
+
+void RequestParser::error()
+{
+    throw std::invalid_argument("Request Parser Error");
 }
 
 Result<RequestLineParams_t> RequestParser::parseRequestLine(const std::string &requestLine)
 {
     RequestLineParams_t params;
+
+    params.method = parseRequestMethod(this->currentToken_.getValue());
+    eat(METHOD);
+
+    eat(SP);
+
     std::vector<std::string> splittedRequestLine = split(requestLine, " ");
 
     if (splittedRequestLine.size() != 3)
         return Result<RequestLineParams_t>::fail("400 Bad Request");
 
-    if (splittedRequestLine[0].empty())
-        return Result<RequestLineParams_t>::fail("400 Bad Request");
-
-    params.method = parseRequestMethod(splittedRequestLine[0]);
+    // if (splittedRequestLine[0].empty())
+    //     return Result<RequestLineParams_t>::fail("400 Bad Request");
+    //
+    // params.method = parseRequestMethod(splittedRequestLine[0]);
 
     if (params.method == NOT_IMPLEMENTED)
         return Result<RequestLineParams_t>::fail("501 Not Implemented");

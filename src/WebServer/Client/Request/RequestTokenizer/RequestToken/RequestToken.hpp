@@ -2,20 +2,24 @@
 
 #include <string>
 
-#define METHOD "METHOD"
-#define EOF "EOF"
+typedef enum tokenType_e
+{
+    METHOD,
+    SP,
+    EOF
+} tokenType_t;
 
 class RequestToken
 {
 private:
-    std::string type_;
+    tokenType_t type_;
     std::string value_;
 
 public:
-    RequestToken(const std::string &type, const std::string &value);
+    RequestToken(tokenType_t type, const std::string &value);
     ~RequestToken();
 
-    std::string getType();
+    tokenType_t getType() const;
     std::string getValue();
 
     std::string toString() const;

@@ -6,9 +6,11 @@
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 {
     Request_t request;
-    RequestParser requestParser;
 
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
+
+    RequestTokenizer tokenizer = RequestTokenizer(splittedRequestBuffer[0]);
+    RequestParser requestParser = RequestParser(tokenizer);
 
     Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine(splittedRequestBuffer[0]);
 

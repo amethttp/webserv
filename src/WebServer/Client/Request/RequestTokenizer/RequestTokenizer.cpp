@@ -1,5 +1,4 @@
 #include "RequestTokenizer.hpp"
-
 #include <stdexcept>
 
 RequestTokenizer::RequestTokenizer(const std::string &text)
@@ -40,6 +39,12 @@ RequestToken RequestTokenizer::getNextToken()
 
     if (std::isalpha(this->currentChar_))
         return RequestToken(METHOD, httpMethod());
+
+    if (this->currentChar_ == ' ')
+    {
+        advance();
+        return RequestToken(SP, " ");
+    }
 
     return RequestToken(EOF, "");
 }
