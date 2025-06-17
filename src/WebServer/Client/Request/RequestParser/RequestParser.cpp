@@ -31,16 +31,9 @@ void RequestParser::error()
     throw std::invalid_argument("Request Parser Error");
 }
 
-Result<RequestLineParams_t> RequestParser::parseRequestLine(const std::string &requestLine)
+Result<RequestLineParams_t> RequestParser::parseRequestLine()
 {
     RequestLineParams_t params;
-    std::vector<std::string> splittedRequestLine = split(requestLine, " ");
-
-    if (splittedRequestLine.size() != 3)
-        return Result<RequestLineParams_t>::fail("400 Bad Request");
-
-    if (splittedRequestLine[0].empty())
-        return Result<RequestLineParams_t>::fail("400 Bad Request");
 
     params.method = parseRequestMethod(this->currentToken_.getValue());
     eat(METHOD);

@@ -18,6 +18,6 @@ private:
 public:
     RequestParser(const RequestTokenizer &tokenizer);
 
-    Result<RequestLineParams_t> parseRequestLine(const std::string &requestLine);
+    Result<RequestLineParams_t> parseRequestLine();
     void parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer);
 };

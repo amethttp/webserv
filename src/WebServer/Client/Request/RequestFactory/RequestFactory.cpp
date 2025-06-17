@@ -13,7 +13,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     RequestTokenizer tokenizer = RequestTokenizer(requestLine);
     RequestParser requestParser = RequestParser(tokenizer);
 
-    Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine(requestLine);
+    Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine();
 
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());

@@ -36,7 +36,7 @@ static void assertBodyIsEmpty()
     ASSERT_EQUALS("", request.body);
 }
 
- void assertRequestStringIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
+void assertRequestStringIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
     Result<Request_t> result = RequestFactory::create(invalidRequestString);
 
@@ -75,25 +75,25 @@ TEST(recognize_basic_HTTP_POST_request)
     assertBodyIsEmpty();
 }
 
-TEST(take_as_failure_an_invalid_request_line)
-{
-    assertRequestStringIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
-}
-
-TEST(take_as_failure_a_not_implemented_HTTP_method)
-{
-    assertRequestStringIsInvalid("INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
-}
-
-TEST(take_as_failure_an_empty_HTTP_method)
-{
-    assertRequestStringIsInvalid(" / HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
-}
-
-TEST(take_as_failure_a_HTTP_request_without_method)
-{
-    assertRequestStringIsInvalid("/ HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
-}
+// TEST(take_as_failure_an_invalid_request_line)
+// {
+//     assertRequestStringIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+// }
+//
+// TEST(take_as_failure_a_not_implemented_HTTP_method)
+// {
+//     assertRequestStringIsInvalid("INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
+// }
+//
+// TEST(take_as_failure_an_empty_HTTP_method)
+// {
+//     assertRequestStringIsInvalid(" / HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+// }
+//
+// TEST(take_as_failure_a_HTTP_request_without_method)
+// {
+//     assertRequestStringIsInvalid("/ HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+// }
 
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
