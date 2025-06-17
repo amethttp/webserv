@@ -39,7 +39,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     eat(METHOD);
 
     if (params.method == NOT_IMPLEMENTED)
-        return Result<RequestLineParams_t>::fail("501 Not Implemented");
+        return Result<RequestLineParams_t>::fail("400 Bad Request");
 
     eat(SP);
 
