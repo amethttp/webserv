@@ -44,7 +44,7 @@ public:
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	void executeRequest(Parameters &responseParams);
+	void executeRequest(std::vector<Server> &servers);
 	void buildResponse(std::vector<Server> &servers);
 	void buildResponse(t_httpCode code, t_connection mode);
 };

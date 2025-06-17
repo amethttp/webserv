@@ -7,6 +7,7 @@
 #include <ctime>
 #include <vector>
 #include <dirent.h>
+#include <unistd.h>
 
 static std::map<t_httpCode, std::string> initializeErrorDict()
 {
@@ -93,6 +94,8 @@ static int checkPath(std::string &path)
 
 	if (stat(path.c_str(), &st))
 		return errno;
+	if (access(path.c_str(), R_OK))
+		return EACCES;
 
 	return (st.st_mode & S_IFMT);
 }
@@ -177,10 +180,14 @@ static std::string getImfFixdate()
     std::time_t timeNow = std::time(NULL);
     std::tm *gmt = std::gmtime(&timeNow);
     std::string res;
+	size_t resSize;
 	
-	res.resize(30);
-    if (std::strftime(&res[0], res.size(), "%a, %d %b %Y %H:%M:%S GMT", gmt))
+	res.resize(50);
+    if ((resSize = std::strftime(&res[0], res.size(), "%a, %d %b %Y %H:%M:%S GMT", gmt)))
+	{
+		res.resize(resSize);
         return res;
+	}
 	return std::string("");
 }
 
@@ -248,13 +255,6 @@ t_httpCode Response::getFile(std::string &target)
 	return OK;
 }
 
-static void closeHTML(std::ostringstream &html)
-{
-	html << "</ul>\n"
-		<< "</body>\n"
-	<< "</html>\n";
-}
-
 static void startHTML(std::ostringstream &html, const std::string &targetName)
 {
 	html << "<!DOCTYPE html>\n"
@@ -267,6 +267,13 @@ static void startHTML(std::ostringstream &html, const std::string &targetName)
 				<< "<ul>\n";
 }
 
+static void closeHTML(std::ostringstream &html)
+{
+	html << "</ul>\n"
+		<< "</body>\n"
+	<< "</html>";
+}
+
 t_httpCode Response::tryAutoIndex(Parameters &p)
 {
 	if (!p.location_.getAutoIndex())
@@ -274,8 +281,9 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 
 	DIR *d;
 	struct dirent *dir;
-	std::string type = extensionTypesDict_[".html"];
+	std::string name;
 	std::ostringstream html;
+	std::string type = extensionTypesDict_[".html"];
 
 	d = opendir(p.targetPath_.c_str());
 	if (d)
@@ -284,19 +292,21 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 		dir = readdir(d);
 		while (dir != NULL)
 		{
-			if (dir->d_name[0] && dir->d_name[0] != '.')
-			{
-				html << "<li><a href=\"" << dir->d_name << "\"" << dir->d_name <<"</a></li>\n";
-			}
+			// if (dir->d_type == DT_REG || dir->d_type == DT_LNK || dir->d_type == DT_UNKNOWN)
+			name = dir->d_name;
+			if (dir->d_type == DT_DIR)
+				name += "/";
+			html << "<li><a href=\"" << name << "\">" << name <<"</a></li>\n";
 			dir = readdir(d);
 		}
 		closedir(d);
 		closeHTML(html);
 		this->body_ = html.str();
 		this->setRepresentationHeaders(type);
+		return OK;
 	}
 
-	return OK;	
+	return FORBIDDEN;
 }
 
 t_httpCode Response::methodGet(Parameters &p)
@@ -386,7 +396,7 @@ void Response::build(Parameters &params)
 	t_httpCode code;
 	t_connection mode;
 
-	this->buffer_.clear();
+	this->clear();
 
 	code = this->executeRequest(params);
 	mode = params.getConnectionMode();
@@ -396,9 +406,16 @@ void Response::build(Parameters &params)
 
 void Response::build(t_httpCode code, t_connection mode)
 {
-	this->buffer_.clear();
+	this->clear();
 
 	this->generateResponse(code, mode);
+}
+
+void Response::clear()
+{
+	this->buffer_.clear();
+	this->headers_.clear();
+	this->body_.clear();
 }
 
 Response::~Response()

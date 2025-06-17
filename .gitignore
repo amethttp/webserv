@@ -35,3 +35,6 @@ webserv
 
 # IDEs
 .vscode/
+
+# Test files
+imgtest.png

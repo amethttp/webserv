@@ -48,6 +48,8 @@ public:
 	t_httpCode getStatusCode() const;
 	bool getConnection() const;
 
+	void clear();
+
 	void build(Parameters &responseParams);
 	void build(t_httpCode code, t_connection mode);
 };
