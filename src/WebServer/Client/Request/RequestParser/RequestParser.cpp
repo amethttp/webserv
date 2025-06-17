@@ -35,21 +35,28 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
 {
     RequestLineParams_t params;
 
-    params.method = parseRequestMethod(this->currentToken_.getValue());
-    eat(METHOD);
+    try
+    {
+        params.method = parseRequestMethod(this->currentToken_.getValue());
+        eat(METHOD);
 
-    if (params.method == NOT_IMPLEMENTED)
+        eat(SP);
+
+        params.target = this->currentToken_.getValue();
+        eat(TARGET);
+
+        eat(SP);
+
+        params.httpVersion = this->currentToken_.getValue();
+        eat(HTTP_VERSION);
+
+        if (params.method == NOT_IMPLEMENTED)
+            return Result<RequestLineParams_t>::fail("501 Not Implemented");
+    }
+    catch (const std::invalid_argument &e)
+    {
         return Result<RequestLineParams_t>::fail("400 Bad Request");
-
-    eat(SP);
-
-    params.target = this->currentToken_.getValue();
-    eat(TARGET);
-
-    eat(SP);
-
-    params.httpVersion = this->currentToken_.getValue();
-    eat(HTTP_VERSION);
+    }
 
     return Result<RequestLineParams_t>::ok(params);
 }
