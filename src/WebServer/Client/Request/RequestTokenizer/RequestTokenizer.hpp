@@ -10,8 +10,6 @@ private:
     size_t pos_;
     char currentChar_;
 
-    bool isHTTPMethod();
-
 public:
     RequestTokenizer(const std::string &text);
     ~RequestTokenizer();

@@ -1,16 +1,6 @@
 #include "RequestTokenizer.hpp"
 #include <stdexcept>
 
-bool RequestTokenizer::isHTTPMethod()
-{
-    size_t endPos = this->text_.find(' ', this->pos_);
-    std::string methodString = this->text_.substr(this->pos_, endPos - this->pos_);
-
-    return (methodString == "GET"
-            || methodString == "POST"
-            || methodString == "DELETE");
-}
-
 RequestTokenizer::RequestTokenizer(const std::string &text)
 {
     this->text_ = text;
@@ -59,7 +49,7 @@ RequestToken RequestTokenizer::getNextToken()
 
     this->currentChar_ = this->text_[this->pos_];
 
-    if (isHTTPMethod())
+    if (std::isalpha(this->currentChar_) && this->pos_ == 0)
         return RequestToken(METHOD, httpMethod());
 
     if (this->currentChar_ == ' ')
