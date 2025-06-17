@@ -69,12 +69,3 @@ RequestToken RequestTokenizer::getNextToken()
 
     return RequestToken(EOF, "");
 }
-
-void RequestTokenizer::error() const
-{
-    const std::string message = std::string("Invalid character: ") + this->currentChar_;
-
-    throw std::invalid_argument(message);
-}
-
-

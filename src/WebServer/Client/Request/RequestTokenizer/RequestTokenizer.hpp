@@ -20,5 +20,4 @@ public:
     std::string httpVersion();
 
     RequestToken getNextToken();
-    void error() const;
 };
