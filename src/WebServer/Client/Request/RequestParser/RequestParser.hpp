@@ -6,13 +6,19 @@
 #include "WebServer/Client/Request/RequestTokenizer/RequestToken/RequestToken.hpp"
 #include <vector>
 
+typedef enum result_e
+{
+    SUCCESS,
+    FAIL
+} result_t;
+
 class RequestParser
 {
 private:
     RequestTokenizer tokenizer_;
     RequestToken currentToken_;
 
-    int eat(tokenType_t type);
+    result_t eat(tokenType_t type);
     void error();
 
 public:

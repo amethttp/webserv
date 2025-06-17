@@ -18,13 +18,13 @@ static method_t parseRequestMethod(const std::string &requestMethod)
     return NOT_IMPLEMENTED;
 }
 
-int RequestParser::eat(tokenType_t type)
+result_t RequestParser::eat(tokenType_t type)
 {
     if (this->currentToken_.getType() != type)
-        return 1;
+        return FAIL;
 
     this->currentToken_ = this->tokenizer_.getNextToken();
-    return 0;
+    return SUCCESS;
 }
 
 void RequestParser::error()
