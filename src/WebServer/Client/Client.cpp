@@ -135,20 +135,23 @@ static Location getLocationPH(Request &request, std::vector<Server> &servers)
 	return matchLocation(request, server); // this prob belongs to server
 }
 
+void Client::executeRequest(Parameters &responseParams)
+{
+	if (this->request_.getHTTPVersion() == "HTTP/1.1")
+		this->response_.build(responseParams);
+	else
+		this->response_.build(HTTP_VERSION_NOT_SUPPORTED, C_KEEP_ALIVE);
+}
+
+// instead of build response implement request executor 
 void Client::buildResponse(std::vector<Server> &servers)
 {
 	// match server...
 	Location location = getLocationPH(this->request_, servers);
-
 	Parameters responseParams(this->request_, location);
 
 	if (this->request_.isComplete())
-	{
-		if (this->request_.getHTTPVersion() == "HTTP/1.1")
-			this->response_.build(responseParams);
-		else
-			this->response_.build(HTTP_VERSION_NOT_SUPPORTED, C_KEEP_ALIVE);
-	}
+		this->executeRequest(responseParams);
 	else
 		this->response_.build(BAD_REQUEST, C_CLOSE);
 }
