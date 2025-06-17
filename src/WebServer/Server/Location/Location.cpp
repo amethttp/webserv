@@ -40,7 +40,7 @@ std::set<t_method> Location::getMethods()
 	return this->methods_;
 }
 
-bool Location::getAutoIndex(bool mode)
+bool Location::getAutoIndex()
 {
 	return this->autoIndex_;
 }

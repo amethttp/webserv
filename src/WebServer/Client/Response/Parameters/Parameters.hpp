@@ -7,7 +7,7 @@
 
 class Parameters
 {
-private:
+public:
 	t_method method_;
 	Request &request_;
 	Location &location_;

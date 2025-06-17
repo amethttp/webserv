@@ -11,26 +11,30 @@
 class Response
 {
 private:
-	static std::map<t_httpCode, std::string> errorDict_;
-	static std::map<std::string, std::string> extensionTypesDict_;
+	static std::map<t_httpCode, std::string> errorDict_; // to client
+	static std::map<std::string, std::string> extensionTypesDict_; // to client
 
-	std::string buffer_;
+	std::string buffer_; // to client
 
 	StatusLine statusLine_;
-	std::map<std::string, std::string> headers_;
+	std::map<std::string, std::string> headers_; // make response a dto/simpler class
 	std::string body_;
 
-	std::string getMIME(std::string &target);
+	// to response generator
 	void setStatusLine(t_httpCode code);
 	void setResponseHeaders(t_connection mode);
 	void setRepresentationHeaders(std::string &target);
 	
 	void generateResponse(t_httpCode code, t_connection mode);
 
-	t_httpCode methodGet(std::string targetPath);
-	t_httpCode methodPost(std::string targetPath);
-	t_httpCode methodDelete(std::string targetPath);
-	t_httpCode executeRequest(const Parameters &p);
+	// request executor
+	std::string getMIME(std::string &target);
+	t_httpCode tryAutoIndex(Parameters &p);
+	t_httpCode getFile(std::string &target);
+	t_httpCode methodGet(Parameters &p);
+	t_httpCode methodPost(Parameters &p);
+	t_httpCode methodDelete(Parameters &p);
+	t_httpCode executeRequest(Parameters &p);
 public:
 	Response();
 	~Response();
@@ -44,6 +48,6 @@ public:
 	t_httpCode getStatusCode() const;
 	bool getConnection() const;
 
-	void build(const Parameters &responseParams);
+	void build(Parameters &responseParams);
 	void build(t_httpCode code, t_connection mode);
 };

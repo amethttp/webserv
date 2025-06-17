@@ -288,9 +288,9 @@ std::ostream &operator<<(std::ostream &stream, Request &request)
 
 	stream << "  - Method: ";
 	if (request.method_ == M_GET)
-		stream << "DELETE" << std::endl;
+		stream << "GET" << std::endl;
 	else if (request.method_ == M_POST)
-		stream << "DELETE" << std::endl;
+		stream << "POST" << std::endl;
 	else if (request.method_ == M_DELETE)
 		stream << "DELETE" << std::endl;
 	else

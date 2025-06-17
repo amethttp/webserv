@@ -40,6 +40,6 @@ public:
 	std::string getPath();
 	std::string getRoot();
 	std::set<t_method> getMethods();
-	bool getAutoIndex(bool mode);
+	bool getAutoIndex();
 	std::vector<std::string> getIndex(const std::vector<std::string> indexes);
 };

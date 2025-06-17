@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <ctime>
 #include <vector>
+#include <dirent.h>
 
 static std::map<t_httpCode, std::string> initializeErrorDict()
 {
@@ -222,12 +223,12 @@ std::string Response::getMIME(std::string &target)
 	return res;
 }
 
-void Response::setRepresentationHeaders(std::string &target)
+void Response::setRepresentationHeaders(std::string &mimeType)
 {
 	std::ostringstream length;
 
 	length << this->body_.length();
-	this->headers_["Content-Type"] = this->getMIME(target);
+	this->headers_["Content-Type"] = mimeType;
 	this->headers_["Content-Length"] = length.str();
 }
 
@@ -237,20 +238,78 @@ void Response::generateResponse(t_httpCode code, t_connection mode)
 	setStatusLine(code);
 }
 
-t_httpCode Response::methodGet(std::string targetPath)
+t_httpCode Response::getFile(std::string &target)
+{
+	std::string type = getMIME(target);
+
+	readFileToString(target.c_str(), this->body_);
+	this->setRepresentationHeaders(type);
+
+	return OK;
+}
+
+static void closeHTML(std::ostringstream &html)
+{
+	html << "</ul>\n"
+		<< "</body>\n"
+	<< "</html>\n";
+}
+
+static void startHTML(std::ostringstream &html, const std::string &targetName)
+{
+	html << "<!DOCTYPE html>\n"
+		<< "<html>\n"
+			<< "<head>\n"
+				<< "<title>" << "Index: " << targetName << "</title>\n"
+			<< "</head>\n"
+			<< "<body>\n"
+				<< "<p>------------------------------</p>\n"
+				<< "<ul>\n";
+}
+
+t_httpCode Response::tryAutoIndex(Parameters &p)
+{
+	if (!p.location_.getAutoIndex())
+		return FORBIDDEN;
+
+	DIR *d;
+	struct dirent *dir;
+	std::string type = extensionTypesDict_[".html"];
+	std::ostringstream html;
+
+	d = opendir(p.targetPath_.c_str());
+	if (d)
+	{
+		startHTML(html, p.request_.getTarget());
+		dir = readdir(d);
+		while (dir != NULL)
+		{
+			if (dir->d_name[0] && dir->d_name[0] != '.')
+			{
+				html << "<li><a href=\"" << dir->d_name << "\"" << dir->d_name <<"</a></li>\n";
+			}
+			dir = readdir(d);
+		}
+		closedir(d);
+		closeHTML(html);
+		this->body_ = html.str();
+		this->setRepresentationHeaders(type);
+	}
+
+	return OK;	
+}
+
+t_httpCode Response::methodGet(Parameters &p)
 {
 	int statCheck;
 
-	statCheck = checkPath(targetPath);
+	statCheck = checkPath(p.targetPath_);
 	switch (statCheck)
 	{
 		case S_IFREG:
-			readFileToString(targetPath.c_str(), this->body_);
-			this->setRepresentationHeaders(targetPath);
-			return OK;
+			return getFile(p.targetPath_);
 		case S_IFDIR:
-			// autoindex html display...
-			return OK;
+			return tryAutoIndex(p);
 		case EACCES:
 			return FORBIDDEN;
 
@@ -259,11 +318,11 @@ t_httpCode Response::methodGet(std::string targetPath)
 	}
 }
 
-t_httpCode Response::methodPost(std::string targetPath)
+t_httpCode Response::methodPost(Parameters &p)
 {
 	int statCheck;
 
-	statCheck = checkPath(targetPath);
+	statCheck = checkPath(p.targetPath_);
 	switch (statCheck)
 	{
 		case S_IFREG:
@@ -278,22 +337,23 @@ t_httpCode Response::methodPost(std::string targetPath)
 	}
 }
 
-static void removeFile(const char *path)
+static t_httpCode removeFile(const char *path)
 {
 	if (std::remove(path) < 0)
 		throw std::runtime_error("Couldn't remove resource");
+
+	return NO_CONTENT;
 }
 
-t_httpCode Response::methodDelete(std::string targetPath)
+t_httpCode Response::methodDelete(Parameters &p)
 {
 	int statCheck;
 
-	statCheck = checkPath(targetPath);
+	statCheck = checkPath(p.targetPath_);
 	switch (statCheck)
 	{
 		case S_IFREG:
-			removeFile(targetPath.c_str());
-			return NO_CONTENT;
+			return removeFile(p.targetPath_.c_str());
 		case EACCES:
 		case S_IFDIR:
 			return FORBIDDEN;
@@ -303,16 +363,16 @@ t_httpCode Response::methodDelete(std::string targetPath)
 	}
 }
 
-t_httpCode Response::executeRequest(const Parameters &p)
+t_httpCode Response::executeRequest(Parameters &p)
 {
 	switch (p.getMethod())
 	{
 		case M_GET:
-			return this->methodGet(p.getTargetPath());
+			return this->methodGet(p);
 		case M_POST:
-			return this->methodPost(p.getTargetPath());
+			return this->methodPost(p);
 		case M_DELETE:
-			return this->methodDelete(p.getTargetPath());
+			return this->methodDelete(p);
 		case M_NOT_ALLOWED:
 			return METHOD_NOT_ALLOWED;
 		
@@ -321,7 +381,7 @@ t_httpCode Response::executeRequest(const Parameters &p)
 	}
 }
 
-void Response::build(const Parameters &params) 
+void Response::build(Parameters &params) 
 {
 	t_httpCode code;
 	t_connection mode;
