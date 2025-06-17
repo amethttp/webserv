@@ -77,10 +77,10 @@ TEST(recognize_basic_HTTP_POST_request)
 
 TEST(take_as_failure_an_invalid_request_line)
 {
-    // assertRequestStringIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+    assertRequestStringIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
     assertRequestStringIsInvalid("INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
-    // assertRequestStringIsInvalid(" / HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
-    // assertRequestStringIsInvalid("/ HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+    assertRequestStringIsInvalid(" / HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+    assertRequestStringIsInvalid("/ HTTP/1.1\r\nHost: localhost\r\n\r\n", "400 Bad Request");
 }
 
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
