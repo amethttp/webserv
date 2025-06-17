@@ -1,13 +1,17 @@
 #include "RequestParser.hpp"
 #include "utils/string/string.hpp"
+#include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 
 static method_t parseRequestMethod(const std::string &requestMethod)
 {
-    if (requestMethod == "GET")
+    RequestTokenizer tokenizer(requestMethod);
+    RequestToken token = tokenizer.getNextToken();
+
+    if (token.getValue() == "GET")
         return GET;
-    else if (requestMethod == "POST")
+    if (token.getValue() == "POST")
         return POST;
-    else if (requestMethod == "DELETE")
+    if (token.getValue() == "DELETE")
         return DELETE;
     return NOT_IMPLEMENTED;
 }

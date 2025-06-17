@@ -73,6 +73,8 @@ vpath %.cpp $(SRC):\
             $(SUITES_DIRECTORIES)\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/\
             $(PROJ_SRC)WebServer/Client/Request/RequestParser/\
+            $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/\
+            $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/RequestToken/\
             $(PROJ_SRC)utils/string/\
             $(PROJ_SRC)utils/Result/\
 			
@@ -84,6 +86,8 @@ SRCS = main.cpp \
        $(SUITES_FILES) \
        RequestFactory.cpp \
        RequestParser.cpp \
+       RequestTokenizer.cpp \
+       RequestToken.cpp \
        string.cpp \
        SimpleResult.cpp \
 
