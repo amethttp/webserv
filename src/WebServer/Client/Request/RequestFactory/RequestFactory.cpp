@@ -3,9 +3,9 @@
 #include "../RequestParser/RequestParser.hpp"
 #include <vector>
 
-Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
+Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 {
-    RequestInfo_t requestInfo;
+    Request_t request;
     RequestParser requestParser;
 
     std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
@@ -13,11 +13,11 @@ Result<RequestInfo_t> RequestFactory::create(const std::string &requestBuffer)
     Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine(splittedRequestBuffer[0]);
 
     if (requestLineResult.isFailure())
-        return Result<RequestInfo_t>::fail(requestLineResult.getError());
+        return Result<Request_t>::fail(requestLineResult.getError());
 
-    requestInfo.request.requestLine = requestLineResult.getValue();
+    request.requestLine = requestLineResult.getValue();
 
-    requestParser.parseHeaders(requestInfo.request, splittedRequestBuffer);
+    requestParser.parseHeaders(request, splittedRequestBuffer);
 
-    return Result<RequestInfo_t>::ok(requestInfo);
+    return Result<Request_t>::ok(request);
 }

@@ -9,9 +9,9 @@ namespace
 
 static Request_t createFromValidRequest(const std::string &requestString)
 {
-    Result<RequestInfo_t> result = RequestFactory::create(requestString);
+    Result<Request_t> result = RequestFactory::create(requestString);
 
-    return result.getValue().request;
+    return result.getValue();
 }
 
 static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
@@ -38,7 +38,7 @@ static void assertBodyIsEmpty()
 
 static void assertRequestStringIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
-    Result<RequestInfo_t> result = RequestFactory::create(invalidRequestString);
+    Result<Request_t> result = RequestFactory::create(invalidRequestString);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(errorMessage, result.getError());
