@@ -6,7 +6,7 @@
 #define TEST_IDENTATION "    "
 #define OK GREEN_BOLD << TEST_IDENTATION << "[ ✔ ] " << GREEN
 #define FAIL RED_BOLD << TEST_IDENTATION << "[ ✘ ] " << RED
-#define EXCP RED_BOLD << TEST_IDENTATION << "[ ! ] "
+#define EXCP RED_BOLD << TEST_IDENTATION << "[ ! ] " << RED
 
 static size_t executeTests(std::vector<TestCase_t> &tests)
 {
@@ -26,7 +26,7 @@ static size_t executeTests(std::vector<TestCase_t> &tests)
         }
         catch (std::exception &e)
         {
-            std::cerr << EXCP << "Uncaught exception in test: " << e.what() << RESET << std::endl;
+            std::cerr << EXCP << tests[j].name << " ---> Uncaught exception in test: " << e.what() << RESET << std::endl;
         }
     }
     return passed;
