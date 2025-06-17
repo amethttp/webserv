@@ -12,7 +12,7 @@ private:
     RequestTokenizer tokenizer_;
     RequestToken currentToken_;
 
-    void eat(tokenType_t type);
+    int eat(tokenType_t type);
     void error();
 
 public:

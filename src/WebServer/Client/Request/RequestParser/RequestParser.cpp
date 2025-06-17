@@ -18,12 +18,13 @@ static method_t parseRequestMethod(const std::string &requestMethod)
     return NOT_IMPLEMENTED;
 }
 
-void RequestParser::eat(tokenType_t type)
+int RequestParser::eat(tokenType_t type)
 {
-    if (this->currentToken_.getType() == type)
-        this->currentToken_ = this->tokenizer_.getNextToken();
-    else
-        error();
+    if (this->currentToken_.getType() != type)
+        return 1;
+
+    this->currentToken_ = this->tokenizer_.getNextToken();
+    return 0;
 }
 
 void RequestParser::error()
@@ -33,30 +34,27 @@ void RequestParser::error()
 
 Result<RequestLineParams_t> RequestParser::parseRequestLine()
 {
+    int hasFailed = 0;
     RequestLineParams_t params;
 
-    try
-    {
-        params.method = parseRequestMethod(this->currentToken_.getValue());
-        eat(METHOD);
+    params.method = parseRequestMethod(this->currentToken_.getValue());
+    hasFailed |= eat(METHOD);
 
-        eat(SP);
+    hasFailed |= eat(SP);
 
-        params.target = this->currentToken_.getValue();
-        eat(TARGET);
+    params.target = this->currentToken_.getValue();
+    hasFailed |= eat(TARGET);
 
-        eat(SP);
+    hasFailed |= eat(SP);
 
-        params.httpVersion = this->currentToken_.getValue();
-        eat(HTTP_VERSION);
+    params.httpVersion = this->currentToken_.getValue();
+    hasFailed |= eat(HTTP_VERSION);
 
-        if (params.method == NOT_IMPLEMENTED)
-            return Result<RequestLineParams_t>::fail("501 Not Implemented");
-    }
-    catch (const std::invalid_argument &e)
-    {
+    if (hasFailed)
         return Result<RequestLineParams_t>::fail("400 Bad Request");
-    }
+
+    if (params.method == NOT_IMPLEMENTED)
+        return Result<RequestLineParams_t>::fail("501 Not Implemented");
 
     return Result<RequestLineParams_t>::ok(params);
 }
