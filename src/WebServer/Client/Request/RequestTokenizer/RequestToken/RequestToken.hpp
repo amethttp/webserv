@@ -6,6 +6,7 @@ typedef enum tokenType_e
 {
     METHOD,
     SP,
+    TARGET,
     EOF
 } tokenType_t;
 

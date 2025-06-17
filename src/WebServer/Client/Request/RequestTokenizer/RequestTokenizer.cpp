@@ -46,6 +46,12 @@ RequestToken RequestTokenizer::getNextToken()
         return RequestToken(SP, " ");
     }
 
+    if (this->currentChar_ == '/')
+    {
+        advance();
+        return RequestToken(TARGET, "/");
+    }
+
     return RequestToken(EOF, "");
 }
 
