@@ -100,6 +100,11 @@ TEST(take_as_failure_a_request_line_with_only_a_SP)
     assertRequestStringIsInvalid(" \r\nHost: localhost\r\n\r\n", "400 Bad Request");
 }
 
+TEST(take_as_failure_an_empty_request_line)
+{
+    assertRequestStringIsInvalid("\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+}
+
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
     request = createFromValidRequest("POST / HTTP/1.1\r\nHost:localhost\r\nContent-Length:0\r\n\r\n");
