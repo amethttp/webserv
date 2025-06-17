@@ -45,15 +45,18 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine(const std::string &r
     params.method = parseRequestMethod(this->currentToken_.getValue());
     eat(METHOD);
 
+    if (params.method == NOT_IMPLEMENTED)
+        return Result<RequestLineParams_t>::fail("501 Not Implemented");
+
     eat(SP);
 
     params.target = this->currentToken_.getValue();
     eat(TARGET);
 
-    if (params.method == NOT_IMPLEMENTED)
-        return Result<RequestLineParams_t>::fail("501 Not Implemented");
+    eat(SP);
 
-    params.httpVersion = splittedRequestLine[2];
+    params.httpVersion = this->currentToken_.getValue();
+    eat(HTTP_VERSION);
 
     return Result<RequestLineParams_t>::ok(params);
 }

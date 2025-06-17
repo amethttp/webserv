@@ -10,6 +10,8 @@ private:
     size_t pos_;
     char currentChar_;
 
+    bool isHTTPMethod();
+
 public:
     RequestTokenizer(const std::string &text);
     ~RequestTokenizer();
@@ -17,6 +19,7 @@ public:
     void advance();
 
     std::string httpMethod();
+    std::string httpVersion();
 
     RequestToken getNextToken();
     void error() const;

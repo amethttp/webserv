@@ -7,7 +7,8 @@ typedef enum tokenType_e
     METHOD,
     SP,
     TARGET,
-    EOF
+    HTTP_VERSION,
+    EOF,
 } tokenType_t;
 
 class RequestToken
