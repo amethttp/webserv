@@ -79,3 +79,15 @@ TEST(take_as_failure_a_not_implemented_method_consisted_of_tchars)
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS("501 Not Implemented", result.getError());
 }
+
+TEST(take_as_failure_a_method_with_invalid_characters)
+{
+    RequestTokenizer requestTokenizer("()?@ / HTTP/1.1");
+    RequestParser requestParser(requestTokenizer);
+
+    Result<RequestLineParams_t> result = requestParser.parseRequestLine();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS("400 Bad Request", result.getError());
+}
+
