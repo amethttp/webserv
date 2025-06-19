@@ -21,8 +21,9 @@ void RequestTokenizer::advance()
 std::string RequestTokenizer::httpMethod()
 {
     std::string result;
+    std::string tchars = "!#$%&'*+-.^_`|~";
 
-    while (this->pos_ < this->text_.length() && std::isalpha(this->currentChar_))
+    while (this->pos_ < this->text_.length() && (std::isalnum(this->currentChar_) || tchars.find(this->currentChar_) != std::string::npos))
     {
         result += this->text_[this->pos_];
         advance();
@@ -49,7 +50,9 @@ RequestToken RequestTokenizer::getNextToken()
 
     this->currentChar_ = this->text_[this->pos_];
 
-    if (std::isalpha(this->currentChar_) && this->pos_ == 0)
+    std::string tchars = "!#$%&'*+-.^_`|~";
+
+    if ((std::isalnum(this->currentChar_) || tchars.find(this->currentChar_) != std::string::npos) && this->pos_ == 0)
         return RequestToken(METHOD, httpMethod());
 
     if (this->currentChar_ == ' ')
