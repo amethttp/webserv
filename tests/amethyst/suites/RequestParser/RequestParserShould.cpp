@@ -44,3 +44,14 @@ TEST(recognize_a_basic_DELETE_request_line)
 
     assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
+
+TEST(take_as_failure_a_case_insensitive_method)
+{
+    RequestTokenizer requestTokenizer("get / HTTP/1.1");
+    RequestParser requestParser(requestTokenizer);
+
+    Result<RequestLineParams_t> result = requestParser.parseRequestLine();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS("501 Not Implemented", result.getError());
+}
