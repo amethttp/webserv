@@ -14,3 +14,16 @@ TEST(should_recognize_a_basic_GET_request_line)
     ASSERT_EQUALS("/", requestLineParams.target);
     ASSERT_EQUALS("HTTP/1.1", requestLineParams.httpVersion);
 }
+
+TEST(should_recognize_a_basic_POST_request_line)
+{
+    RequestTokenizer requestTokenizer("POST / HTTP/1.1");
+    RequestParser sut(requestTokenizer);
+
+    Result<RequestLineParams_t> result = sut.parseRequestLine();
+    RequestLineParams_t requestLineParams = result.getValue();
+
+    ASSERT_EQUALS(POST, requestLineParams.method);
+    ASSERT_EQUALS("/", requestLineParams.target);
+    ASSERT_EQUALS("HTTP/1.1", requestLineParams.httpVersion);
+}
