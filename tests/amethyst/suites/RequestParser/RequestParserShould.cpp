@@ -74,8 +74,7 @@ TEST(take_as_failure_a_not_implemented_method_consisted_of_tchars)
     assertRequestLineIsInvalid(invalidRequestLineString, "501 Not Implemented");
 }
 
-TEST(take_as_failure_a_method_with_invalid_characters)
+TEST(take_as_failure_a_method_consisted_of_invalid_characters)
 {
-    assertRequestLineIsInvalid("()?@ / HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("(),/:;\r<=>\b?@\f[\\]\t{}\n / HTTP/1.1", "400 Bad Request");
 }
-
