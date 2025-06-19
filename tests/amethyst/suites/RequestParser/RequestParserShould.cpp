@@ -5,9 +5,9 @@
 TEST(should_recognize_a_basic_GET_request_line)
 {
     RequestTokenizer requestTokenizer("GET / HTTP/1.1");
-    RequestParser requestParser(requestTokenizer);
+    RequestParser sut(requestTokenizer);
 
-    Result<RequestLineParams_t> result = requestParser.parseRequestLine();
+    Result<RequestLineParams_t> result = sut.parseRequestLine();
     RequestLineParams_t requestLineParams = result.getValue();
 
     ASSERT_EQUALS(GET, requestLineParams.method);
