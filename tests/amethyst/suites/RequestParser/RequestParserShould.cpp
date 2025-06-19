@@ -83,3 +83,8 @@ TEST(take_as_failure_a_method_that_contains_invalid_characters)
 {
     assertRequestLineIsInvalid("DEL(),/:;\r<=>\b?@\f[\\]\t{}\nTE / HTTP/1.1", "400 Bad Request");
 }
+
+TEST(take_as_failure_an_empty_method)
+{
+    assertRequestLineIsInvalid(" / HTTP/1.1", "400 Bad Request");
+}
