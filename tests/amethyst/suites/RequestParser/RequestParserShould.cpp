@@ -4,7 +4,7 @@
 
 namespace
 {
-    RequestLineParams_t requestLineParams;
+    RequestLineParams_t requestLine;
 }
 
 static RequestLineParams_t createFromValidRequestLine(const std::string &requestLineString)
@@ -19,28 +19,28 @@ static RequestLineParams_t createFromValidRequestLine(const std::string &request
 
 static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
 {
-    ASSERT_EQUALS(method, requestLineParams.method);
-    ASSERT_EQUALS(target, requestLineParams.target);
-    ASSERT_EQUALS(version, requestLineParams.httpVersion);
+    ASSERT_EQUALS(method, requestLine.method);
+    ASSERT_EQUALS(target, requestLine.target);
+    ASSERT_EQUALS(version, requestLine.httpVersion);
 }
 
 TEST(should_recognize_a_basic_GET_request_line)
 {
-    requestLineParams = createFromValidRequestLine("GET / HTTP/1.1");
+    requestLine = createFromValidRequestLine("GET / HTTP/1.1");
 
     assertRequestLine(GET, "/", "HTTP/1.1");
 }
 
 TEST(should_recognize_a_basic_POST_request_line)
 {
-    requestLineParams = createFromValidRequestLine("POST / HTTP/1.1");
+    requestLine = createFromValidRequestLine("POST / HTTP/1.1");
 
     assertRequestLine(POST, "/", "HTTP/1.1");
 }
 
 TEST(should_recognize_a_basic_DELETE_request_line)
 {
-    requestLineParams = createFromValidRequestLine("DELETE / HTTP/1.1");
+    requestLine = createFromValidRequestLine("DELETE / HTTP/1.1");
 
     assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
