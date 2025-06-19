@@ -69,7 +69,9 @@ TEST(take_as_failure_a_not_implemented_method_consisted_only_of_alphabetic_chara
 
 TEST(take_as_failure_a_not_implemented_method_consisted_of_tchars)
 {
-    RequestTokenizer requestTokenizer("!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz / HTTP/1.1");
+    std::string tchars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    std::string requestLineString = tchars + " / HTTP/1.1";
+    RequestTokenizer requestTokenizer(requestLineString);
     RequestParser requestParser(requestTokenizer);
 
     Result<RequestLineParams_t> result = requestParser.parseRequestLine();
