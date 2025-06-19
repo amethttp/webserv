@@ -23,8 +23,7 @@
 #     - 1. Read the start-line into a structure
 #     - 2. Read each header into a hash table / map until the empty line
 #     - 3. Determine if a body message is expected using the parsed data
-#        - If a message body has been indicated, it is read as a stream until an amount of
-#          bytes is equal to the body length is read or the connection is closed
+#        - If a message body has been indicated, it is read as a stream until the number of bytes read equals the body length, or the connection is closed
 #
 #
 # 4.  Before parsing request data to unicode, you MUST parse it, to prevent missing control characters
@@ -115,7 +114,9 @@
 #
 # 17. A header field (field line) consists of: case-insensitive field-name ":" OWS field-value OWS. For example:
 #     (Host:[ ]locahost[ ]). The OWS MUST be trimmed. Headers SHOULD follow:
-#     - Host and Connection headers SHOULD be recognized by all HTTP implementations
+#     - Host and Connection headers SHOULD be recognized by all HTTP implementations. Connection MAY be:
+#       - close: Closes the connection after sending the response
+#       - keep-alive (default in HTTP/1.1): keeps the connection open after sending the response
 #     - Receivers SHOULD ignore unrecognized header and trailer fields
 #     - A server that receives a header larger that it wishes to parse MUST respond with a 4xx (Client error) response.
 #     - Header keys SHOULD contain only ALPHA, DIGIT and hyphens ('-'). But MUST NOT contain other characters that are not tchars:
@@ -165,6 +166,9 @@
 #       after the header fields, regardless of the headers present in the message, thus cannot contain a message body
 #     - If a message contains an invalid Content-Length, the receiver MUST treat it as an unrecoverable error. If this happens in a request,
 #       the server must respond with 400 Bad Request and close the connection.
+#     - If the body is larger than the stated Content-Length, the server MUST respond with 400 Bad Request
+#     - If the Content-Length is not fully received and the connection is closed, the message is invalid and MUST be discarded
+#     - A timeout MAY be used to wait for the full body, but once timed out, it MUST be treated as incomplete.
 #     - If a valid Content-Length is present, the decimal value represents the exact length. If the sender clsoes the connection or the receiver
 #       times out before the number of bytes are received, the recipient MUST consider the message to be incomplet and close the connection
 #     - If this is a request message and none of the above are true, then the message body length is zero, thus no message body is present
@@ -201,6 +205,7 @@
 # RFC key words: https://www.rfc-editor.org/rfc/rfc2119.txt
 # HTTP 1.1 documentation: https://www.rfc-editor.org/rfc/rfc9112.html
 # HTTP Semantics documentation: https://www.rfc-editor.org/rfc/rfc9110.html
+# HTTP URI semantics https://www.rfc-editor.org/rfc/rfc3986
 #
 ###########################################################################################
 
