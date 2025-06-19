@@ -2,13 +2,18 @@
 #include "test/assert/assert.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
+namespace
+{
+    RequestLineParams_t requestLineParams;
+}
+
 TEST(should_recognize_a_basic_GET_request_line)
 {
     RequestTokenizer requestTokenizer("GET / HTTP/1.1");
     RequestParser sut(requestTokenizer);
 
     Result<RequestLineParams_t> result = sut.parseRequestLine();
-    RequestLineParams_t requestLineParams = result.getValue();
+    requestLineParams = result.getValue();
 
     ASSERT_EQUALS(GET, requestLineParams.method);
     ASSERT_EQUALS("/", requestLineParams.target);
@@ -21,7 +26,7 @@ TEST(should_recognize_a_basic_POST_request_line)
     RequestParser sut(requestTokenizer);
 
     Result<RequestLineParams_t> result = sut.parseRequestLine();
-    RequestLineParams_t requestLineParams = result.getValue();
+    requestLineParams = result.getValue();
 
     ASSERT_EQUALS(POST, requestLineParams.method);
     ASSERT_EQUALS("/", requestLineParams.target);
@@ -34,7 +39,7 @@ TEST(should_recognize_a_basic_DELETE_request_line)
     RequestParser sut(requestTokenizer);
 
     Result<RequestLineParams_t> result = sut.parseRequestLine();
-    RequestLineParams_t requestLineParams = result.getValue();
+    requestLineParams = result.getValue();
 
     ASSERT_EQUALS(DELETE, requestLineParams.method);
     ASSERT_EQUALS("/", requestLineParams.target);

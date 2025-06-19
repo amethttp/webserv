@@ -36,7 +36,7 @@ static void assertBodyIsEmpty()
     ASSERT_EQUALS("", request.body);
 }
 
-void assertRequestStringIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
+static void assertRequestStringIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
     Result<Request_t> result = RequestFactory::create(invalidRequestString);
 
