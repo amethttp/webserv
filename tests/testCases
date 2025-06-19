@@ -206,7 +206,7 @@
 # 
 # REQUEST GRAMMAR
 # 
-#   ABNF Core Rules:
+#---# ABNF Core Rules: #---#
 # 
 #   ---
 #   - CR              =  %x0D                        ; Carriage return (\r)
@@ -222,6 +222,8 @@
 #   - VCHAR           =  %x21-7E                     ; Visible printing characters ("!" - "~")
 #   ---
 # 
+# 
+#---# RFC HTTP-messages grammar #---#
 # 
 #   HTTP-message      = start-line CRLF
 #                       *( field-line CRLF )            --->    MUST have Host header (no repetitions)
@@ -350,8 +352,9 @@
 #   trailer-section   = *( field-line CRLF )
 # 
 #  
-#   # HEADERS
-#   Connection:       = keep-alive / close           --->  CASE-INSENSITIVE
+#---# Mandatory headers grammar #---#
+# 
+#   Connection:       = "keep-alive" / "close"           --->  CASE-INSENSITIVE
 # 
 # 
 #   Host:             = reg-name ":" port            --->  CASE-INSENSITIVE   --->  MUST NOT BE EMPTY NOR DUPLICATED
@@ -362,7 +365,7 @@
 #   Content-Length    = 1*DIGIT
 # 
 # 
-#   Transfer-Encoding = chunked           --->    Tranfer-coding chunked (chunked-body)     --->     CASE-INSENSITIVE (CHUNKED == chunked)
+#   Transfer-Encoding = "chunked"           --->    Tranfer-coding chunked (chunked-body)     --->     CASE-INSENSITIVE (CHUNKED == chunked)
 #  
 #  
 #   Content-Length and Transfer-Encoding ---> 400 Bad Request
@@ -379,6 +382,46 @@
 # ABNF Core rules https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1
 #
 ###########################################################################################
+
+# ACCEPTANCE CRITERIA:
+
+## Request line (RQL)
+
+### METHOD CRITERIA
+### 1. Basic GET RQL (works)
+"GET / HTTP/1.1"
+
+### 2. Basic POST RQL (works)
+"POST / HTTP/1.1"
+
+### 3. Basic DELETE RQL (works)
+"DELETE / HTTP/1.1"
+
+### 4. Fail with 501 Not Implemented for case-insensitive method
+"get / HTTP/1.1"
+
+### 5. Fail with 501 Not Implemented for not-recognized method
+"INVALID / HTTP/1.1"
+"5!#$ / HTTP/1.1"
+
+### 6. Fail with 400 Bad Request for non-token (tchars) method
+"()?@ / HTTP/1.1"
+
+### 7. Fail with 400 Bad Reqest for empty method
+" / HTTP/1.1"
+
+### 8. Fail with 400 Bad Request for non-existant method
+"/ HTTP/1.1"
+
+### 9. Fail with 400 Bad Request for INVALID request-line
+"INVALID"
+
+### 10. Fail with 400 Bad Request for a only space request-line
+" "
+
+### 11. Fail with 400 Bad Request for an empty request-line
+""
+
 
 # TESTS:
 
