@@ -7,6 +7,13 @@ namespace
     RequestLineParams_t requestLineParams;
 }
 
+static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
+{
+    ASSERT_EQUALS(method, requestLineParams.method);
+    ASSERT_EQUALS(target, requestLineParams.target);
+    ASSERT_EQUALS(version, requestLineParams.httpVersion);
+}
+
 TEST(should_recognize_a_basic_GET_request_line)
 {
     RequestTokenizer requestTokenizer("GET / HTTP/1.1");
@@ -15,9 +22,7 @@ TEST(should_recognize_a_basic_GET_request_line)
     Result<RequestLineParams_t> result = sut.parseRequestLine();
     requestLineParams = result.getValue();
 
-    ASSERT_EQUALS(GET, requestLineParams.method);
-    ASSERT_EQUALS("/", requestLineParams.target);
-    ASSERT_EQUALS("HTTP/1.1", requestLineParams.httpVersion);
+    assertRequestLine(GET, "/", "HTTP/1.1");
 }
 
 TEST(should_recognize_a_basic_POST_request_line)
@@ -28,9 +33,7 @@ TEST(should_recognize_a_basic_POST_request_line)
     Result<RequestLineParams_t> result = sut.parseRequestLine();
     requestLineParams = result.getValue();
 
-    ASSERT_EQUALS(POST, requestLineParams.method);
-    ASSERT_EQUALS("/", requestLineParams.target);
-    ASSERT_EQUALS("HTTP/1.1", requestLineParams.httpVersion);
+    assertRequestLine(POST, "/", "HTTP/1.1");
 }
 
 TEST(should_recognize_a_basic_DELETE_request_line)
@@ -41,7 +44,5 @@ TEST(should_recognize_a_basic_DELETE_request_line)
     Result<RequestLineParams_t> result = sut.parseRequestLine();
     requestLineParams = result.getValue();
 
-    ASSERT_EQUALS(DELETE, requestLineParams.method);
-    ASSERT_EQUALS("/", requestLineParams.target);
-    ASSERT_EQUALS("HTTP/1.1", requestLineParams.httpVersion);
+    assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
