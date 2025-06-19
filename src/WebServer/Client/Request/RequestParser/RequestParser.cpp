@@ -27,11 +27,6 @@ result_t RequestParser::eat(tokenType_t type)
     return SUCCESS;
 }
 
-void RequestParser::error()
-{
-    throw std::invalid_argument("Request Parser Error");
-}
-
 Result<RequestLineParams_t> RequestParser::parseRequestLine()
 {
     int hasFailed = 0;

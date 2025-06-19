@@ -19,7 +19,6 @@ private:
     RequestToken currentToken_;
 
     result_t eat(tokenType_t type);
-    void error();
 
 public:
     RequestParser(const RequestTokenizer &tokenizer);
