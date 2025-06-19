@@ -201,11 +201,182 @@
 #     the received trailer fields. 
 #
 #
+###########################################################################################
+###########################################################################################
+# 
+# REQUEST GRAMMAR
+# 
+#   ABNF Core Rules:
+# 
+#   ---
+#   - CR              =  %x0D                        ; Carriage return (\r)
+#   - LF              =  %x0A                        ; Linefeed (\n)
+#   - CRLF            =  CR LF                       ; Internet standard newline (\r\n)
+#   - SP              =  %x20                        ; Space (' ')
+#   - HTAB            =  %x09                        ; Horizontal tab (\t)
+#   - DQUOTE          =  %x22                        ; Double quote ('"')
+#   - ALPHA           =  %x41-5A / %x61-7A           ; A-Z / a-z
+#   - DIGIT           =  %x30-39                     ; 0-9
+#   - HEXDIG          =  DIGIT / "A-F" / "a-f"       ; A-Z / a-z
+#   - OCTET           =  %x00-FF                     ; 1 byte of data
+#   - VCHAR           =  %x21-7E                     ; Visible printing characters ("!" - "~")
+#   ---
+# 
+# 
+#   HTTP-message      = start-line CRLF
+#                       *( field-line CRLF )            --->    MUST have Host header (no repetitions)
+#                       CRLF
+#                       [ message-body ]
+# 
+# 
+#   start-line        = request-line / status-line
+# 
+# 
+#   request-line      = method SP request-target SP HTTP-version
+#  
+# 
+#   method            = token             --->     CASE-SENSITIVE
+# 
+# 
+#   token             = 1*tchar
+# 
+# 
+#   tchar             = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
+# 
+# 
+#   request-target    = origin-form
+# 
+# 
+#   origin-form       = absolute-path [ "?" query ]
+# 
+# 
+#   absolute-path     = 1*( "/" segment )
+# 
+# 
+#   segment           = *pchar
+# 
+# 
+#   pchar             = unreserved / pct-encoded / sub-delims / ":" / "@"
+# 
+# 
+#   unreserved        = ALPHA / DIGIT / "-" / "." / "_" / "~"
+# 
+# 
+#   pct-encoded       = "%" HEXDIG HEXDIG
+# 
+# 
+#   sub-delims        = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+# 
+# 
+#   query             = *( pchar / "/" / "?" )
+# 
+# 
+#   HTTP-version      = HTTP-name "/" DIGIT "." DIGIT          --->     CASE-SENSITIVE
+# 
+# 
+#   HTTP-name         = %s"HTTP"
+# 
+# 
+#   status-line       = HTTP-version SP status-code SP [ reason-phrase ]
+# 
+# 
+#   status-code       = 3 DIGIT 
+# 
+# 
+#   reason-phrase     = 1*( HTAB / SP / VCHAR / obs-text )
+# 
+# 
+#   field-line        = field-name ":" OWS field-value OWS
+# 
+# 
+#   field-name        = token               --->     CASE-INSENSITIVE
+# 
+# 
+#   OWS               = *( SP / HTAB )    ; optional WS (should trim)
+# 
+# 
+#   field-value       = *field-content
+# 
+# 
+#   field-content     = field-vchar [ 1*( SP / HTAB / field-vchar ) field-vchar ]
+# 
+# 
+#   field-vchar       = VCHAR / obs-text
+# 
+# 
+#   obs-text          = %x80-FF           --->     We will not recognize them (400 Bad Request)
+#
+# 
+#   message-body      = *OCTET            --->     Size based on Content-Length or Transfer-Encoding: chunked 
+# 
+# 
+#   chunked-body      = *chunk
+#                       last-chunk
+#                       trailer-section
+#                       CRLF
+# 
+# 
+#   chunk             = chunk-size [ chunk-ext ] CRLF
+#                       chunk-data CRLF
+# 
+# 
+#   chunk-size        = 1*HEXDIG
+# 
+# 
+#   chunk-ext         = *( ";" chunk-ext-name [ "=" chunk-ext-val ] )
+# 
+# 
+#   chunk-ext-name    = token
+# 
+# 
+#   chunk-ext-val     = token / quoted-string
+# 
+# 
+#   quoted-string     = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+# 
+# 
+#   qdtext            = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text     --->   HTAB / SP / '!' / '#' - '[' / ']' - '~' / obs-text
+# 
+# 
+#   quoted-pair       = "\" ( HTAB / SP / VCHAR / obs-text )
+# 
+# 
+#   chunk-data        = 1*OCTET    --->    MUST be exactly chunk-size octets
+# 
+# 
+#   last-chunk        = 1*("0") [ chunk-ext ] CRLF
+# 
+# 
+#   trailer-section   = *( field-line CRLF )
+# 
+#  
+#   # HEADERS
+#   Connection:       = keep-alive / close           --->  CASE-INSENSITIVE
+# 
+# 
+#   Host:             = reg-name ":" port            --->  CASE-INSENSITIVE   --->  MUST NOT BE EMPTY NOR DUPLICATED
+#   reg-name          = *( unreserved / pct-encoded / sub-delims)  
+#   port              = 1*DIGIT                       --->  0 => port <= 65335
+#  
+#  
+#   Content-Length    = 1*DIGIT
+# 
+# 
+#   Transfer-Encoding = chunked           --->    Tranfer-coding chunked (chunked-body)     --->     CASE-INSENSITIVE (CHUNKED == chunked)
+#  
+#  
+#   Content-Length and Transfer-Encoding ---> 400 Bad Request
+#  
+#  
+###########################################################################################
+###########################################################################################
+#
 # Sources:
 # RFC key words: https://www.rfc-editor.org/rfc/rfc2119.txt
 # HTTP 1.1 documentation: https://www.rfc-editor.org/rfc/rfc9112.html
 # HTTP Semantics documentation: https://www.rfc-editor.org/rfc/rfc9110.html
 # HTTP URI semantics https://www.rfc-editor.org/rfc/rfc3986
+# ABNF Core rules https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1
 #
 ###########################################################################################
 
