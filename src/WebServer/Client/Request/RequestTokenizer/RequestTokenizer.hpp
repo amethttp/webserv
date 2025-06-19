@@ -10,6 +10,10 @@ private:
     size_t pos_;
     char currentChar_;
 
+    static const std::string tcharsSymbols;
+
+    bool isTchar() const;
+
 public:
     RequestTokenizer(const std::string &text);
     ~RequestTokenizer();

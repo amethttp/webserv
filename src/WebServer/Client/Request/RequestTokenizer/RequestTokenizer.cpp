@@ -1,6 +1,8 @@
 #include "RequestTokenizer.hpp"
 #include <stdexcept>
 
+const std::string RequestTokenizer::tcharsSymbols = "!#$%&'*+-.^_`|~";
+
 RequestTokenizer::RequestTokenizer(const std::string &text)
 {
     this->text_ = text;
@@ -18,12 +20,18 @@ void RequestTokenizer::advance()
         this->currentChar_ = this->text_[this->pos_];
 }
 
+bool RequestTokenizer::isTchar() const
+{
+    const char ch = this->currentChar_;
+
+    return (std::isalnum(ch) || tcharsSymbols.find(ch) != std::string::npos);
+}
+
 std::string RequestTokenizer::httpMethod()
 {
     std::string result;
-    std::string tchars = "!#$%&'*+-.^_`|~";
 
-    while (this->pos_ < this->text_.length() && (std::isalnum(this->currentChar_) || tchars.find(this->currentChar_) != std::string::npos))
+    while (this->pos_ < this->text_.length() && isTchar())
     {
         result += this->text_[this->pos_];
         advance();
@@ -50,9 +58,7 @@ RequestToken RequestTokenizer::getNextToken()
 
     this->currentChar_ = this->text_[this->pos_];
 
-    std::string tchars = "!#$%&'*+-.^_`|~";
-
-    if ((std::isalnum(this->currentChar_) || tchars.find(this->currentChar_) != std::string::npos) && this->pos_ == 0)
+    if (isTchar() && this->pos_ == 0)
         return RequestToken(METHOD, httpMethod());
 
     if (this->currentChar_ == ' ')
