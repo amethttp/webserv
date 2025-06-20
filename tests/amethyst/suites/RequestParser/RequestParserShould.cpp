@@ -128,3 +128,8 @@ TEST(take_as_failure_an_invalid_request_line)
 {
     assertRequestLineIsInvalid("INVALID", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_line_with_only_a_SP)
+{
+    assertRequestLineIsInvalid(" ", "400 Bad Request");
+}
