@@ -118,3 +118,8 @@ TEST(take_as_failure_a_request_with_an_invalid_third_token_and_more_than_three_t
 {
     assertRequestLineIsInvalid("GET / INVALID HTTP/1.1", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_an_invalid_fourth_token_and_more_than_three_tokens)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.1 INVALID", "400 Bad Request");
+}
