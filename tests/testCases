@@ -386,6 +386,26 @@
 # ACCEPTANCE CRITERIA:
 
 ## Request line (RQL)
+### 1. Fail with 400 Bad Request for INVALID request-line preceded by a SP 
+" GET / HTTP/1.1"
+
+### 2. Fail with 400 Bad Request for INVALID request-line followed by a SP 
+"GET / HTTP/1.1 "
+
+### 3. Fail with 400 Bad Request for INVALID request-line with 4 elements 
+"INVALID GET / HTTP/1.1"
+
+### 4. Fail with 400 Bad Request for INVALID request-line with 4 elements 
+"GET / HTTP/1.1 INVALID"
+
+### 5. Fail with 400 Bad Request for INVALID request-line
+"INVALID"
+
+### 6. Fail with 400 Bad Request for a only space request-line
+" "
+
+### 7. Fail with 400 Bad Request for an empty request-line
+""
 
 ### METHOD CRITERIA
 ### 1. Basic GET RQL (works)
@@ -400,27 +420,23 @@
 ### 4. Fail with 501 Not Implemented for case-insensitive method
 "get / HTTP/1.1"
 
-### 5. Fail with 501 Not Implemented for not-recognized method
+### 5. Fail with 501 Not Implemented for not-recognized method with only alphabetic characters
 "INVALID / HTTP/1.1"
-"5!#$ / HTTP/1.1"
 
-### 6. Fail with 400 Bad Request for non-token (tchars) method
-"()?@ / HTTP/1.1"
+### 6. Fail with 501 Not Implemented for not-recognized method of tchars
+"!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz / HTTP/1.1"
 
-### 7. Fail with 400 Bad Reqest for empty method
+### 7. Fail with 400 Bad Request for non-token (tchars) method
+"(),/:;\r<=>\b?@\f[\\]\t{}\n / HTTP/1.1"
+
+### 8. Fail with 400 Bad Request for method containing non-token chars (tchars)
+"DEL(),/:;\r<=>\b?@\f[\\]\t{}\nTE / HTTP/1.1"
+
+### 9. Fail with 400 Bad Reqest for empty method
 " / HTTP/1.1"
 
-### 8. Fail with 400 Bad Request for non-existant method
+### 10. Fail with 400 Bad Request for non-existant method
 "/ HTTP/1.1"
-
-### 9. Fail with 400 Bad Request for INVALID request-line
-"INVALID"
-
-### 10. Fail with 400 Bad Request for a only space request-line
-" "
-
-### 11. Fail with 400 Bad Request for an empty request-line
-""
 
 
 # TESTS:
