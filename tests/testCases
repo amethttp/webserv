@@ -457,6 +457,25 @@
 ### 6. Fail with 400 Bad Request if it has multiple SP
 "GET   / HTTP/1.1"
 
+### LAST SPACE CRITERIA
+### 1. Fail with 400 Bad Request if it doesn't have an SP
+"GET /HTTP/1.1"
+
+### 2. Fail with 400 Bad Request if it has another character instead of SP
+"GET /?HTTP/1.1"
+
+### 3. Fail with 400 Bad Request if it has a tabulation instead of SP
+"GET /\tHTTP/1.1"
+
+### 4. Fail with 400 Bad Request if it has a tabulation and a SP
+"GET /\t HTTP/1.1"
+
+### 5. Fail with 400 Bad Request if it has a SP and a tabulation
+"GET / \tHTTP/1.1"
+
+### 6. Fail with 400 Bad Request if it has multiple SP
+"GET /   HTTP/1.1"
+
 
 
 
