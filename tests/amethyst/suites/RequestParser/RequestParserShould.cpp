@@ -109,12 +109,12 @@ TEST(take_as_failure_a_request_line_with_a_HTAB_instead_of_the_first_SP)
     assertRequestLineIsInvalid("GET\t/ HTTP/1.1", "400 Bad Request");
 }
 
-TEST(take_as_failure_a_request_line_with_a_HTAB_and_SP)
+TEST(take_as_failure_a_request_line_with_a_HTAB_and_SP_instead_of_a_single_first_SP)
 {
     assertRequestLineIsInvalid("GET\t / HTTP/1.1", "400 Bad Request");
 }
 
-TEST(take_as_failure_a_request_line_with_a_SP_and_HTAB)
+TEST(take_as_failure_a_request_line_with_a_SP_and_HTAB_instead_of_a_single_first_SP)
 {
     assertRequestLineIsInvalid("GET \t/ HTTP/1.1", "400 Bad Request");
 }
