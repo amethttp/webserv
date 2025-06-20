@@ -43,7 +43,7 @@ std::string RequestTokenizer::httpVersion()
 {
     std::string result;
 
-    while (this->pos_ < this->text_.length() && std::isprint(this->currentChar_))
+    while (this->pos_ < this->text_.length() && std::isprint(this->currentChar_) && this->currentChar_ != ' ')
     {
         result += this->text_[this->pos_];
         advance();

@@ -98,3 +98,8 @@ TEST(take_as_failure_a_request_preceded_by_SP)
 {
     assertRequestLineIsInvalid(" GET / HTTP/1.1", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_followed_by_SP)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.1 ", "400 Bad Request");
+}

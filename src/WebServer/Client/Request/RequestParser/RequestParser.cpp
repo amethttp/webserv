@@ -45,6 +45,8 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     params.httpVersion = this->currentToken_.getValue();
     hasFailed |= eat(HTTP_VERSION);
 
+    hasFailed |= eat(EOF);
+
     if (hasFailed)
         return Result<RequestLineParams_t>::fail("400 Bad Request");
 
