@@ -103,3 +103,8 @@ TEST(take_as_failure_a_request_followed_by_SP)
 {
     assertRequestLineIsInvalid("GET / HTTP/1.1 ", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_an_invalid_first_token_and_more_than_three_tokens)
+{
+    assertRequestLineIsInvalid("INVALID GET / HTTP/1.1", "400 Bad Request");
+}
