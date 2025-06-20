@@ -129,6 +129,11 @@ TEST(take_as_failure_a_request_line_without_the_last_SP)
     assertRequestLineIsInvalid("GET /HTTP/1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_request_line_with_another_character_instead_of_the_last_SP)
+{
+    assertRequestLineIsInvalid("GET /?HTTP/1.1", "400 Bad Request");
+}
+
 TEST(take_as_failure_a_request_line_preceded_by_SP)
 {
     assertRequestLineIsInvalid(" GET / HTTP/1.1", "400 Bad Request");
