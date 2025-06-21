@@ -407,6 +407,7 @@
 ### 7. Fail with 400 Bad Request for an empty request-line
 ""
 
+
 ### METHOD CRITERIA
 ### 1. Basic GET RQL (works)
 "GET / HTTP/1.1"
@@ -437,6 +438,7 @@
 
 ### 10. Fail with 400 Bad Request for non-existant method
 "/ HTTP/1.1"
+
 
 ### FIRST SPACE CRITERIA
 ### 1. Fail with 400 Bad Request if it doesn't have an SP
@@ -476,6 +478,126 @@
 ### 6. Fail with 400 Bad Request if it has multiple SP
 "GET /   HTTP/1.1"
 
+
+### HTTP VERSION CRITERIA
+### 1. Fail with 400 Bad Request for case-insensitive HTTP-name
+"GET / Http/1.1"
+"GET / http/1.1"
+
+### 2. Fail with 400 Bad Request for an invalid HTTP-name
+"GET / INVALID/1.1"
+"GET / \rIN\b31VA\n()!%&9/LID/1.1"
+
+### 3. Fail with 400 Bad Request for repeated HTTP-name
+"GET / HTTPHTTP/1.1"
+
+### 4. Fail with 400 Bad Request for SP instead of HTTP-name
+"GET /  /1.1"
+
+### 5. Fail with 400 Bad Request for HTAB instead of HTTP-name
+"GET / \t/1.1"
+
+### 6. Fail with 400 Bad Request for empty HTTP-name
+"GET / /1.1"
+
+### 7. Fail with 400 Bad Request for an invalid '/'
+"GET / HTTP?1.1"
+"GET / HTTP$1.1"
+
+### 8. Fail with 400 Bad Request for repeated '/'
+"GET / HTTP//1.1"
+
+### 9. Fail with 400 Bad Request for SP instead of '/'
+"GET / HTTP 1.1"
+
+### 10. Fail with 400 Bad Request for HTAB instead of '/'
+"GET / HTTP\t1.1"
+
+### 11. Fail with 400 Bad Request for empty '/'
+"GET / HTTP1.1"
+
+### 12. Fail with 500 HTTP Version Not Supported for major version different of 1
+"GET / HTTP/0.1"
+"GET / HTTP/2.1"
+
+### 13. Fail with 400 Bad Request for invalid major version
+"GET / HTTP/1fA($!.1"
+"GET / HTTP/fe\r\b1.1"
+
+### 14. Fail with 400 Bad Request for not single-digit major version
+"GET / HTTP/11.1"
+
+### 15. Fail with 400 Bad Request for negative major version
+"GET / HTTP/-1.1"
+
+### 16. Fail with 400 Bad Request for SP instead of major version
+"GET / HTTP/ .1"
+
+### 17. Fail with 400 Bad Request for HTAB instead of major version
+"GET / HTTP/\t.1"
+
+### 18. Fail with 400 Bad Request for empty major version
+"GET / HTTP/.1"
+
+### 19. Fail with 400 Bad Request for invalid '.'
+"GET / HTTP/1(1"
+"GET / HTTP/1F_1"
+
+### 20. Fail with 400 Bad Request for repeated '.'
+"GET / HTTP/1..1"
+
+### 21. Fail with 400 Bad Request for SP instead of '.'
+"GET / HTTP/1 1"
+
+### 22. Fail with 400 Bad Request for HTAB instead of '.'
+"GET / HTTP/1\t1"
+
+### 23. Fail with 400 Bad Request for empty '.'
+"GET / HTTP/11"
+
+### 24. Fail with 505 HTTP Version Not Supported for minor version different of 1
+"GET / HTTP/1.0"
+"GET / HTTP/1.2"
+
+### 25. Fail with 400 Bad Request for invalid minor version
+"GET / HTTP/1.1fA($!"
+"GET / HTTP/1.fe\r\b1"
+
+### 26. Fail with 400 Bad Request for not single-digit minor version
+"GET / HTTP/1.11"
+
+### 27. Fail with 400 Bad Request for negative minor version
+"GET / HTTP/1.-1"
+
+### 28. Fail with 400 Bad Request for SP instead of minor version
+"GET / HTTP/1. "
+
+### 29. Fail with 400 Bad Request for HTAB instead of minor version
+"GET / HTTP/1.\t"
+
+### 30. Fail with 400 Bad Request for empty minor version
+"GET / HTTP/1."
+
+### 31. Fail with 400 Bad Request for INVALID HTTP-version
+"GET / INVALID"
+
+### 32. Fail with 400 Bad Request for INVALID HTTP-version
+"GET / 1.1"
+
+### 33. Fail with 400 Bad Request for incomplete HTTP-version
+"GET / HTTP"
+"GET / HTTP//"
+"GET / HTTP/1"
+"GET / HTTP/1."
+
+### 32. Fail with 400 Bad Request for multiple minor versions HTTP-version
+"GET / HTTP/1.1.1"
+
+### 34. Fail with 400 Bad Request for empty HTTP-version
+"GET / "
+
+### 34. Fail with 400 Bad Request for non-existant HTTP-version
+"GET /"
 
 
 

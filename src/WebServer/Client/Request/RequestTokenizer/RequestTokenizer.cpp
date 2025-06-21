@@ -45,6 +45,8 @@ std::string RequestTokenizer::httpVersion()
 
     while (this->pos_ < this->text_.length() && std::isprint(this->currentChar_) && this->currentChar_ != ' ')
     {
+        if (std::isalpha(this->currentChar_) && this->currentChar_ >= 'a')
+            return result;
         result += this->text_[this->pos_];
         advance();
     }
