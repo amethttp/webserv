@@ -279,6 +279,13 @@ TEST(take_as_failure_an_empty_HTTP_version_dot)
     assertRequestLineIsInvalid("GET / HTTP/11", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_non_supported_minor_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.0", "505 HTTP Version Not Supported");
+    assertRequestLineIsInvalid("GET / HTTP/1.2", "505 HTTP Version Not Supported");
+    assertRequestLineIsInvalid("GET / HTTP/1.7", "505 HTTP Version Not Supported");
+}
+
 TEST(take_as_failure_a_request_line_preceded_by_SP)
 {
     assertRequestLineIsInvalid(" GET / HTTP/1.1", "400 Bad Request");
