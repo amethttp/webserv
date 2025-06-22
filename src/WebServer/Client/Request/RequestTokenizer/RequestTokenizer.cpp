@@ -86,5 +86,5 @@ RequestToken RequestTokenizer::getNextToken()
     if (isHttpVersion())
         return RequestToken(HTTP_VERSION, httpVersion());
 
-    return RequestToken(EOF, "");
+    return RequestToken(UNKNOWN, "UNKNOWN");
 }
