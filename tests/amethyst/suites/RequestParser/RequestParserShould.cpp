@@ -160,6 +160,12 @@ TEST(take_as_failure_a_case_insensitive_http_name)
     assertRequestLineIsInvalid("GET / http/1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_an_invalid_http_name)
+{
+    assertRequestLineIsInvalid("GET / INVALID/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET / HFDAJFK_INVALID/1.1", "400 Bad Request");
+}
+
 TEST(take_as_failure_a_request_line_preceded_by_SP)
 {
     assertRequestLineIsInvalid(" GET / HTTP/1.1", "400 Bad Request");

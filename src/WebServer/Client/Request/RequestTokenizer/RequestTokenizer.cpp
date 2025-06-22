@@ -27,6 +27,11 @@ bool RequestTokenizer::isTchar() const
     return (std::isalnum(ch) || tcharsSymbols.find(ch) != std::string::npos);
 }
 
+bool RequestTokenizer::isHttpVersion() const
+{
+    return (this->text_.find("HTTP") == this->pos_);
+}
+
 std::string RequestTokenizer::httpMethod()
 {
     std::string result;
@@ -75,7 +80,7 @@ RequestToken RequestTokenizer::getNextToken()
         return RequestToken(TARGET, "/");
     }
 
-    if (std::isalpha(this->currentChar_))
+    if (isHttpVersion())
         return RequestToken(HTTP_VERSION, httpVersion());
 
     return RequestToken(EOF, "");

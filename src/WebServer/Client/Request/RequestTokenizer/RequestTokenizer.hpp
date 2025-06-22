@@ -13,6 +13,7 @@ private:
     static const std::string tcharsSymbols;
 
     bool isTchar() const;
+    bool isHttpVersion() const;
 
 public:
     RequestTokenizer(const std::string &text);
