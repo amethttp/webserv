@@ -29,7 +29,7 @@ bool RequestTokenizer::isTchar() const
 
 bool RequestTokenizer::isHttpVersion() const
 {
-    return (this->text_.find("HTTP/") == this->pos_);
+    return (this->text_.find("HTTP/") == this->pos_ && this->text_[this->pos_ + 5] == '1');
 }
 
 std::string RequestTokenizer::httpMethod()

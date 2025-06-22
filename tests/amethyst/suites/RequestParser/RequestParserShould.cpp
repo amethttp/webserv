@@ -194,6 +194,11 @@ TEST(take_as_failure_an_invalid_HTTP_version_slash)
     assertRequestLineIsInvalid("GET / HTTPINVALID1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_repeated_HTTP_version_slash)
+{
+    assertRequestLineIsInvalid("GET / HTTP//1.1", "400 Bad Request");
+}
+
 TEST(take_as_failure_a_request_line_preceded_by_SP)
 {
     assertRequestLineIsInvalid(" GET / HTTP/1.1", "400 Bad Request");
