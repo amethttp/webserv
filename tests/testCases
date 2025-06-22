@@ -521,6 +521,7 @@
 "GET / HTTP/2.1"
 
 ### 13. Fail with 400 Bad Request for invalid major version
+"GET / HTTP/?.1"
 "GET / HTTP/1fA($!.1"
 "GET / HTTP/fe\r\b1.1"
 
@@ -560,6 +561,7 @@
 "GET / HTTP/1.2"
 
 ### 25. Fail with 400 Bad Request for invalid minor version
+"GET / HTTP/1.?"
 "GET / HTTP/1.1fA($!"
 "GET / HTTP/1.fe\r\b1"
 
@@ -586,7 +588,7 @@
 
 ### 33. Fail with 400 Bad Request for incomplete HTTP-version
 "GET / HTTP"
-"GET / HTTP//"
+"GET / HTTP/"
 "GET / HTTP/1"
 "GET / HTTP/1."
 
@@ -603,6 +605,7 @@
 
 # TEST "GET / HTTP/1.1\t" ON THE VERSION
 # TEST "GET / HTTPINVALID/1.1" ON THE VERSION
+# TEST "GET / HTTP/" ON THE VERSION --> WHY NOT SEGFAULT? (UNDEFINED BEHAVIOR)
 
 
 

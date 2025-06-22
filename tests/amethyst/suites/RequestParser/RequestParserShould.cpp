@@ -223,6 +223,7 @@ TEST(take_as_failure_a_non_supported_major_version)
 
 TEST(take_as_failure_an_invalid_major_version)
 {
+    assertRequestLineIsInvalid("GET / HTTP/?.1", "400 Bad Request");
     assertRequestLineIsInvalid("GET / HTTP/1fA($!.1", "400 Bad Request");
     assertRequestLineIsInvalid("GET / HTTP/fe\r\b1.1", "400 Bad Request");
 }
@@ -288,7 +289,9 @@ TEST(take_as_failure_a_non_supported_minor_version)
 
 TEST(take_as_failure_an_invalid_minor_version)
 {
+    assertRequestLineIsInvalid("GET / HTTP/1.?", "400 Bad Request");
     assertRequestLineIsInvalid("GET / HTTP/1.1fA($!", "400 Bad Request");
+    assertRequestLineIsInvalid("GET / HTTP/1.fe\r\b1", "400 Bad Request");
 }
 
 TEST(take_as_failure_a_request_line_preceded_by_SP)
