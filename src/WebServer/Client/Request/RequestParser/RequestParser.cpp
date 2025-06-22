@@ -53,6 +53,9 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     if (params.method == NOT_IMPLEMENTED)
         return Result<RequestLineParams_t>::fail("501 Not Implemented");
 
+    if (params.httpVersion != "HTTP/1.1")
+        return Result<RequestLineParams_t>::fail("505 HTTP Version Not Supported");
+
     return Result<RequestLineParams_t>::ok(params);
 }
 

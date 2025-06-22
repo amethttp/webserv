@@ -516,7 +516,7 @@
 ### 11. Fail with 400 Bad Request for empty '/'
 "GET / HTTP1.1"
 
-### 12. Fail with 500 HTTP Version Not Supported for major version different of 1
+### 12. Fail with 505 HTTP Version Not Supported for major version different of 1
 "GET / HTTP/0.1"
 "GET / HTTP/2.1"
 
