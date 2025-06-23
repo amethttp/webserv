@@ -12,17 +12,17 @@ private:
 
     static const std::string tcharsSymbols;
 
+    void advance();
+
     bool isTchar() const;
     bool isHttpVersion() const;
+
+    std::string token();
+    std::string httpVersion();
 
 public:
     RequestTokenizer(const std::string &text);
     ~RequestTokenizer();
-
-    void advance();
-
-    std::string token();
-    std::string httpVersion();
 
     RequestToken getNextToken();
 };
