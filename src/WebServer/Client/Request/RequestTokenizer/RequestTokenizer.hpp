@@ -15,6 +15,7 @@ private:
     void advance(int amount = 1);
 
     bool isTchar() const;
+    bool isCurrentPosHttpName() const;
     bool isHttpVersion() const;
 
     std::string token();
