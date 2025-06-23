@@ -35,6 +35,8 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString, 
     ASSERT_EQUALS(errorMessage, result.getError());
 }
 
+
+/* BASIC REQUEST LINE */
 TEST(recognize_a_basic_GET_request_line)
 {
     requestLine = createFromValidRequestLine("GET / HTTP/1.1");
@@ -56,6 +58,8 @@ TEST(recognize_a_basic_DELETE_request_line)
     assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
 
+
+/* REQUEST LINE METHOD CRITERIA */
 TEST(take_as_failure_a_case_insensitive_method)
 {
     assertRequestLineIsInvalid("get / HTTP/1.1", "501 Not Implemented");
@@ -94,6 +98,8 @@ TEST(take_as_failure_a_non_existant_method)
     assertRequestLineIsInvalid("/ HTTP/1.1", "400 Bad Request");
 }
 
+
+/* REQUEST LINE FIRST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_first_SP)
 {
     assertRequestLineIsInvalid("GET/ HTTP/1.1", "400 Bad Request");
@@ -124,6 +130,8 @@ TEST(take_as_failure_a_request_line_with_multiple_first_SP)
     assertRequestLineIsInvalid("GET   / HTTP/1.1", "400 Bad Request");
 }
 
+
+/* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
 {
     assertRequestLineIsInvalid("GET /HTTP/1.1", "400 Bad Request");
@@ -154,6 +162,8 @@ TEST(take_as_failure_a_request_line_with_multiple_last_SP)
     assertRequestLineIsInvalid("GET /   HTTP/1.1", "400 Bad Request");
 }
 
+
+/* REQUEST LINE HTTP-VERSION CRITERIA */
 TEST(take_as_failure_a_case_insensitive_HTTP_name)
 {
     assertRequestLineIsInvalid("GET / Http/1.1", "400 Bad Request");
@@ -319,6 +329,8 @@ TEST(take_as_failure_an_empty_minor_version)
     assertRequestLineIsInvalid("GET / HTTP/1.", "400 Bad Request");
 }
 
+
+/* MISC. REQUEST LINE CRITERIA */
 TEST(take_as_failure_a_request_line_preceded_by_SP)
 {
     assertRequestLineIsInvalid(" GET / HTTP/1.1", "400 Bad Request");
