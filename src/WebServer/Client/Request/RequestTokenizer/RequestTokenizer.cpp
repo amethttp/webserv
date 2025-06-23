@@ -30,9 +30,9 @@ bool RequestTokenizer::startsWithHttpPrefixAtCurrentPos() const
     return this->text_.find("HTTP/") == this->pos_;
 }
 
-char RequestTokenizer::peekCharAtDistanceFromCurrentPos(const size_t distanceFromCurrentPos) const
+char RequestTokenizer::peek(const size_t distance) const
 {
-    const size_t peekedCharacterPos = this->pos_ + distanceFromCurrentPos;
+    const size_t peekedCharacterPos = this->pos_ + distance;
 
     if (peekedCharacterPos >= this->text_.length())
         return '\0';
@@ -43,9 +43,9 @@ char RequestTokenizer::peekCharAtDistanceFromCurrentPos(const size_t distanceFro
 bool RequestTokenizer::isHttpVersion() const
 {
     return (startsWithHttpPrefixAtCurrentPos()
-            && std::isdigit(peekCharAtDistanceFromCurrentPos(5))
-            && peekCharAtDistanceFromCurrentPos(6) == '.'
-            && std::isdigit(peekCharAtDistanceFromCurrentPos(7)));
+            && std::isdigit(peek(5))
+            && peek(6) == '.'
+            && std::isdigit(peek(7)));
 }
 
 std::string RequestTokenizer::token()

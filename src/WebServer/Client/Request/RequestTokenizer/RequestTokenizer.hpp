@@ -16,7 +16,7 @@ private:
 
     bool isTchar() const;
     bool startsWithHttpPrefixAtCurrentPos() const;
-    char peekCharAtDistanceFromCurrentPos(size_t distanceFromCurrentPos) const;
+    char peek(size_t distance = 1) const;
     bool isHttpVersion() const;
 
     std::string token();
