@@ -7,7 +7,7 @@ RequestParser::RequestParser(const RequestTokenizer &tokenizer)
 {
 }
 
-static method_t parseRequestMethod(const std::string &requestMethod)
+method_t RequestParser::parseRequestMethod(const std::string &requestMethod)
 {
     if (requestMethod == "GET")
         return GET;

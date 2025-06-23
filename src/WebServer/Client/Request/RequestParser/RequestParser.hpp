@@ -18,6 +18,8 @@ private:
     RequestTokenizer tokenizer_;
     RequestToken currentToken_;
 
+    method_t parseRequestMethod(const std::string &requestMethod);
+
     result_t eat(tokenType_t type);
 
 public:
