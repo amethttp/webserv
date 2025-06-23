@@ -12,9 +12,9 @@ RequestTokenizer::RequestTokenizer(const std::string &text)
 
 RequestTokenizer::~RequestTokenizer() {}
 
-void RequestTokenizer::advance()
+void RequestTokenizer::advance(const int amount)
 {
-    this->pos_++;
+    this->pos_ += amount;
 
     if (this->pos_ < this->text_.length())
         this->currentChar_ = this->text_[this->pos_];
@@ -49,10 +49,7 @@ std::string RequestTokenizer::httpVersion()
 {
     std::string result = this->text_.substr(this->pos_, 8);
 
-    this->pos_ += 8;
-
-    if (this->pos_ < this->text_.length())
-        this->currentChar_ = this->text_[this->pos_];
+    advance(8);
 
     return result;
 }

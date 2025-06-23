@@ -12,7 +12,7 @@ private:
 
     static const std::string tcharsSymbols;
 
-    void advance();
+    void advance(int amount = 1);
 
     bool isTchar() const;
     bool isHttpVersion() const;
