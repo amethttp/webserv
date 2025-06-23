@@ -35,7 +35,7 @@ bool RequestTokenizer::isHttpVersion() const
             && std::isdigit(this->text_[this->pos_ + 7]));
 }
 
-std::string RequestTokenizer::httpMethod()
+std::string RequestTokenizer::token()
 {
     std::string result;
 
@@ -66,9 +66,6 @@ RequestToken RequestTokenizer::getNextToken()
 
     this->currentChar_ = this->text_[this->pos_];
 
-    if (isTchar() && this->pos_ == 0)
-        return RequestToken(METHOD, httpMethod());
-
     if (this->currentChar_ == ' ')
     {
         advance();
@@ -83,6 +80,9 @@ RequestToken RequestTokenizer::getNextToken()
 
     if (isHttpVersion())
         return RequestToken(HTTP_VERSION, httpVersion());
+
+    if (isTchar())
+        return RequestToken(TOKEN, token());
 
     return RequestToken(UNKNOWN, "UNKNOWN");
 }

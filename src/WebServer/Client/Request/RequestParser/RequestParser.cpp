@@ -33,7 +33,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     RequestLineParams_t params;
 
     params.method = parseRequestMethod(this->currentToken_.getValue());
-    hasFailed |= eat(METHOD);
+    hasFailed |= eat(TOKEN);
 
     hasFailed |= eat(SP);
 

@@ -21,7 +21,7 @@ public:
 
     void advance();
 
-    std::string httpMethod();
+    std::string token();
     std::string httpVersion();
 
     RequestToken getNextToken();
