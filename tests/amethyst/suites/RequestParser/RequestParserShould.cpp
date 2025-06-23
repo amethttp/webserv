@@ -314,6 +314,11 @@ TEST(take_as_failure_a_HTAB_instead_of_minor_version)
     assertRequestLineIsInvalid("GET / HTTP/1.\t", "400 Bad Request");
 }
 
+TEST(take_as_failure_an_empty_minor_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.", "400 Bad Request");
+}
+
 TEST(take_as_failure_a_request_line_preceded_by_SP)
 {
     assertRequestLineIsInvalid(" GET / HTTP/1.1", "400 Bad Request");

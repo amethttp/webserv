@@ -590,7 +590,6 @@
 "GET / HTTP"
 "GET / HTTP/"
 "GET / HTTP/1"
-"GET / HTTP/1."
 
 ### 32. Fail with 400 Bad Request for multiple minor versions HTTP-version
 "GET / HTTP/1.1.1"
