@@ -25,14 +25,14 @@ bool RequestTokenizer::isTchar() const
     return (std::isalnum(this->currentChar_) || tcharsSymbols.find(this->currentChar_) != std::string::npos);
 }
 
-bool RequestTokenizer::isCurrentPosHttpName() const
+bool RequestTokenizer::startsWithHttpPrefixAtCurrentPos() const
 {
     return this->text_.find("HTTP/") == this->pos_;
 }
 
 bool RequestTokenizer::isHttpVersion() const
 {
-    return (isCurrentPosHttpName()
+    return (startsWithHttpPrefixAtCurrentPos()
             && std::isdigit(this->text_[this->pos_ + 5])
             && this->text_[this->pos_ + 6] == '.'
             && std::isdigit(this->text_[this->pos_ + 7]));
