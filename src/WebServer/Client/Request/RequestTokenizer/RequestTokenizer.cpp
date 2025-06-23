@@ -47,9 +47,10 @@ std::string RequestTokenizer::token()
 
 std::string RequestTokenizer::httpVersion()
 {
-    std::string result = this->text_.substr(this->pos_, 8);
+    const int httpVersionLength = 8;
 
-    advance(8);
+    std::string result = this->text_.substr(this->pos_, httpVersionLength);
+    advance(httpVersionLength);
 
     return result;
 }
