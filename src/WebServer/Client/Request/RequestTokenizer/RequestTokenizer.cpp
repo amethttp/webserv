@@ -50,32 +50,30 @@ bool RequestTokenizer::isHttpVersion() const
 
 std::string RequestTokenizer::token()
 {
-    std::string result;
+    std::string tokenString;
 
     while (this->pos_ < this->text_.length() && isTchar())
     {
-        result += this->text_[this->pos_];
+        tokenString += this->currentChar_;
         advance();
     }
-    return result;
+    return tokenString;
 }
 
 std::string RequestTokenizer::httpVersion()
 {
     const int httpVersionLength = 8;
+    std::string httpVersionString = this->text_.substr(this->pos_, httpVersionLength);
 
-    std::string result = this->text_.substr(this->pos_, httpVersionLength);
     advance(httpVersionLength);
 
-    return result;
+    return httpVersionString;
 }
 
 RequestToken RequestTokenizer::getNextToken()
 {
     if (this->pos_ >= this->text_.size())
         return RequestToken(EOF, "");
-
-    this->currentChar_ = this->text_[this->pos_];
 
     if (this->currentChar_ == ' ')
     {
