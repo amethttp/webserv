@@ -13,10 +13,10 @@ private:
     static const std::string tcharsSymbols;
 
     void advance(int amount = 1);
+    char peek(size_t distance = 1) const;
 
     bool isTchar() const;
     bool startsWithHttpPrefixAtCurrentPos() const;
-    char peek(size_t distance = 1) const;
     bool isHttpVersion() const;
 
     std::string token();

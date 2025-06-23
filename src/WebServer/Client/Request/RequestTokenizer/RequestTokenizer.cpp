@@ -20,16 +20,6 @@ void RequestTokenizer::advance(const int amount)
         this->currentChar_ = this->text_[this->pos_];
 }
 
-bool RequestTokenizer::isTchar() const
-{
-    return (std::isalnum(this->currentChar_) || tcharsSymbols.find(this->currentChar_) != std::string::npos);
-}
-
-bool RequestTokenizer::startsWithHttpPrefixAtCurrentPos() const
-{
-    return this->text_.find("HTTP/") == this->pos_;
-}
-
 char RequestTokenizer::peek(const size_t distance) const
 {
     const size_t peekedCharacterPos = this->pos_ + distance;
@@ -38,6 +28,16 @@ char RequestTokenizer::peek(const size_t distance) const
         return '\0';
 
     return this->text_[peekedCharacterPos];
+}
+
+bool RequestTokenizer::isTchar() const
+{
+    return (std::isalnum(this->currentChar_) || tcharsSymbols.find(this->currentChar_) != std::string::npos);
+}
+
+bool RequestTokenizer::startsWithHttpPrefixAtCurrentPos() const
+{
+    return this->text_.find("HTTP/") == this->pos_;
 }
 
 bool RequestTokenizer::isHttpVersion() const
