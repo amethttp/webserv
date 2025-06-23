@@ -22,9 +22,7 @@ void RequestTokenizer::advance()
 
 bool RequestTokenizer::isTchar() const
 {
-    const char ch = this->currentChar_;
-
-    return (std::isalnum(ch) || tcharsSymbols.find(ch) != std::string::npos);
+    return (std::isalnum(this->currentChar_) || tcharsSymbols.find(this->currentChar_) != std::string::npos);
 }
 
 bool RequestTokenizer::isHttpVersion() const
