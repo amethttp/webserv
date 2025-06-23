@@ -15,6 +15,7 @@ private:
     void advance(int amount = 1);
     char peek(size_t distance = 1) const;
 
+    bool hasFinishedText() const;
     bool isTchar() const;
     bool startsWithHttpPrefixAtCurrentPos() const;
     bool isHttpVersion() const;

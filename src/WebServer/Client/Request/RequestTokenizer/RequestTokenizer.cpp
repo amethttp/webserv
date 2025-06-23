@@ -16,7 +16,7 @@ void RequestTokenizer::advance(const int amount)
 {
     this->pos_ += amount;
 
-    if (this->pos_ < this->text_.length())
+    if (!hasFinishedText())
         this->currentChar_ = this->text_[this->pos_];
 }
 
@@ -28,6 +28,11 @@ char RequestTokenizer::peek(const size_t distance) const
         return '\0';
 
     return this->text_[peekedCharacterPos];
+}
+
+bool RequestTokenizer::hasFinishedText() const
+{
+    return this->pos_ >= this->text_.length();
 }
 
 bool RequestTokenizer::isTchar() const
@@ -52,7 +57,7 @@ std::string RequestTokenizer::token()
 {
     std::string tokenString;
 
-    while (this->pos_ < this->text_.length() && isTchar())
+    while (!hasFinishedText() && isTchar())
     {
         tokenString += this->currentChar_;
         advance();
@@ -72,7 +77,7 @@ std::string RequestTokenizer::httpVersion()
 
 RequestToken RequestTokenizer::getNextToken()
 {
-    if (this->pos_ >= this->text_.size())
+    if (hasFinishedText())
         return RequestToken(EOF, "");
 
     if (this->currentChar_ == ' ')
