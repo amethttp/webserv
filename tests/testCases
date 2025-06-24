@@ -217,7 +217,7 @@
 #   - DQUOTE          =  %x22                        ; Double quote ('"')
 #   - ALPHA           =  %x41-5A / %x61-7A           ; A-Z / a-z
 #   - DIGIT           =  %x30-39                     ; 0-9
-#   - HEXDIG          =  DIGIT / "A-F" / "a-f"       ; A-Z / a-z
+#   - HEXDIG          =  DIGIT / "A-F" / "a-f"       ; 0-9 / A-F / a-f
 #   - OCTET           =  %x00-FF                     ; 1 byte of data
 #   - VCHAR           =  %x21-7E                     ; Visible printing characters ("!" - "~")
 #   ---
@@ -369,6 +369,7 @@
 #  
 #  
 #   Content-Length and Transfer-Encoding ---> 400 Bad Request
+#   Neither Content-Length nor Transfer-Encoding and body ---> 400 Bad Request
 #  
 #  
 ###########################################################################################
@@ -458,6 +459,142 @@
 
 ### 6. Fail with 400 Bad Request if it has multiple SP
 "GET   / HTTP/1.1"
+
+
+### TARGET CRITERIA
+### 1. Target with text. Works, target is /index
+"GET /index HTTP/1.1"
+
+### 2. Target with text and extension. Works, target is /index.html
+"GET /index.html HTTP/1.1"
+
+### 3. Target with multiple / (directories). Works, target is the specified
+"GET /profile/contact.php HTTP/1.1"
+"GET /courses/science/physics.py HTTP/1.1" 
+"GET /courses/science/physics.aspx HTTP/1.1" 
+
+### 4. Target references a directory (ends with /). Works, target is the specified
+"GET /courses/ HTTP/1.1"
+"GET /courses/spanish/ HTTP/1.1"
+
+### 5. Target doesn't start with /. 400 BR
+"GET ./ HTTP/1.1"
+"GET INVALID HTTP/1.1"
+"GET INVALID/ HTTP/1.1"
+
+### 6. Target contains only valid characters. Works, target is the specified
+# VALID CHARS -> pchar:
+# "0123456789"
+# "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+# "%AA"
+# "-._~!$&'()*+,;=:@"
+"GET /0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%AA-._~!$&'()*+,;=:@ HTTP/1.1"
+
+### 7. Target contains invalid characters. 400 BR
+"GET /INVALID^{}[]\t\b HTTP/1.1"
+"GET /^{}[]\t\bINVALID HTTP/1.1"
+"GET /INVA^{}[]\t\bLID HTTP/1.1"
+"GET /^{}[]\t\b HTTP/1.1"
+
+### 8. Target contains valid pct-encoded. Works, target is the specified
+"GET /%aa HTTP/1.1"
+"GET /%AA HTTP/1.1"
+"GET /%ff HTTP/1.1"
+"GET /%FF HTTP/1.1"
+"GET /%09 HTTP/1.1"
+"GET /%A0 HTTP/1.1"
+"GET /%9f HTTP/1.1"
+"GET /%Df HTTP/1.1"
+"GET /%dF HTTP/1.1"
+
+### 9. Target contains invalid pct-encoded. 400 BR
+"GET /%gg HTTP/1.1"
+"GET /%GG HTTP/1.1"
+"GET /%-r HTTP/1.1"
+
+### 10. Target contains incomplete pct-encoded. 400 BR
+"GET /%a HTTP/1.1"
+"GET /% HTTP/1.1"
+
+### 11. Target contains empty query. Works, target is /VALID/PATH/?
+"GET /VALID/PATH/? HTTP/1.1"
+
+### 12. Target contains query with empty param. Works, target is /VALID/PATH/?param
+"GET /VALID/PATH?param HTTP/1.1"
+
+### 13. Target contains query with param. Works, target is the specified
+"GET /VALID/PATH?param= HTTP/1.1"
+"GET /VALID/PATH?param=value HTTP/1.1"
+
+### 14. Target contains query with multiple params. Works, target is the specified
+"GET /VALID/PATH?param=value&mode HTTP/1.1"
+"GET /VALID/PATH?param=value&mode= HTTP/1.1"
+"GET /VALID/PATH?param=value&mode=true HTTP/1.1"
+
+### 15. Target's query contains only valid chars. Works, target is the specified
+# VALID CHARS -> pchar and "/?":
+# "0123456789"
+# "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+# "%AA"
+# "-._~!$&'()*+,;=:@"
+# "/?"
+"GET /VALID/PATH?0123456789/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/%AA/-._~/!$&'()*+,;=/:@/? HTTP/1.1"
+
+### 16. Target's query contains invalid chars. 400 BR
+"GET /VALID/PATH?INVALID^{}[]\t\b HTTP/1.1"
+"GET /VALID/PATH?^{}[]\t\bINVALID HTTP/1.1"
+"GET /VALID/PATH?INV^{}[]\t\bALID HTTP/1.1"
+"GET /VALID/PATH?^{}[]\t\b HTTP/1.1"
+
+### 17. Target's query contains valid pct-encoded. Works, target is the specified
+"GET /VALID/PATH/?%aa HTTP/1.1"
+"GET /VALID/PATH/?%AA HTTP/1.1"
+"GET /VALID/PATH/?%ff HTTP/1.1"
+"GET /VALID/PATH/?%FF HTTP/1.1"
+"GET /VALID/PATH/?%09 HTTP/1.1"
+"GET /VALID/PATH/?%A0 HTTP/1.1"
+"GET /VALID/PATH/?%9f HTTP/1.1"
+"GET /VALID/PATH/?%Df HTTP/1.1"
+"GET /VALID/PATH/?%dF HTTP/1.1"
+
+### 18. Target's query contains invalid pct-encoded. 400 BR
+"GET /VALID/PATH/?%gg HTTP/1.1"
+"GET /VALID/PATH/?%GG HTTP/1.1"
+"GET /VALID/PATH/?%-r HTTP/1.1"
+
+### 19. Target's query contains incomplete pct-encoded. 400 BR
+"GET /VALID/PATH/?%a HTTP/1.1"
+"GET /VALID/PATH/?% HTTP/1.1"
+
+### 20. Target is only query. 400 BR
+"GET ?param=value HTTP/1.1"
+
+### 21. Target is longer than maximum allowed ({TARGET}.length() > 8000). 414 URI Too Long
+"GET /{TARGET} HTTP/1.1"
+
+### 22. Target is mixed with HTTP-version. 400 BR
+"GET /index.html/HTTP/1.1"
+"GET /index.html?HTTP/1.1"
+
+### 23. Mixed pct-encoded in path. Works
+"GET /%2e%2e/%2e%2e/%2e%2e/etc/passwd HTTP/1.1"
+
+### 24. Combinations in query. Works
+"GET /?? HTTP/1.1"
+"GET /?= HTTP/1.1"
+"GET /?& HTTP/1.1"
+"GET /?&&&&&& HTTP/1.1"
+
+### 25. Target with fragment. 400 BR
+"GET /index.html#section HTTP/1.1"
+"GET /index.html?param=value#section HTTP/1.1"
+
+### 26. Target is empty. 400 BR
+"GET  HTTP/1.1"
+
+### 27. Target is non-existant. 400 BR
+"GET HTTP/1.1"
+
 
 ### LAST SPACE CRITERIA
 ### 1. Fail with 400 Bad Request if it doesn't have an SP
@@ -602,9 +739,21 @@
 
 
 
-# TEST "GET / HTTP/1.1\t" ON THE VERSION
-# TEST "GET / HTTPINVALID/1.1" ON THE VERSION
-# TEST "GET / HTTP/" ON THE VERSION --> WHY NOT SEGFAULT? (UNDEFINED BEHAVIOR)
+
+
+# TEST IN REQUEST LINE
+# "GET /index.html" -> 400 BR
+# "GET /index.html?param1=value&param2=value2" -> 400 BR
+# "GET {TARGET} HTTP/1.1", where TARGET.length() > 8000 -> 414 URI Too Long
+# |
+# v
+# 1. Request-line parsing -> /../%2e%2e/about//index.html?p1=val1&p2=val2
+# 2. Separate path (necessary?) -> /../%2e%2e/about//index.html
+# 3. Pct-decoding -> /../../about//index.html
+# 4. Normalize -> /about/index.html
+
+
+
 
 
 
