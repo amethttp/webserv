@@ -347,6 +347,11 @@ TEST(take_as_failure_an_HTTP_version_with_multiple_minor_versions)
     assertRequestLineIsInvalid("GET / HTTP/1.1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_an_empty_HTTP_version)
+{
+    assertRequestLineIsInvalid("GET / ", "400 Bad Request");
+}
+
 /* MISC. REQUEST LINE CRITERIA */
 TEST(take_as_failure_a_request_line_preceded_by_SP)
 {
