@@ -146,6 +146,13 @@ TEST(recognize_a_target_with_extension)
     assertRequestLine(GET, "/index.html", "HTTP/1.1");
 }
 
+TEST(recognize_a_target_with_one_directory_level)
+{
+    requestLine = createFromValidRequestLine("GET /profile/contact.php HTTP/1.1");
+
+    assertRequestLine(GET, "/profile/contact.php", "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
