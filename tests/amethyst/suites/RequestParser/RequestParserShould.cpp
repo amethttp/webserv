@@ -153,6 +153,13 @@ TEST(recognize_a_target_with_one_directory_level)
     assertRequestLine(GET, "/profile/contact.php", "HTTP/1.1");
 }
 
+TEST(recognize_a_target_with_multiple_directory_levels)
+{
+    requestLine = createFromValidRequestLine("GET /courses/science/physics.py HTTP/1.1");
+
+    assertRequestLine(GET, "/courses/science/physics.py", "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
