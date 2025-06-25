@@ -62,6 +62,7 @@ std::string RequestTokenizer::token()
         tokenString += this->currentChar_;
         advance();
     }
+
     return tokenString;
 }
 
@@ -73,6 +74,20 @@ std::string RequestTokenizer::httpVersion()
     advance(httpVersionLength);
 
     return httpVersionString;
+}
+
+std::string RequestTokenizer::target()
+{
+    std::string targetString = "/";
+
+    advance();
+    while (!hasFinishedText() && std::isalpha(this->currentChar_))
+    {
+        targetString += this->currentChar_;
+        advance();
+    }
+
+    return targetString;
 }
 
 RequestToken RequestTokenizer::getNextToken()
@@ -87,10 +102,7 @@ RequestToken RequestTokenizer::getNextToken()
     }
 
     if (this->currentChar_ == '/')
-    {
-        advance();
-        return RequestToken(TARGET, "/");
-    }
+        return RequestToken(TARGET, target());
 
     if (isHttpVersion())
         return RequestToken(HTTP_VERSION, httpVersion());

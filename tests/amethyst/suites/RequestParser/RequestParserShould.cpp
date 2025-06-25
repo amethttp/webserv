@@ -131,6 +131,15 @@ TEST(take_as_failure_a_request_line_with_multiple_first_SP)
 }
 
 
+/* REQUEST LINE TARGET CRITERIA */
+TEST(recognize_a_simple_alphabetic_target)
+{
+    requestLine = createFromValidRequestLine("GET /index HTTP/1.1");
+
+    assertRequestLine(GET, "/index", "HTTP/1.1");
+}
+
+
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
 {

@@ -22,6 +22,7 @@ private:
 
     std::string token();
     std::string httpVersion();
+    std::string target();
 
 public:
     RequestTokenizer(const std::string &text);
