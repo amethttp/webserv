@@ -139,6 +139,13 @@ TEST(recognize_a_simple_alphabetic_target)
     assertRequestLine(GET, "/index", "HTTP/1.1");
 }
 
+TEST(recognize_a_target_with_extension)
+{
+    requestLine = createFromValidRequestLine("GET /index.html HTTP/1.1");
+
+    assertRequestLine(GET, "/index.html", "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)

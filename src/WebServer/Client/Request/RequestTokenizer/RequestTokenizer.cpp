@@ -1,5 +1,4 @@
 #include "RequestTokenizer.hpp"
-#include <stdexcept>
 
 const std::string RequestTokenizer::tcharsSymbols = "!#$%&'*+-.^_`|~";
 
@@ -81,7 +80,7 @@ std::string RequestTokenizer::target()
     std::string targetString = "/";
 
     advance();
-    while (!hasFinishedText() && std::isalpha(this->currentChar_))
+    while (!hasFinishedText() && std::isgraph(this->currentChar_))
     {
         targetString += this->currentChar_;
         advance();
