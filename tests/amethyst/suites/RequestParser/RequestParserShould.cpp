@@ -312,7 +312,8 @@ TEST(take_as_failure_a_target_with_only_query)
 
 TEST(take_as_failure_a_target_longer_than_maximum_length)
 {
-    const std::string target = "/" + std::string(8000, 'a');
+    const char anyValidCharacter = 'A';
+    const std::string target = "/" + std::string(MAX_URI_LENGTH, anyValidCharacter);
     const std::string invalidRequestLine = "GET " + target + " HTTP/1.1";
 
     assertRequestLineIsInvalid(invalidRequestLine, "414 URI Too Long");

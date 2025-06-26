@@ -18,7 +18,7 @@ method_t RequestParser::parseRequestMethod(const std::string &requestMethod)
     return NOT_IMPLEMENTED;
 }
 
-result_t RequestParser::eat(tokenType_t type)
+result_t RequestParser::eat(const tokenType_t type)
 {
     if (this->currentToken_.getType() != type)
         return FAIL;
@@ -53,7 +53,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     if (params.method == NOT_IMPLEMENTED)
         return Result<RequestLineParams_t>::fail("501 Not Implemented");
 
-    if (params.target.length() > 8000)
+    if (params.target.length() > MAX_URI_LENGTH)
         return Result<RequestLineParams_t>::fail("414 URI Too Long");
 
     if (params.httpVersion != "HTTP/1.1")

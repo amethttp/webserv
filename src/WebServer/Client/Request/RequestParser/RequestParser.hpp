@@ -6,6 +6,8 @@
 #include "WebServer/Client/Request/RequestTokenizer/RequestToken/RequestToken.hpp"
 #include <vector>
 
+#define MAX_URI_LENGTH 8000
+
 typedef enum result_e
 {
     SUCCESS,
