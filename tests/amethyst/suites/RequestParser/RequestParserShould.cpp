@@ -205,7 +205,7 @@ TEST(take_as_failure_a_target_that_contains_invalid_characters)
     assertRequestLineIsInvalid("GET /INVA^\r{}\"[]\t\bLID HTTP/1.1", "400 Bad Request");
 }
 
-TEST(recognize_target_with_valid_pct_encoded_pchars)
+TEST(recognize_a_target_with_valid_pct_encoded_pchars)
 {
     const std::string target = "/%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF";
     const std::string validRequestLine = "GET " + target + " HTTP/1.1";
@@ -254,6 +254,17 @@ TEST(recognize_a_query_with_multiple_parameters)
     requestLine = createFromValidRequestLine("GET /VALID/PATH/?param=anyValue&mode= HTTP/1.1");
 
     assertRequestLine(GET, "/VALID/PATH/?param=anyValue&mode=", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_consisted_of_valid_characters)
+{
+    const std::string validChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%AA-._~!$&'()*+,;=:@/?";
+    const std::string target = "/VALID/PATH/?" + validChars;
+    const std::string validRequestLine = "GET " + target + " HTTP/1.1";
+
+    requestLine = createFromValidRequestLine(validRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
 }
 
 
