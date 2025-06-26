@@ -290,6 +290,13 @@ TEST(recognize_a_query_with_valid_pct_encoded_pchars)
     assertRequestLine(GET, target, "HTTP/1.1");
 }
 
+TEST(take_as_failure_a_query_with_invalid_pct_encoded_pchars)
+{
+    assertRequestLineIsInvalid("GET /VALID/PATH/?%gg HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /VALID/PATH/?%GG HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /VALID/PATH/?%-r HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
