@@ -545,15 +545,7 @@
 "GET /VALID/PATH?INVA^\r{}\"[]\t\bLID HTTP/1.1"
 
 ### 17. Target's query contains valid pct-encoded. Works, target is the specified
-"GET /VALID/PATH/?%aa HTTP/1.1"
-"GET /VALID/PATH/?%AA HTTP/1.1"
-"GET /VALID/PATH/?%ff HTTP/1.1"
-"GET /VALID/PATH/?%FF HTTP/1.1"
-"GET /VALID/PATH/?%09 HTTP/1.1"
-"GET /VALID/PATH/?%A0 HTTP/1.1"
-"GET /VALID/PATH/?%9f HTTP/1.1"
-"GET /VALID/PATH/?%Df HTTP/1.1"
-"GET /VALID/PATH/?%dF HTTP/1.1"
+"GET /VALID/PATH/?%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF HTTP/1.1"
 
 ### 18. Target's query contains invalid pct-encoded. 400 BR
 "GET /VALID/PATH/?%gg HTTP/1.1"
