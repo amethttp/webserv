@@ -181,6 +181,17 @@ TEST(take_as_failure_a_target_not_starting_with_slash)
     assertRequestLineIsInvalid("GET INVALID/ HTTP/1.1", "400 Bad Request");
 }
 
+TEST(recognize_a_target_consisted_of_pchars)
+{
+    const std::string pchars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%AA-._~!$&'()*+,;=:@";
+    const std::string target = "/" + pchars;
+    const std::string validRequestLine = "GET " + target + " HTTP/1.1";
+
+    requestLine = createFromValidRequestLine(validRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
