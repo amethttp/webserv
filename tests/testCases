@@ -490,11 +490,14 @@
 # "-._~!$&'()*+,;=:@"
 "GET /0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%AA-._~!$&'()*+,;=:@ HTTP/1.1"
 
-### 7. Target contains invalid characters. 400 BR
-"GET /INVALID^{}[]\t\b HTTP/1.1"
-"GET /^{}[]\t\bINVALID HTTP/1.1"
-"GET /INVA^{}[]\t\bLID HTTP/1.1"
-"GET /^{}[]\t\b HTTP/1.1"
+### 7.1. Target is consisted of invalid characters. 400 BR
+"GET /^{}[] HTTP/1.1"
+"GET /\b\"\n`\t HTTP/1.1"
+
+### 7.2. Target contains of invalid characters. 400 BR
+"GET /INVALID^{}[] HTTP/1.1"
+"GET /^{}[]INVALID HTTP/1.1"
+"GET /INVA^\r{}\"[]\t\bLID HTTP/1.1"
 
 ### 8. Target contains valid pct-encoded. Works, target is the specified
 "GET /%aa HTTP/1.1"
@@ -742,6 +745,7 @@
 
 
 # TEST IN REQUEST LINE
+# "GET ////// HTTP/1.1" -> WORKS
 # "GET /index.html" -> 400 BR
 # "GET /index.html?param1=value&param2=value2" -> 400 BR
 # "GET {TARGET} HTTP/1.1", where TARGET.length() > 8000 -> 414 URI Too Long

@@ -1,6 +1,8 @@
 #include "RequestTokenizer.hpp"
 
 const std::string RequestTokenizer::tcharsSymbols = "!#$%&'*+-.^_`|~";
+const std::string RequestTokenizer::unreservedSymbols = "-._~";
+const std::string RequestTokenizer::subDelimSymbols = "!$&'()*+,;=";
 
 RequestTokenizer::RequestTokenizer(const std::string &text)
 {
@@ -52,6 +54,26 @@ bool RequestTokenizer::isHttpVersion() const
             && std::isdigit(peek(7)));
 }
 
+bool RequestTokenizer::isUnreserved() const
+{
+    return (std::isalnum(this->currentChar_) || unreservedSymbols.find(this->currentChar_) != std::string::npos);
+}
+
+bool RequestTokenizer::isPctEncoded() const
+{
+    return this->currentChar_ == '%';
+}
+
+bool RequestTokenizer::isSubDelim() const
+{
+    return subDelimSymbols.find(this->currentChar_) != std::string::npos;
+}
+
+bool RequestTokenizer::isPchar() const
+{
+    return (isUnreserved() || isPctEncoded() || isSubDelim() || this->currentChar_ == ':' || this->currentChar_ == '@');
+}
+
 std::string RequestTokenizer::token()
 {
     std::string tokenString;
@@ -80,7 +102,7 @@ std::string RequestTokenizer::target()
     std::string targetString = "/";
 
     advance();
-    while (!hasFinishedText() && std::isgraph(this->currentChar_))
+    while (!hasFinishedText() && (isPchar() || this->currentChar_ == '/'))
     {
         targetString += this->currentChar_;
         advance();
