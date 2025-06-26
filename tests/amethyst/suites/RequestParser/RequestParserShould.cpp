@@ -249,6 +249,13 @@ TEST(recognize_a_query_with_a_full_parameter)
     assertRequestLine(GET, "/VALID/PATH/?param=anyValue", "HTTP/1.1");
 }
 
+TEST(recognize_a_query_with_multiple_parameters)
+{
+    requestLine = createFromValidRequestLine("GET /VALID/PATH/?param=anyValue&mode= HTTP/1.1");
+
+    assertRequestLine(GET, "/VALID/PATH/?param=anyValue&mode=", "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
