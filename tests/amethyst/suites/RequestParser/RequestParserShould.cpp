@@ -273,6 +273,13 @@ TEST(take_as_failure_a_query_consisted_of_invalid_characters)
     assertRequestLineIsInvalid("GET /VALID/PATH?\b\"\n`\t HTTP/1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_query_that_contains_invalid_characters)
+{
+    assertRequestLineIsInvalid("GET /VALID/PATH?INVALID^{}[] HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /VALID/PATH?^{}[]INVALID HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /VALID/PATH?INVA^\r{}\"[]\t\bLID HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
