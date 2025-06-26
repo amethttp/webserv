@@ -138,16 +138,19 @@ std::string RequestTokenizer::target()
     return targetString;
 }
 
+std::string RequestTokenizer::sp()
+{
+    advance();
+    return " ";
+}
+
 RequestToken RequestTokenizer::getNextToken()
 {
     if (hasFinishedText())
         return RequestToken(EOF, "");
 
     if (this->currentChar_ == ' ')
-    {
-        advance();
-        return RequestToken(SP, " ");
-    }
+        return RequestToken(SP, sp());
 
     if (this->currentChar_ == '/')
         return RequestToken(TARGET, target());

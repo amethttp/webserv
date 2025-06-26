@@ -21,7 +21,7 @@ static void assertRequestLine(method_t method, const std::string &target, const 
     ASSERT_EQUALS(version, request.requestLine.httpVersion);
 }
 
-static void assertHeaderSize(size_t size)
+static void assertHeaderSize(const size_t size)
 {
     ASSERT_EQUALS(size, request.headers.size());
 }
@@ -43,6 +43,7 @@ static void assertRequestStringIsInvalid(const std::string &invalidRequestString
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(errorMessage, result.getError());
 }
+
 
 TEST(recognize_basic_HTTP_GET_request)
 {
