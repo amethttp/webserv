@@ -367,6 +367,11 @@ TEST(take_as_failure_a_target_with_a_fragment_section)
     assertRequestLineIsInvalid("GET /index.html?param=anyValue#section HTTP/1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_an_empty_target)
+{
+    assertRequestLineIsInvalid("GET  HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
