@@ -222,6 +222,12 @@ TEST(take_as_failure_a_target_with_invalid_pct_encoded_pchars)
     assertRequestLineIsInvalid("GET /%-r HTTP/1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_target_with_incomplete_pct_encoded_pchars)
+{
+    assertRequestLineIsInvalid("GET /%a HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /% HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
