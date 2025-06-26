@@ -102,12 +102,17 @@ std::string RequestTokenizer::httpVersion()
     return httpVersionString;
 }
 
+bool RequestTokenizer::isAbsolutePath() const
+{
+    return (this->currentChar_ == '/' || isPchar());
+}
+
 std::string RequestTokenizer::target()
 {
     std::string targetString = "/";
 
     advance();
-    while (!hasFinishedText() && (isPchar() || this->currentChar_ == '/'))
+    while (!hasFinishedText() && isAbsolutePath())
     {
         targetString += this->currentChar_;
         advance();

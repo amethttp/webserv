@@ -26,6 +26,7 @@ private:
     bool isSubDelim() const;
     bool isPcharSymbol() const;
     bool isPchar() const;
+    bool isAbsolutePath() const;
 
     std::string token();
     std::string httpVersion();
