@@ -319,6 +319,12 @@ TEST(take_as_failure_a_target_longer_than_maximum_length)
     assertRequestLineIsInvalid(invalidRequestLine, "414 URI Too Long");
 }
 
+TEST(take_as_failure_a_target_mixed_with_HTTP_version)
+{
+    assertRequestLineIsInvalid("GET /index.html/HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /index.html?HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
