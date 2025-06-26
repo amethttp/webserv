@@ -198,6 +198,13 @@ TEST(take_as_failure_a_target_consisted_of_invalid_characters)
     assertRequestLineIsInvalid("GET /\b\"\n`\t HTTP/1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_target_that_contains_invalid_characters)
+{
+    assertRequestLineIsInvalid("GET /INVALID^{}[] HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /^{}[]INVALID HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /INVA^\r{}\"[]\t\bLID HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
