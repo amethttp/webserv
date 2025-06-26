@@ -124,8 +124,11 @@ std::string RequestTokenizer::target()
     if (this->currentChar_ != '?')
         return targetString;
 
-    targetString += this->currentChar_;
-    advance();
+    while (!hasFinishedText() && std::isgraph(this->currentChar_))
+    {
+        targetString += this->currentChar_;
+        advance();
+    }
 
     return targetString;
 }
