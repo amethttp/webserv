@@ -124,7 +124,7 @@ std::string RequestTokenizer::target()
     if (this->currentChar_ != '?')
         return targetString;
 
-    while (!hasFinishedText() && std::isgraph(this->currentChar_))
+    while (!hasFinishedText() && (this->currentChar_ == '?' || this->currentChar_ == '/' || isPchar()))
     {
         targetString += this->currentChar_;
         advance();

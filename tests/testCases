@@ -535,11 +535,14 @@
 # "/?"
 "GET /VALID/PATH?0123456789/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/%AA/-._~/!$&'()*+,;=/:@/? HTTP/1.1"
 
-### 16. Target's query contains invalid chars. 400 BR
-"GET /VALID/PATH?INVALID^{}[]\t\b HTTP/1.1"
-"GET /VALID/PATH?^{}[]\t\bINVALID HTTP/1.1"
-"GET /VALID/PATH?INV^{}[]\t\bALID HTTP/1.1"
-"GET /VALID/PATH?^{}[]\t\b HTTP/1.1"
+### 16.1. Target is consisted of invalid characters. 400 BR
+"GET /VALID/PATH?^{}[] HTTP/1.1"
+"GET /VALID/PATH?\b\"\n`\t HTTP/1.1"
+
+### 16.2. Target contains of invalid characters. 400 BR
+"GET /VALID/PATH?INVALID^{}[] HTTP/1.1"
+"GET /VALID/PATH?^{}[]INVALID HTTP/1.1"
+"GET /VALID/PATH?INVA^\r{}\"[]\t\bLID HTTP/1.1"
 
 ### 17. Target's query contains valid pct-encoded. Works, target is the specified
 "GET /VALID/PATH/?%aa HTTP/1.1"
