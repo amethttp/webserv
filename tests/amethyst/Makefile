@@ -76,6 +76,7 @@ vpath %.cpp $(SRC):\
             $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/\
             $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/RequestToken/\
             $(PROJ_SRC)utils/string/\
+            $(PROJ_SRC)utils/numeric/\
             $(PROJ_SRC)utils/Result/\
 			
 
@@ -89,6 +90,7 @@ SRCS = main.cpp \
        RequestTokenizer.cpp \
        RequestToken.cpp \
        string.cpp \
+       numeric.cpp \
        SimpleResult.cpp \
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)

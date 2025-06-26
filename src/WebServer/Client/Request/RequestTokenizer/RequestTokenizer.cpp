@@ -1,4 +1,5 @@
 #include "RequestTokenizer.hpp"
+#include "utils/numeric/numeric.hpp"
 
 const std::string RequestTokenizer::tcharsSymbols = "!#$%&'*+-.^_`|~";
 const std::string RequestTokenizer::unreservedSymbols = "-._~";
@@ -59,16 +60,11 @@ bool RequestTokenizer::isUnreserved() const
     return (std::isalnum(this->currentChar_) || unreservedSymbols.find(this->currentChar_) != std::string::npos);
 }
 
-bool RequestTokenizer::isHexdig(const char peekedChar) const
-{
-    return (std::isdigit(peekedChar)
-            || (peekedChar >= 'a' && peekedChar <= 'f')
-            || (peekedChar >= 'A' && peekedChar <= 'F'));
-}
-
 bool RequestTokenizer::isPctEncoded() const
 {
-    return (this->currentChar_ == '%' && isHexdig(peek()) && isHexdig(peek(2)));
+    return (this->currentChar_ == '%'
+            && isHexdig(peek())
+            && isHexdig(peek(2)));
 }
 
 bool RequestTokenizer::isSubDelim() const

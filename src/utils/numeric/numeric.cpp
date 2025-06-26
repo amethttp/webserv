@@ -10,6 +10,13 @@ bool isLong(const std::string &str)
     return stream.eof() && !stream.fail();
 }
 
+bool isHexdig(const char ch)
+{
+    return (std::isdigit(ch)
+            || (ch >= 'a' && ch <= 'f')
+            || (ch >= 'A' && ch <= 'F'));
+}
+
 bool isHex(const std::string &str)
 {
     size_t num;
