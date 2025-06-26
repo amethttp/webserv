@@ -310,6 +310,14 @@ TEST(take_as_failure_a_target_with_only_query)
     assertRequestLineIsInvalid("GET ?invalidQuery=anyValue HTTP/1.1", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_target_longer_than_maximum_length)
+{
+    const std::string target = "/" + std::string(8000, 'a');
+    const std::string invalidRequestLine = "GET " + target + " HTTP/1.1";
+
+    assertRequestLineIsInvalid(invalidRequestLine, "414 URI Too Long");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)

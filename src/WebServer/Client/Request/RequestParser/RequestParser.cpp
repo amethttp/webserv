@@ -53,6 +53,9 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     if (params.method == NOT_IMPLEMENTED)
         return Result<RequestLineParams_t>::fail("501 Not Implemented");
 
+    if (params.target.length() > 8000)
+        return Result<RequestLineParams_t>::fail("414 URI Too Long");
+
     if (params.httpVersion != "HTTP/1.1")
         return Result<RequestLineParams_t>::fail("505 HTTP Version Not Supported");
 
