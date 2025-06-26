@@ -31,6 +31,8 @@ private:
 
     std::string token();
     std::string httpVersion();
+    std::string absolutePath();
+    std::string query();
     std::string target();
     std::string sp();
 

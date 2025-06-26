@@ -115,25 +115,38 @@ std::string RequestTokenizer::httpVersion()
     return httpVersionString;
 }
 
-std::string RequestTokenizer::target()
+std::string RequestTokenizer::absolutePath()
 {
-    std::string targetString = "/";
+    std::string absolutePathString;
 
-    advance();
     while (!hasFinishedText() && isAbsolutePath())
     {
-        targetString += this->currentChar_;
+        absolutePathString += this->currentChar_;
         advance();
     }
 
-    if (this->currentChar_ != '?')
-        return targetString;
+    return absolutePathString;
+}
+
+std::string RequestTokenizer::query()
+{
+    std::string queryString;
 
     while (!hasFinishedText() && isQuery())
     {
-        targetString += this->currentChar_;
+        queryString += this->currentChar_;
         advance();
     }
+
+    return queryString;
+}
+
+std::string RequestTokenizer::target()
+{
+    std::string targetString = absolutePath();
+
+    if (this->currentChar_ == '?')
+        targetString += query();
 
     return targetString;
 }
