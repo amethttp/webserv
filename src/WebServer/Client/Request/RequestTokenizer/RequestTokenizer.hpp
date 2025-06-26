@@ -24,6 +24,7 @@ private:
     bool isUnreserved() const;
     bool isPctEncoded() const;
     bool isSubDelim() const;
+    bool isPcharSymbol() const;
     bool isPchar() const;
 
     std::string token();

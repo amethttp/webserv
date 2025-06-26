@@ -69,9 +69,14 @@ bool RequestTokenizer::isSubDelim() const
     return subDelimSymbols.find(this->currentChar_) != std::string::npos;
 }
 
+bool RequestTokenizer::isPcharSymbol() const
+{
+    return (this->currentChar_ == ':' || this->currentChar_ == '@');
+}
+
 bool RequestTokenizer::isPchar() const
 {
-    return (isUnreserved() || isPctEncoded() || isSubDelim() || this->currentChar_ == ':' || this->currentChar_ == '@');
+    return (isUnreserved() || isPctEncoded() || isSubDelim() || isPcharSymbol());
 }
 
 std::string RequestTokenizer::token()
