@@ -228,6 +228,13 @@ TEST(take_as_failure_a_target_with_incomplete_pct_encoded_pchars)
     assertRequestLineIsInvalid("GET /% HTTP/1.1", "400 Bad Request");
 }
 
+TEST(recognize_a_target_with_an_empty_query)
+{
+    requestLine = createFromValidRequestLine("GET /VALID/PATH/? HTTP/1.1");
+
+    assertRequestLine(GET, "/VALID/PATH/?", "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)

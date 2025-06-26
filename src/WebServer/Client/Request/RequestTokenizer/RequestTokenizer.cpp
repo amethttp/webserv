@@ -121,6 +121,12 @@ std::string RequestTokenizer::target()
         advance();
     }
 
+    if (this->currentChar_ != '?')
+        return targetString;
+
+    targetString += this->currentChar_;
+    advance();
+
     return targetString;
 }
 

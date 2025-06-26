@@ -560,6 +560,8 @@
 ### 19. Target's query contains incomplete pct-encoded. 400 BR
 "GET /VALID/PATH/?%a HTTP/1.1"
 "GET /VALID/PATH/?% HTTP/1.1"
+"GET /VALID/PATH/%a? HTTP/1.1"
+"GET /VALID/PATH/%? HTTP/1.1"
 
 ### 20. Target is only query. 400 BR
 "GET ?param=value HTTP/1.1"
