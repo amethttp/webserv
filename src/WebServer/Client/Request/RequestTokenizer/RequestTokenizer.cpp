@@ -110,6 +110,11 @@ bool RequestTokenizer::isAbsolutePath() const
     return (this->currentChar_ == '/' || isPchar());
 }
 
+bool RequestTokenizer::isQuery() const
+{
+    return (isPchar() || this->currentChar_ == '/' || this->currentChar_ == '?');
+}
+
 std::string RequestTokenizer::target()
 {
     std::string targetString = "/";
@@ -124,7 +129,7 @@ std::string RequestTokenizer::target()
     if (this->currentChar_ != '?')
         return targetString;
 
-    while (!hasFinishedText() && (this->currentChar_ == '?' || this->currentChar_ == '/' || isPchar()))
+    while (!hasFinishedText() && isQuery())
     {
         targetString += this->currentChar_;
         advance();

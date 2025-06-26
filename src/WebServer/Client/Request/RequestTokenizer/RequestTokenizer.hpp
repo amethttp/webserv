@@ -27,6 +27,7 @@ private:
     bool isPcharSymbol() const;
     bool isPchar() const;
     bool isAbsolutePath() const;
+    bool isQuery() const;
 
     std::string token();
     std::string httpVersion();
