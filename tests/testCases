@@ -500,15 +500,7 @@
 "GET /INVA^\r{}\"[]\t\bLID HTTP/1.1"
 
 ### 8. Target contains valid pct-encoded. Works, target is the specified
-"GET /%aa HTTP/1.1"
-"GET /%AA HTTP/1.1"
-"GET /%ff HTTP/1.1"
-"GET /%FF HTTP/1.1"
-"GET /%09 HTTP/1.1"
-"GET /%A0 HTTP/1.1"
-"GET /%9f HTTP/1.1"
-"GET /%Df HTTP/1.1"
-"GET /%dF HTTP/1.1"
+"GET /%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF HTTP/1.1"
 
 ### 9. Target contains invalid pct-encoded. 400 BR
 "GET /%gg HTTP/1.1"
