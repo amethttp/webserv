@@ -59,9 +59,16 @@ bool RequestTokenizer::isUnreserved() const
     return (std::isalnum(this->currentChar_) || unreservedSymbols.find(this->currentChar_) != std::string::npos);
 }
 
+bool RequestTokenizer::isHexdig(const char peekedChar) const
+{
+    return (std::isdigit(peekedChar)
+            || (peekedChar >= 'a' && peekedChar <= 'f')
+            || (peekedChar >= 'A' && peekedChar <= 'F'));
+}
+
 bool RequestTokenizer::isPctEncoded() const
 {
-    return this->currentChar_ == '%';
+    return (this->currentChar_ == '%' && isHexdig(peek()) && isHexdig(peek(2)));
 }
 
 bool RequestTokenizer::isSubDelim() const

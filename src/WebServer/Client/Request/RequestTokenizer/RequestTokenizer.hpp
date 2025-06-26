@@ -22,6 +22,7 @@ private:
     bool startsWithHttpPrefixAtCurrentPos() const;
     bool isHttpVersion() const;
     bool isUnreserved() const;
+    bool isHexdig(char peekedChar) const;
     bool isPctEncoded() const;
     bool isSubDelim() const;
     bool isPcharSymbol() const;
