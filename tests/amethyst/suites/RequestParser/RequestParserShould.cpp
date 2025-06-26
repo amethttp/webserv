@@ -360,6 +360,13 @@ TEST(recognize_a_query_with_multiple_ampersands)
     assertRequestLine(GET, "/?&&&&&&", "HTTP/1.1");
 }
 
+TEST(take_as_failure_a_target_with_a_fragment_section)
+{
+    assertRequestLineIsInvalid("GET /index.html# HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /index.html#section HTTP/1.1", "400 Bad Request");
+    assertRequestLineIsInvalid("GET /index.html?param=anyValue#section HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
