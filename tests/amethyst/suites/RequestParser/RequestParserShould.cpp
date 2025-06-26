@@ -235,11 +235,18 @@ TEST(recognize_a_target_with_an_empty_query)
     assertRequestLine(GET, "/VALID/PATH/?", "HTTP/1.1");
 }
 
-TEST(recognize_a_query_with_an_empty_param)
+TEST(recognize_a_query_with_an_empty_parameter)
 {
     requestLine = createFromValidRequestLine("GET /VALID/PATH/?param HTTP/1.1");
 
     assertRequestLine(GET, "/VALID/PATH/?param", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_a_full_parameter)
+{
+    requestLine = createFromValidRequestLine("GET /VALID/PATH/?param=anyValue HTTP/1.1");
+
+    assertRequestLine(GET, "/VALID/PATH/?param=anyValue", "HTTP/1.1");
 }
 
 
