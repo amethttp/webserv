@@ -325,6 +325,13 @@ TEST(take_as_failure_a_target_mixed_with_HTTP_version)
     assertRequestLineIsInvalid("GET /index.html?HTTP/1.1", "400 Bad Request");
 }
 
+TEST(recognize_a_not_normalized_pct_encoded_target)
+{
+    requestLine = createFromValidRequestLine("GET /%2e%2e/%2e%2e/%2e%2e/etc/passwd HTTP/1.1");
+
+    assertRequestLine(GET, "/%2e%2e/%2e%2e/%2e%2e/etc/passwd", "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
