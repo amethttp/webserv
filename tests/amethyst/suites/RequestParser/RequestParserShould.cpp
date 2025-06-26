@@ -346,6 +346,13 @@ TEST(recognize_a_query_with_a_single_equal)
     assertRequestLine(GET, "/?=", "HTTP/1.1");
 }
 
+TEST(recognize_a_query_with_a_single_ampersand)
+{
+    requestLine = createFromValidRequestLine("GET /?& HTTP/1.1");
+
+    assertRequestLine(GET, "/?&", "HTTP/1.1");
+}
+
 
 /* REQUEST LINE LAST SP CRITERIA */
 TEST(take_as_failure_a_request_line_without_the_last_SP)
