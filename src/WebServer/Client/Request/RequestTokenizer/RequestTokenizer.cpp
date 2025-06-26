@@ -82,6 +82,16 @@ bool RequestTokenizer::isPchar() const
     return (isUnreserved() || isPctEncoded() || isSubDelim() || isPcharSymbol());
 }
 
+bool RequestTokenizer::isAbsolutePath() const
+{
+    return (this->currentChar_ == '/' || isPchar());
+}
+
+bool RequestTokenizer::isQuery() const
+{
+    return (isPchar() || this->currentChar_ == '/' || this->currentChar_ == '?');
+}
+
 std::string RequestTokenizer::token()
 {
     std::string tokenString;
@@ -103,16 +113,6 @@ std::string RequestTokenizer::httpVersion()
     advance(httpVersionLength);
 
     return httpVersionString;
-}
-
-bool RequestTokenizer::isAbsolutePath() const
-{
-    return (this->currentChar_ == '/' || isPchar());
-}
-
-bool RequestTokenizer::isQuery() const
-{
-    return (isPchar() || this->currentChar_ == '/' || this->currentChar_ == '?');
 }
 
 std::string RequestTokenizer::target()
