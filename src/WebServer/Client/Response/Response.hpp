@@ -8,6 +8,12 @@
 #include "WebServer/Client/Request/Request.hpp"
 #include "WebServer/Server/Location/Location.hpp"
 
+typedef struct s_body
+{
+	std::string content;
+	std::string type;
+} t_body;
+
 class Response
 {
 private:
@@ -18,12 +24,12 @@ private:
 
 	StatusLine statusLine_;
 	std::map<std::string, std::string> headers_; // make response a dto/simpler class
-	std::string body_;
+	t_body body_;
 
 	// to response generator
 	void setStatusLine(t_httpCode code);
 	void setResponseHeaders(t_connection mode);
-	void setRepresentationHeaders(std::string &target);
+	void setRepresentationHeaders();
 	
 	void generateResponse(t_httpCode code, t_connection mode);
 
@@ -44,7 +50,6 @@ public:
 	void eraseBuffer(size_t bytesToErase);
 
 	std::string getBuffer() const;
-	std::string getBody() const;
 	t_httpCode getStatusCode() const;
 	bool getConnection() const;
 

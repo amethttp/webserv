@@ -37,4 +37,4 @@ webserv
 .vscode/
 
 # Test files
-imgtest.png
+tests/

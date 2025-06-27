@@ -109,7 +109,7 @@ std::string Response::toString()
 		res << (*it).first << ": " << (*it).second << "\r\n";
 	}
 	res << "\r\n";
-	res << body_;
+	res << this->body_.content;
 
 	return res.str();
 }
@@ -122,11 +122,6 @@ void Response::setBuffer(const std::string &buffer)
 std::string Response::getBuffer() const
 {
 	return this->buffer_;
-}
-
-std::string Response::getBody() const
-{
-	return this->body_;
 }
 
 t_httpCode Response::getStatusCode() const
@@ -150,9 +145,10 @@ void Response::eraseBuffer(size_t bytesToErase)
 	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
 }
 
-static void readFileToString(const char *path, std::string &str)
+static std::string readFileToString(const char *path)
 {
 	struct stat st;
+	std::string str;
 	std::ifstream file(path, std::ifstream::binary);
 
     if (!file.is_open())
@@ -173,6 +169,8 @@ static void readFileToString(const char *path, std::string &str)
 		throw (std::runtime_error("Reading operation failed"));
 	}
     file.close();
+
+	return str;
 }
 
 static std::string getImfFixdate()
@@ -230,27 +228,27 @@ std::string Response::getMIME(std::string &target)
 	return res;
 }
 
-void Response::setRepresentationHeaders(std::string &mimeType)
+void Response::setRepresentationHeaders()
 {
 	std::ostringstream length;
 
-	length << this->body_.length();
-	this->headers_["Content-Type"] = mimeType;
+	length << this->body_.content.length();
 	this->headers_["Content-Length"] = length.str();
+	if (!this->body_.content.empty())
+		this->headers_["Content-Type"] = this->body_.type;
 }
 
 void Response::generateResponse(t_httpCode code, t_connection mode)
 {
-	this->setResponseHeaders(mode);
 	setStatusLine(code);
+	this->setResponseHeaders(mode);
+	this->setRepresentationHeaders();
 }
 
 t_httpCode Response::getFile(std::string &target)
 {
-	std::string type = getMIME(target);
-
-	readFileToString(target.c_str(), this->body_);
-	this->setRepresentationHeaders(type);
+	this->body_.content = readFileToString(target.c_str());
+	this->body_.type = getMIME(target);
 
 	return OK;
 }
@@ -283,7 +281,6 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 	struct dirent *dir;
 	std::string name;
 	std::ostringstream html;
-	std::string type = extensionTypesDict_[".html"];
 
 	d = opendir(p.targetPath_.c_str());
 	if (d)
@@ -301,8 +298,8 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 		}
 		closedir(d);
 		closeHTML(html);
-		this->body_ = html.str();
-		this->setRepresentationHeaders(type);
+		this->body_.content = html.str();
+		this->body_.type = extensionTypesDict_[".html"];
 		return OK;
 	}
 
@@ -415,7 +412,7 @@ void Response::clear()
 {
 	this->buffer_.clear();
 	this->headers_.clear();
-	this->body_.clear();
+	this->body_.content.clear();
 }
 
 Response::~Response()

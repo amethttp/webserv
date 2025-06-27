@@ -76,9 +76,9 @@ bool Client::hasFullRequestHeaders()
 void Client::buildRequest()
 {
 	this->request_.setComplete(request_.tryParseFromBuffer());
-	
-	std::cout << this->request_ << std::endl;
-	std::cout << "Should build a response: " << (this->request_.isComplete() ? "true" : "false") << std::endl;
+
+	// std::cout << this->request_ << std::endl;
+	// std::cout << "Should build a response: " << (this->request_.isComplete() ? "true" : "false") << std::endl;
 }
 
 void Client::appendRequest(char *request)
