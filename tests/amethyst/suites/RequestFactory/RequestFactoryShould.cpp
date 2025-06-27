@@ -1,6 +1,7 @@
 #include "test/test.hpp"
 #include "test/assert/assert.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
+#include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
 namespace
 {
@@ -84,6 +85,15 @@ TEST(take_as_failure_an_invalid_request_line)
 TEST(take_as_failure_a_not_implemented_HTTP_method)
 {
     assertRequestStringIsInvalid("INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
+}
+
+TEST(take_as_failure_an_uri_longer_than_max_length)
+{
+    const char anyCharacter = 'A';
+    const std::string invalidTarget = "/" + std::string(MAX_URI_LENGTH, anyCharacter);
+    const std::string requestString = "GET " + invalidTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
+
+    assertRequestStringIsInvalid(requestString, "414 URI Too Long");
 }
 
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
