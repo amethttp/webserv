@@ -50,6 +50,7 @@ public:
 
 	t_method getMethod();
 	std::string getBuffer();
+	std::string getBody();
 	std::string getTarget();
 	std::string getHTTPVersion();
 	std::map<std::string, std::string>  getHeaders();

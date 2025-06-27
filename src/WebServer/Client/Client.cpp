@@ -139,6 +139,7 @@ void Client::executeRequest(std::vector<Server> &servers)
 {
 	Location location = getLocationPH(this->request_, servers);
 	Parameters responseParams(this->request_, location);
+	responseParams.uploadPath_ = "tests/"; // from server??
 
 	if (this->request_.getHTTPVersion() == "HTTP/1.1")
 		this->response_.build(responseParams);

@@ -353,18 +353,34 @@ t_httpCode Response::methodGet(Parameters &p)
 	}
 }
 
+t_httpCode Response::postFile(Parameters &p)
+{
+	struct stat st;
+
+	if (stat(p.targetPath_.c_str(), &st) == 0)
+		return CONFLICT;
+
+	std::ofstream file(p.targetPath_.c_str(), std::ofstream::trunc);
+	if (!file.is_open())
+	{
+		file.close();
+        throw (std::runtime_error("Error creating file"));
+	}
+	file << p.request_.getBody();
+
+	return CREATED;
+}
+
 t_httpCode Response::methodPost(Parameters &p)
 {
 	int statCheck;
 
-	statCheck = checkPath(p.targetPath_);
+	statCheck = checkPath(p.uploadPath_);
 	switch (statCheck)
 	{
-		case S_IFREG:
-			// M_POSTTTTTT
-			return OK;
-		case EACCES:
 		case S_IFDIR:
+			return postFile(p);
+		case EACCES:
 			return FORBIDDEN;
 
 		default:

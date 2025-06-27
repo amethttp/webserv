@@ -11,6 +11,7 @@ public:
 	t_method method_;
 	Request &request_;
 	Location &location_;
+	std::string uploadPath_;
 	std::string targetPath_;
 	t_connection connectionMode_;
 

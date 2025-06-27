@@ -41,6 +41,7 @@ private:
 	std::string getMIME(std::string &target);
 	t_httpCode tryAutoIndex(Parameters &p);
 	t_httpCode getFile(std::string &target);
+	t_httpCode postFile(Parameters &p);
 	t_httpCode methodGet(Parameters &p);
 	t_httpCode methodPost(Parameters &p);
 	t_httpCode methodDelete(Parameters &p);

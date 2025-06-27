@@ -207,6 +207,11 @@ std::string Request::getBuffer()
 	return this->buffer_;
 }
 
+std::string Request::getBody()
+{
+	return this->body_;
+}
+
 void Request::clear()
 {
 	this->method_ = M_NOT_IMPLEMENTED;
