@@ -96,6 +96,11 @@ TEST(take_as_failure_an_uri_longer_than_max_length)
     assertRequestStringIsInvalid(requestString, "414 URI Too Long");
 }
 
+TEST(take_as_failure_a_non_supported_HTTP_version)
+{
+    assertRequestStringIsInvalid("GET / HTTP/2.0\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
+}
+
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
     request = createFromValidRequest("POST / HTTP/1.1\r\nHost:localhost\r\nContent-Length:0\r\n\r\n");
