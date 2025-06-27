@@ -258,18 +258,47 @@ static void startHTML(std::ostringstream &html, const std::string &targetName)
 	html << "<!DOCTYPE html>\n"
 		<< "<html>\n"
 			<< "<head>\n"
-				<< "<title>" << "Index: " << targetName << "</title>\n"
+				<< "<title>" << "Index of: " << targetName << "</title>\n"
+				<< readFileToString(INDEX_STYLE)
 			<< "</head>\n"
 			<< "<body>\n"
-				<< "<p>------------------------------</p>\n"
-				<< "<ul>\n";
+				<< "<h2>" << "Index of: " << targetName << "</h2>\n"
+					<< readFileToString(INDEX_FILE_LIST)
+					<< "<ul>\n";
 }
 
 static void closeHTML(std::ostringstream &html)
 {
-	html << "</ul>\n"
-		<< "</body>\n"
-	<< "</html>";
+	html << readFileToString(INDEX_CLOSE);
+}
+
+static void appendElementToHTML(std::ostringstream &html, std::string &targetPath, std::string &anchorName, std::string displayName, unsigned char type)
+{
+	struct stat st;
+	std::ostringstream size;
+	std::string lastModified = "";
+	std::string filePath = targetPath + anchorName;
+	if (!stat(filePath.c_str(), &st))
+	{
+		if (type != DT_DIR)
+			size << (st.st_size / 1000) << " KB";
+		lastModified = ctime(&st.st_mtime);
+	}
+	html << "<li class=\"file-item\">"
+			<< "<div><a href=\"" << anchorName << "\">" << displayName <<"</a></div>\n"
+			<< "<div>" << size.str() << "</div>\n"
+			<< "<div>" << lastModified << "</div>\n"
+		<< "</li>\n";
+}
+
+static void setIndexNames(struct dirent *dir, std::string &anchorName, std::string &displayName)
+{
+	anchorName = dir->d_name;
+	if (dir->d_type == DT_DIR)
+		anchorName += "/";
+	displayName = anchorName;
+	if (displayName.length() > 25)
+		displayName = anchorName.substr(0,22) + "..>";
 }
 
 t_httpCode Response::tryAutoIndex(Parameters &p)
@@ -279,21 +308,20 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 
 	DIR *d;
 	struct dirent *dir;
-	std::string name;
+	std::string anchorName;
+	std::string displayName;
 	std::ostringstream html;
 
 	d = opendir(p.targetPath_.c_str());
 	if (d)
 	{
-		startHTML(html, p.request_.getTarget());
+		startHTML(html, p.targetPath_.c_str());
 		dir = readdir(d);
 		while (dir != NULL)
 		{
 			// if (dir->d_type == DT_REG || dir->d_type == DT_LNK || dir->d_type == DT_UNKNOWN)
-			name = dir->d_name;
-			if (dir->d_type == DT_DIR)
-				name += "/";
-			html << "<li><a href=\"" << name << "\">" << name <<"</a></li>\n";
+			setIndexNames(dir, anchorName, displayName);
+			appendElementToHTML(html, p.targetPath_, anchorName, displayName, dir->d_type);
 			dir = readdir(d);
 		}
 		closedir(d);

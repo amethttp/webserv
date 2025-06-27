@@ -8,6 +8,10 @@
 #include "WebServer/Client/Request/Request.hpp"
 #include "WebServer/Server/Location/Location.hpp"
 
+#define INDEX_STYLE "src/utils/htmlTemplates/indexStyle.html"
+#define INDEX_FILE_LIST "src/utils/htmlTemplates/indexFileList.html"
+#define INDEX_CLOSE "src/utils/htmlTemplates/closeIndex.html"
+
 typedef struct s_body
 {
 	std::string content;
