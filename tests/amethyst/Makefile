@@ -75,6 +75,7 @@ vpath %.cpp $(SRC):\
             $(PROJ_SRC)WebServer/Client/Request/RequestParser/\
             $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/\
             $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/RequestToken/\
+            $(PROJ_SRC)utils/HTTP/\
             $(PROJ_SRC)utils/string/\
             $(PROJ_SRC)utils/numeric/\
             $(PROJ_SRC)utils/Result/\
@@ -89,6 +90,7 @@ SRCS = main.cpp \
        RequestParser.cpp \
        RequestTokenizer.cpp \
        RequestToken.cpp \
+       http.cpp \
        string.cpp \
        numeric.cpp \
        SimpleResult.cpp \

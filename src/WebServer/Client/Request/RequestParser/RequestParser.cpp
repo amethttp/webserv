@@ -7,17 +7,6 @@ RequestParser::RequestParser(const RequestTokenizer &tokenizer)
 {
 }
 
-method_t RequestParser::parseRequestMethod(const std::string &requestMethod)
-{
-    if (requestMethod == "GET")
-        return GET;
-    if (requestMethod == "POST")
-        return POST;
-    if (requestMethod == "DELETE")
-        return DELETE;
-    return NOT_IMPLEMENTED;
-}
-
 result_t RequestParser::eat(const tokenType_t type)
 {
     if (this->currentToken_.getType() != type)
@@ -32,7 +21,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     int hasFailed = 0;
     RequestLineParams_t params;
 
-    params.method = parseRequestMethod(this->currentToken_.getValue());
+    params.method = getHttpMethodFromString(this->currentToken_.getValue());
     hasFailed |= eat(TOKEN);
 
     hasFailed |= eat(SP);
