@@ -82,9 +82,9 @@ TEST(take_as_failure_an_invalid_request_line)
     assertRequestStringIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
 }
 
-TEST(take_as_failure_a_not_implemented_HTTP_method)
+TEST(take_as_failure_a_non_implemented_HTTP_method)
 {
-    assertRequestStringIsInvalid("INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
+    assertRequestStringIsInvalid("NOT_IMPLEMENTED / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
 }
 
 TEST(take_as_failure_an_uri_longer_than_max_length)
@@ -98,7 +98,8 @@ TEST(take_as_failure_an_uri_longer_than_max_length)
 
 TEST(take_as_failure_a_non_supported_HTTP_version)
 {
-    assertRequestStringIsInvalid("GET / HTTP/2.0\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
+    assertRequestStringIsInvalid("GET / HTTP/2.1\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
+    assertRequestStringIsInvalid("GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
 }
 
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)

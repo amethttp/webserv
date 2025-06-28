@@ -50,15 +50,6 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     if (hasFailed)
         return Result<RequestLineParams_t>::fail("400 Bad Request");
 
-    if (params.method == NOT_IMPLEMENTED)
-        return Result<RequestLineParams_t>::fail("501 Not Implemented");
-
-    if (params.target.length() > MAX_URI_LENGTH)
-        return Result<RequestLineParams_t>::fail("414 URI Too Long");
-
-    if (params.httpVersion != "HTTP/1.1")
-        return Result<RequestLineParams_t>::fail("505 HTTP Version Not Supported");
-
     return Result<RequestLineParams_t>::ok(params);
 }
 

@@ -60,22 +60,28 @@ TEST(recognize_a_basic_DELETE_request_line)
 
 
 /* REQUEST LINE METHOD CRITERIA */
-TEST(take_as_failure_a_case_insensitive_method)
+TEST(recognize_as_not_implemented_a_case_insensitive_method)
 {
-    assertRequestLineIsInvalid("get / HTTP/1.1", "501 Not Implemented");
+    requestLine = createFromValidRequestLine("get / HTTP/1.1");
+
+    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
 
-TEST(take_as_failure_a_not_implemented_method_consisted_only_of_alphabetic_characters)
+TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_only_of_alphabetic_characters)
 {
-    assertRequestLineIsInvalid("INVALID / HTTP/1.1", "501 Not Implemented");
+    requestLine = createFromValidRequestLine("NotImplemented / HTTP/1.1");
+
+    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
 
-TEST(take_as_failure_a_not_implemented_method_consisted_of_tchars)
+TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_of_tchars)
 {
     const std::string tchars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    const std::string invalidRequestLineString = tchars + " / HTTP/1.1";
+    const std::string nonImplementedRequestLineString = tchars + " / HTTP/1.1";
 
-    assertRequestLineIsInvalid(invalidRequestLineString, "501 Not Implemented");
+    requestLine = createFromValidRequestLine(nonImplementedRequestLineString);
+
+    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_method_consisted_of_invalid_characters)
@@ -310,13 +316,15 @@ TEST(take_as_failure_a_target_with_only_query)
     assertRequestLineIsInvalid("GET ?invalidQuery=anyValue HTTP/1.1", "400 Bad Request");
 }
 
-TEST(take_as_failure_a_target_longer_than_maximum_length)
+TEST(recognize_a_target_longer_than_maximum_length)
 {
     const char anyValidCharacter = 'A';
     const std::string target = "/" + std::string(MAX_URI_LENGTH, anyValidCharacter);
-    const std::string invalidRequestLine = "GET " + target + " HTTP/1.1";
+    const std::string targetTooLongRequestLine = "GET " + target + " HTTP/1.1";
 
-    assertRequestLineIsInvalid(invalidRequestLine, "414 URI Too Long");
+    requestLine = createFromValidRequestLine(targetTooLongRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_mixed_with_HTTP_version)
@@ -471,11 +479,11 @@ TEST(take_as_failure_an_empty_HTTP_version_slash)
     assertRequestLineIsInvalid("GET / HTTP1.1", "400 Bad Request");
 }
 
-TEST(take_as_failure_a_non_supported_major_version)
+TEST(recognize_a_non_supported_major_version)
 {
-    assertRequestLineIsInvalid("GET / HTTP/0.1", "505 HTTP Version Not Supported");
-    assertRequestLineIsInvalid("GET / HTTP/2.1", "505 HTTP Version Not Supported");
-    assertRequestLineIsInvalid("GET / HTTP/7.1", "505 HTTP Version Not Supported");
+    requestLine = createFromValidRequestLine("GET / HTTP/2.1");
+
+    assertRequestLine(GET, "/", "HTTP/2.1");
 }
 
 TEST(take_as_failure_an_invalid_major_version)
@@ -537,11 +545,11 @@ TEST(take_as_failure_an_empty_HTTP_version_dot)
     assertRequestLineIsInvalid("GET / HTTP/11", "400 Bad Request");
 }
 
-TEST(take_as_failure_a_non_supported_minor_version)
+TEST(recognize_a_non_supported_minor_version)
 {
-    assertRequestLineIsInvalid("GET / HTTP/1.0", "505 HTTP Version Not Supported");
-    assertRequestLineIsInvalid("GET / HTTP/1.2", "505 HTTP Version Not Supported");
-    assertRequestLineIsInvalid("GET / HTTP/1.7", "505 HTTP Version Not Supported");
+    requestLine = createFromValidRequestLine("GET / HTTP/1.0");
+
+    assertRequestLine(GET, "/", "HTTP/1.0");
 }
 
 TEST(take_as_failure_an_invalid_minor_version)
