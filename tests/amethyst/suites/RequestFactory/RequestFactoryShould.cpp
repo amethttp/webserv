@@ -46,6 +46,7 @@ static void assertRequestStringIsInvalid(const std::string &invalidRequestString
 }
 
 
+/* BASIC REQUEST LINE TESTS */
 TEST(recognize_basic_HTTP_GET_request)
 {
     request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
@@ -77,6 +78,8 @@ TEST(recognize_basic_HTTP_POST_request)
     assertBodyIsEmpty();
 }
 
+
+/* REQUEST LINE FAILURE TESTS */
 TEST(take_as_failure_an_invalid_request_line)
 {
     assertRequestStringIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
@@ -102,6 +105,8 @@ TEST(take_as_failure_a_non_supported_HTTP_version)
     assertRequestStringIsInvalid("GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
 }
 
+
+/* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
     request = createFromValidRequest("POST / HTTP/1.1\r\nHost:localhost\r\nContent-Length:0\r\n\r\n");
