@@ -124,6 +124,16 @@ TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
     assertBodyIsEmpty();
 }
 
+TEST(leave_the_same_directory_target_if_it_does_not_contain_pct_encoded_pchars)
+{
+    request = createFromValidRequest("GET /courses/biology/ HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+    assertRequestLine(GET, "/courses/biology/", "HTTP/1.1");
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+    assertBodyIsEmpty();
+}
+
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
