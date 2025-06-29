@@ -142,6 +142,13 @@ TEST(decode_valid_pct_encoded_pchars)
     assertRequestLine(GET, "/index/ _\"_%_<_>_[_\\_]_{_}", "HTTP/1.1");
 }
 
+TEST(decode_valid_case_insensitive_pct_encoded_pchars)
+{
+    request = createRequestFromValidRequestLine("GET /index/%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B HTTP/1.1");
+
+    assertRequestLine(GET, "/index/<_<_>_>_\\_\\_{_{", "HTTP/1.1");
+}
+
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
