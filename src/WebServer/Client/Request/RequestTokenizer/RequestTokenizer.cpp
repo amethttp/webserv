@@ -63,8 +63,8 @@ bool RequestTokenizer::isUnreserved() const
 bool RequestTokenizer::isPctEncoded() const
 {
     return (this->currentChar_ == '%'
-            && isHexdig(peek())
-            && isHexdig(peek(2)));
+            && std::isxdigit(peek())
+            && std::isxdigit(peek(2)));
 }
 
 bool RequestTokenizer::isSubDelim() const
