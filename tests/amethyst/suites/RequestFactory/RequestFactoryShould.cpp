@@ -45,6 +45,13 @@ static void assertRequestIsInvalid(const std::string &invalidRequestString, cons
     ASSERT_EQUALS(errorMessage, result.getError());
 }
 
+static void assertRequestIsInvalidFromRequestLine(const std::string &invalidRequestLineString, const std::string &errorMessage)
+{
+    const std::string invalidRequestString = invalidRequestLineString + "\r\nHost: localhost\r\n\r\n";
+
+    assertRequestIsInvalid(invalidRequestString, errorMessage);
+}
+
 
 /* BASIC REQUEST LINE TESTS */
 TEST(recognize_basic_HTTP_GET_request)
@@ -82,27 +89,27 @@ TEST(recognize_basic_HTTP_POST_request)
 /* REQUEST LINE FAILURE TESTS */
 TEST(take_as_failure_an_invalid_request_line)
 {
-    assertRequestIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("INVALID", "400 Bad Request");
 }
 
 TEST(take_as_failure_a_non_implemented_HTTP_method)
 {
-    assertRequestIsInvalid("NOT_IMPLEMENTED / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
+    assertRequestIsInvalidFromRequestLine("NOT_IMPLEMENTED / HTTP/1.1", "501 Not Implemented");
 }
 
 TEST(take_as_failure_an_uri_longer_than_max_length)
 {
     const char anyCharacter = 'A';
     const std::string invalidTarget = "/" + std::string(MAX_URI_LENGTH, anyCharacter);
-    const std::string requestString = "GET " + invalidTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    const std::string requestString = "GET " + invalidTarget + " HTTP/1.1";
 
-    assertRequestIsInvalid(requestString, "414 URI Too Long");
+    assertRequestIsInvalidFromRequestLine(requestString, "414 URI Too Long");
 }
 
 TEST(take_as_failure_a_non_supported_HTTP_version)
 {
-    assertRequestIsInvalid("GET / HTTP/2.1\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
-    assertRequestIsInvalid("GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
+    assertRequestIsInvalidFromRequestLine("GET / HTTP/2.1", "505 HTTP Version Not Supported");
+    assertRequestIsInvalidFromRequestLine("GET / HTTP/1.0", "505 HTTP Version Not Supported");
 }
 
 
