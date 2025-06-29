@@ -171,6 +171,14 @@ TEST(leave_the_same_target_query_if_it_does_contain_valid_case_insensitive_pct_e
     assertRequestLine(GET, "/index/query?%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B", "HTTP/1.1");
 }
 
+TEST(take_as_failure_a_target_query_with_pct_encoded_control_chars)
+{
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%0d HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%0A HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%00 HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%7f HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)

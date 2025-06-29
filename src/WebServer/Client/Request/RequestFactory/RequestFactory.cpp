@@ -30,6 +30,17 @@ Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarge
 
     for (size_t i = 0; i < query.length(); i++)
     {
+        if (query[i] != '%')
+        {
+            decodedTarget += query[i];
+            continue;
+        }
+
+        const char decodedChar = hexToChar(query[i + 1], query[i + 2]);
+
+        if (std::iscntrl(decodedChar))
+            return Result<std::string>::fail("400 Bad Request");
+
         decodedTarget += query[i];
     }
 
