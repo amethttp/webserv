@@ -1,5 +1,4 @@
 #include "RequestTokenizer.hpp"
-#include "utils/numeric/numeric.hpp"
 
 const std::string RequestTokenizer::tcharsSymbols = "!#$%&'*+-.^_`|~";
 const std::string RequestTokenizer::unreservedSymbols = "-._~";

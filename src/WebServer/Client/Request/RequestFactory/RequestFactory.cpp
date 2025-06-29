@@ -17,6 +17,10 @@ std::string RequestFactory::decodeTarget(const std::string &encodedTarget)
         }
 
         const char decodedChar = hexToChar(encodedTarget[i + 1], encodedTarget[i + 2]);
+
+        if (std::iscntrl(decodedChar))
+            return "";
+
         decodedTarget += decodedChar;
         i += 2;
     }
@@ -51,6 +55,9 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         return Result<Request_t>::fail("505 HTTP Version Not Supported");
 
     request.requestLine.target = decodeTarget(request.requestLine.target);
+
+    if (request.requestLine.target.empty())
+        return Result<Request_t>::fail("400 Bad Request");
 
     requestParser.parseHeaders(request, splittedRequestBuffer);
 
