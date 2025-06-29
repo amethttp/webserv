@@ -37,7 +37,7 @@ static void assertBodyIsEmpty()
     ASSERT_EQUALS("", request.body);
 }
 
-static void assertRequestStringIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
+static void assertRequestIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
     Result<Request_t> result = RequestFactory::create(invalidRequestString);
 
@@ -82,12 +82,12 @@ TEST(recognize_basic_HTTP_POST_request)
 /* REQUEST LINE FAILURE TESTS */
 TEST(take_as_failure_an_invalid_request_line)
 {
-    assertRequestStringIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
+    assertRequestIsInvalid("INVALID\r\nHost: localhost\r\n\r\n", "400 Bad Request");
 }
 
 TEST(take_as_failure_a_non_implemented_HTTP_method)
 {
-    assertRequestStringIsInvalid("NOT_IMPLEMENTED / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
+    assertRequestIsInvalid("NOT_IMPLEMENTED / HTTP/1.1\r\nHost: localhost\r\n\r\n", "501 Not Implemented");
 }
 
 TEST(take_as_failure_an_uri_longer_than_max_length)
@@ -96,13 +96,13 @@ TEST(take_as_failure_an_uri_longer_than_max_length)
     const std::string invalidTarget = "/" + std::string(MAX_URI_LENGTH, anyCharacter);
     const std::string requestString = "GET " + invalidTarget + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
 
-    assertRequestStringIsInvalid(requestString, "414 URI Too Long");
+    assertRequestIsInvalid(requestString, "414 URI Too Long");
 }
 
 TEST(take_as_failure_a_non_supported_HTTP_version)
 {
-    assertRequestStringIsInvalid("GET / HTTP/2.1\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
-    assertRequestStringIsInvalid("GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
+    assertRequestIsInvalid("GET / HTTP/2.1\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
+    assertRequestIsInvalid("GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", "505 HTTP Version Not Supported");
 }
 
 
