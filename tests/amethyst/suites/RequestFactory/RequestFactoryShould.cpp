@@ -15,6 +15,13 @@ static Request_t createFromValidRequest(const std::string &requestString)
     return result.getValue();
 }
 
+static Request_t createRequestFromValidRequestLine(const std::string &requestLineString)
+{
+    const std::string requestString = requestLineString + "\r\nHost: localhost\r\n\r\n";
+
+    return createFromValidRequest(requestString);
+}
+
 static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
 {
     ASSERT_EQUALS(method, request.requestLine.method);
@@ -116,32 +123,23 @@ TEST(take_as_failure_a_non_supported_HTTP_version)
 /* REQUEST TARGET PCT-DECODING TESTS */
 TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
 {
-    request = createFromValidRequest("GET /index.html HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    request = createRequestFromValidRequestLine("GET /index.html HTTP/1.1");
 
     assertRequestLine(GET, "/index.html", "HTTP/1.1");
-    assertHeaderSize(1);
-    assertHeader("Host", "localhost");
-    assertBodyIsEmpty();
 }
 
 TEST(leave_the_same_directory_target_if_it_does_not_contain_pct_encoded_pchars)
 {
-    request = createFromValidRequest("GET /courses/biology/ HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    request = createRequestFromValidRequestLine("GET /courses/biology/ HTTP/1.1");
 
     assertRequestLine(GET, "/courses/biology/", "HTTP/1.1");
-    assertHeaderSize(1);
-    assertHeader("Host", "localhost");
-    assertBodyIsEmpty();
 }
 
 TEST(decode_valid_pct_encoded_pchars)
 {
-    request = createFromValidRequest("GET /index/%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1\r\nHost: localhost\r\n\r\n");
+    request = createRequestFromValidRequestLine("GET /index/%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1");
 
     assertRequestLine(GET, "/index/ _\"_%_<_>_[_\\_]_{_}", "HTTP/1.1");
-    assertHeaderSize(1);
-    assertHeader("Host", "localhost");
-    assertBodyIsEmpty();
 }
 
 /* REQUEST HEADERS TESTS */
