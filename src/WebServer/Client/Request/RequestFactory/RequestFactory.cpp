@@ -4,7 +4,7 @@
 #include "utils/numeric/numeric.hpp"
 #include <vector>
 
-std::string RequestFactory::decodeTarget(const std::string &encodedTarget)
+Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarget)
 {
     std::string decodedTarget;
 
@@ -19,13 +19,13 @@ std::string RequestFactory::decodeTarget(const std::string &encodedTarget)
         const char decodedChar = hexToChar(encodedTarget[i + 1], encodedTarget[i + 2]);
 
         if (std::iscntrl(decodedChar))
-            return "";
+            return Result<std::string>::fail("400 Bad Request");
 
         decodedTarget += decodedChar;
         i += 2;
     }
 
-    return decodedTarget;
+    return Result<std::string>::ok(decodedTarget);
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
@@ -54,10 +54,12 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     if (request.requestLine.httpVersion != "HTTP/1.1")
         return Result<Request_t>::fail("505 HTTP Version Not Supported");
 
-    request.requestLine.target = decodeTarget(request.requestLine.target);
+    Result<std::string> decodingTargetResult = decodeTarget(request.requestLine.target);
 
-    if (request.requestLine.target.empty())
-        return Result<Request_t>::fail("400 Bad Request");
+    if (decodingTargetResult.isFailure())
+        return Result<Request_t>::fail(decodingTargetResult.getError());
+
+    request.requestLine.target = decodingTargetResult.getValue();
 
     requestParser.parseHeaders(request, splittedRequestBuffer);
 
