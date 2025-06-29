@@ -157,6 +157,13 @@ TEST(take_as_failure_a_target_with_pct_encoded_control_chars)
     assertRequestIsInvalidFromRequestLine("GET /index/%7f HTTP/1.1", "400 Bad Request");
 }
 
+TEST(leave_the_same_target_query_if_it_does_contain_valid_pct_encoded_pchars)
+{
+    request = createRequestFromValidRequestLine("GET /index/query?%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1");
+
+    assertRequestLine(GET, "/index/query?%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)

@@ -7,8 +7,11 @@
 Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarget)
 {
     std::string decodedTarget;
+    const size_t queryStartPos = encodedTarget.find('?') > encodedTarget.length() ? encodedTarget.length() : encodedTarget.find('?');
+    const std::string absolutePath = encodedTarget.substr(0, queryStartPos);
+    const std::string query = encodedTarget.substr(queryStartPos);
 
-    for (size_t i = 0; i < encodedTarget.length(); i++)
+    for (size_t i = 0; i < absolutePath.length(); i++)
     {
         if (encodedTarget[i] != '%')
         {
@@ -23,6 +26,11 @@ Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarge
 
         decodedTarget += decodedChar;
         i += 2;
+    }
+
+    for (size_t i = 0; i < query.length(); i++)
+    {
+        decodedTarget += query[i];
     }
 
     return Result<std::string>::ok(decodedTarget);
