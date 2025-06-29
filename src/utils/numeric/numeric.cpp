@@ -37,3 +37,12 @@ size_t hexToDec(const std::string &hexNumber)
     stream >> std::hex >> num;
     return num;
 }
+
+char hexToChar(const char firstDigit, const char secondDigit)
+{
+    const std::string hexString = std::string(1, firstDigit) + std::string(1, secondDigit);
+
+    const size_t result = hexToDec(hexString);
+
+    return static_cast<char>(result);
+}

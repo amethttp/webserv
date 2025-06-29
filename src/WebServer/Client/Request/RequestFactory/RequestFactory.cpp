@@ -1,11 +1,27 @@
 #include "RequestFactory.hpp"
 #include "utils/string/string.hpp"
 #include "../RequestParser/RequestParser.hpp"
+#include "utils/numeric/numeric.hpp"
 #include <vector>
 
 std::string RequestFactory::decodeTarget(const std::string &encodedTarget)
 {
-    return encodedTarget;
+    std::string decodedTarget;
+
+    for (size_t i = 0; i < encodedTarget.length(); i++)
+    {
+        if (encodedTarget[i] != '%')
+        {
+            decodedTarget += encodedTarget[i];
+            continue ;
+        }
+
+        const char decodedChar = hexToChar(encodedTarget[i + 1], encodedTarget[i + 2]);
+        decodedTarget += decodedChar;
+        i += 2;
+    }
+
+    return decodedTarget;
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)

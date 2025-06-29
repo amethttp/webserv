@@ -134,6 +134,16 @@ TEST(leave_the_same_directory_target_if_it_does_not_contain_pct_encoded_pchars)
     assertBodyIsEmpty();
 }
 
+TEST(decode_valid_pct_encoded_pchars)
+{
+    request = createFromValidRequest("GET /index/%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+    assertRequestLine(GET, "/index/ _\"_%_<_>_[_\\_]_{_}", "HTTP/1.1");
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+    assertBodyIsEmpty();
+}
+
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
