@@ -106,6 +106,17 @@ TEST(take_as_failure_a_non_supported_HTTP_version)
 }
 
 
+/* REQUEST TARGET PCT-DECODING TESTS */
+TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
+{
+    request = createFromValidRequest("GET /index.html HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+    assertRequestLine(GET, "/index.html", "HTTP/1.1");
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+    assertBodyIsEmpty();
+}
+
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {

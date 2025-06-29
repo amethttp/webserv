@@ -3,6 +3,11 @@
 #include "../RequestParser/RequestParser.hpp"
 #include <vector>
 
+std::string RequestFactory::decodeTarget(const std::string &encodedTarget)
+{
+    return encodedTarget;
+}
+
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 {
     Request_t request;
@@ -28,6 +33,8 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
     if (request.requestLine.httpVersion != "HTTP/1.1")
         return Result<Request_t>::fail("505 HTTP Version Not Supported");
+
+    request.requestLine.target = decodeTarget(request.requestLine.target);
 
     requestParser.parseHeaders(request, splittedRequestBuffer);
 
