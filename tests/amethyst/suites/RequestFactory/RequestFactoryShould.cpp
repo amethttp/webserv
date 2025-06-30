@@ -244,6 +244,14 @@ TEST(decode_valid_pct_encoded_pchars_inside_absolute_path_and_leave_the_same_tar
     assertRequestLine(GET, "/index/%25?%20", "HTTP/1.1");
 }
 
+TEST(leave_the_same_path_and_query_if_the_query_contains_pct_encoded_question_marks)
+{
+    request = createRequestFromValidRequestLine("GET /index.html?query%3fvar HTTP/1.1");
+
+    assertTargetComponents("/index.html", "query%3fvar");
+    assertRequestLine(GET, "/index.html?query%3fvar", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)

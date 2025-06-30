@@ -786,15 +786,13 @@
 # TEST IN REQUEST LINE
 # |
 # v
-# 1. Request-line parsing -> /../%2e%2e/about/.///index.html?p1=val1&p2=val2%2e
-# 2. Separate path -> /../%2e%2e/about/.///index.html
-# 3. Pct-decoding -> /../../about/.///index.html
+# 1. Request-line parsing -> /../%2e%2e/about/./%2e/%2F//index.html?p1=val1&p2=val2%2e
+# 2. Separate path -> /../%2e%2e/about/./%2e/%2F//index.html
+# 3. Pct-decoding -> /../../about/././///index.html
 # 4. Normalize -> /about/index.html
 
-# ADD ASSERT_TARGET_COMPONENTS IN ALL REQUESTFACTORYTESTS
-
 # HOY #
-# 1. Separate path-query (decode only path, not URI neither query)                                 
+# 1. Separate path-query (decode only path, not URI neither query)                      
 # 2. Target pct-decoder                                                                 DONE
 # 3. Refactor RequestFactory::create()                                                  
 # 4. Target normalizer criteria                                                         
