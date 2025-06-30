@@ -25,7 +25,7 @@ Result<T> Result<T>::fail(const std::string &error)
 }
 
 template <typename T>
-T Result<T>::getValue()
+T Result<T>::getValue() const
 {
     if (isFailure())
         throw std::logic_error("Cannot access result value if the operation failed");

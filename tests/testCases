@@ -792,7 +792,7 @@
 # 4. Normalize -> /about/index.html
 
 # HOY #
-# 1. Separate path-query (decode only path, not URI neither query)                      
+# 1. Separate path-query (decode only path, not URI neither query)                      DONE
 # 2. Target pct-decoder                                                                 DONE
 # 3. Refactor RequestFactory::create()                                                  
 # 4. Target normalizer criteria                                                         

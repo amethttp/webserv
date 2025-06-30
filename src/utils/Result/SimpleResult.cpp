@@ -1,7 +1,7 @@
 #include "Result.hpp"
 #include <stdexcept>
 
-SimpleResult::SimpleResult(bool isSuccess, const std::string &error)
+SimpleResult::SimpleResult(const bool isSuccess, const std::string &error)
 {
     if (!isSuccess && error.empty())
         throw std::invalid_argument("A failing result must have a valid error message");
@@ -24,17 +24,17 @@ SimpleResult SimpleResult::fail(const std::string &error)
     return SimpleResult(false, error);
 }
 
-bool SimpleResult::isSuccess()
+bool SimpleResult::isSuccess() const
 {
     return this->isSuccess_;
 }
 
-bool SimpleResult::isFailure()
+bool SimpleResult::isFailure() const
 {
     return !this->isSuccess_;
 }
 
-std::string SimpleResult::getError()
+std::string SimpleResult::getError() const
 {
     return this->error_;
 }

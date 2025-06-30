@@ -16,9 +16,9 @@ public:
     static SimpleResult ok();
     static SimpleResult fail(const std::string &error);
 
-    bool isSuccess();
-    bool isFailure();
-    std::string getError();
+    bool isSuccess() const;
+    bool isFailure() const;
+    std::string getError() const;
 };
 
 template <typename T>
@@ -35,7 +35,7 @@ public:
     static Result<T> ok(T value);
     static Result<T> fail(const std::string &error);
 
-    T getValue();
+    T getValue() const;
 };
 
 #include "Result.tpp"

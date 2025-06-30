@@ -1,10 +1,8 @@
 #include "RequestFactory.hpp"
-
-#include <algorithm>
-
 #include "utils/string/string.hpp"
 #include "../RequestParser/RequestParser.hpp"
 #include "utils/numeric/numeric.hpp"
+#include <algorithm>
 #include <vector>
 
 void RequestFactory::splitRequestTargetComponents(Target_t &target)
@@ -18,45 +16,60 @@ void RequestFactory::splitRequestTargetComponents(Target_t &target)
         target.query = std::string(queryStart + 1, uriEnd);
 }
 
-Result<Target_t> RequestFactory::decodeTarget(const Target_t &encodedTarget)
+Result<std::string> RequestFactory::decodePath(const std::string &path)
 {
-    Target_t decodedTarget;
-    const std::string path = encodedTarget.path;
-    const std::string query = encodedTarget.query;
+    std::string decodedPath;
 
-    decodedTarget.uri = encodedTarget.uri;
     for (size_t i = 0; i < path.length(); i++)
     {
         if (path[i] != '%')
         {
-            decodedTarget.path += path[i];
+            decodedPath += path[i];
             continue ;
         }
 
         const char decodedChar = hexToChar(path[i + 1], path[i + 2]);
 
         if (std::iscntrl(decodedChar))
-            return Result<Target_t>::fail("400 Bad Request");
+            return Result<std::string>::fail("400 Bad Request");
 
-        decodedTarget.path += decodedChar;
+        decodedPath += decodedChar;
         i += 2;
     }
 
+    return Result<std::string>::ok(decodedPath);
+}
+
+bool RequestFactory::isEncodedQueryValid(const std::string &query)
+{
     for (size_t i = 0; i < query.length(); i++)
     {
         if (query[i] != '%')
-        {
-            decodedTarget.query += query[i];
             continue;
-        }
 
         const char decodedChar = hexToChar(query[i + 1], query[i + 2]);
 
         if (std::iscntrl(decodedChar))
-            return Result<Target_t>::fail("400 Bad Request");
-
-        decodedTarget.query += query[i];
+            return false;
     }
+
+    return true;
+}
+
+Result<Target_t> RequestFactory::decodeTarget(const Target_t &encodedTarget)
+{
+    Target_t decodedTarget;
+
+    const Result<std::string> decodingPathResult = decodePath(encodedTarget.path);
+    if (decodingPathResult.isFailure())
+        return Result<Target_t>::fail(decodingPathResult.getError());
+
+    if (!isEncodedQueryValid(encodedTarget.query))
+        return Result<Target_t>::fail("400 Bad Request");
+
+    decodedTarget.uri = encodedTarget.uri;
+    decodedTarget.path = decodingPathResult.getValue();
+    decodedTarget.query = encodedTarget.query;
 
     return Result<Target_t>::ok(decodedTarget);
 }
@@ -99,6 +112,8 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         return Result<Request_t>::fail(decodingTargetResult.getError());
 
     request.requestLine.target = decodingTargetResult.getValue();
+
+
 
     requestParser.parseHeaders(request, splittedRequestBuffer);
 
