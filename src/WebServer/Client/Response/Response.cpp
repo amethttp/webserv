@@ -364,9 +364,10 @@ t_httpCode Response::postFile(Parameters &p)
 	if (!file.is_open())
 	{
 		file.close();
-        throw (std::runtime_error("Error creating file"));
+		throw (std::runtime_error("Error creating file"));
 	}
 	file << p.request_.getBody();
+	this->headers_["Content-Location"] = p.targetPath_;
 
 	return CREATED;
 }
