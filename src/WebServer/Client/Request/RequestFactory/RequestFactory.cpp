@@ -12,7 +12,8 @@ void RequestFactory::splitRequestTargetComponents(Target_t &target)
     const std::string::iterator queryStart = std::find(target.uri.begin(), target.uri.end(), '?');
 
     target.path = std::string(target.uri.begin(), queryStart);
-    target.query = "";
+    if (queryStart != target.uri.end())
+        target.query = std::string(queryStart + 1, target.uri.end());
 }
 
 Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarget)
