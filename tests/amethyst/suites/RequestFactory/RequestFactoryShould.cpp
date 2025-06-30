@@ -159,6 +159,14 @@ TEST(separate_a_path_from_a_non_empty_query)
     assertRequestLine(GET, "/index.html?anyQuery", "HTTP/1.1");
 }
 
+TEST(separate_a_path_from_a_query_with_multiple_question_mark_characters)
+{
+    request = createRequestFromValidRequestLine("GET /index.html?any?Query? HTTP/1.1");
+
+    assertTargetComponents("/index.html", "any?Query?");
+    assertRequestLine(GET, "/index.html?any?Query?", "HTTP/1.1");
+}
+
 
 /* REQUEST TARGET PCT-DECODING TESTS */
 TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
