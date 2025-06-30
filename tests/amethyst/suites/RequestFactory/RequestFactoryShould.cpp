@@ -139,6 +139,15 @@ TEST(match_path_to_uri_if_there_is_no_query)
     assertRequestLine(GET, "/index.html", "HTTP/1.1");
 }
 
+TEST(separate_a_complex_path_from_an_empty_query)
+{
+    request = createRequestFromValidRequestLine("GET /index.html? HTTP/1.1");
+
+    ASSERT_EQUALS(request.requestLine.target.path, "/index.html");
+    ASSERT_EQUALS(request.requestLine.target.query, "");
+    assertRequestLine(GET, "/index.html?", "HTTP/1.1");
+}
+
 
 /* REQUEST TARGET PCT-DECODING TESTS */
 TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
