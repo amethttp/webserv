@@ -120,6 +120,16 @@ TEST(take_as_failure_a_non_supported_HTTP_version)
 }
 
 
+/* REQUEST TARGET PATH-QUERY SEPARATION TESTS */
+TEST(separate_a_simple_path_from_an_empty_query)
+{
+    request = createRequestFromValidRequestLine("GET /? HTTP/1.1");
+
+    ASSERT_EQUALS(request.requestLine.target.path, "/");
+    ASSERT_EQUALS(request.requestLine.target.query, "");
+}
+
+
 /* REQUEST TARGET PCT-DECODING TESTS */
 TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
 {

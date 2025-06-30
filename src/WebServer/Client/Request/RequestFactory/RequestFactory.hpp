@@ -8,6 +8,7 @@ class RequestFactory
 private:
     RequestFactory();
 
+    static void splitRequestTargetComponents(Target_t &target);
     static Result<std::string> decodeTarget(const std::string &encodedTarget);
 
 public:

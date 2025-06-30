@@ -4,6 +4,12 @@
 #include "utils/numeric/numeric.hpp"
 #include <vector>
 
+void RequestFactory::splitRequestTargetComponents(Target_t &target)
+{
+    target.path = "/";
+    target.query = "";
+}
+
 Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarget)
 {
     std::string decodedTarget;
@@ -57,6 +63,8 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     RequestTokenizer tokenizer = RequestTokenizer(requestLine);
     RequestParser requestParser = RequestParser(tokenizer);
 
+
+
     Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine();
 
     if (requestLineResult.isFailure())
@@ -72,6 +80,10 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
     if (request.requestLine.httpVersion != "HTTP/1.1")
         return Result<Request_t>::fail("505 HTTP Version Not Supported");
+
+
+
+    splitRequestTargetComponents(request.requestLine.target);
 
     Result<std::string> decodingTargetResult = decodeTarget(request.requestLine.target.uri);
 
