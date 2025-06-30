@@ -2,7 +2,7 @@
 #include "utils/string/string.hpp"
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestTargetDecoder/RequestTargetDecoder.hpp"
-#include "RequestTargetSeparator/RequestTargetSeparator.hpp"
+#include "RequestTargetProcesser/RequestTargetProcesser.hpp"
 #include <algorithm>
 #include <vector>
 
@@ -51,14 +51,12 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
 
 
-    RequestTargetSeparator::separateInComponents(request.requestLine.target);
+    const Result<Target_t> requestTargetResult = RequestTargetProcesser::process(request.requestLine.target);
 
-    Result<Target_t> decodingTargetResult = RequestTargetDecoder::decodeTarget(request.requestLine.target);
+    if (requestTargetResult.isFailure())
+        return Result<Request_t>::fail(requestTargetResult.getError());
 
-    if (decodingTargetResult.isFailure())
-        return Result<Request_t>::fail(decodingTargetResult.getError());
-
-    request.requestLine.target = decodingTargetResult.getValue();
+    request.requestLine.target = requestTargetResult.getValue();
 
 
 
