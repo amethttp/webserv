@@ -127,6 +127,16 @@ TEST(separate_a_simple_path_from_an_empty_query)
 
     ASSERT_EQUALS(request.requestLine.target.path, "/");
     ASSERT_EQUALS(request.requestLine.target.query, "");
+    assertRequestLine(GET, "/?", "HTTP/1.1");
+}
+
+TEST(match_path_to_uri_if_there_is_no_query)
+{
+    request = createRequestFromValidRequestLine("GET /index.html HTTP/1.1");
+
+    ASSERT_EQUALS(request.requestLine.target.path, "/index.html");
+    ASSERT_EQUALS(request.requestLine.target.query, "");
+    assertRequestLine(GET, "/index.html", "HTTP/1.1");
 }
 
 

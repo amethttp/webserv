@@ -1,4 +1,7 @@
 #include "RequestFactory.hpp"
+
+#include <algorithm>
+
 #include "utils/string/string.hpp"
 #include "../RequestParser/RequestParser.hpp"
 #include "utils/numeric/numeric.hpp"
@@ -6,7 +9,9 @@
 
 void RequestFactory::splitRequestTargetComponents(Target_t &target)
 {
-    target.path = "/";
+    const std::string::iterator queryStart = std::find(target.uri.begin(), target.uri.end(), '?');
+
+    target.path = std::string(target.uri.begin(), queryStart);
     target.query = "";
 }
 
