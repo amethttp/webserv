@@ -252,6 +252,14 @@ TEST(leave_the_same_path_and_query_if_the_query_contains_pct_encoded_question_ma
     assertRequestLine(GET, "/index.html?query%3fvar", "HTTP/1.1");
 }
 
+TEST(decode_the_target_path_pct_encoded_question_marks_without_separating_the_path_from_the_query)
+{
+    request = createRequestFromValidRequestLine("GET /index.html%3fquery%3fvar HTTP/1.1");
+
+    assertTargetComponents("/index.html?query?var", "");
+    assertRequestLine(GET, "/index.html%3fquery%3fvar", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
