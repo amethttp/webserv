@@ -67,18 +67,18 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     if (request.requestLine.method == NOT_IMPLEMENTED)
         return Result<Request_t>::fail("501 Not Implemented");
 
-    if (request.requestLine.target.length() > MAX_URI_LENGTH)
+    if (request.requestLine.target.uri.length() > MAX_URI_LENGTH)
         return Result<Request_t>::fail("414 URI Too Long");
 
     if (request.requestLine.httpVersion != "HTTP/1.1")
         return Result<Request_t>::fail("505 HTTP Version Not Supported");
 
-    Result<std::string> decodingTargetResult = decodeTarget(request.requestLine.target);
+    Result<std::string> decodingTargetResult = decodeTarget(request.requestLine.target.uri);
 
     if (decodingTargetResult.isFailure())
         return Result<Request_t>::fail(decodingTargetResult.getError());
 
-    request.requestLine.target = decodingTargetResult.getValue();
+    request.requestLine.target.uri = decodingTargetResult.getValue();
 
     requestParser.parseHeaders(request, splittedRequestBuffer);
 

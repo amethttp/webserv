@@ -26,7 +26,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
 
     hasFailed |= eat(SP);
 
-    params.target = this->currentToken_.getValue();
+    params.target.uri = this->currentToken_.getValue();
     hasFailed |= eat(TARGET);
 
     hasFailed |= eat(SP);

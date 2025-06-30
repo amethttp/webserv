@@ -22,10 +22,10 @@ static Request_t createRequestFromValidRequestLine(const std::string &requestLin
     return createFromValidRequest(requestString);
 }
 
-static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
+static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
 {
     ASSERT_EQUALS(method, request.requestLine.method);
-    ASSERT_EQUALS(target, request.requestLine.target);
+    ASSERT_EQUALS(targetUri, request.requestLine.target.uri);
     ASSERT_EQUALS(version, request.requestLine.httpVersion);
 }
 

@@ -770,8 +770,8 @@
 
 # HOY #
 # 1. Target pct-decoder                                                                 DONE
+# 1.5 FIX THE PATH-QUERY SEPARATION (SAVE PATH AND QUERY IN 2 DIFFERENT VARS)           
 # 2. Refactor RequestFactory::create()                                                  
-# 2.5 FIX THE PATH-QUERY SEPARATION (SAVE PATH AND QUERY IN 2 DIFFERENT VARS)           
 # 3. Target normalizer criteria                                                         
 # 4. Target normalizer                                                                  
 #??? 5. Headers parser minimum design ???#                                              

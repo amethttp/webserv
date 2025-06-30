@@ -17,10 +17,10 @@ static RequestLineParams_t createFromValidRequestLine(const std::string &request
     return result.getValue();
 }
 
-static void assertRequestLine(method_t method, const std::string &target, const std::string &version)
+static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
 {
     ASSERT_EQUALS(method, requestLine.method);
-    ASSERT_EQUALS(target, requestLine.target);
+    ASSERT_EQUALS(targetUri, requestLine.target.uri);
     ASSERT_EQUALS(version, requestLine.httpVersion);
 }
 
