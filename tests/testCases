@@ -386,7 +386,7 @@
 
 # ACCEPTANCE CRITERIA:
 
-## Request line (RQL)
+## REQUEST LINE (RQL)
 ### 1. Fail with 400 Bad Request for INVALID request-line preceded by a SP 
 " GET / HTTP/1.1"
 
@@ -730,22 +730,78 @@
 "GET /"
 
 
+### TARGET DECODER
+### 1. Target without pct-encoded remains the same
+"GET /index.html HTTP/1.1\r\nHost: localhost\r\n\r\n"
+"GET /courses/biology/ HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 2. Target with pct-encoded -> target: "/index/ _\"_%_<_>_[_\\_]_{_}"
+"GET /index/%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 3. Target with pct-encoded case-insensitive -> target: "/index/<_<_>_>_\\_\\_{_{"
+"GET /index/%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 4. Target with pct-encoded control chars -> 400 BR
+"GET /index/%0d_%0A_%00_%7f HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 5. Query with pct-encoded chars remains the same
+"GET /index/query?%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 6. Query with pct-encoded case-insensitive remains the same
+"GET /index/query?%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 7. Query with pct-encoded control chars -> 400 BR
+"GET /index/query?%0d_%0A_%00_%7f HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 8. Target with pct-encoded in path and query -> target: "/index/%?%25"
+"GET /index/%25?%25 HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
 
 
 # TEST IN REQUEST LINE
-# "GET ////// HTTP/1.1" -> WORKS
-# "GET /index.html" -> 400 BR
-# "GET /index.html?param1=value&param2=value2" -> 400 BR
-# "GET {TARGET} HTTP/1.1", where TARGET.length() > 8000 -> 414 URI Too Long
 # |
 # v
-# 1. Request-line parsing -> /../%2e%2e/about//index.html?p1=val1&p2=val2
-# 2. Separate path (necessary?) -> /../%2e%2e/about//index.html
-# 3. Pct-decoding -> /../../about//index.html
+# 1. Request-line parsing -> /../%2e%2e/about/.///index.html?p1=val1&p2=val2%2e
+# 2. Separate path -> /../%2e%2e/about/.///index.html
+# 3. Pct-decoding -> /../../about/.///index.html
 # 4. Normalize -> /about/index.html
 
 
+
+# HOY #
+# 1. Target pct-decoder                                                                 DONE
+# 2. Refactor RequestFactory::create()                                                  
+# 2.5 FIX THE PATH-QUERY SEPARATION (SAVE PATH AND QUERY IN 2 DIFFERENT VARS)           
+# 3. Target normalizer criteria                                                         
+# 4. Target normalizer                                                                  
+#??? 5. Headers parser minimum design ???#                                              
+
+# MAÑANA #
+#??? 5. Headers parser minimum design ???#
+# 6. Headers parsing criteria
+# 7. Headers parsing
+
+
+
+
+# OPCION 1
+# Tokenizer1("GET / HTTP/1.1")
+# Parser1(tokenizer)
+
+# Tokenizer2("Host: localhost")
+# Parser2(tokenizer)
+
+
+# OPCION 2
+# tokenizer.setText("Host: localhost")
+# tokenizer.restart() -> pos = 0; currentChar = text[0]
+
+
+# OPCION 3
+# Host: localhost\r\nContent-Length: 0\r\n
+# vector("Host: localhost", "Content-Length: 0")
+# Host: localhost
+# Content-Length: 0
 
 
 
