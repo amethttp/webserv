@@ -18,27 +18,27 @@ void RequestFactory::splitRequestTargetComponents(Target_t &target)
         target.query = std::string(queryStart + 1, uriEnd);
 }
 
-Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarget)
+Result<Target_t> RequestFactory::decodeTarget(const Target_t &encodedTarget)
 {
-    std::string decodedTarget;
-    const size_t queryStartPos = encodedTarget.find('?') > encodedTarget.length() ? encodedTarget.length() : encodedTarget.find('?');
-    const std::string absolutePath = encodedTarget.substr(0, queryStartPos);
-    const std::string query = encodedTarget.substr(queryStartPos);
+    Target_t decodedTarget;
+    const std::string path = encodedTarget.path;
+    const std::string query = encodedTarget.query;
 
-    for (size_t i = 0; i < absolutePath.length(); i++)
+    decodedTarget.uri = encodedTarget.uri;
+    for (size_t i = 0; i < path.length(); i++)
     {
-        if (encodedTarget[i] != '%')
+        if (path[i] != '%')
         {
-            decodedTarget += encodedTarget[i];
+            decodedTarget.path += path[i];
             continue ;
         }
 
-        const char decodedChar = hexToChar(encodedTarget[i + 1], encodedTarget[i + 2]);
+        const char decodedChar = hexToChar(path[i + 1], path[i + 2]);
 
         if (std::iscntrl(decodedChar))
-            return Result<std::string>::fail("400 Bad Request");
+            return Result<Target_t>::fail("400 Bad Request");
 
-        decodedTarget += decodedChar;
+        decodedTarget.path += decodedChar;
         i += 2;
     }
 
@@ -46,19 +46,19 @@ Result<std::string> RequestFactory::decodeTarget(const std::string &encodedTarge
     {
         if (query[i] != '%')
         {
-            decodedTarget += query[i];
+            decodedTarget.query += query[i];
             continue;
         }
 
         const char decodedChar = hexToChar(query[i + 1], query[i + 2]);
 
         if (std::iscntrl(decodedChar))
-            return Result<std::string>::fail("400 Bad Request");
+            return Result<Target_t>::fail("400 Bad Request");
 
-        decodedTarget += query[i];
+        decodedTarget.query += query[i];
     }
 
-    return Result<std::string>::ok(decodedTarget);
+    return Result<Target_t>::ok(decodedTarget);
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
@@ -93,12 +93,12 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
     splitRequestTargetComponents(request.requestLine.target);
 
-    Result<std::string> decodingTargetResult = decodeTarget(request.requestLine.target.uri);
+    Result<Target_t> decodingTargetResult = decodeTarget(request.requestLine.target);
 
     if (decodingTargetResult.isFailure())
         return Result<Request_t>::fail(decodingTargetResult.getError());
 
-    request.requestLine.target.uri = decodingTargetResult.getValue();
+    request.requestLine.target = decodingTargetResult.getValue();
 
     requestParser.parseHeaders(request, splittedRequestBuffer);
 

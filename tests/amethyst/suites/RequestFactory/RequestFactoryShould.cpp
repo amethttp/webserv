@@ -71,6 +71,7 @@ TEST(recognize_basic_HTTP_GET_request)
 {
     request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
+    assertTargetComponents("/", "");
     assertRequestLine(GET, "/", "HTTP/1.1");
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -81,6 +82,7 @@ TEST(recognize_basic_HTTP_DELETE_request)
 {
     request = createFromValidRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
+    assertTargetComponents("/", "");
     assertRequestLine(DELETE, "/", "HTTP/1.1");
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -91,6 +93,7 @@ TEST(recognize_basic_HTTP_POST_request)
 {
     request = createFromValidRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
 
+    assertTargetComponents("/", "");
     assertRequestLine(POST, "/", "HTTP/1.1");
     assertHeaderSize(2);
     assertHeader("Host", "localhost");
@@ -173,6 +176,7 @@ TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
 {
     request = createRequestFromValidRequestLine("GET /index.html HTTP/1.1");
 
+    assertTargetComponents("/index.html", "");
     assertRequestLine(GET, "/index.html", "HTTP/1.1");
 }
 
@@ -180,6 +184,7 @@ TEST(leave_the_same_directory_target_if_it_does_not_contain_pct_encoded_pchars)
 {
     request = createRequestFromValidRequestLine("GET /courses/biology/ HTTP/1.1");
 
+    assertTargetComponents("/courses/biology/", "");
     assertRequestLine(GET, "/courses/biology/", "HTTP/1.1");
 }
 
@@ -187,14 +192,16 @@ TEST(decode_valid_pct_encoded_pchars)
 {
     request = createRequestFromValidRequestLine("GET /index/%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1");
 
-    assertRequestLine(GET, "/index/ _\"_%_<_>_[_\\_]_{_}", "HTTP/1.1");
+    assertTargetComponents("/index/ _\"_%_<_>_[_\\_]_{_}", "");
+    assertRequestLine(GET, "/index/%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d", "HTTP/1.1");
 }
 
 TEST(decode_valid_case_insensitive_pct_encoded_pchars)
 {
     request = createRequestFromValidRequestLine("GET /index/%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B HTTP/1.1");
 
-    assertRequestLine(GET, "/index/<_<_>_>_\\_\\_{_{", "HTTP/1.1");
+    assertTargetComponents("/index/<_<_>_>_\\_\\_{_{", "");
+    assertRequestLine(GET, "/index/%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B", "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_with_pct_encoded_control_chars)
@@ -209,6 +216,7 @@ TEST(leave_the_same_target_query_if_it_does_contain_valid_pct_encoded_pchars)
 {
     request = createRequestFromValidRequestLine("GET /index/query?%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1");
 
+    assertTargetComponents("/index/query", "%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d");
     assertRequestLine(GET, "/index/query?%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d", "HTTP/1.1");
 }
 
@@ -216,6 +224,7 @@ TEST(leave_the_same_target_query_if_it_does_contain_valid_case_insensitive_pct_e
 {
     request = createRequestFromValidRequestLine("GET /index/query?%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B HTTP/1.1");
 
+    assertTargetComponents("/index/query", "%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B");
     assertRequestLine(GET, "/index/query?%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B", "HTTP/1.1");
 }
 
@@ -231,7 +240,8 @@ TEST(decode_valid_pct_encoded_pchars_inside_absolute_path_and_leave_the_same_tar
 {
     request = createRequestFromValidRequestLine("GET /index/%25?%20 HTTP/1.1");
 
-    assertRequestLine(GET, "/index/%?%20", "HTTP/1.1");
+    assertTargetComponents("/index/%", "%20");
+    assertRequestLine(GET, "/index/%25?%20", "HTTP/1.1");
 }
 
 

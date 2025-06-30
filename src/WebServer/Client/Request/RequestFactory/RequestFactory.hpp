@@ -9,7 +9,7 @@ private:
     RequestFactory();
 
     static void splitRequestTargetComponents(Target_t &target);
-    static Result<std::string> decodeTarget(const std::string &encodedTarget);
+    static Result<Target_t> decodeTarget(const Target_t &encodedTarget);
 
 public:
     static Result<Request_t> create(const std::string &requestBuffer);
