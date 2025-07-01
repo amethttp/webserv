@@ -783,6 +783,147 @@
 "GET /index.html%3fquery?var HTTP/1.1"
 
 
+### TARGET PATH NORMALIZER
+### 1. Basic path -> "/"
+"/"
+
+### 2. Basic file path -> "index.html"
+"/index.html"
+
+### 3. Basic directory path -> "/courses/biology/"
+"/courses/biology/"
+
+### 4. Single current directory path -> "/"
+"/."
+
+### 5. Single current directory ended with slash -> "/"
+"/./"
+
+### 5. Multiple current directory -> "/"
+"/././."
+
+### 6. Multiple current directory ended with slash -> "/"
+"/./././"
+
+### 7. Single current directory after text -> "/courses/"
+"/courses/."
+
+### 8. Single current directory after text ended with slash -> "/courses/"
+"/courses/./"
+
+### 9. Multiple current directory after text -> "/courses/"
+"/courses/././."
+
+### 10. Multiple current directory after text ended with slash -> "/courses/"
+"/courses/./././"
+
+### 11. Single current directory before text -> "/courses"
+"/./courses"
+
+### 12. Multiple current directory before text ended with slash -> "/courses"
+"/./././courses"
+
+### 13. Multiple current directory before text without slash -> "/.courses"
+"/././.courses"
+
+### 14. Single current directory between text ended with slash -> "/courses/index.html"
+"/courses/./index.html"
+
+### 15. Multiple current directory between text ended with slash -> "/courses/index.html"
+"/courses/./././index.html"
+
+### 16. Multiple current directory between text without slash -> "/courses/.index.html"
+"/courses/././.index.html"
+
+### 17. Single current directory before and after text -> "/courses/"
+"/./courses/./"
+
+### 18. Multiple current directory before and after text -> "/courses/"
+"/././courses/././"
+
+### 19. Single parent directory path -> "/"
+"/.."
+
+### 20. Single parent directory ended with slash -> "/"
+"/../"
+
+### 21. Multiple parent directory -> "/"
+"/../../.."
+
+### 22. Multiple parent directory ended with slash -> "/"
+"/../../../"
+
+### 23. Single parent directory after text -> "/"
+"/courses/.."
+
+### 24. Single parent directory after text ended with slash -> "/"
+"/courses/../"
+
+### 25. Multiple parent directory after text -> "/"
+"/courses/../../.."
+
+### 26. Multiple parent directory after text ended with slash -> "/"
+"/courses/../../../"
+
+### 27. Single parent directory before text -> "/courses"
+"/../courses"
+
+### 28. Multiple parent directory before text ended with slash -> "/courses"
+"/../../../courses"
+
+### 29. Multiple parent directory before text without slash -> "/..courses"
+"/../../..courses"
+
+### 30. Single parent directory between text ended with slash -> "/index.html"
+"/courses/../index.html"
+
+### 31. Multiple parent directory between text ended with slash -> "/index.html"
+"/courses/../../../index.html"
+
+### 32. Multiple parent directory between text without slash -> "/..index.html"
+"/courses/../../..index.html"
+
+### 33. Single parent directory before and after text -> "/"
+"/../courses/../"
+
+### 34. Multiple parent directory before and after text -> "/"
+"/../../courses/../../"
+
+### 35. Multiple slashes -> "/"
+"////"
+
+### 36. Multiple slashes after text -> "/courses/"
+"/courses//////"
+
+### 37. Multiple slashes before text -> "/courses"
+"/////courses"
+
+### 38. Multiple slashes between text -> "/courses/index.html"
+"/courses/////index.html"
+
+### 39. Multiple slashes before and after text -> "/courses/"
+"///courses///"
+
+### 40. Combination of multiple current and parent directory, and slashes -> "/about/index.php" 
+"/./courses/..////about/index.php"
+
+### 41. Pct-encoded current directory -> "/about/index.html"
+"/%2e/about/index.html"
+
+### 42. Pct-encoded parent directory -> "/about/index.html"
+"/courses/%2e%2e/about/index.html"
+
+### 43. Pct-encoded slash -> "/courses/index.html"
+"/courses/%2f/%2Findex.html"
+
+### 44. Combination of pct-encoded and non pct-encoded current and parent directory, and slashes -> "/about/index.html"
+"//../%2e%2e/about/./%2e/%2F//index.html"
+
+### 45. Existing file outside root -> "/etc/passwd"
+"/../../../../..%2f..%2F%2e%2E/%2e%2E/%2e%2E/%2e%2E/%2e%2E/etc/passwd"
+
+
+
 # TEST IN REQUEST LINE
 # |
 # v
@@ -795,7 +936,7 @@
 # 1. Separate path-query (decode only path, not URI neither query)                      DONE
 # 2. Target pct-decoder                                                                 DONE
 # 3. Refactor RequestFactory::create()                                                  DONE
-# 4. Target normalizer criteria                                                         
+# 4. Target normalizer criteria                                                         DONE
 # 5. Target normalizer                                                                  
 #??? 6. Headers parser minimum design ???#                                              
 
