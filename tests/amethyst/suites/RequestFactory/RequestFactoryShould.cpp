@@ -286,6 +286,14 @@ TEST(leave_the_same_file_path_if_it_does_not_need_to_be_normalized)
     assertRequestLine(GET, "/index.html", "HTTP/1.1");
 }
 
+TEST(leave_the_same_directory_path_if_it_does_not_need_to_be_normalized)
+{
+    request = createRequestFromValidRequestLine("GET /courses/biology/ HTTP/1.1");
+
+    assertTargetComponents("/courses/biology/", "");
+    assertRequestLine(GET, "/courses/biology/", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
