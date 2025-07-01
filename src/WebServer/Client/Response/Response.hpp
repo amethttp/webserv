@@ -41,6 +41,7 @@ private:
 
 	// request executor
 	std::string getMIME(std::string &target);
+	t_httpCode tryIndex(Parameters &p);
 	t_httpCode tryAutoIndex(Parameters &p);
 	t_httpCode getFile(std::string &target);
 	t_httpCode postFile(Parameters &p);

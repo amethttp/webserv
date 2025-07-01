@@ -88,6 +88,13 @@ Response::Response()
 {
 }
 
+static bool pathExists(std::string &path)
+{
+	struct stat st;
+
+	return (stat(path.c_str(), &st) == 0);
+}
+
 static int checkPath(std::string &path)
 {
 	struct stat st;
@@ -246,7 +253,7 @@ void Response::parseCustomPage(std::string &pagePath)
 
 void Response::generateResponse(error_page_t &customPage, t_connection mode)
 {
-	setStatusLine((t_httpCode)customPage.code);
+	setStatusLine(customPage.code);
 	this->setResponseHeaders(mode);
 	this->parseCustomPage(customPage.page);
 	this->setRepresentationHeaders();
@@ -317,8 +324,9 @@ static void setIndexNames(struct dirent *dir, std::string &anchorName, std::stri
 
 t_httpCode Response::tryAutoIndex(Parameters &p)
 {
-	if (p.location_.getAutoIndex())
+	if (!p.location_.getAutoIndex())
 		return FORBIDDEN;
+
 	DIR *d;
 	struct dirent *dir;
 	std::string anchorName;
@@ -347,6 +355,32 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 	return FORBIDDEN;
 }
 
+static bool findIndex(Parameters &p)
+{
+	std::string indexPath;
+	std::vector<std::string> indexList = p.location_.getIndexList();
+
+	for (std::vector<std::string>::iterator ite = indexList.begin(); ite != indexList.end(); ++ite)
+	{
+		indexPath = p.targetPath_ + (*ite);
+		if (checkPath(indexPath) == S_IFREG)
+		{
+			p.targetPath_ = indexPath;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+t_httpCode Response::tryIndex(Parameters &p)
+{
+	if (findIndex(p))
+		return getFile(p.targetPath_);
+	
+	return tryAutoIndex(p);
+}
+
 t_httpCode Response::methodGet(Parameters &p)
 {
 	int statCheck;
@@ -357,7 +391,7 @@ t_httpCode Response::methodGet(Parameters &p)
 		case S_IFREG:
 			return getFile(p.targetPath_);
 		case S_IFDIR:
-			return tryAutoIndex(p);
+			return tryIndex(p);
 		case EACCES:
 			return FORBIDDEN;
 
@@ -368,9 +402,7 @@ t_httpCode Response::methodGet(Parameters &p)
 
 t_httpCode Response::postFile(Parameters &p)
 {
-	struct stat st;
-
-	if (stat(p.targetPath_.c_str(), &st) == 0)
+	if (pathExists(p.targetPath_))
 		return CONFLICT;
 
 	std::ofstream file(p.targetPath_.c_str(), std::ofstream::trunc);

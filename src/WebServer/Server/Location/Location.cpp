@@ -50,7 +50,7 @@ bool Location::getAutoIndex()
 	return this->autoIndex_;
 }
 
-std::vector<std::string> Location::getIndex(const std::vector<std::string> indexes)
+std::vector<std::string> Location::getIndexList()
 {
 	return this->index_;
 }

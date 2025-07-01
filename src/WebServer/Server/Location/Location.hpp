@@ -43,5 +43,5 @@ public:
 	std::set<t_method> getMethods();
 	std::set<error_page_t> getErrorPages();
 	bool getAutoIndex();
-	std::vector<std::string> getIndex(const std::vector<std::string> indexes);
+	std::vector<std::string> getIndexList();
 };

@@ -120,11 +120,13 @@ static Location getLocationPH(Request &request, std::vector<Server> &servers)
 	std::vector<std::string> indexes;
 	std::set<t_method> allowedMethods;
 
+	indexes.push_back("index");
+	indexes.push_back("index.html");
 	indexes.push_back("test.html");
 	indexes.push_back("test2.html");
 	allowedMethods.insert(M_GET);
 	allowedMethods.insert(M_POST);
-	location.setRoot("/tests/www");
+	location.setRoot("tests/www");
 	location.setPath("/");
 	location.setAutoIndex(true);
 	location.setIndex(indexes);
@@ -139,7 +141,7 @@ void Client::executeRequest(std::vector<Server> &servers)
 {
 	Location location = getLocationPH(this->request_, servers);
 	Parameters responseParams(this->request_, location);
-	responseParams.uploadPath_ = "tests/"; // from server??
+	responseParams.uploadPath_ = "tests/www/"; // from server??
 
 	if (this->request_.getHTTPVersion() == "HTTP/1.1")
 		this->response_.build(responseParams);
