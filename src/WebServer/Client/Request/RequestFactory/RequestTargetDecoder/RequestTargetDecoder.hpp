@@ -8,9 +8,7 @@ class RequestTargetDecoder
 private:
     RequestTargetDecoder();
 
+public:
     static Result<std::string> decodePath(const std::string &path);
     static bool isEncodedQueryValid(const std::string &query);
-
-public:
-    static Result<Target_t> decodeTarget(const Target_t &encodedTarget);
 };

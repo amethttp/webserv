@@ -40,21 +40,3 @@ bool RequestTargetDecoder::isEncodedQueryValid(const std::string &query)
 
     return true;
 }
-
-Result<Target_t> RequestTargetDecoder::decodeTarget(const Target_t &encodedTarget)
-{
-    Target_t decodedTarget;
-
-    const Result<std::string> decodingPathResult = decodePath(encodedTarget.path);
-    if (decodingPathResult.isFailure())
-        return Result<Target_t>::fail(decodingPathResult.getError());
-
-    if (!isEncodedQueryValid(encodedTarget.query))
-        return Result<Target_t>::fail("400 Bad Request");
-
-    decodedTarget.uri = encodedTarget.uri;
-    decodedTarget.path = decodingPathResult.getValue();
-    decodedTarget.query = encodedTarget.query;
-
-    return Result<Target_t>::ok(decodedTarget);
-}
