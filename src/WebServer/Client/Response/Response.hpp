@@ -37,7 +37,7 @@ private:
 	void parseCustomPage(std::string &pagePath);
 	
 	void generateResponse(t_httpCode code, t_connection mode);
-	void generateResponse(error_page_t &customPage, t_connection mode);
+	void generateResponse(t_error_page &customPage, t_connection mode);
 
 	// request executor
 	std::string getMIME(std::string &target);

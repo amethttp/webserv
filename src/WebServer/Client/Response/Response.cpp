@@ -251,7 +251,7 @@ void Response::parseCustomPage(std::string &pagePath)
 	this->body_.type = getMIME(pagePath);
 }
 
-void Response::generateResponse(error_page_t &customPage, t_connection mode)
+void Response::generateResponse(t_error_page &customPage, t_connection mode)
 {
 	setStatusLine(customPage.code);
 	this->setResponseHeaders(mode);
@@ -477,11 +477,11 @@ t_httpCode Response::executeRequest(Parameters &p)
 	}
 }
 
-static error_page_t setCustomErrorPage(t_httpCode code, std::set<error_page_t> errorPages, error_page_t &page)
+static t_error_page setCustomErrorPage(t_httpCode code, std::set<t_error_page> errorPages, t_error_page &page)
 {
 	bzero(&page, sizeof(page));
 
-	for (std::set<error_page_t>::iterator ite = errorPages.begin(); ite != errorPages.end(); ++ite)
+	for (std::set<t_error_page>::iterator ite = errorPages.begin(); ite != errorPages.end(); ++ite)
 	{
 		if (ite->code == code)
 			page = *ite;
@@ -494,7 +494,7 @@ void Response::build(Parameters &params)
 {
 	t_httpCode code;
 	t_connection mode;
-	error_page_t errorPage;
+	t_error_page errorPage;
 
 	this->clear();
 

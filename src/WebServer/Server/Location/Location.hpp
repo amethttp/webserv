@@ -6,17 +6,17 @@
 #include <string.h>
 #include "utils/http.hpp"
 
-typedef struct return_s
+typedef struct s_return
 {
 	t_httpCode code;
 	std::string path;
-} return_t;
+} t_return;
 
-typedef struct error_page_s
+typedef struct s_error_page
 {
 	t_httpCode code;
 	std::string page;
-} error_page_t;
+} t_error_page;
 
 class Location
 {
@@ -28,8 +28,8 @@ private:
 	std::vector<std::string> indexList_;
 	size_t clientMaxBodySize_; // In bytes
 	std::set<t_method> methods_;
-	return_t return_;
-	std::set<error_page_t> errorPages_;
+	t_return return_;
+	std::set<t_error_page> errorPages_;
 
 public:
 	void setPath(const std::string &path);
@@ -41,7 +41,7 @@ public:
 	std::string getPath();
 	std::string getRoot();
 	std::set<t_method> getMethods();
-	std::set<error_page_t> getErrorPages();
+	std::set<t_error_page> getErrorPages();
 	bool getAutoIndex();
 	std::vector<std::string> getIndexList();
 };

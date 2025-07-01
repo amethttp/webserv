@@ -172,7 +172,6 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 	std::string stringifiedResponse = client->getStringifiedResponse();
 	size_t bytesSent = send(client->getFd(), stringifiedResponse.c_str(), stringifiedResponse.length(), 0);
 
-	// std::cout << "\n\nResponse Sent! | \n" << stringifiedResponse << std::endl;
 	if (bytesSent < 0)
 		throw std::runtime_error("Couldn't send response");
 
