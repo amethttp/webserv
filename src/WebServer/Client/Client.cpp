@@ -106,15 +106,52 @@ bool Client::shouldClose()
     return this->response_.getConnection();
 }
 
-static Location matchLocation(Request &request, Server &server)
+// Decide if we normalize slashes or not || Nginx default beaviour doesnt do it
+static void removeTrailingSlashes(std::string &str)
 {
-	return server.getLocations().at(0); // this prob belongs to server
+	if (*(str.rbegin()) == '/' && str.length() > 1)
+		str.erase(str.length() - 1);
 }
 
-static Location getLocationPH(Request &request, std::vector<Server> &servers)
+static int countMatchingCharacters(std::string &base, std::string target)
 {
-	Server server = servers.at(0);
+	int res = 0;
 
+	// removeTrailingSlashes(target);
+	while (target[res] && base[res])
+	{
+		if (target[res] != base[res])
+			break ;
+		res++;
+	}
+
+	return res;
+}
+
+// Decide on no locations defined on server
+static Location matchLocation(Request &request, Server &server)
+{
+	int matchIndex = 0;
+	int matchLength = 0;
+	int longestMatch = 0;
+	std::string targetRoute = request.getTarget();
+	std::vector<Location> locations = server.getLocations();
+
+	for (size_t i = 0; i < locations.size(); ++i)
+	{
+		matchLength = countMatchingCharacters(targetRoute, locations[i].getPath());
+		if (matchLength > longestMatch)
+		{
+			matchIndex = i;
+			longestMatch = matchLength;
+		}
+	}
+	
+	return locations[matchIndex];
+}
+
+static Location getLocationPH(Request &request, Server &server)
+{
 	Location location;
 	std::vector<Location> testLocations;
 	std::vector<std::string> indexes;
@@ -133,13 +170,33 @@ static Location getLocationPH(Request &request, std::vector<Server> &servers)
 	location.setMethods(allowedMethods);
 	testLocations.push_back(location);
 	server.setLocations(testLocations);
+	server.setUploadPath("tests/www/uploads/");
 
 	return matchLocation(request, server); // this prob belongs to server
 }
 
-void Client::executeRequest(std::vector<Server> &servers)
+// resolve no name match // same server name dieferent ports... || need to know the port etc..
+// Handle when server / location fields might not be filled... eg: no names...
+static Server getServerPH(Request &request, std::vector<Server> &serverList)
 {
-	Location location = getLocationPH(this->request_, servers);
+	std::string host = request.getHeaders()["Host"];
+
+	for (std::vector<Server>::iterator serverIt = serverList.begin(); serverIt != serverList.end(); ++serverIt)
+	{
+		for (std::vector<std::string>::iterator name = serverIt->getNames().begin(); name != serverIt->getNames().end(); ++name)
+		{
+			if (*name == host)
+				return *serverIt;
+		}
+	}
+
+	return *serverList.begin();
+}
+
+void Client::executeRequest(std::vector<Server> &serversList)
+{
+	Server server = getServerPH(this->request_, serversList);
+	Location location = getLocationPH(this->request_, server);
 	Parameters responseParams(this->request_, location);
 	responseParams.uploadPath_ = "tests/www/"; // from server??
 

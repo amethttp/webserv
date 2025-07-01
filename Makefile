@@ -50,7 +50,7 @@ NAME = webserv
 
 #----COMPILER----#
 CC = c++
-CCFLAGS += -std=c++98 -fsanitize=address -g # -Ofast
+CCFLAGS += -std=c++98 -Wall -Wextra -Wpedantic -fsanitize=address -g # -Ofast
 
 
 #----DIRS----#

@@ -27,3 +27,23 @@ void Server::setLocations(std::vector<Location> &locations)
 {
 	this->locations_ = locations;
 }
+
+std::vector<std::string> Server::getNames()
+{
+    return this->names_;
+}
+
+void Server::setNames(std::vector<std::string> &names)
+{
+	this->names_ = names;
+}
+
+std::string Server::getUploadPath()
+{
+    return this->uploadPath_;
+}
+
+void Server::setUploadPath(std::string path)
+{
+	this->uploadPath_ = path;
+}
