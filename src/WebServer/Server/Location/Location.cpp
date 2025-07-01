@@ -40,6 +40,11 @@ std::set<t_method> Location::getMethods()
 	return this->methods_;
 }
 
+std::set<error_page_t> Location::getErrorPages()
+{
+    return this->errorPages_;
+}
+
 bool Location::getAutoIndex()
 {
 	return this->autoIndex_;

@@ -34,8 +34,10 @@ private:
 	void setStatusLine(t_httpCode code);
 	void setResponseHeaders(t_connection mode);
 	void setRepresentationHeaders();
+	void parseCustomPage(std::string &pagePath);
 	
 	void generateResponse(t_httpCode code, t_connection mode);
+	void generateResponse(error_page_t &customPage, t_connection mode);
 
 	// request executor
 	std::string getMIME(std::string &target);

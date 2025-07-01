@@ -238,6 +238,20 @@ void Response::setRepresentationHeaders()
 		this->headers_["Content-Type"] = this->body_.type;
 }
 
+void Response::parseCustomPage(std::string &pagePath)
+{
+	this->body_.content = readFileToString(pagePath.c_str());
+	this->body_.type = getMIME(pagePath);
+}
+
+void Response::generateResponse(error_page_t &customPage, t_connection mode)
+{
+	setStatusLine((t_httpCode)customPage.code);
+	this->setResponseHeaders(mode);
+	this->parseCustomPage(customPage.page);
+	this->setRepresentationHeaders();
+}
+
 void Response::generateResponse(t_httpCode code, t_connection mode)
 {
 	setStatusLine(code);
@@ -303,9 +317,8 @@ static void setIndexNames(struct dirent *dir, std::string &anchorName, std::stri
 
 t_httpCode Response::tryAutoIndex(Parameters &p)
 {
-	if (!p.location_.getAutoIndex())
+	if (p.location_.getAutoIndex())
 		return FORBIDDEN;
-
 	DIR *d;
 	struct dirent *dir;
 	std::string anchorName;
@@ -432,17 +445,35 @@ t_httpCode Response::executeRequest(Parameters &p)
 	}
 }
 
+static error_page_t setCustomErrorPage(t_httpCode code, std::set<error_page_t> errorPages, error_page_t &page)
+{
+	bzero(&page, sizeof(page));
+
+	for (std::set<error_page_t>::iterator ite = errorPages.begin(); ite != errorPages.end(); ++ite)
+	{
+		if (ite->code == code)
+			page = *ite;
+	}
+
+	return page;
+}
+
 void Response::build(Parameters &params) 
 {
 	t_httpCode code;
 	t_connection mode;
+	error_page_t errorPage;
 
 	this->clear();
 
 	code = this->executeRequest(params);
 	mode = params.getConnectionMode();
 
-	this->generateResponse(code, mode);
+	setCustomErrorPage(code, params.location_.getErrorPages(), errorPage);
+	if (errorPage.code)
+		this->generateResponse(errorPage, mode);
+	else
+		this->generateResponse(code, mode);
 }
 
 void Response::build(t_httpCode code, t_connection mode)

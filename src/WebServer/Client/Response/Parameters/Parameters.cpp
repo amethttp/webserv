@@ -18,7 +18,7 @@ void Parameters::checkRequestHeaders()
 
 void Parameters::routeTarget()
 {
-	this->targetPath_ = this->location_.getPath() + this->request_.getTarget();
+	this->targetPath_ = this->location_.getRoot() + this->request_.getTarget();
 }
 
 void  Parameters::fitMethod()

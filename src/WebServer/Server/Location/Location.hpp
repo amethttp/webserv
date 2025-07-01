@@ -3,17 +3,18 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <string.h>
 #include "utils/http.hpp"
 
 typedef struct return_s
 {
-	int code;
+	t_httpCode code;
 	std::string path;
 } return_t;
 
 typedef struct error_page_s
 {
-	int code;
+	t_httpCode code;
 	std::string page;
 } error_page_t;
 
@@ -40,6 +41,7 @@ public:
 	std::string getPath();
 	std::string getRoot();
 	std::set<t_method> getMethods();
+	std::set<error_page_t> getErrorPages();
 	bool getAutoIndex();
 	std::vector<std::string> getIndex(const std::vector<std::string> indexes);
 };

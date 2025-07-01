@@ -124,8 +124,8 @@ static Location getLocationPH(Request &request, std::vector<Server> &servers)
 	indexes.push_back("test2.html");
 	allowedMethods.insert(M_GET);
 	allowedMethods.insert(M_POST);
-	location.setPath("tests");
-	location.setRoot("/");
+	location.setRoot("/tests/www");
+	location.setPath("/");
 	location.setAutoIndex(true);
 	location.setIndex(indexes);
 	location.setMethods(allowedMethods);
