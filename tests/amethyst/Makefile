@@ -76,6 +76,7 @@ vpath %.cpp $(SRC):\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestTargetProcesser\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestTargetSeparator\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestTargetDecoder\
+            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestTargetNormalizer\
             $(PROJ_SRC)WebServer/Client/Request/RequestParser/\
             $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/\
             $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/RequestToken/\
@@ -95,6 +96,7 @@ SRCS = main.cpp \
        RequestTargetProcesser.cpp \
        RequestTargetSeparator.cpp \
        RequestTargetDecoder.cpp \
+       RequestTargetNormalizer.cpp \
        RequestParser.cpp \
        RequestTokenizer.cpp \
        RequestToken.cpp \

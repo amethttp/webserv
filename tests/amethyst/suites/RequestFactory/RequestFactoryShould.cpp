@@ -269,6 +269,16 @@ TEST(decode_the_target_path_pct_encoded_question_marks_separating_the_path_from_
 }
 
 
+/* REQUEST TARGET'S PATH NORMALIZING TESTS */
+TEST(leave_the_same_basic_path_if_it_does_not_need_to_be_normalized)
+{
+    request = createRequestFromValidRequestLine("GET / HTTP/1.1");
+
+    assertTargetComponents("/", "");
+    assertRequestLine(GET, "/", "HTTP/1.1");
+}
+
+
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {

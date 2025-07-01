@@ -1,6 +1,7 @@
 #include "RequestTargetProcesser.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetDecoder/RequestTargetDecoder.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetSeparator/RequestTargetSeparator.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 
 SimpleResult RequestTargetProcesser::decodeTargetComponents(Target_t &target)
 {
@@ -22,6 +23,8 @@ SimpleResult RequestTargetProcesser::process(Target_t &target)
     const SimpleResult targetDecodingResult = decodeTargetComponents(target);
     if (targetDecodingResult.isFailure())
         return SimpleResult::fail(targetDecodingResult.getError());
+
+    RequestTargetNormalizer::normalizePath(target.path);
 
     return SimpleResult::ok();
 }
