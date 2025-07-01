@@ -2,12 +2,14 @@
 
 #include "utils/Result/Result.hpp"
 #include "../Request.hpp"
+#include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
 class RequestFactory
 {
 private:
     RequestFactory();
 
+    static RequestParser createParser(const std::string &text);
     static Result<RequestLineParams_t> validateRequestLine(const RequestLineParams_t &requestLine);
     static Result<RequestLineParams_t> getRequestLine(const std::string &requestLineString);
 

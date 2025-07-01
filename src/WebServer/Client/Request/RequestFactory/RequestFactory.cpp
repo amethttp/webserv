@@ -6,6 +6,12 @@
 #include <algorithm>
 #include <vector>
 
+RequestParser RequestFactory::createParser(const std::string &text)
+{
+    const RequestTokenizer tokenizer(text);
+    return RequestParser(tokenizer);
+}
+
 Result<RequestLineParams_t> RequestFactory::validateRequestLine(const RequestLineParams_t &requestLine)
 {
     if (requestLine.method == NOT_IMPLEMENTED)
@@ -22,8 +28,7 @@ Result<RequestLineParams_t> RequestFactory::validateRequestLine(const RequestLin
 
 Result<RequestLineParams_t> RequestFactory::getRequestLine(const std::string &requestLineString)
 {
-    const RequestTokenizer tokenizer = RequestTokenizer(requestLineString);
-    RequestParser requestParser = RequestParser(tokenizer);
+    RequestParser requestParser = createParser(requestLineString);
 
     const Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine();
 
@@ -55,7 +60,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
 
 
-    RequestParser requestParser = RequestParser(RequestTokenizer(requestLine));
+    RequestParser requestParser = createParser(requestLine);
     requestParser.parseHeaders(request, splittedRequestBuffer);
 
     return Result<Request_t>::ok(request);
