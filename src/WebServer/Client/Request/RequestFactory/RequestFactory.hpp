@@ -10,7 +10,6 @@ private:
     RequestFactory();
 
     static RequestParser createParser(const std::string &text);
-    static SimpleResult validateRequestLine(const RequestLineParams_t &requestLine);
     static Result<RequestLineParams_t> buildRequestLineFromString(const std::string &requestLineString);
 
 public:

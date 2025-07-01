@@ -1,0 +1,12 @@
+#pragma once
+#include "utils/Result/Result.hpp"
+#include "WebServer/Client/Request/RequestLineParams/RequestLineParams.hpp"
+
+class RequestValidator
+{
+private:
+    RequestValidator();
+
+public:
+    static SimpleResult validateRequestLine(const RequestLineParams_t &requestLine);
+};
