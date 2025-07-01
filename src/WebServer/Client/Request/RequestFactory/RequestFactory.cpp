@@ -26,7 +26,7 @@ Result<RequestLineParams_t> RequestFactory::validateRequestLine(const RequestLin
     return Result<RequestLineParams_t>::ok(requestLine);
 }
 
-Result<RequestLineParams_t> RequestFactory::getRequestLine(const std::string &requestLineString)
+Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std::string &requestLineString)
 {
     RequestParser requestParser = createParser(requestLineString);
 
@@ -47,7 +47,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
 
 
-    const Result<RequestLineParams_t> requestLineResult = getRequestLine(requestLine);
+    const Result<RequestLineParams_t> requestLineResult = buildRequestLineFromString(requestLine);
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
     request.requestLine = requestLineResult.getValue();

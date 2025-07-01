@@ -11,7 +11,7 @@ private:
 
     static RequestParser createParser(const std::string &text);
     static Result<RequestLineParams_t> validateRequestLine(const RequestLineParams_t &requestLine);
-    static Result<RequestLineParams_t> getRequestLine(const std::string &requestLineString);
+    static Result<RequestLineParams_t> buildRequestLineFromString(const std::string &requestLineString);
 
 public:
     static Result<Request_t> create(const std::string &requestBuffer);
