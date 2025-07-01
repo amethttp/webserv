@@ -25,7 +25,7 @@ private:
 	std::string root_;
 	std::map<std::string, std::string> cgis_;
 	bool autoIndex_;
-	std::vector<std::string> index_;
+	std::vector<std::string> indexList_;
 	size_t clientMaxBodySize_; // In bytes
 	std::set<t_method> methods_;
 	return_t return_;
@@ -35,7 +35,7 @@ public:
 	void setPath(const std::string &path);
 	void setRoot(const std::string &root);
 	void setAutoIndex(bool mode);
-	void setIndex(const std::vector<std::string> indexes);
+	void setIndexList(const std::vector<std::string> indexes);
 	void setMethods(const std::set<t_method> &methods);
 
 	std::string getPath();

@@ -129,7 +129,7 @@ static Location getLocationPH(Request &request, std::vector<Server> &servers)
 	location.setRoot("tests/www");
 	location.setPath("/");
 	location.setAutoIndex(true);
-	location.setIndex(indexes);
+	location.setIndexList(indexes);
 	location.setMethods(allowedMethods);
 	testLocations.push_back(location);
 	server.setLocations(testLocations);

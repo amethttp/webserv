@@ -15,9 +15,9 @@ void Location::setAutoIndex(bool mode)
 	this->autoIndex_ = mode;
 }
 
-void Location::setIndex(const std::vector<std::string> indexes)
+void Location::setIndexList(const std::vector<std::string> indexes)
 {
-	this->index_ = indexes;
+	this->indexList_ = indexes;
 }
 
 void Location::setMethods(const std::set<t_method> &methods)
@@ -52,5 +52,5 @@ bool Location::getAutoIndex()
 
 std::vector<std::string> Location::getIndexList()
 {
-	return this->index_;
+	return this->indexList_;
 }
