@@ -12,18 +12,18 @@ RequestParser RequestFactory::createParser(const std::string &text)
     return RequestParser(tokenizer);
 }
 
-Result<RequestLineParams_t> RequestFactory::validateRequestLine(const RequestLineParams_t &requestLine)
+SimpleResult RequestFactory::validateRequestLine(const RequestLineParams_t &requestLine)
 {
     if (requestLine.method == NOT_IMPLEMENTED)
-        return Result<RequestLineParams_t>::fail("501 Not Implemented");
+        return SimpleResult::fail("501 Not Implemented");
 
     if (requestLine.target.uri.length() > MAX_URI_LENGTH)
-        return Result<RequestLineParams_t>::fail("414 URI Too Long");
+        return SimpleResult::fail("414 URI Too Long");
 
     if (requestLine.httpVersion != "HTTP/1.1")
-        return Result<RequestLineParams_t>::fail("505 HTTP Version Not Supported");
+        return SimpleResult::fail("505 HTTP Version Not Supported");
 
-    return Result<RequestLineParams_t>::ok(requestLine);
+    return SimpleResult::ok();
 }
 
 Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std::string &requestLineString)
@@ -31,11 +31,15 @@ Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std
     RequestParser requestParser = createParser(requestLineString);
 
     const Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine();
-
     if (requestLineResult.isFailure())
         return Result<RequestLineParams_t>::fail(requestLineResult.getError());
+    RequestLineParams_t requestLineParams = requestLineResult.getValue();
 
-    return validateRequestLine(requestLineResult.getValue());
+    const SimpleResult requestLineValidationResult = validateRequestLine(requestLineResult.getValue());
+    if (requestLineValidationResult.isFailure())
+        return Result<RequestLineParams_t>::fail(requestLineValidationResult.getError());
+
+    return Result<RequestLineParams_t>::ok(requestLineParams);
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
