@@ -11,5 +11,5 @@ private:
     static SimpleResult decodeTargetComponents(Target_t &target);
 
 public:
-    static Result<Target_t> process(Target_t &target);
+    static SimpleResult process(Target_t &target);
 };

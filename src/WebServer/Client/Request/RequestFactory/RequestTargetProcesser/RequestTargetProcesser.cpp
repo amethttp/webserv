@@ -15,13 +15,13 @@ SimpleResult RequestTargetProcesser::decodeTargetComponents(Target_t &target)
     return SimpleResult::ok();
 }
 
-Result<Target_t> RequestTargetProcesser::process(Target_t &target)
+SimpleResult RequestTargetProcesser::process(Target_t &target)
 {
     RequestTargetSeparator::separateInComponents(target);
 
     const SimpleResult targetDecodingResult = decodeTargetComponents(target);
     if (targetDecodingResult.isFailure())
-        return Result<Target_t>::fail(targetDecodingResult.getError());
+        return SimpleResult::fail(targetDecodingResult.getError());
 
-    return Result<Target_t>::ok(target);
+    return SimpleResult::ok();
 }

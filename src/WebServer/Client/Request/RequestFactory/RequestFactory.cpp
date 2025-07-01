@@ -43,25 +43,19 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
 
     const Result<RequestLineParams_t> requestLineResult = getRequestLine(requestLine);
-
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
-
     request.requestLine = requestLineResult.getValue();
 
 
 
-    const Result<Target_t> requestTargetResult = RequestTargetProcesser::process(request.requestLine.target);
-
+    const SimpleResult requestTargetResult = RequestTargetProcesser::process(request.requestLine.target);
     if (requestTargetResult.isFailure())
         return Result<Request_t>::fail(requestTargetResult.getError());
-
-    request.requestLine.target = requestTargetResult.getValue();
 
 
 
     RequestParser requestParser = RequestParser(RequestTokenizer(requestLine));
-
     requestParser.parseHeaders(request, splittedRequestBuffer);
 
     return Result<Request_t>::ok(request);
