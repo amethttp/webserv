@@ -39,6 +39,10 @@ Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std
     if (requestLineValidationResult.isFailure())
         return Result<RequestLineParams_t>::fail(requestLineValidationResult.getError());
 
+    const SimpleResult requestTargetProcessResult = RequestTargetProcesser::process(requestLineParams.target);
+    if (requestTargetProcessResult.isFailure())
+        return Result<RequestLineParams_t>::fail(requestTargetProcessResult.getError());
+
     return Result<RequestLineParams_t>::ok(requestLineParams);
 }
 
@@ -55,12 +59,6 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
     request.requestLine = requestLineResult.getValue();
-
-
-
-    const SimpleResult requestTargetResult = RequestTargetProcesser::process(request.requestLine.target);
-    if (requestTargetResult.isFailure())
-        return Result<Request_t>::fail(requestTargetResult.getError());
 
 
 
