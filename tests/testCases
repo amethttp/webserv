@@ -794,7 +794,7 @@
 # HOY #
 # 1. Separate path-query (decode only path, not URI neither query)                      DONE
 # 2. Target pct-decoder                                                                 DONE
-# 3. Refactor RequestFactory::create()                                                  
+# 3. Refactor RequestFactory::create()                                                  DONE
 # 4. Target normalizer criteria                                                         
 # 5. Target normalizer                                                                  
 #??? 6. Headers parser minimum design ???#                                              

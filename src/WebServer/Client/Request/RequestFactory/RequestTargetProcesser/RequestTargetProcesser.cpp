@@ -17,7 +17,7 @@ SimpleResult RequestTargetProcesser::decodeTargetComponents(Target_t &target)
 
 SimpleResult RequestTargetProcesser::process(Target_t &target)
 {
-    RequestTargetSeparator::separateInComponents(target);
+    RequestTargetSeparator::separateComponents(target);
 
     const SimpleResult targetDecodingResult = decodeTargetComponents(target);
     if (targetDecodingResult.isFailure())

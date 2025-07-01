@@ -1,7 +1,7 @@
 #include "RequestTargetSeparator.hpp"
 #include <algorithm>
 
-void RequestTargetSeparator::separateInComponents(Target_t &target)
+void RequestTargetSeparator::separateComponents(Target_t &target)
 {
     const std::string::iterator uriBegin = target.uri.begin();
     const std::string::iterator uriEnd = target.uri.end();

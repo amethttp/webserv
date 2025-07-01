@@ -8,5 +8,5 @@ private:
     RequestTargetSeparator();
 
 public:
-    static void separateInComponents(Target_t &target);
+    static void separateComponents(Target_t &target);
 };
