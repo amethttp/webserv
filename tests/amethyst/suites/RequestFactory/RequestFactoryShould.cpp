@@ -302,6 +302,14 @@ TEST(normalize_a_single_current_directory)
     assertRequestLine(GET, "/.", "HTTP/1.1");
 }
 
+TEST(normalize_a_single_current_directory_ended_with_slash)
+{
+    request = createRequestFromValidRequestLine("GET /./ HTTP/1.1");
+
+    assertTargetComponents("/", "");
+    assertRequestLine(GET, "/./", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)

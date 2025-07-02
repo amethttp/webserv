@@ -2,6 +2,10 @@
 
 void RequestTargetNormalizer::normalizePath(std::string &path)
 {
-    if (path[path.length() - 1] == '.')
-        path.erase(path.length() - 1, 1);
+    const size_t currentPathPos = path.find("/.");
+
+    if (currentPathPos != std::string::npos)
+        path.erase(currentPathPos);
+    if (path.empty())
+        path = "/";
 }
