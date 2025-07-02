@@ -9,16 +9,16 @@ bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
 
 pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComponents_t &pathComponents)
 {
-    pathComponents_t processedPathComponents;
+    pathComponents_t normalizedPathComponents;
 
     for (pathComponents_t::const_iterator it = pathComponents.begin() + 1; it != pathComponents.end(); ++it)
     {
         if (*it == ".")
             continue;
-        processedPathComponents.push_back(*it);
+        normalizedPathComponents.push_back(*it);
     }
 
-    return processedPathComponents;
+    return normalizedPathComponents;
 }
 
 std::string RequestTargetNormalizer::buildNewPath(const pathComponents_t &newPathComponents)
