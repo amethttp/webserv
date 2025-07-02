@@ -7,6 +7,14 @@ bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
     return endsWith(path, "/.");
 }
 
+pathComponents_t RequestTargetNormalizer::getPathComponents(const std::string &path)
+{
+    pathComponents_t pathComponents = split(path, "/");
+    pathComponents.erase(pathComponents.begin());
+
+    return pathComponents;
+}
+
 pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComponents_t &pathComponents)
 {
     pathComponents_t normalizedPathComponents;
@@ -40,8 +48,7 @@ void RequestTargetNormalizer::normalizePath(std::string &path)
     if (hasTrailingDotSegment(path))
         path += '/';
 
-    pathComponents_t pathComponents = split(path, "/");
-    pathComponents.erase(pathComponents.begin());
+    const pathComponents_t pathComponents = getPathComponents(path);
     const pathComponents_t newPathComponents = normalizePathComponents(pathComponents);
     path = buildNewPath(newPathComponents);
 }
