@@ -4,7 +4,7 @@
 
 bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
 {
-    return (path.length() >= 2 && path.rfind("/.") == path.length() - 2);
+    return endsWith(path, "/.");
 }
 
 void RequestTargetNormalizer::normalizePath(std::string &path)

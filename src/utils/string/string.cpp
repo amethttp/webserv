@@ -5,6 +5,14 @@ bool isEmpty(const std::string &str)
 	return str.empty();
 }
 
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+	if (suffix.length() > str.length())
+		return false;
+
+	return str.rfind(suffix) == str.length() - suffix.length();
+}
+
 std::vector<std::string> split(const std::string &input, const std::string &del)
 {
 	std::vector<std::string> result;
