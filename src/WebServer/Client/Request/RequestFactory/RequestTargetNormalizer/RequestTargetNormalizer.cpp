@@ -1,32 +1,29 @@
 #include "RequestTargetNormalizer.hpp"
+#include "utils/string/string.hpp"
+#include <vector>
 
 void RequestTargetNormalizer::normalizePath(std::string &path)
 {
-    size_t currentPathPos = std::string::npos;
-    do
+    std::vector<std::string> newPathComponents;
+    std::vector<std::string> pathComponents = split(path, "/");
+
+    for (std::vector<std::string>::iterator it = pathComponents.begin() + 1; it != pathComponents.end(); ++it)
     {
-        currentPathPos = path.find("/.");
+        if (*it == ".")
+            continue;
 
-        if (currentPathPos != std::string::npos)
-            path.replace(currentPathPos, 2, "/");
-    } while (currentPathPos != std::string::npos);
-
-    if (path.empty())
-        path = "/";
-
-    bool itsSlash = false;
-    for (size_t i = 0; i < path.size(); i++)
-    {
-        if (path[i] == '/')
-        {
-            if (itsSlash)
-            {
-                path.replace(i, 1, "");
-                i--;
-            }
-            itsSlash = true;
-        }
-        else
-            itsSlash = false;
+        newPathComponents.push_back(*it);
     }
+
+    std::string newPath = "/";
+    const bool isDirectory = path.length() >= 2 && path.rfind("/.") == path.length() - 2;
+    for (std::vector<std::string>::iterator it = newPathComponents.begin(); it != newPathComponents.end(); ++it)
+    {
+        newPath += *it;
+
+        if (it != newPathComponents.end() - 1 || isDirectory)
+            newPath += "/";
+    }
+
+    path = newPath;
 }
