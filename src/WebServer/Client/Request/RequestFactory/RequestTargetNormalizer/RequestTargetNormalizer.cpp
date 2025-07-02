@@ -21,7 +21,7 @@ pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComp
 
     for (pathComponents_t::const_iterator it = pathComponents.begin(); it != pathComponents.end(); ++it)
     {
-        if (*it == ".")
+        if (*it == "." || (it != pathComponents.end() - 1 && *it == ""))
             continue;
         if (*it != "..")
             normalizedPathComponents.push_back(*it);
