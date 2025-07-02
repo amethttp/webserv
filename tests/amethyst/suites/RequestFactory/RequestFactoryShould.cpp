@@ -598,6 +598,14 @@ TEST(normalize_a_pct_encoded_current_directory)
     assertRequestLine(GET, "/%2e/about/index.html", "HTTP/1.1");
 }
 
+TEST(normalize_a_pct_encoded_parent_directory)
+{
+    request = createRequestFromValidRequestLine("GET /courses/%2e%2e/about/index.html HTTP/1.1");
+
+    assertTargetComponents("/about/index.html", "");
+    assertRequestLine(GET, "/courses/%2e%2e/about/index.html", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
