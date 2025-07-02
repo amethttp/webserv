@@ -23,10 +23,10 @@ pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComp
     {
         if (*it == ".")
             continue;
-        if (*it == ".." && !normalizedPathComponents.empty())
-            normalizedPathComponents.pop_back();
-        else if (*it != "..")
+        if (*it != "..")
             normalizedPathComponents.push_back(*it);
+        else if (!normalizedPathComponents.empty())
+            normalizedPathComponents.pop_back();
     }
 
     return normalizedPathComponents;
