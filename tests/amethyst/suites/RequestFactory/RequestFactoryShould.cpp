@@ -614,6 +614,13 @@ TEST(normalize_a_pct_encoded_slash)
     assertRequestLine(GET, "/courses/%2f/%2Findex.html", "HTTP/1.1");
 }
 
+TEST(normalize_a_combination_of_pct_encoded_and_not_pct_encoded_current_directories_and_parent_directories_and_slashes)
+{
+    request = createRequestFromValidRequestLine("GET //../%2e%2e/about/./%2e/%2F//index.html HTTP/1.1");
+
+    assertTargetComponents("/about/index.html", "");
+    assertRequestLine(GET, "//../%2e%2e/about/./%2e/%2F//index.html", "HTTP/1.1");
+}
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
