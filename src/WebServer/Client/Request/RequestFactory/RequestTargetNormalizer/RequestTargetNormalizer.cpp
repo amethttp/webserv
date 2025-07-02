@@ -4,6 +4,9 @@
 
 void RequestTargetNormalizer::normalizePath(std::string &path)
 {
+    if (path.length() >= 2 && path.rfind("/.") == path.length() - 2)
+        path += '/';
+
     std::vector<std::string> newPathComponents;
     std::vector<std::string> pathComponents = split(path, "/");
 
@@ -16,12 +19,11 @@ void RequestTargetNormalizer::normalizePath(std::string &path)
     }
 
     std::string newPath = "/";
-    const bool isDirectory = path.length() >= 2 && path.rfind("/.") == path.length() - 2;
     for (std::vector<std::string>::iterator it = newPathComponents.begin(); it != newPathComponents.end(); ++it)
     {
         newPath += *it;
 
-        if (it != newPathComponents.end() - 1 || isDirectory)
+        if (it != newPathComponents.end() - 1)
             newPath += "/";
     }
 
