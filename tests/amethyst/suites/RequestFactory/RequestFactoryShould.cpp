@@ -622,6 +622,15 @@ TEST(normalize_a_combination_of_pct_encoded_and_not_pct_encoded_current_director
     assertRequestLine(GET, "//../%2e%2e/about/./%2e/%2F//index.html", "HTTP/1.1");
 }
 
+TEST(normalize_a_resource_outside_the_document_root)
+{
+    request = createRequestFromValidRequestLine("GET /../../../../..%2f..%2F%2e%2E/%2e%2E/%2e%2E/%2e%2E/%2e%2E/etc/passwd HTTP/1.1");
+
+    assertTargetComponents("/etc/passwd", "");
+    assertRequestLine(GET, "/../../../../..%2f..%2F%2e%2E/%2e%2E/%2e%2E/%2e%2E/%2e%2E/etc/passwd", "HTTP/1.1");
+}
+
+
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
 {
