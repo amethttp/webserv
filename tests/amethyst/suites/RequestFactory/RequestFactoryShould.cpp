@@ -566,6 +566,14 @@ TEST(normalize_a_multiple_slashes_path_before_text)
     assertRequestLine(GET, "/////courses", "HTTP/1.1");
 }
 
+TEST(normalize_a_multiple_slashes_path_between_text)
+{
+    request = createRequestFromValidRequestLine("GET /courses/////index.html HTTP/1.1");
+
+    assertTargetComponents("/courses/index.html", "");
+    assertRequestLine(GET, "/courses/////index.html", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
