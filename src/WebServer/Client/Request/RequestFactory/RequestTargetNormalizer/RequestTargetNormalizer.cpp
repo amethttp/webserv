@@ -7,11 +7,11 @@ bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
     return endsWith(path, "/.");
 }
 
-std::vector<std::string> RequestTargetNormalizer::normalizePathComponents(const std::vector<std::string> &pathComponents)
+pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComponents_t &pathComponents)
 {
-    std::vector<std::string> processedPathComponents;
+    pathComponents_t processedPathComponents;
 
-    for (std::vector<std::string>::const_iterator it = pathComponents.begin() + 1; it != pathComponents.end(); ++it)
+    for (pathComponents_t::const_iterator it = pathComponents.begin() + 1; it != pathComponents.end(); ++it)
     {
         if (*it == ".")
             continue;
@@ -21,11 +21,11 @@ std::vector<std::string> RequestTargetNormalizer::normalizePathComponents(const 
     return processedPathComponents;
 }
 
-std::string RequestTargetNormalizer::buildNewPath(const std::vector<std::string> &newPathComponents)
+std::string RequestTargetNormalizer::buildNewPath(const pathComponents_t &newPathComponents)
 {
     std::string newPath = "/";
 
-    for (std::vector<std::string>::const_iterator it = newPathComponents.begin(); it != newPathComponents.end(); ++it)
+    for (pathComponents_t::const_iterator it = newPathComponents.begin(); it != newPathComponents.end(); ++it)
     {
         newPath += *it;
         if (it != newPathComponents.end() - 1)
@@ -40,7 +40,7 @@ void RequestTargetNormalizer::normalizePath(std::string &path)
     if (hasTrailingDotSegment(path))
         path += '/';
 
-    const std::vector<std::string> pathComponents = split(path, "/");
-    const std::vector<std::string> newPathComponents = normalizePathComponents(pathComponents);
+    const pathComponents_t pathComponents = split(path, "/");
+    const pathComponents_t newPathComponents = normalizePathComponents(pathComponents);
     path = buildNewPath(newPathComponents);
 }
