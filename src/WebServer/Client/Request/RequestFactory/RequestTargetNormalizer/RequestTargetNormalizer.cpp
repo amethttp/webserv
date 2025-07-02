@@ -11,7 +11,7 @@ pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComp
 {
     pathComponents_t normalizedPathComponents;
 
-    for (pathComponents_t::const_iterator it = pathComponents.begin() + 1; it != pathComponents.end(); ++it)
+    for (pathComponents_t::const_iterator it = pathComponents.begin(); it != pathComponents.end(); ++it)
     {
         if (*it == ".")
             continue;
@@ -40,7 +40,8 @@ void RequestTargetNormalizer::normalizePath(std::string &path)
     if (hasTrailingDotSegment(path))
         path += '/';
 
-    const pathComponents_t pathComponents = split(path, "/");
+    pathComponents_t pathComponents = split(path, "/");
+    pathComponents.erase(pathComponents.begin());
     const pathComponents_t newPathComponents = normalizePathComponents(pathComponents);
     path = buildNewPath(newPathComponents);
 }
