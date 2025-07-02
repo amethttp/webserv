@@ -446,12 +446,12 @@ TEST(normalize_a_multiple_parent_directory)
     assertRequestLine(GET, "/../../..", "HTTP/1.1");
 }
 
-TEST(normalize_a_multiple_parent_directory_ended_with_slash)
+TEST(normalize_a_single_parent_directory_after_text)
 {
-    request = createRequestFromValidRequestLine("GET /../../../ HTTP/1.1");
+    request = createRequestFromValidRequestLine("GET /courses/.. HTTP/1.1");
 
     assertTargetComponents("/", "");
-    assertRequestLine(GET, "/../../../", "HTTP/1.1");
+    assertRequestLine(GET, "/courses/..", "HTTP/1.1");
 }
 
 

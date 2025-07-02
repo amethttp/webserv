@@ -21,9 +21,12 @@ pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComp
 
     for (pathComponents_t::const_iterator it = pathComponents.begin(); it != pathComponents.end(); ++it)
     {
-        if (*it == "." || *it == "..")
+        if (*it == ".")
             continue;
-        normalizedPathComponents.push_back(*it);
+        if (*it == ".." && !normalizedPathComponents.empty())
+            normalizedPathComponents.pop_back();
+        else if (*it != "..")
+            normalizedPathComponents.push_back(*it);
     }
 
     return normalizedPathComponents;
