@@ -2,9 +2,14 @@
 #include "utils/string/string.hpp"
 #include <vector>
 
+bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
+{
+    return (path.length() >= 2 && path.rfind("/.") == path.length() - 2);
+}
+
 void RequestTargetNormalizer::normalizePath(std::string &path)
 {
-    if (path.length() >= 2 && path.rfind("/.") == path.length() - 2)
+    if (hasTrailingDotSegment(path))
         path += '/';
 
     std::vector<std::string> newPathComponents;
