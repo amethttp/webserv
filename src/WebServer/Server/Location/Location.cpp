@@ -1,5 +1,14 @@
 #include "Location.hpp"
 
+Location::Location()
+{
+	bzero(&this->return_, sizeof(this->return_));
+}
+
+Location::~Location()
+{
+}
+
 void Location::setPath(const std::string &path)
 {
 	this->path_ = path;
@@ -43,6 +52,11 @@ std::set<t_method> Location::getMethods()
 std::set<t_error_page> Location::getErrorPages()
 {
     return this->errorPages_;
+}
+
+t_return Location::getReturn()
+{
+    return this->return_;
 }
 
 bool Location::getAutoIndex()

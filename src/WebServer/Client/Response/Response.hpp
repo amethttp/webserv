@@ -34,10 +34,15 @@ private:
 	void setStatusLine(t_httpCode code);
 	void setResponseHeaders(t_connection mode);
 	void setRepresentationHeaders();
-	void parseCustomPage(std::string &pagePath);
+	void setRedirectionResponse(t_httpCode code, std::string uri);
+	void setBodyFromFile(std::string target);
+	void setBodyFromString(std::string str);
+
+	std::string getRedirectionHTML(t_httpCode code, std::string &uri);
+
+	void handleReturnDirective(t_return ret, t_connection mode);
 	
 	void generateResponse(t_httpCode code, t_connection mode);
-	void generateResponse(t_error_page &customPage, t_connection mode);
 
 	// request executor
 	std::string getMIME(std::string &target);
@@ -48,7 +53,8 @@ private:
 	t_httpCode methodGet(Parameters &p);
 	t_httpCode methodPost(Parameters &p);
 	t_httpCode methodDelete(Parameters &p);
-	t_httpCode executeRequest(Parameters &p);
+	t_httpCode executeMethod(Parameters &p);
+	void executeRequest(Parameters &p);
 public:
 	Response();
 	~Response();

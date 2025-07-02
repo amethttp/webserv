@@ -32,6 +32,9 @@ private:
 	std::set<t_error_page> errorPages_;
 
 public:
+	Location();
+	~Location();
+
 	void setPath(const std::string &path);
 	void setRoot(const std::string &root);
 	void setAutoIndex(bool mode);
@@ -42,6 +45,7 @@ public:
 	std::string getRoot();
 	std::set<t_method> getMethods();
 	std::set<t_error_page> getErrorPages();
+	t_return getReturn();
 	bool getAutoIndex();
 	std::vector<std::string> getIndexList();
 };

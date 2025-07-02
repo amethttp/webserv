@@ -213,6 +213,34 @@ void Response::setStatusLine(t_httpCode code)
 	this->statusLine_.setFields(code, this->errorDict_[code]);
 }
 
+static bool isRedirection(t_httpCode code)
+{
+	return ((code / 100) * 100 == 300);
+}
+
+std::string Response::getRedirectionHTML(t_httpCode code, std::string &uri)
+{
+	std::ostringstream html;
+
+	html << "<!DOCTYPE html>\n"
+		<<"<html>\n" 
+		<< "<head><title>" << code << " " << this->errorDict_[code] << "</title></head>\n"
+		<< "<body>\n"
+		<< "<h1>" << this->errorDict_[code] << "</h1>\n"
+		<< "<p>The document has moved <a href=\"" << uri << "\">" << "here" << "</a>.</p>\n"
+		<< "</body>\n"
+		<< "</html>\n";
+	
+	return html.str();
+}
+
+void Response::setRedirectionResponse(t_httpCode code, std::string uri)
+{
+	this->headers_["Location"] = uri;
+	this->body_.content = getRedirectionHTML(code, uri);
+	this->body_.type = this->extensionTypesDict_[".html"];
+}
+
 void Response::setResponseHeaders(t_connection mode)
 {
 	this->headers_["Server"] = "Amethttp";
@@ -245,20 +273,6 @@ void Response::setRepresentationHeaders()
 		this->headers_["Content-Type"] = this->body_.type;
 }
 
-void Response::parseCustomPage(std::string &pagePath)
-{
-	this->body_.content = readFileToString(pagePath.c_str());
-	this->body_.type = getMIME(pagePath);
-}
-
-void Response::generateResponse(t_error_page &customPage, t_connection mode)
-{
-	setStatusLine(customPage.code);
-	this->setResponseHeaders(mode);
-	this->parseCustomPage(customPage.page);
-	this->setRepresentationHeaders();
-}
-
 void Response::generateResponse(t_httpCode code, t_connection mode)
 {
 	setStatusLine(code);
@@ -266,10 +280,21 @@ void Response::generateResponse(t_httpCode code, t_connection mode)
 	this->setRepresentationHeaders();
 }
 
-t_httpCode Response::getFile(std::string &target)
+void Response::setBodyFromString(std::string str)
+{
+	this->body_.content = str;
+	this->body_.type = this->extensionTypesDict_[".txt"];
+}
+
+void Response::setBodyFromFile(std::string target)
 {
 	this->body_.content = readFileToString(target.c_str());
 	this->body_.type = getMIME(target);
+}
+
+t_httpCode Response::getFile(std::string &target)
+{
+	this->setBodyFromFile(target);
 
 	return OK;
 }
@@ -348,7 +373,7 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 		closedir(d);
 		closeHTML(html);
 		this->body_.content = html.str();
-		this->body_.type = extensionTypesDict_[".html"];
+		this->body_.type = this->extensionTypesDict_[".html"];
 		return OK;
 	}
 
@@ -459,7 +484,7 @@ t_httpCode Response::methodDelete(Parameters &p)
 	}
 }
 
-t_httpCode Response::executeRequest(Parameters &p)
+t_httpCode Response::executeMethod(Parameters &p)
 {
 	switch (p.getMethod())
 	{
@@ -477,35 +502,69 @@ t_httpCode Response::executeRequest(Parameters &p)
 	}
 }
 
-static t_error_page setCustomErrorPage(t_httpCode code, std::set<t_error_page> errorPages, t_error_page &page)
+// Set necessary ??
+static bool findCustomErrorPage(t_httpCode code, Location &location, t_error_page &page)
 {
+	std::set<t_error_page> errorPages = location.getErrorPages();
 	bzero(&page, sizeof(page));
 
 	for (std::set<t_error_page>::iterator ite = errorPages.begin(); ite != errorPages.end(); ++ite)
 	{
 		if (ite->code == code)
+		{
 			page = *ite;
+			return true;
+		}
 	}
 
-	return page;
+	return false;
 }
 
-void Response::build(Parameters &params) 
+void Response::executeRequest(Parameters &p)
 {
 	t_httpCode code;
 	t_connection mode;
 	t_error_page errorPage;
 
-	this->clear();
+	code = this->executeMethod(p);
+	mode = p.getConnectionMode();
 
-	code = this->executeRequest(params);
-	mode = params.getConnectionMode();
-
-	setCustomErrorPage(code, params.location_.getErrorPages(), errorPage);
-	if (errorPage.code)
-		this->generateResponse(errorPage, mode);
+	if (findCustomErrorPage(code, p.location_, errorPage))
+	{
+		// config parse that an error page MUST have a URI page 
+		this->setBodyFromFile(errorPage.page);
+		this->generateResponse(errorPage.code, mode);
+	}
 	else
 		this->generateResponse(code, mode);
+}
+
+void Response::handleReturnDirective(t_return ret, t_connection mode)
+{
+	if (!ret.path.empty())
+	{
+		if (isRedirection(ret.code))
+			this->setRedirectionResponse(ret.code, ret.path);
+		else
+			this->setBodyFromString(ret.path);
+	}
+
+	this->generateResponse(ret.code, mode);
+}
+
+static bool checkReturn(Location &location)
+{
+	return (location.getReturn().code != 0);
+}
+
+void Response::build(Parameters &p) 
+{
+	this->clear();
+
+	if (checkReturn(p.location_))
+		this->handleReturnDirective(p.location_.getReturn(), p.getConnectionMode());
+	else
+		this->executeRequest(p);
 }
 
 void Response::build(t_httpCode code, t_connection mode)
