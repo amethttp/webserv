@@ -422,6 +422,14 @@ TEST(normalize_a_multiple_current_directory_before_and_after_text)
     assertRequestLine(GET, "/././courses/././", "HTTP/1.1");
 }
 
+TEST(normalize_a_single_parent_directory)
+{
+    request = createRequestFromValidRequestLine("GET /.. HTTP/1.1");
+
+    assertTargetComponents("/", "");
+    assertRequestLine(GET, "/..", "HTTP/1.1");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
