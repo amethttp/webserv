@@ -2,5 +2,6 @@
 
 void RequestTargetNormalizer::normalizePath(std::string &path)
 {
-    path = path;
+    if (path[path.length() - 1] == '.')
+        path.erase(path.length() - 1, 1);
 }
