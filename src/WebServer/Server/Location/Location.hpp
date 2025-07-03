@@ -3,19 +3,20 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <string.h>
 #include "utils/http.hpp"
 
-typedef struct return_s
+typedef struct s_return
 {
-	int code;
+	t_httpCode code;
 	std::string path;
-} return_t;
+} t_return;
 
-typedef struct error_page_s
+typedef struct s_error_page
 {
-	int code;
+	t_httpCode code;
 	std::string page;
-} error_page_t;
+} t_error_page;
 
 class Location
 {
@@ -24,22 +25,27 @@ private:
 	std::string root_;
 	std::map<std::string, std::string> cgis_;
 	bool autoIndex_;
-	std::vector<std::string> index_;
+	std::vector<std::string> indexList_;
 	size_t clientMaxBodySize_; // In bytes
 	std::set<t_method> methods_;
-	return_t return_;
-	std::set<error_page_t> errorPages_;
+	t_return return_;
+	std::set<t_error_page> errorPages_;
 
 public:
+	Location();
+	~Location();
+
 	void setPath(const std::string &path);
 	void setRoot(const std::string &root);
 	void setAutoIndex(bool mode);
-	void setIndex(const std::vector<std::string> indexes);
+	void setIndexList(const std::vector<std::string> indexes);
 	void setMethods(const std::set<t_method> &methods);
 
 	std::string getPath();
 	std::string getRoot();
 	std::set<t_method> getMethods();
+	std::set<t_error_page> getErrorPages();
+	t_return getReturn();
 	bool getAutoIndex();
-	std::vector<std::string> getIndex(const std::vector<std::string> indexes);
+	std::vector<std::string> getIndexList();
 };

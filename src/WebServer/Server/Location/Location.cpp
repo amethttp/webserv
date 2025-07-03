@@ -1,5 +1,14 @@
 #include "Location.hpp"
 
+Location::Location()
+{
+	bzero(&this->return_, sizeof(this->return_));
+}
+
+Location::~Location()
+{
+}
+
 void Location::setPath(const std::string &path)
 {
 	this->path_ = path;
@@ -15,9 +24,9 @@ void Location::setAutoIndex(bool mode)
 	this->autoIndex_ = mode;
 }
 
-void Location::setIndex(const std::vector<std::string> indexes)
+void Location::setIndexList(const std::vector<std::string> indexes)
 {
-	this->index_ = indexes;
+	this->indexList_ = indexes;
 }
 
 void Location::setMethods(const std::set<t_method> &methods)
@@ -40,12 +49,22 @@ std::set<t_method> Location::getMethods()
 	return this->methods_;
 }
 
+std::set<t_error_page> Location::getErrorPages()
+{
+    return this->errorPages_;
+}
+
+t_return Location::getReturn()
+{
+    return this->return_;
+}
+
 bool Location::getAutoIndex()
 {
 	return this->autoIndex_;
 }
 
-std::vector<std::string> Location::getIndex(const std::vector<std::string> indexes)
+std::vector<std::string> Location::getIndexList()
 {
-	return this->index_;
+	return this->indexList_;
 }

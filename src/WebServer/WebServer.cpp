@@ -170,14 +170,13 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 void WebServer::sendResponse(Client *client, t_epoll &epoll)
 {
 	std::string stringifiedResponse = client->getStringifiedResponse();
-	size_t bytesSent = send(client->getFd(), stringifiedResponse.c_str(), stringifiedResponse.length(), 0);
+	ssize_t bytesSent = send(client->getFd(), stringifiedResponse.c_str(), stringifiedResponse.length(), 0);
 
-	// std::cout << "\n\nResponse Sent! | \n" << stringifiedResponse << std::endl;
 	if (bytesSent < 0)
 		throw std::runtime_error("Couldn't send response");
 
 	client->eraseResponse(bytesSent);
-	if (bytesSent < stringifiedResponse.length())
+	if (bytesSent < (ssize_t)stringifiedResponse.length())
 		return;
 
 	if (client->shouldClose())
@@ -227,7 +226,7 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 
 std::vector<Client>::iterator WebServer::removeClient(Client *client)
 {
-	uint32_t clientId = client->getId();
+	int clientId = client->getId();
 
 	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
 	{

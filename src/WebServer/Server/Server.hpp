@@ -23,4 +23,10 @@ public:
 
 	std::vector<Location> getLocations();
 	void setLocations(std::vector<Location> &locations);
+
+	std::vector<std::string> getNames();
+	void setNames(std::vector<std::string> &names);
+
+	std::string getUploadPath();
+	void setUploadPath(std::string path);
 };
