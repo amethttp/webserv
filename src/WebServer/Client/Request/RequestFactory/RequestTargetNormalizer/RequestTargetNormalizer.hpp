@@ -11,6 +11,9 @@ private:
     RequestTargetNormalizer();
 
     static bool isLastElement(const pathSegments_t &pathSegments, pathSegments_t::const_iterator it);
+    static bool isCurrentDirectory(const std::string &str);
+    static bool isEmptySegment(const pathSegments_t &pathSegments, pathSegments_t::const_iterator it);
+    static bool isParentDirectory(const std::string &str);
 
     static bool hasTrailingDotSegment(const std::string &path);
     static pathSegments_t getPathSegments(const std::string &path);
