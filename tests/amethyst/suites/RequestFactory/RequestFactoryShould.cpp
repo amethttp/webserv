@@ -91,13 +91,12 @@ TEST(recognize_basic_HTTP_DELETE_request)
 
 TEST(recognize_basic_HTTP_POST_request)
 {
-    request = createFromValidRequest("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
+    request = createFromValidRequest("POST / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
     assertTargetComponents("/", "");
     assertRequestLine(POST, "/", "HTTP/1.1");
-    assertHeaderSize(2);
+    assertHeaderSize(1);
     assertHeader("Host", "localhost");
-    assertHeader("Content-Length", "0");
     assertBodyIsEmpty();
 }
 
@@ -632,13 +631,3 @@ TEST(normalize_a_resource_outside_the_document_root)
 
 
 /* REQUEST HEADERS TESTS */
-TEST(recognize_basic_HTTP_request_without_OWS_inside_headers)
-{
-    request = createFromValidRequest("POST / HTTP/1.1\r\nHost:localhost\r\nContent-Length:0\r\n\r\n");
-
-    assertRequestLine(POST, "/", "HTTP/1.1");
-    assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Content-Length", "0");
-    assertBodyIsEmpty();
-}

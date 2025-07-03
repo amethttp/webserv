@@ -1146,6 +1146,12 @@
 # 8. Headers parsing                                                                    
 
 
+
+# 
+# CREATE REQUEST_PROCESSER_SHOULD SUITE AND MOVE SEPARATOR, DECODER AND NORMALIZER TESTS THERE
+#
+
+
 #
 # NOT TESTING IN HEADERS:
 # 1. CL size = body size
@@ -1154,14 +1160,10 @@
 #    "Host: localhost\r\nContent-Length: 0\r\n\r\nInvalid body"
 #    "Host: localhost\r\nContent-Length: 10\r\n\r\nInvalid body"
 #    "Host: localhost\r\nContent-Length: 0\r\n\r\n       "
-# 3. No CL no TE but body
+# 3. No CL no TE but body -> 411 Length Required
 #    "Host: localhost\r\n\r\nInvalid body"
 #
 
-
-# 
-# CREATE REQUEST_PROCESSER_SHOULD SUITE AND MOVE SEPARATOR, DECODER AND NORMALIZER TESTS THERE
-#
 
 
 # TESTS:

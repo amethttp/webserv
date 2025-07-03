@@ -1,13 +1,14 @@
 #pragma once
 
+#include "RequestLineParams/RequestLineParams.hpp"
 #include <map>
 #include <string>
-#include "utils/HTTP/http.hpp"
-#include "RequestLineParams/RequestLineParams.hpp"
+
+typedef std::map<std::string, std::string> headers_t;
 
 typedef struct Request_s
 {
 	RequestLineParams_t requestLine;
-	std::map<std::string, std::string> headers;
+	headers_t headers;
 	std::string body;
 } Request_t;

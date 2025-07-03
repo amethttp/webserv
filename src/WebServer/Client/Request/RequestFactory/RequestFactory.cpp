@@ -48,7 +48,11 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
 
     RequestParser requestParser = createParser(requestLine);
-    requestParser.parseHeaders(request, splittedRequestBuffer);
+
+    const Result<headers_t> requestHeadersResult = requestParser.parseHeaders();
+    if (requestHeadersResult.isFailure())
+        return Result<Request_t>::fail(requestHeadersResult.getError());
+    request.headers = requestHeadersResult.getValue();
 
     return Result<Request_t>::ok(request);
 }

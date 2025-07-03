@@ -4,7 +4,6 @@
 #include "utils/Result/Result.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestToken/RequestToken.hpp"
-#include <vector>
 
 #define MAX_URI_LENGTH 8000
 
@@ -26,5 +25,5 @@ public:
     RequestParser(const RequestTokenizer &tokenizer);
 
     Result<RequestLineParams_t> parseRequestLine();
-    void parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer);
+    Result<headers_t> parseHeaders();
 };

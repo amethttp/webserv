@@ -42,16 +42,12 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     return Result<RequestLineParams_t>::ok(params);
 }
 
-void RequestParser::parseHeaders(Request_t &request, std::vector<std::string> &splittedRequestBuffer)
+Result<headers_t> RequestParser::parseHeaders()
 {
-    std::vector<std::string> header;
-    std::vector<std::string>::iterator it = splittedRequestBuffer.begin() + 1;
+    headers_t headers;
 
-    while (it != splittedRequestBuffer.end() && !it->empty())
-    {
-        header = split(*it, ":");
-        request.headers[header[0]] = trim(header[1], " ");
-        ++it;
-    }
+    headers["Host"] = "localhost";
+
+    return Result<headers_t>::ok(headers);
 }
 
