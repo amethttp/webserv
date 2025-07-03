@@ -923,51 +923,245 @@
 "/../../../../..%2f..%2F%2e%2E/%2e%2E/%2e%2E/%2e%2E/%2e%2E/etc/passwd"
 
 
+### REQUEST HEADERS CRITERIA
+# --- Headers tests performed in RequestParser --- #
+### 1. Recognize simple header
+"Host: localhost"
 
-# TEST IN REQUEST LINE
-# |
-# v
-# 1. Request-line parsing -> /../%2e%2e/about/./%2e/%2F//index.html?p1=val1&p2=val2%2e
-# 2. Separate path -> /../%2e%2e/about/./%2e/%2F//index.html
-# 3. Pct-decoding -> /../../about/././///index.html
-# 4. Normalize -> /about/index.html
+### 2. Recognize header with case insensitive key
+"hOST: localhost"
 
-# HOY #
+### 3. Recognize header with key consisted of tchars
+"!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz: localhost"
+
+### 4. Take as failure a header key containing non-tchars 
+"(),/:;\r<=>\b?@\f[\\]\t{}\n: localhost"
+"Ho(),/:;\r<=>\b?@\f[\\]\t{}\nst: localhost"
+"Ho\x01\x14st: localhost"
+
+### 5. Take as failure a header key containing SP
+"Host : localhost"
+" Host: localhost"
+"Ho st: localhost"
+
+### 6. Take as failure a header key containing HTAB
+"Host\t: localhost"
+"\tHost: localhost"
+"Ho\tst: localhost"
+
+### 7. Take as failure a header key consisted of a single SP
+" : localhost"
+
+### 8. Take as failure a header key consisted of a single HTAB
+"\t: localhost"
+
+### 9. Take as failure an empty header key
+": localhost"
+
+### 10. Take as failure a header missing the colon separator 
+"Host localhost"
+
+### 11. Take as failure a header that has any other character replacing the colon separator
+"Host? localhost"
+"Host! localhost"
+"Hosta localhost"
+
+### 12. Take as failure a header that has a SP replacing the colon separator
+"Host  localhost"
+
+### 13. Take as failure a header that has a HTAB replacing the colon separator
+"Host\t localhost"
+
+### 14. Recognize a header with double colon separator (first is separator, second is header value)
+"Host::localhost"
+
+### 15. Recognize a header without first OWS
+"Host:localhost"
+
+### 16. Recognize a header with a single first OWS
+"Host: localhost"
+"Host:\tlocalhost"
+
+### 17. Recognize a header with a combination of single first OWS
+"Host: \tlocalhost"
+
+### 18. Recognize a header with a combination of multiple first OWS
+"Host: \t   \t\t  \t\tlocalhost"
+
+### 19. Recognize a header value with valid printable characters and HTAB
+"Host: !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ \t[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+
+### 20. Recognize a header value consisted of multiple words using SP as separator
+"Host: localhost and something else"
+
+### 21. Recognize a header value consisted of multiple words using HTAB as separator
+"Host: localhost\tand\tsomething\telse"
+
+### 22. Recognize a header value consisted of multiple words using multiple OWS as separator
+"Host: localhost\t \tand   \tsomething\t   \t\telse"
+
+### 23. Recognize a header value consisted of multiple valid chars
+"Host: !\"#$%&'()*+,-./0123456789 \t ;<=>?@ABCDEF\t \t[\\]^_`abcdefghijklmnop"
+
+### 24. Take as failure a header value consisted of control chars
+"Host: \r\b\n\n\r\x7f\x10"
+
+### 25. Recognize a header value consisted of a single SP
+"Host: "
+
+### 26. Recognize a header value consisted of a single HTAB
+"Host:\t"
+
+### 27. Recognize a header value consisted of multiple OWS
+"Host:\t \t\t   \t \t"
+
+### 28. Recognize an empty header value
+"Host:"
+
+### 29. Recognize a header without the final OWS
+"Host: localhost"
+
+### 30. Recognize a header with a single final OWS
+"Host: localhost "
+"Host: localhost\t"
+
+### 31. Recognize a header with a combination of single final HTAB
+"Host: localhost \t"
+
+### 32. Recognize a header with a combination of multiple final OWS
+"Host: localhost\t   \t\t  \t\t"
+
+### 33. Recognize multiple headers separated with CRLF
+"Host: localhost\r\nContent-Length:0\r\nConnection:\tclose"
+
+### 34. Take as failure multiple headers with OWS as separation
+"Host: localhost\r\n Content-Length: 0"
+"Host: localhost\r\n\tContent-Length: 0"
+
+### 35. Take as failure multiple headers bad separated
+"Host: localhost\rContent-Length: 0"
+"Host: localhost\nContent-Length: 0"
+"Host: localhost\b\fContent-Length: 0"
+"Host: localhost\r \nContent-Length: 0"
+
+### 36. Recognize as a single header multiple valid headers bad separated
+"Host: localhost\\r\\nContent-Length: 0"
+
+### 37. Take as failure an invalid header
+"INVALID"
+
+### 38. Take as failure a OWS as header
+" "
+"\t"
+
+### 39. Take as failure an empty header
+""
+
+# --- Headers tests performed in RequestFactory --- #
+### 40. Take as failure a missing Host header
+"Connection: keep-alive\r\n\r\n"
+
+### 41. Take as failure an empty Host header
+"Host:\r\n\r\n"
+
+### 42. Take as failure a Host header consisted of OWS
+"Host:  \t  \t\t  \r\n\r\n"
+"Host:  \t  \t\t  :8000\r\n\r\n"
+
+### 43. Take as failure a Host header with invalid characters
+"Host: loc alh ost\r\n\r\n"
+"Host: loc\talh\tost\r\n\r\n"
+"Host: loc\balh\fost\r\n\r\n"
+
+### 44. Recognize a Host header with port
+"Host: localhost:8080\r\n\r\n"
+
+### 45. Recognize a Host header consisted of valid chars
+"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=\r\n\r\n"
+
+### 46. Recognize a Host header consisted of valid chars and port
+"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=:8080\r\n\r\n"
+
+### 47. Decode pct-encoded chars in Host header
+"Host: localhost_%20_%34_%56\r\n\r\n"
+
+### 48. Take as failure pct-encoded control chars in Host header
+"Host: localhost_%00_%7f\r\n\r\n"
+
+### 49. Take as failure a non-numeric port
+"Host: localhost:afda\r\n\r\n"
+"Host: localhost:31.023\r\n\r\n"
+
+### 50. Take as failure multiple ports
+"Host: localhost:31:30\r\n\r\n"
+
+### 51. Take as failure ports out of range
+"Host: localhost:-8419\r\n\r\n"
+"Host: localhost:1000000\r\n\r\n"
+
+### 52. Recognize a port with leading zeros
+"Host: localhost:0000000000008080\r\n\r\n"
+
+### 53. Take as failure a repeated Host header
+"Host: localhost\r\nHost: my.domain.com\r\n\r\n"
+
+### 54. Recognize case-insensitive headers
+"hOSt: localhost\r\nConNecTion: KEEP-ALIVE\r\n\r\n"
+
+### 55. Recognize a request with valid CL header and size zero
+"Host: localhost\r\nContent-Length: 0\r\n\r\n"
+
+### 56. Recognize a request with valid CL header and size greater than zero
+"Host: localhost\r\nContent-Length: 10\r\n\r\nValid body"
+
+### 57. Take as failure a non-numeric Content-Length value
+"Host: localhost\r\nContent-Length: -23\r\n\r\n"
+"Host: localhost\r\nContent-Length: 2.03\r\n\r\n"
+"Host: localhost\r\nContent-Length: avc\r\n\r\n"
+
+### 58. Take as failure a repeated CL header
+"Host: localhost\r\nContent-Length: 0\r\nContent-Length: 0\r\n\r\n"
+
+### 59. Recognize a request with valid TE
+"Host: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 60. Recognize a request with valid case-insensitive TE
+"Host: localhost\r\nTransfer-Encoding: cHUnKeD\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 61. Take as failure a request with invalid TE
+"Host: localhost\r\nTransfer-Encoding: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 62. Take as failure a request with body CL and TE chunked headers
+"Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked\r\n\r\n"
+
+
+
 # 1. Separate path-query (decode only path, not URI neither query)                      DONE
 # 2. Target pct-decoder                                                                 DONE
 # 3. Refactor RequestFactory::create()                                                  DONE
 # 4. Target normalizer criteria                                                         DONE
-# 5. Target normalizer                                                                  
-#??? 6. Headers parser minimum design ???#                                              
-
-# MAÑANA #
-#??? 6. Headers parser minimum design ???#
-# 7. Headers parsing criteria
-# 8. Headers parsing
+# 5. Target normalizer                                                                  DONE
+# 6. Headers parser minimum design                                                      DONE
+# 7. Headers parsing criteria                                                           DONE
+# 8. Headers parsing                                                                    
 
 
+#
+# NOT TESTING IN HEADERS:
+# 1. CL size = body size
+#    "Host: localhost\r\nContent-Length: 10\r\n\r\nValid body"
+# 2. CL size < body size
+#    "Host: localhost\r\nContent-Length: 0\r\n\r\nInvalid body"
+#    "Host: localhost\r\nContent-Length: 10\r\n\r\nInvalid body"
+#    "Host: localhost\r\nContent-Length: 0\r\n\r\n       "
+# 3. No CL no TE but body
+#    "Host: localhost\r\n\r\nInvalid body"
+#
 
 
-# OPCION 1
-# Tokenizer1("GET / HTTP/1.1")
-# Parser1(tokenizer)
-
-# Tokenizer2("Host: localhost")
-# Parser2(tokenizer)
-
-
-# OPCION 2
-# tokenizer.setText("Host: localhost")
-# tokenizer.restart() -> pos = 0; currentChar = text[0]
-
-
-# OPCION 3
-# Host: localhost\r\nContent-Length: 0\r\n
-# vector("Host: localhost", "Content-Length: 0")
-# Host: localhost
-# Content-Length: 0
-
-
+# 
+# CREATE REQUEST_PROCESSER_SHOULD SUITE AND MOVE SEPARATOR, DECODER AND NORMALIZER TESTS THERE
+#
 
 
 # TESTS:
