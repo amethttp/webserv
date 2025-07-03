@@ -22,6 +22,14 @@ bool RequestTargetNormalizer::isParentDirectory(const std::string &str)
     return str == "..";
 }
 
+void RequestTargetNormalizer::removeLastElement(pathSegments_t &pathSegments)
+{
+    if (pathSegments.empty())
+        return;
+
+    pathSegments.pop_back();
+}
+
 bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
 {
     return endsWith(path, "/.");
@@ -43,10 +51,10 @@ pathSegments_t RequestTargetNormalizer::normalizePathSegments(const pathSegments
     {
         if (isCurrentDirectory(*it) || isEmptySegment(pathSegments, it))
             continue;
-        if (!isParentDirectory(*it))
+        if (isParentDirectory(*it))
+            removeLastElement(normalizedPathSegments);
+        else
             normalizedPathSegments.push_back(*it);
-        else if (!normalizedPathSegments.empty())
-            normalizedPathSegments.pop_back();
     }
 
     return normalizedPathSegments;
