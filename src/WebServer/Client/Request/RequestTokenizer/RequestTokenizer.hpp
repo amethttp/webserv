@@ -29,7 +29,7 @@ private:
     bool isAbsolutePath() const;
     bool isQuery() const;
 
-    std::string token();
+    std::string method();
     std::string httpVersion();
     std::string absolutePath();
     std::string query();

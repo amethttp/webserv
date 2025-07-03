@@ -4,7 +4,7 @@
 
 typedef enum tokenType_e
 {
-    TOKEN,
+    METHOD,
     SP,
     TARGET,
     HTTP_VERSION,

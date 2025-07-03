@@ -22,7 +22,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     RequestLineParams_t params;
 
     params.method = getHttpMethodFromString(this->currentToken_.getValue());
-    hasFailed |= eat(TOKEN);
+    hasFailed |= eat(METHOD);
 
     hasFailed |= eat(SP);
 

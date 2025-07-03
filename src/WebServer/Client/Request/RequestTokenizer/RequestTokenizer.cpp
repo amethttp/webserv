@@ -91,17 +91,17 @@ bool RequestTokenizer::isQuery() const
     return (isPchar() || this->currentChar_ == '/' || this->currentChar_ == '?');
 }
 
-std::string RequestTokenizer::token()
+std::string RequestTokenizer::method()
 {
-    std::string tokenString;
+    std::string methodString;
 
     while (!hasFinishedText() && isTchar())
     {
-        tokenString += this->currentChar_;
+        methodString += this->currentChar_;
         advance();
     }
 
-    return tokenString;
+    return methodString;
 }
 
 std::string RequestTokenizer::httpVersion()
@@ -171,7 +171,7 @@ RequestToken RequestTokenizer::getNextToken()
         return RequestToken(HTTP_VERSION, httpVersion());
 
     if (isTchar())
-        return RequestToken(TOKEN, token());
+        return RequestToken(METHOD, method());
 
     return RequestToken(UNKNOWN, "UNKNOWN");
 }
