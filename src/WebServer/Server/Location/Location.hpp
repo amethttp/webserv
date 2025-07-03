@@ -40,6 +40,7 @@ public:
 	void setAutoIndex(bool mode);
 	void setIndexList(const std::vector<std::string> indexes);
 	void setMethods(const std::set<t_method> &methods);
+	void setReturn(const t_return &ret);
 
 	std::string getPath();
 	std::string getRoot();

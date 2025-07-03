@@ -116,15 +116,24 @@ static void removeTrailingSlashes(std::string &str)
 static int countMatchingCharacters(std::string &base, std::string target)
 {
 	int res = 0;
+	int tmp = 0;
+	int i = 0;
 
 	// removeTrailingSlashes(target);
-	while (target[res] && base[res])
+	while (target[i] && base[i])
 	{
-		if (target[res] != base[res])
+		if (target[i] != base[i])
 			break ;
-		res++;
+		tmp++;
+		if (target[i] == '/' && base[i] == '/')
+		{
+			res += tmp;
+			tmp = 0;
+		}
+		i++;
 	}
-
+	if (target[i] || base[i])
+		return 0;
 	return res;
 }
 
@@ -146,7 +155,7 @@ static Location matchLocation(Request &request, Server &server)
 			longestMatch = matchLength;
 		}
 	}
-	
+
 	return locations[matchIndex];
 }
 
@@ -156,6 +165,7 @@ static Location getLocationPH(Request &request, Server &server)
 	std::vector<Location> testLocations;
 	std::vector<std::string> indexes;
 	std::set<t_method> allowedMethods;
+	t_return ret;
 
 	indexes.push_back("index");
 	indexes.push_back("index.html");
@@ -165,6 +175,16 @@ static Location getLocationPH(Request &request, Server &server)
 	allowedMethods.insert(M_POST);
 	location.setRoot("tests/www");
 	location.setPath("/");
+	location.setAutoIndex(true);
+	location.setIndexList(indexes);
+	location.setMethods(allowedMethods);
+	testLocations.push_back(location);
+
+	location.setRoot("");
+	location.setPath("/ok/testindex/index");
+	ret.code = MOVED_PERMANENTLY;
+	ret.path = "/ok/testindex/index/";
+	location.setReturn(ret);
 	location.setAutoIndex(true);
 	location.setIndexList(indexes);
 	location.setMethods(allowedMethods);

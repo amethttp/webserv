@@ -34,6 +34,11 @@ void Location::setMethods(const std::set<t_method> &methods)
 	this->methods_ = methods;
 }
 
+void Location::setReturn(const t_return &ret)
+{
+	this->return_ = ret;
+}
+
 std::string Location::getPath()
 {
 	return this->path_;

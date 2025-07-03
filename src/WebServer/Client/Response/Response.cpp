@@ -88,6 +88,12 @@ Response::Response()
 {
 }
 
+static void normalizeTrailingSlash(std::string &path)
+{
+	if (*path.rbegin() != '/')
+		path += '/';
+}
+
 static bool pathExists(std::string &path)
 {
 	struct stat st;
@@ -324,6 +330,7 @@ static void appendElementToHTML(std::ostringstream &html, std::string &targetPat
 	std::ostringstream size;
 	std::string lastModified = "";
 	std::string filePath = targetPath + anchorName;
+
 	if (!stat(filePath.c_str(), &st))
 	{
 		if (type != DT_DIR)
@@ -400,6 +407,7 @@ static bool findIndex(Parameters &p)
 
 t_httpCode Response::tryIndex(Parameters &p)
 {
+	// normalizeTrailingSlash(p.targetPath_);
 	if (findIndex(p))
 		return getFile(p.targetPath_);
 	
@@ -430,6 +438,7 @@ t_httpCode Response::postFile(Parameters &p)
 	if (pathExists(p.targetPath_))
 		return CONFLICT;
 
+	// normalizeTrailingSlash(p.targetPath_);
 	std::ofstream file(p.targetPath_.c_str(), std::ofstream::trunc);
 	if (!file.is_open())
 	{
