@@ -32,18 +32,18 @@ pathComponents_t RequestTargetNormalizer::normalizePathComponents(const pathComp
     return normalizedPathComponents;
 }
 
-std::string RequestTargetNormalizer::buildNewPath(const pathComponents_t &newPathComponents)
+std::string RequestTargetNormalizer::buildNormalizedPath(const pathComponents_t &normalizedPathComponents)
 {
-    std::string newPath = "/";
+    std::string normalizedPath = "/";
 
-    for (pathComponents_t::const_iterator it = newPathComponents.begin(); it != newPathComponents.end(); ++it)
+    for (pathComponents_t::const_iterator it = normalizedPathComponents.begin(); it != normalizedPathComponents.end(); ++it)
     {
-        newPath += *it;
-        if (it != newPathComponents.end() - 1)
-            newPath += "/";
+        normalizedPath += *it;
+        if (it != normalizedPathComponents.end() - 1)
+            normalizedPath += "/";
     }
 
-    return newPath;
+    return normalizedPath;
 }
 
 void RequestTargetNormalizer::normalizePath(std::string &path)
@@ -52,6 +52,6 @@ void RequestTargetNormalizer::normalizePath(std::string &path)
         path += '/';
 
     const pathComponents_t pathComponents = getPathComponents(path);
-    const pathComponents_t newPathComponents = normalizePathComponents(pathComponents);
-    path = buildNewPath(newPathComponents);
+    const pathComponents_t normalizedPathComponents = normalizePathComponents(pathComponents);
+    path = buildNormalizedPath(normalizedPathComponents);
 }
