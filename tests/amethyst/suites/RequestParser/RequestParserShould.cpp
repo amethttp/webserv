@@ -658,3 +658,17 @@ TEST(take_as_failure_an_empty_request_line)
 {
     assertRequestLineIsInvalid("", "400 Bad Request");
 }
+
+
+/* REQUEST HEADERS CRITERIA */
+TEST(recognize_a_simple_header)
+{
+    RequestTokenizer requestTokenizer("Host: localhost");
+    RequestParser sut(requestTokenizer);
+    Result<headers_t> result = sut.parseHeaders();
+
+    const headers_t headers = result.getValue();
+
+    ASSERT_EQUALS(1, headers.size());
+    ASSERT_EQUALS("localhost", headers.at("Host"))
+}
