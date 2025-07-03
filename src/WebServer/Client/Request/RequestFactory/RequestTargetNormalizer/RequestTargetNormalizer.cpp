@@ -2,6 +2,11 @@
 #include "utils/string/string.hpp"
 #include <vector>
 
+bool RequestTargetNormalizer::isLastElement(const pathSegments_t &pathSegments, const pathSegments_t::const_iterator it)
+{
+    return it == pathSegments.end() - 1;
+}
+
 bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
 {
     return endsWith(path, "/.");
@@ -21,7 +26,7 @@ pathSegments_t RequestTargetNormalizer::normalizePathSegments(const pathSegments
 
     for (pathSegments_t::const_iterator it = pathSegments.begin(); it != pathSegments.end(); ++it)
     {
-        if (*it == "." || (it != pathSegments.end() - 1 && *it == ""))
+        if (*it == "." || (!isLastElement(pathSegments, it) && *it == ""))
             continue;
         if (*it != "..")
             normalizedPathSegments.push_back(*it);
@@ -39,7 +44,7 @@ std::string RequestTargetNormalizer::buildNormalizedPath(const pathSegments_t &n
     for (pathSegments_t::const_iterator it = normalizedPathSegments.begin(); it != normalizedPathSegments.end(); ++it)
     {
         normalizedPath += *it;
-        if (it != normalizedPathSegments.end() - 1)
+        if (!isLastElement(normalizedPathSegments, it))
             normalizedPath += "/";
     }
 

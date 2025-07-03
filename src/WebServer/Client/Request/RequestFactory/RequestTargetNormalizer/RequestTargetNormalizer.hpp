@@ -10,6 +10,8 @@ class RequestTargetNormalizer
 private:
     RequestTargetNormalizer();
 
+    static bool isLastElement(const pathSegments_t &pathSegments, pathSegments_t::const_iterator it);
+
     static bool hasTrailingDotSegment(const std::string &path);
     static pathSegments_t getPathSegments(const std::string &path);
     static pathSegments_t normalizePathSegments(const pathSegments_t &pathSegments);
