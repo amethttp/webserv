@@ -851,3 +851,11 @@ TEST(recognize_a_header_whose_value_has_multiple_words_using_HTAB_as_separator)
     assertHeaderSize(1);
     assertHeader("Host", "localhost\tand\tsomething\telse");
 }
+
+TEST(recognize_a_header_whose_value_has_multiple_words_using_multiple_OWS_as_separator)
+{
+    headers = createFromValidHeaders("Host: localhost\t \tand   \tsomething\t   \t\telse");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost\t \tand   \tsomething\t   \t\telse");
+}
