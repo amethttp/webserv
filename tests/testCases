@@ -1044,8 +1044,8 @@
 "Host: localhost\b\fContent-Length: 0"
 "Host: localhost\r \nContent-Length: 0"
 
-### 36. Recognize as a single header multiple valid headers bad separated
-"Host: localhost\\r\\nContent-Length: 0"
+### 36. Take as failure an invalid middle header
+"Host: localhost\r\nContent-Length: \b0\r\nConnection: close"
 
 ### 37. Take as failure an invalid header
 "INVALID"

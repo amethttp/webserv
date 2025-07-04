@@ -944,3 +944,8 @@ TEST(take_as_failure_multiple_headers_with_invalid_separator)
     assertRequestHeaderIsInvalid("Host: localhost\b\fContent-Length: 0", "400 Bad Request");
     assertRequestHeaderIsInvalid("Host: localhost\r \nContent-Length: 0", "400 Bad Request");
 }
+
+TEST(take_as_failure_multiple_headers_with_an_invalid_middle_header)
+{
+    assertRequestHeaderIsInvalid("Host: localhost\r\nContent-Length: \b0\r\nConnection: close", "400 Bad Request");
+}
