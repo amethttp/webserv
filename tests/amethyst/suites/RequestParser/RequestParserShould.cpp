@@ -684,3 +684,15 @@ TEST(recognize_a_complex_header)
     ASSERT_EQUALS(1, headers.size());
     ASSERT_EQUALS("1312", headers.at("Content-Length"))
 }
+
+TEST(recognize_a_case_insensitive_header)
+{
+    RequestTokenizer requestTokenizer("HoST: localhost");
+    RequestParser sut(requestTokenizer);
+    Result<headers_t> result = sut.parseHeaders();
+
+    const headers_t headers = result.getValue();
+
+    ASSERT_EQUALS(1, headers.size());
+    ASSERT_EQUALS("localhost", headers.at("Host"))
+}

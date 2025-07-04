@@ -49,7 +49,7 @@ Result<headers_t> RequestParser::parseHeaders()
     const std::string header = this->currentToken_.getValue();
     eat(HEADER);
 
-    const std::string headerKey = header.substr(0, header.find(':'));
+    const std::string headerKey = toHttpHeaderCase(header.substr(0, header.find(':')));
     const std::string headerValue = header.substr(header.find(':') + 1);
 
     headers[headerKey] = trim(headerValue, " ");
