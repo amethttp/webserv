@@ -53,6 +53,9 @@ Result<headers_t> RequestParser::parseHeaders()
     const std::string headerKey = toHttpHeaderCase(header.substr(0, header.find(':')));
     const std::string headerValue = header.substr(header.find(':') + 1);
 
+    if (headerKey.empty())
+        return Result<headers_t>::fail("400 Bad Request");
+
     headers[headerKey] = trim(headerValue, " ");
 
     return Result<headers_t>::ok(headers);
