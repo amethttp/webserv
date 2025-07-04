@@ -41,6 +41,11 @@ bool RequestTokenizer::isTchar() const
     return (std::isalnum(this->currentChar_) || tcharsSymbols.find(this->currentChar_) != std::string::npos);
 }
 
+bool RequestTokenizer::isTchar(const char c) const
+{
+    return (std::isalnum(c) || tcharsSymbols.find(c) != std::string::npos);
+}
+
 bool RequestTokenizer::startsWithHttpPrefixAtCurrentPos() const
 {
     return this->text_.find("HTTP/") == this->pos_;
@@ -94,19 +99,14 @@ bool RequestTokenizer::isQuery() const
 bool RequestTokenizer::isHeader() const
 {
     int distance = 0;
+    char headerChar = peek(distance);
 
-    while (!hasFinishedText())
+    while (!hasFinishedText() && isTchar(headerChar))
     {
-        const char c = peek(distance);
-        if (!(std::isalnum(c) || tcharsSymbols.find(c) != std::string::npos))
-            break ;
-        distance++;
+        headerChar = peek(distance++);
     }
 
-    if (peek(distance) != ':')
-        return false;
-
-    return true;
+    return headerChar == ':';
 }
 
 std::string RequestTokenizer::method()
