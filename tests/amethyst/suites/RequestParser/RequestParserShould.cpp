@@ -904,3 +904,11 @@ TEST(recognize_a_header_with_a_single_SP_as_last_OWS)
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
 }
+
+TEST(recognize_a_header_with_a_single_HTAB_as_last_OWS)
+{
+    headers = createFromValidHeaders("Host: localhost\t");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+}
