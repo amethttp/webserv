@@ -763,3 +763,8 @@ TEST(take_as_failure_a_header_whose_key_is_empty)
 {
     assertRequestHeaderIsInvalid(": localhost", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_header_missing_the_colon_separator)
+{
+    assertRequestHeaderIsInvalid("Host localhost", "400 Bad Request");
+}
