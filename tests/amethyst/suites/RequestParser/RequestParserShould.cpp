@@ -930,3 +930,9 @@ TEST(recognize_multiple_headers_separated_with_CRLF)
     assertHeader("Content-Length", "0");
     assertHeader("Connection", "close");
 }
+
+TEST(take_as_failure_multiple_headers_with_OWS_as_separator)
+{
+    assertRequestHeaderIsInvalid("Host: localhost\r\n Content-Length: 0", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Host: localhost\r\n\tContent-Length: 0", "400 Bad Request");
+}
