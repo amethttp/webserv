@@ -888,3 +888,11 @@ TEST(recognize_a_header_whose_value_is_multiple_OWS)
     assertHeaderSize(1);
     assertHeader("Host", "");
 }
+
+TEST(recognize_a_header_whose_value_is_empty)
+{
+    headers = createFromValidHeaders("Host:");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "");
+}
