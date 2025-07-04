@@ -920,3 +920,13 @@ TEST(recognize_a_header_with_a_combination_of_last_OWS)
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
 }
+
+TEST(recognize_multiple_headers_separated_with_CRLF)
+{
+    headers = createFromValidHeaders("Host: localhost\r\nContent-Length:0\r\nConnection:\tclose");
+
+    assertHeaderSize(3);
+    assertHeader("Host", "localhost");
+    assertHeader("Content-Length", "0");
+    assertHeader("Connection", "close");
+}

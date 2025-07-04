@@ -37,6 +37,7 @@ private:
     std::string target();
     std::string sp();
     std::string header();
+    std::string crlf();
 
 public:
     RequestTokenizer(const std::string &text);

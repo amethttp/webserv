@@ -46,17 +46,29 @@ Result<headers_t> RequestParser::parseHeaders()
 {
     headers_t headers;
 
-    const std::string header = this->currentToken_.getValue();
-    if (eat(HEADER) == FAIL || eat(EOF) == FAIL)
+    while (this->currentToken_.getType() == HEADER)
+    {
+        const std::string header = this->currentToken_.getValue();
+        if (eat(HEADER) == FAIL)
+            return Result<headers_t>::fail("400 Bad Request");
+
+        const std::string headerKey = toHttpHeaderCase(header.substr(0, header.find(':')));
+        const std::string headerValue = header.substr(header.find(':') + 1);
+
+        if (headerKey.empty())
+            return Result<headers_t>::fail("400 Bad Request");
+
+        headers[headerKey] = trim(headerValue, " \t");
+
+        if (this->currentToken_.getType() != CRLF)
+            break;
+
+        if (eat(CRLF) == FAIL)
+            return Result<headers_t>::fail("400 Bad Request");
+    }
+
+    if (eat(EOF) == FAIL)
         return Result<headers_t>::fail("400 Bad Request");
-
-    const std::string headerKey = toHttpHeaderCase(header.substr(0, header.find(':')));
-    const std::string headerValue = header.substr(header.find(':') + 1);
-
-    if (headerKey.empty())
-        return Result<headers_t>::fail("400 Bad Request");
-
-    headers[headerKey] = trim(headerValue, " \t");
 
     return Result<headers_t>::ok(headers);
 }

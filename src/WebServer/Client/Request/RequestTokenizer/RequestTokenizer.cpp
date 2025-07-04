@@ -187,6 +187,12 @@ std::string RequestTokenizer::header()
     return headerString;
 }
 
+std::string RequestTokenizer::crlf()
+{
+    advance(2);
+    return "\r\n";
+}
+
 RequestToken RequestTokenizer::getNextToken()
 {
     if (hasFinishedText())
@@ -206,6 +212,9 @@ RequestToken RequestTokenizer::getNextToken()
 
     if (isTchar())
         return RequestToken(METHOD, method());
+
+    if (this->currentChar_ == '\r' && peek() == '\n')
+        return RequestToken(CRLF, crlf());
 
     return RequestToken(UNKNOWN, "UNKNOWN");
 }

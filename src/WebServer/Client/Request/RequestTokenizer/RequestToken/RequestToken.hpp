@@ -9,6 +9,7 @@ typedef enum tokenType_e
     TARGET,
     HTTP_VERSION,
     HEADER,
+    CRLF,
     EOF,
     UNKNOWN,
 } tokenType_t;
