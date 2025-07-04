@@ -113,28 +113,27 @@ static void removeTrailingSlashes(std::string &str)
 		str.erase(str.length() - 1);
 }
 
-static int countMatchingCharacters(std::string &base, std::string target)
+static int countMatchingDepth(std::string base, std::string target)
 {
-	int res = 0;
-	int tmp = 0;
-	int i = 0;
+	size_t i = 0;
+	size_t len = 0;
 
-	// removeTrailingSlashes(target);
-	while (target[i] && base[i])
+	if (base.length() > target.length())
+		return -1;
+
+	while (i < base.length())
 	{
-		if (target[i] != base[i])
+		if (base[i] != target[i])
 			break ;
-		tmp++;
-		if (target[i] == '/' && base[i] == '/')
-		{
-			res += tmp;
-			tmp = 0;
-		}
 		i++;
 	}
-	if (target[i] || base[i])
-		return 0;
-	return res;
+
+	if (i != base.length())
+		return -1;
+	else if ((base.length() != target.length()) && (base[i - 1] != '/'))
+		return -1;
+
+	return i;
 }
 
 // Decide on no locations defined on server
@@ -148,7 +147,7 @@ static Location matchLocation(Request &request, Server &server)
 
 	for (size_t i = 0; i < locations.size(); ++i)
 	{
-		matchLength = countMatchingCharacters(targetRoute, locations[i].getPath());
+		matchLength = countMatchingDepth(locations[i].getPath(), targetRoute);
 		if (matchLength > longestMatch)
 		{
 			matchIndex = i;
@@ -180,12 +179,12 @@ static Location getLocationPH(Request &request, Server &server)
 	location.setMethods(allowedMethods);
 	testLocations.push_back(location);
 
-	location.setRoot("");
-	location.setPath("/ok/testindex/index");
+	location.setRoot("tests/www");
+	location.setPath("/test/index");
 	ret.code = MOVED_PERMANENTLY;
-	ret.path = "/ok/testindex/index/";
+	ret.path = "/test/index/";
 	location.setReturn(ret);
-	location.setAutoIndex(true);
+	location.setAutoIndex(false);
 	location.setIndexList(indexes);
 	location.setMethods(allowedMethods);
 	testLocations.push_back(location);
