@@ -835,3 +835,11 @@ TEST(recognize_a_header_whose_value_has_valid_printable_characters_and_HTAB)
     assertHeaderSize(1);
     assertHeader("Host", validValue);
 }
+
+TEST(recognize_a_header_whose_value_has_multiple_words_using_SP_as_separator)
+{
+    headers = createFromValidHeaders("Host: localhost and something else");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost and something else");
+}
