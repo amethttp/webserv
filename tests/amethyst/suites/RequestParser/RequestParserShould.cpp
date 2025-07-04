@@ -957,3 +957,9 @@ TEST(take_as_failure_an_invalid_header_line)
     assertRequestHeaderIsInvalid("INVALID", "400 Bad Request");
 }
 
+TEST(take_as_failure_a_header_line_consisted_of_OWS)
+{
+    assertRequestHeaderIsInvalid(" ", "400 Bad Request");
+    assertRequestHeaderIsInvalid("\t", "400 Bad Request");
+    assertRequestHeaderIsInvalid(" \t  \t    \t \t\t", "400 Bad Request");
+}
