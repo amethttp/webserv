@@ -166,12 +166,16 @@ static Location getLocationPH(Request &request, Server &server)
 	std::set<t_method> allowedMethods;
 	t_return ret;
 
+	std::map<std::string, std::string> test;
+
 	indexes.push_back("index");
 	indexes.push_back("index.html");
 	indexes.push_back("test.html");
 	indexes.push_back("test2.html");
 	allowedMethods.insert(M_GET);
 	allowedMethods.insert(M_POST);
+	test[".py"] = "./www/tests/";
+	location.setCGIs(test);
 	location.setRoot("tests/www");
 	location.setPath("/");
 	location.setAutoIndex(true);

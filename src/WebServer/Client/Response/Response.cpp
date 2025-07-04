@@ -553,8 +553,8 @@ static bool matchCGI(std::string &path, Location &location, std::pair<std::strin
 static bool timedOut(time_t start)
 {
 	if ((std::time(NULL) - start) > CGI_TIMEOUT)
-		return false;
-	return true;
+		return true;
+	return false;
 }
 
 static t_httpCode waitForOutput(pid_t child, time_t start)
@@ -586,6 +586,8 @@ static std::string readOutput(int pipefd[2])
 	while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
 		output.write(buffer, bytes_read);
 	close(pipefd[0]);
+
+	return output.str();
 }
 
 t_httpCode Response::executeCGI(Parameters &p, std::pair<std::string, std::string> &cgi)
