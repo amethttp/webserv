@@ -91,6 +91,24 @@ bool RequestTokenizer::isQuery() const
     return (isPchar() || this->currentChar_ == '/' || this->currentChar_ == '?');
 }
 
+bool RequestTokenizer::isHeader() const
+{
+    int distance = 0;
+
+    while (!hasFinishedText())
+    {
+        const char c = peek(distance);
+        if (!(std::isalnum(c) || tcharsSymbols.find(c) != std::string::npos))
+            break ;
+        distance++;
+    }
+
+    if (peek(distance) != ':')
+        return false;
+
+    return true;
+}
+
 std::string RequestTokenizer::method()
 {
     std::string methodString;
@@ -156,6 +174,19 @@ std::string RequestTokenizer::sp()
     return " ";
 }
 
+std::string RequestTokenizer::header()
+{
+    std::string headerString;
+
+    while (!hasFinishedText() && std::isprint(this->currentChar_))
+    {
+        headerString += this->currentChar_;
+        advance();
+    }
+
+    return headerString;
+}
+
 RequestToken RequestTokenizer::getNextToken()
 {
     if (hasFinishedText())
@@ -169,6 +200,9 @@ RequestToken RequestTokenizer::getNextToken()
 
     if (isHttpVersion())
         return RequestToken(HTTP_VERSION, httpVersion());
+
+    if (isHeader())
+        return RequestToken(HEADER, header());
 
     if (isTchar())
         return RequestToken(METHOD, method());

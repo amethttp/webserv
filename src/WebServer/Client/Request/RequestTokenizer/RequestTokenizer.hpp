@@ -28,6 +28,7 @@ private:
     bool isPchar() const;
     bool isAbsolutePath() const;
     bool isQuery() const;
+    bool isHeader() const;
 
     std::string method();
     std::string httpVersion();
@@ -35,6 +36,7 @@ private:
     std::string query();
     std::string target();
     std::string sp();
+    std::string header();
 
 public:
     RequestTokenizer(const std::string &text);

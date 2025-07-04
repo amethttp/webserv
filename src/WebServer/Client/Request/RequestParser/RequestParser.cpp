@@ -46,7 +46,13 @@ Result<headers_t> RequestParser::parseHeaders()
 {
     headers_t headers;
 
-    headers["Host"] = "localhost";
+    const std::string header = this->currentToken_.getValue();
+    eat(HEADER);
+
+    const std::string headerKey = header.substr(0, header.find(':'));
+    const std::string headerValue = header.substr(header.find(':') + 1);
+
+    headers[headerKey] = trim(headerValue, " ");
 
     return Result<headers_t>::ok(headers);
 }

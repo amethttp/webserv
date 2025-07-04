@@ -9,10 +9,10 @@ namespace
 
 static RequestLineParams_t createFromValidRequestLine(const std::string &requestLineString)
 {
-    RequestTokenizer requestTokenizer(requestLineString);
+    const RequestTokenizer requestTokenizer(requestLineString);
     RequestParser sut(requestTokenizer);
 
-    Result<RequestLineParams_t> result = sut.parseRequestLine();
+    const Result<RequestLineParams_t> result = sut.parseRequestLine();
 
     return result.getValue();
 }
@@ -26,10 +26,10 @@ static void assertRequestLine(method_t method, const std::string &targetUri, con
 
 static void assertRequestLineIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
-    RequestTokenizer requestTokenizer(invalidRequestString);
+    const RequestTokenizer requestTokenizer(invalidRequestString);
     RequestParser sut(requestTokenizer);
 
-    Result<RequestLineParams_t> result = sut.parseRequestLine();
+    const Result<RequestLineParams_t> result = sut.parseRequestLine();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(errorMessage, result.getError());
@@ -671,4 +671,16 @@ TEST(recognize_a_simple_header)
 
     ASSERT_EQUALS(1, headers.size());
     ASSERT_EQUALS("localhost", headers.at("Host"))
+}
+
+TEST(recognize_a_complex_header)
+{
+    RequestTokenizer requestTokenizer("Content-Length: 1312");
+    RequestParser sut(requestTokenizer);
+    Result<headers_t> result = sut.parseHeaders();
+
+    const headers_t headers = result.getValue();
+
+    ASSERT_EQUALS(1, headers.size());
+    ASSERT_EQUALS("1312", headers.at("Content-Length"))
 }

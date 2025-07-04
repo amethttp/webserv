@@ -8,6 +8,7 @@ typedef enum tokenType_e
     SP,
     TARGET,
     HTTP_VERSION,
+    HEADER,
     EOF,
     UNKNOWN,
 } tokenType_t;
