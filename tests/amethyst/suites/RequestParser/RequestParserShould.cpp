@@ -872,3 +872,11 @@ TEST(recognize_a_header_whose_value_is_a_single_SP)
     assertHeaderSize(1);
     assertHeader("Host", "");
 }
+
+TEST(recognize_a_header_whose_value_is_a_single_HTAB)
+{
+    headers = createFromValidHeaders("Host:\t");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "");
+}
