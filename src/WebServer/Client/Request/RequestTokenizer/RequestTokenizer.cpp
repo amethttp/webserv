@@ -114,6 +114,11 @@ bool RequestTokenizer::isFieldLine() const
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
 }
 
+bool RequestTokenizer::isCrlf() const
+{
+    return this->currentChar_ == '\r' && peek() == '\n';
+}
+
 std::string RequestTokenizer::method()
 {
     std::string methodString;
@@ -218,7 +223,7 @@ RequestToken RequestTokenizer::getNextToken()
     if (isTchar())
         return RequestToken(METHOD, method());
 
-    if (this->currentChar_ == '\r' && peek() == '\n')
+    if (isCrlf())
         return RequestToken(CRLF, crlf());
 
     return RequestToken(UNKNOWN, "UNKNOWN");

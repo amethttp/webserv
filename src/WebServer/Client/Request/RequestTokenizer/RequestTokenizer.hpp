@@ -31,6 +31,7 @@ private:
     bool isQuery() const;
     bool isHeader() const;
     bool isFieldLine() const;
+    bool isCrlf() const;
 
     std::string method();
     std::string httpVersion();
