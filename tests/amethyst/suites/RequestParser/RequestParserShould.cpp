@@ -936,3 +936,11 @@ TEST(take_as_failure_multiple_headers_with_OWS_as_separator)
     assertRequestHeaderIsInvalid("Host: localhost\r\n Content-Length: 0", "400 Bad Request");
     assertRequestHeaderIsInvalid("Host: localhost\r\n\tContent-Length: 0", "400 Bad Request");
 }
+
+TEST(take_as_failure_multiple_headers_with_invalid_separator)
+{
+    assertRequestHeaderIsInvalid("Host: localhost\rContent-Length: 0", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Host: localhost\nContent-Length: 0", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Host: localhost\b\fContent-Length: 0", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Host: localhost\r \nContent-Length: 0", "400 Bad Request");
+}
