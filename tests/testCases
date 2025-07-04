@@ -935,8 +935,8 @@
 "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz: localhost"
 
 ### 4. Take as failure a header key containing non-tchars 
-"(),/:;\r<=>\b?@\f[\\]\t{}\n: localhost"
-"Ho(),/:;\r<=>\b?@\f[\\]\t{}\nst: localhost"
+"(),/;\r<=>\b?@\f[\\]\t{}\n: localhost"
+"Ho(),/;\r<=>\b?@\f[\\]\t{}\nst: localhost"
 "Ho\x01\x14st: localhost"
 
 ### 5. Take as failure a header key containing SP

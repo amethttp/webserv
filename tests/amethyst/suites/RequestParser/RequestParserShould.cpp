@@ -46,6 +46,17 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString, 
     ASSERT_EQUALS(errorMessage, result.getError());
 }
 
+static void assertRequestHeaderIsInvalid(const std::string &invalidHeader, const std::string &errorMessage)
+{
+    const RequestTokenizer requestTokenizer(invalidHeader);
+    RequestParser sut(requestTokenizer);
+
+    const Result<headers_t> result = sut.parseHeaders();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(errorMessage, result.getError());
+}
+
 static void assertHeaderSize(const size_t size)
 {
     ASSERT_EQUALS(size, headers.size());
@@ -715,4 +726,11 @@ TEST(recognize_a_header_whose_key_is_consisted_of_tchars)
 
     assertHeaderSize(1);
     assertHeader(expectedKey, "localhost");
+}
+
+TEST(take_as_failure_a_header_whose_key_contains_non_tchars)
+{
+    assertRequestHeaderIsInvalid("(),/;\r<=>\b?@\f[\\]\t{}\n: localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Ho(),/;\r<=>\b?@\f[\\]\t{}\nst: localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Ho\x01\x14st: localhost", "400 Bad Request");
 }
