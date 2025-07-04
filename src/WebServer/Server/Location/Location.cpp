@@ -39,6 +39,11 @@ void Location::setReturn(const t_return &ret)
 	this->return_ = ret;
 }
 
+void Location::setCGIs(std::map<std::string, std::string> cgis)
+{
+	this->cgis_ = cgis;
+}
+
 std::string Location::getPath()
 {
 	return this->path_;
@@ -57,6 +62,11 @@ std::set<t_method> Location::getMethods()
 std::set<t_error_page> Location::getErrorPages()
 {
     return this->errorPages_;
+}
+
+std::map<std::string, std::string> Location::getCGIs()
+{
+	return this->cgis_;
 }
 
 t_return Location::getReturn()

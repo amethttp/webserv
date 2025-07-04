@@ -513,7 +513,7 @@ t_httpCode Response::executeMethod(Parameters &p)
 }
 
 // Set necessary ??
-static bool findCustomErrorPage(t_httpCode code, Location &location, t_error_page &page)
+static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_page &page)
 {
 	std::set<t_error_page> errorPages = location.getErrorPages();
 	bzero(&page, sizeof(page));
@@ -530,16 +530,115 @@ static bool findCustomErrorPage(t_httpCode code, Location &location, t_error_pag
 	return false;
 }
 
+static bool matchCGI(std::string &path, Location &location, std::pair<std::string, std::string> &cgi)
+{
+	int pos = path.rfind('.');
+	std::map<std::string, std::string>::iterator cgiIt;
+	std::map<std::string, std::string> allowedCGIs = location.getCGIs();
+
+	if (pos != std::string::npos)
+	{
+		cgiIt = allowedCGIs.find(path.substr(pos));
+		if (cgiIt != allowedCGIs.end())
+		{
+			cgi.first = cgiIt->first;
+			cgi.second = cgiIt->second;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool timedOut(time_t start)
+{
+	if ((std::time(NULL) - start) > CGI_TIMEOUT)
+		return false;
+	return true;
+}
+
+static t_httpCode waitForOutput(pid_t child, time_t start)
+{
+	int stat_loc = 0;
+
+	while (waitpid(child, &stat_loc, WNOHANG) == 0)
+	{
+		if (timedOut(start))
+		{
+			kill(child, SIGKILL);
+			return REQUEST_TIME_OUT;
+		}
+		usleep(100);
+	}
+	if (stat_loc < 0)
+		throw (std::runtime_error("WaitPid failed"));
+
+	return OK;
+}
+
+static std::string readOutput(int pipefd[2])
+{
+	std::stringstream output;
+	char buffer[BUFFER_SIZE];
+	ssize_t bytes_read;
+
+	close(pipefd[1]);
+	while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
+		output.write(buffer, bytes_read);
+	close(pipefd[0]);
+}
+
+t_httpCode Response::executeCGI(Parameters &p, std::pair<std::string, std::string> &cgi)
+{
+	int pipefd[2];
+	pid_t child;
+	time_t start;
+	std::string result;	
+
+	if (pipe(pipefd))
+		throw (std::runtime_error("Ceci n'est pas une pipe"));
+	start = std::time(NULL);
+	child = fork();
+	if (child < 0)
+		throw (std::runtime_error("Couldn't fork CGI properly"));
+	else if (child == CHILD_OK)
+	{
+		char **env;
+		*env = strdup(""); // refine this
+		char *argv[] = { strdup(p.targetPath_.c_str()), NULL }; // refine this
+
+		close(pipefd[0]);
+		dup2(pipefd[1], STDOUT_FILENO);
+		close(pipefd[1]);
+		
+		execve(p.targetPath_.c_str(), argv, env);
+		throw (std::runtime_error("Failed execve")); // Throw inside the child?? / exit
+	}
+
+	if (waitForOutput(child, start) == REQUEST_TIME_OUT)
+		return REQUEST_TIME_OUT;
+
+	this->body_.content = readOutput(pipefd);
+	this->body_.type = this->extensionTypesDict_[".txt"];
+
+	return OK;
+}
+
 void Response::executeRequest(Parameters &p)
 {
 	t_httpCode code;
 	t_connection mode;
 	t_error_page errorPage;
+	std::pair<std::string, std::string> cgi;
 
-	code = this->executeMethod(p);
+	if (matchCGI(p.targetPath_, p.location_, cgi))
+		code = this->executeCGI(p, cgi);
+	else
+		code = this->executeMethod(p);
+
 	mode = p.getConnectionMode();
 
-	if (findCustomErrorPage(code, p.location_, errorPage))
+	if (matchCustomErrorPage(code, p.location_, errorPage))
 	{
 		// config parse that an error page MUST have a URI page 
 		this->setBodyFromFile(errorPage.page);

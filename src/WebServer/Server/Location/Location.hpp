@@ -41,11 +41,13 @@ public:
 	void setIndexList(const std::vector<std::string> indexes);
 	void setMethods(const std::set<t_method> &methods);
 	void setReturn(const t_return &ret);
+	void setCGIs(std::map<std::string, std::string> cgis);
 
 	std::string getPath();
 	std::string getRoot();
 	std::set<t_method> getMethods();
 	std::set<t_error_page> getErrorPages();
+	std::map<std::string, std::string> getCGIs();
 	t_return getReturn();
 	bool getAutoIndex();
 	std::vector<std::string> getIndexList();

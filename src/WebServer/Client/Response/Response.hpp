@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sys/wait.h>
 #include "utils/http.hpp"
 #include "StatusLine/StatusLine.hpp"
 #include "Parameters/Parameters.hpp"
@@ -11,6 +12,10 @@
 #define INDEX_STYLE "src/utils/htmlTemplates/indexStyle.html"
 #define INDEX_FILE_LIST "src/utils/htmlTemplates/indexFileList.html"
 #define INDEX_CLOSE "src/utils/htmlTemplates/closeIndex.html"
+
+#define CHILD_OK 0
+#define CGI_TIMEOUT 5000
+#define BUFFER_SIZE 4096
 
 typedef struct s_body
 {
@@ -46,6 +51,7 @@ private:
 
 	// request executor
 	std::string getMIME(std::string &target);
+
 	t_httpCode tryIndex(Parameters &p);
 	t_httpCode tryAutoIndex(Parameters &p);
 	t_httpCode getFile(std::string &target);
@@ -54,6 +60,8 @@ private:
 	t_httpCode methodPost(Parameters &p);
 	t_httpCode methodDelete(Parameters &p);
 	t_httpCode executeMethod(Parameters &p);
+	t_httpCode executeCGI(Parameters &p, std::pair<std::string, std::string> &cgi);
+
 	void executeRequest(Parameters &p);
 public:
 	Response();
