@@ -5,6 +5,7 @@
 namespace
 {
     RequestLineParams_t requestLine;
+    headers_t headers;
 }
 
 static RequestLineParams_t createFromValidRequestLine(const std::string &requestLineString)
@@ -13,6 +14,16 @@ static RequestLineParams_t createFromValidRequestLine(const std::string &request
     RequestParser sut(requestTokenizer);
 
     const Result<RequestLineParams_t> result = sut.parseRequestLine();
+
+    return result.getValue();
+}
+
+static headers_t createFromValidHeaders(const std::string &requestHeaders)
+{
+    const RequestTokenizer requestTokenizer(requestHeaders);
+    RequestParser sut(requestTokenizer);
+
+    const Result<headers_t> result = sut.parseHeaders();
 
     return result.getValue();
 }
@@ -33,6 +44,16 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString, 
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(errorMessage, result.getError());
+}
+
+static void assertHeaderSize(const size_t size)
+{
+    ASSERT_EQUALS(size, headers.size());
+}
+
+static void assertHeader(const std::string &key, const std::string &value)
+{
+    ASSERT_EQUALS(value, headers.at(key));
 }
 
 
@@ -663,36 +684,24 @@ TEST(take_as_failure_an_empty_request_line)
 /* REQUEST HEADERS CRITERIA */
 TEST(recognize_a_simple_header)
 {
-    RequestTokenizer requestTokenizer("Host: localhost");
-    RequestParser sut(requestTokenizer);
-    Result<headers_t> result = sut.parseHeaders();
+    headers = createFromValidHeaders("Host: localhost");
 
-    const headers_t headers = result.getValue();
-
-    ASSERT_EQUALS(1, headers.size());
-    ASSERT_EQUALS("localhost", headers.at("Host"))
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
 }
 
 TEST(recognize_a_complex_header)
 {
-    RequestTokenizer requestTokenizer("Content-Length: 1312");
-    RequestParser sut(requestTokenizer);
-    Result<headers_t> result = sut.parseHeaders();
+    headers = createFromValidHeaders("Content-Length: 1312");
 
-    const headers_t headers = result.getValue();
-
-    ASSERT_EQUALS(1, headers.size());
-    ASSERT_EQUALS("1312", headers.at("Content-Length"))
+    assertHeaderSize(1);
+    assertHeader("Content-Length", "1312");
 }
 
 TEST(recognize_a_case_insensitive_header)
 {
-    RequestTokenizer requestTokenizer("HoST: localhost");
-    RequestParser sut(requestTokenizer);
-    Result<headers_t> result = sut.parseHeaders();
+    headers = createFromValidHeaders("Host: localhost");
 
-    const headers_t headers = result.getValue();
-
-    ASSERT_EQUALS(1, headers.size());
-    ASSERT_EQUALS("localhost", headers.at("Host"))
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
 }
