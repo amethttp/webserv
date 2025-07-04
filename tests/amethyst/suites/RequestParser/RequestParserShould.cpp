@@ -705,3 +705,14 @@ TEST(recognize_a_case_insensitive_header)
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
 }
+
+TEST(recognize_a_header_whose_key_is_consisted_of_tchars)
+{
+    const std::string validKey = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const std::string expectedKey = "!#$%&'*+-.^_`|~0123456789abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
+
+    headers = createFromValidHeaders(validKey + ": localhost");
+
+    assertHeaderSize(1);
+    assertHeader(expectedKey, "localhost");
+}
