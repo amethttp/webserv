@@ -949,3 +949,11 @@ TEST(take_as_failure_multiple_headers_with_an_invalid_middle_header)
 {
     assertRequestHeaderIsInvalid("Host: localhost\r\nContent-Length: \b0\r\nConnection: close", "400 Bad Request");
 }
+
+
+/* MISC. REQUEST HEADERS CRITERIA */
+TEST(take_as_failure_an_invalid_header_line)
+{
+    assertRequestHeaderIsInvalid("INVALID", "400 Bad Request");
+}
+
