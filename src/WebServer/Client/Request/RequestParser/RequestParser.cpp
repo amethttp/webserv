@@ -47,10 +47,7 @@ Result<headers_t> RequestParser::parseHeaders()
     int hasFailed = 0;
     headers_t headers;
 
-    if (this->currentToken_.getType() != HEADER)
-        return Result<headers_t>::fail("400 Bad Request");
-
-    while (this->currentToken_.getType() == HEADER)
+    do
     {
         const std::string header = this->currentToken_.getValue();
         hasFailed |= eat(HEADER);
@@ -68,6 +65,7 @@ Result<headers_t> RequestParser::parseHeaders()
 
         hasFailed |= eat(CRLF);
     }
+    while (this->currentToken_.getType() == HEADER);
 
     hasFailed |= eat(EOF);
 
