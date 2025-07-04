@@ -793,3 +793,11 @@ TEST(recognize_a_header_with_repeated_colon_separator)
     assertHeaderSize(1);
     assertHeader("Host", ": localhost");
 }
+
+TEST(recognize_a_header_without_the_first_OWS)
+{
+    headers = createFromValidHeaders("Host:localhost");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+}
