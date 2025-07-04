@@ -785,3 +785,11 @@ TEST(take_as_failure_a_header_that_has_HTAB_instead_of_the_colon_separator)
 {
     assertRequestHeaderIsInvalid("Host\t localhost", "400 Bad Request");
 }
+
+TEST(recognize_a_header_with_repeated_colon_separator)
+{
+    headers = createFromValidHeaders("Host:: localhost");
+
+    assertHeaderSize(1);
+    assertHeader("Host", ": localhost");
+}
