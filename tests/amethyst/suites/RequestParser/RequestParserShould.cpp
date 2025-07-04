@@ -734,3 +734,10 @@ TEST(take_as_failure_a_header_whose_key_contains_non_tchars)
     assertRequestHeaderIsInvalid("Ho(),/;\r<=>\b?@\f[\\]\t{}\nst: localhost", "400 Bad Request");
     assertRequestHeaderIsInvalid("Ho\x01\x14st: localhost", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_header_whose_key_contains_SP)
+{
+    assertRequestHeaderIsInvalid("Host : localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid(" Host: localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Ho st: localhost", "400 Bad Request");
+}
