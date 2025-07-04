@@ -780,3 +780,8 @@ TEST(take_as_failure_a_header_that_has_SP_instead_of_the_colon_separator)
 {
     assertRequestHeaderIsInvalid("Host  localhost", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_header_that_has_HTAB_instead_of_the_colon_separator)
+{
+    assertRequestHeaderIsInvalid("Host\t localhost", "400 Bad Request");
+}
