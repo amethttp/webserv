@@ -768,3 +768,10 @@ TEST(take_as_failure_a_header_missing_the_colon_separator)
 {
     assertRequestHeaderIsInvalid("Host localhost", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_header_that_has_any_other_character_instead_of_the_colon_separator)
+{
+    assertRequestHeaderIsInvalid("Host? localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Host! localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Hosta localhost", "400 Bad Request");
+}
