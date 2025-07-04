@@ -880,3 +880,11 @@ TEST(recognize_a_header_whose_value_is_a_single_HTAB)
     assertHeaderSize(1);
     assertHeader("Host", "");
 }
+
+TEST(recognize_a_header_whose_value_is_multiple_OWS)
+{
+    headers = createFromValidHeaders("Host:\t \t\t   \t \t");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "");
+}
