@@ -44,13 +44,13 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
 
 Result<headers_t> RequestParser::parseHeaders()
 {
+    int hasFailed = 0;
     headers_t headers;
 
     while (this->currentToken_.getType() == HEADER)
     {
         const std::string header = this->currentToken_.getValue();
-        if (eat(HEADER) == FAIL)
-            return Result<headers_t>::fail("400 Bad Request");
+        hasFailed |= eat(HEADER);
 
         const std::string headerKey = toHttpHeaderCase(header.substr(0, header.find(':')));
         const std::string headerValue = header.substr(header.find(':') + 1);
@@ -63,11 +63,12 @@ Result<headers_t> RequestParser::parseHeaders()
         if (this->currentToken_.getType() != CRLF)
             break;
 
-        if (eat(CRLF) == FAIL)
-            return Result<headers_t>::fail("400 Bad Request");
+        hasFailed |= eat(CRLF);
     }
 
-    if (eat(EOF) == FAIL)
+    hasFailed |= eat(EOF);
+
+    if (hasFailed)
         return Result<headers_t>::fail("400 Bad Request");
 
     return Result<headers_t>::ok(headers);
