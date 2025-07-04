@@ -741,3 +741,10 @@ TEST(take_as_failure_a_header_whose_key_contains_SP)
     assertRequestHeaderIsInvalid(" Host: localhost", "400 Bad Request");
     assertRequestHeaderIsInvalid("Ho st: localhost", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_header_whose_key_contains_HTAB)
+{
+    assertRequestHeaderIsInvalid("Host\t: localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid("\tHost: localhost", "400 Bad Request");
+    assertRequestHeaderIsInvalid("Ho\tst: localhost", "400 Bad Request");
+}
