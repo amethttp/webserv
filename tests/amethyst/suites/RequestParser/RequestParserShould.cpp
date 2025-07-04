@@ -896,3 +896,11 @@ TEST(recognize_a_header_whose_value_is_empty)
     assertHeaderSize(1);
     assertHeader("Host", "");
 }
+
+TEST(recognize_a_header_with_a_single_SP_as_last_OWS)
+{
+    headers = createFromValidHeaders("Host: localhost ");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost");
+}
