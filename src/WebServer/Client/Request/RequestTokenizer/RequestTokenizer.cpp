@@ -178,7 +178,7 @@ std::string RequestTokenizer::header()
 {
     std::string headerString;
 
-    while (!hasFinishedText() && std::isprint(this->currentChar_))
+    while (!hasFinishedText() && (std::isprint(this->currentChar_) || this->currentChar_ == '\t'))
     {
         headerString += this->currentChar_;
         advance();

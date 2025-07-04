@@ -56,7 +56,7 @@ Result<headers_t> RequestParser::parseHeaders()
     if (headerKey.empty())
         return Result<headers_t>::fail("400 Bad Request");
 
-    headers[headerKey] = trim(headerValue, " ");
+    headers[headerKey] = trim(headerValue, " \t");
 
     return Result<headers_t>::ok(headers);
 }
