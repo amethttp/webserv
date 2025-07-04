@@ -825,3 +825,13 @@ TEST(recognize_a_header_with_a_combination_of_first_OWS)
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
 }
+
+TEST(recognize_a_header_whose_value_has_valid_printable_characters_and_HTAB)
+{
+    const std::string validValue = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ \t[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
+    headers = createFromValidHeaders("Host: " + validValue);
+
+    assertHeaderSize(1);
+    assertHeader("Host", validValue);
+}
