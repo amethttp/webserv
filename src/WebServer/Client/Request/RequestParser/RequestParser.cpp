@@ -47,7 +47,7 @@ Result<headers_t> RequestParser::parseHeaders()
     headers_t headers;
 
     const std::string header = this->currentToken_.getValue();
-    if (eat(HEADER) == FAIL)
+    if (eat(HEADER) == FAIL || eat(EOF) == FAIL)
         return Result<headers_t>::fail("400 Bad Request");
 
     const std::string headerKey = toHttpHeaderCase(header.substr(0, header.find(':')));

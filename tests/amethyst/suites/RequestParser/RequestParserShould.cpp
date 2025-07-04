@@ -859,3 +859,8 @@ TEST(recognize_a_header_whose_value_has_multiple_words_using_multiple_OWS_as_sep
     assertHeaderSize(1);
     assertHeader("Host", "localhost\t \tand   \tsomething\t   \t\telse");
 }
+
+TEST(take_as_failure_a_header_whose_value_contains_invalid_characters)
+{
+    assertRequestHeaderIsInvalid("Host: \r\b\n\n\r\x7f\x10", "400 Bad Request");
+}
