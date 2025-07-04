@@ -864,3 +864,11 @@ TEST(take_as_failure_a_header_whose_value_contains_invalid_characters)
 {
     assertRequestHeaderIsInvalid("Host: \r\b\n\n\r\x7f\x10", "400 Bad Request");
 }
+
+TEST(recognize_a_header_whose_value_is_a_single_SP)
+{
+    headers = createFromValidHeaders("Host: ");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "");
+}
