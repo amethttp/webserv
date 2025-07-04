@@ -109,6 +109,11 @@ bool RequestTokenizer::isHeader() const
     return headerChar == ':';
 }
 
+bool RequestTokenizer::isFieldLine() const
+{
+    return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
+}
+
 std::string RequestTokenizer::method()
 {
     std::string methodString;
@@ -178,7 +183,7 @@ std::string RequestTokenizer::header()
 {
     std::string headerString;
 
-    while (!hasFinishedText() && (std::isprint(this->currentChar_) || this->currentChar_ == '\t'))
+    while (!hasFinishedText() && isFieldLine())
     {
         headerString += this->currentChar_;
         advance();

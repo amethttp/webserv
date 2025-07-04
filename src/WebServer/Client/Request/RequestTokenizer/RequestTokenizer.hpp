@@ -30,6 +30,7 @@ private:
     bool isAbsolutePath() const;
     bool isQuery() const;
     bool isHeader() const;
+    bool isFieldLine() const;
 
     std::string method();
     std::string httpVersion();
