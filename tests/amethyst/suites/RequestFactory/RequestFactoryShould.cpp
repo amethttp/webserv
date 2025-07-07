@@ -65,6 +65,13 @@ static void assertRequestIsInvalidFromRequestLine(const std::string &invalidRequ
     assertRequestIsInvalid(invalidRequestString, errorMessage);
 }
 
+static void assertRequestIsInvalidFromHeaders(const std::string &invalidHeadersString, const std::string &errorMessage)
+{
+    const std::string invalidRequestString = "GET / HTTP/1.1\r\n" + invalidHeadersString + "\r\n\r\n";
+
+    assertRequestIsInvalid(invalidRequestString, errorMessage);
+}
+
 
 /* BASIC REQUEST LINE TESTS */
 TEST(recognize_basic_HTTP_GET_request)
@@ -633,15 +640,15 @@ TEST(normalize_a_resource_outside_the_document_root)
 /* REQUEST HEADERS TESTS */
 TEST(take_as_failure_a_request_without_host_header)
 {
-    assertRequestIsInvalid("GET / HTTP/1.1\r\nConnection: keep-alive\r\n\r\n", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Connection: keep-alive", "400 Bad Request");
 }
 
 TEST(take_as_failure_a_request_with_an_empty_host_header)
 {
-    assertRequestIsInvalid("GET / HTTP/1.1\r\nHost:\r\n\r\n", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host:", "400 Bad Request");
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_consisted_of_OWS)
 {
-    assertRequestIsInvalid("GET / HTTP/1.1\r\nHost:  \t  \t\t  \r\n\r\n", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  ", "400 Bad Request");
 }
