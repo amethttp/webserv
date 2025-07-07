@@ -3,7 +3,7 @@
 #include "WebServer/Client/Request/RequestFactory/RequestTargetSeparator/RequestTargetSeparator.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 
-SimpleResult RequestProcesser::decodeTargetComponents(Target_t &target)
+SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
 {
     const Result<std::string> decodingPathResult = RequestPctDecoder::decode(target.path);
 
@@ -20,7 +20,7 @@ SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
 {
     RequestTargetSeparator::separateComponents(target);
 
-    const SimpleResult targetDecodingResult = decodeTargetComponents(target);
+    const SimpleResult targetDecodingResult = processTargetPctDecoding(target);
     if (targetDecodingResult.isFailure())
         return SimpleResult::fail(targetDecodingResult.getError());
 

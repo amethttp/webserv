@@ -8,7 +8,7 @@ class RequestProcesser
 private:
     RequestProcesser();
 
-    static SimpleResult decodeTargetComponents(Target_t &target);
+    static SimpleResult processTargetPctDecoding(Target_t &target);
 
 public:
     static SimpleResult processRequestTarget(Target_t &target);
