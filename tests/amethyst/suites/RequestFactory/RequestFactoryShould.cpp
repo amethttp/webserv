@@ -652,3 +652,13 @@ TEST(take_as_failure_a_request_with_a_host_header_consisted_of_OWS)
 {
     assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  ", "400 Bad Request");
 }
+
+TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
+{
+    const std::string validCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=";
+
+    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: " + validCharacters + "\r\n\r\n");
+
+    assertHeaderSize(1);
+    assertHeader("Host", validCharacters);
+}

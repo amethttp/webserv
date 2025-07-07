@@ -1073,8 +1073,11 @@
 ### 44. Decode pct-encoded chars in Host header
 "Host: localhost_%20_%34_%56\r\n\r\n"
 
-### 45. Take as failure pct-encoded control chars in Host header
+### 45. Take as failure bad pct-encoded chars in Host header
 "Host: localhost_%00_%7f\r\n\r\n"
+"Host: localhost_%xx"
+"Host: localhost_%f"
+"Host: localhost_%"
 
 ### 46. Take as failure a Host header with invalid characters
 "Host: loc alh ost\r\n\r\n"
