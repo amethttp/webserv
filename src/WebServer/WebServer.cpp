@@ -16,6 +16,11 @@ WebServer::WebServer()
 
 WebServer::~WebServer()
 {
+	for (std::vector<Client*>::iterator it = clients_.begin(); it != clients_.end(); ++it) 
+	{
+    	delete *it;
+	}
+	this->clients_.clear();
 }
 
 std::vector<fd_t> WebServer::createServerFds()
@@ -28,7 +33,7 @@ std::vector<fd_t> WebServer::createServerFds()
 	bzero(&serverAddress, sizeof(serverAddress));
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 	serverAddress.sin_family = AF_INET;
-	for (std::vector<Server>::iterator serversIt = this->servers_.begin(); serversIt != this->servers_.end(); ++serversIt)
+	for (std::vector<Server>::iterator serversIt = servers_.begin(); serversIt != servers_.end(); ++serversIt)
 	{
 		std::vector<int> serverPorts = serversIt->getPorts();
 		for (std::vector<int>::iterator portsIt = serverPorts.begin(); portsIt != serverPorts.end(); ++portsIt)
@@ -108,26 +113,25 @@ void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 		}
 		if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
 			throw std::runtime_error("Couldn't set NONBLOCKING flag to client fd");
-		this->clients_.push_back(Client());
-		Client &newClient = this->clients_.back();
-		newClient.setFd(newClientFd);
-		epoll.eventConfig.data.ptr = &newClient;
+		Client *newClient = new Client();
+		this->clients_.push_back(newClient);
+		newClient->setFd(newClientFd);
+		epoll.eventConfig.data.ptr = newClient;
 		epoll.eventConfig.events = EPOLLIN;
 		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newClientFd, &epoll.eventConfig) == -1)
 			throw std::runtime_error("Couldn't add client fd to epoll");
-		std::cout << "New Client (ID: " << newClient.getId() << ") connected" << std::endl;
+		std::cout << "New Client (ID: " << newClient->getId() << ") connected" << std::endl;
 	}
 }
 
-std::vector<Client>::iterator WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
+void WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
 {
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, client->getFd(), NULL) == -1)
 		throw std::runtime_error("Couldn't delete client fd from epoll");
 	if (close(client->getFd()) == -1)
 		throw std::runtime_error("Couldn't close client fd");
 	std::cout << "Client (ID: " << client->getId() << ") " << reason << std::endl;
-
-	return removeClient(client);
+	this->toDelete_.push_back(client);
 }
 
 bool WebServer::tryBuildRequest(Client *client, char *buffer)
@@ -221,44 +225,44 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 				checkClientEvent(epoll, i);
 		}
 		disconnectTimedoutClients(epoll);
+		removeClients();
 	}
 }
 
-std::vector<Client>::iterator WebServer::removeClient(Client *client)
+void WebServer::removeClients()
 {
-	int clientId = client->getId();
-
-	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
+	for (std::vector<Client *>::iterator it =  toDelete_.begin(); it != toDelete_.end(); ++it)
 	{
-		if (it->getId() == clientId)
+		for (std::vector<Client *>::iterator ite =  clients_.begin(); ite != clients_.end();)
 		{
-			return this->clients_.erase(it);
+			if (*it == *ite)
+			{
+				delete *it;
+				ite = clients_.erase(ite);
+			}
+			else
+				++ite;
 		}
 	}
-
-	return this->clients_.end();
+	toDelete_.clear();
 }
 
 void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 {
 	time_t now = std::time(NULL);
 
-	for (std::vector<Client>::iterator it = this->clients_.begin(); it != this->clients_.end();)
+	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end(); ++it)
 	{
-		if ((now - it->getLastReceivedPacket()) * 1000 > TIMEOUT)
+		if ((now - (*it)->getLastReceivedPacket()) * 1000 > TIMEOUT)
 		{
-			if (it->hasPendingRequest())
+			if ((*it)->hasPendingRequest())
 			{
-				it->buildResponse(REQUEST_TIME_OUT, C_CLOSE);
-				this->readySendResponse(&(*it), epoll);
+				(*it)->buildResponse(REQUEST_TIME_OUT, C_CLOSE);
+				this->readySendResponse(*it, epoll);
 			}
 			else
-			{
-				it = disconnectClient(&(*it), epoll, TIMED_OUT);
-				continue;
-			}
+				disconnectClient(*it, epoll, TIMED_OUT);
 		}
-		++it;
 	}
 }
 
