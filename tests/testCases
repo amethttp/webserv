@@ -1082,7 +1082,6 @@
 ### 46. Take as failure a Host header with invalid characters
 "Host: loc alh ost\r\n\r\n"
 "Host: loc\talh\tost\r\n\r\n"
-"Host: loc\balh\fost\r\n\r\n"
 "Host: loc{alh[ost\r\n\r\n"
 
 ### 47. Recognize a Host header with port
@@ -1158,11 +1157,28 @@
 # 6. Headers parser minimum design                                                      DONE
 # 7. Headers parsing criteria                                                           DONE
 # 8. Headers parsing                                                                    
+# 9. TODO THINGS
+# 10. Full body parsing criteria
+# 11. Full body parsing
+# 12. Chunked body parsing criteria
+# 13. Chunked body parsing
+# 14. RequestFactory::canCreateResponse() criteria
+# 15. RequestFactory::canCreateResponse() criteria
+# 16. Final refactors and code checking
+# 17. Refactor code in webserv.cpp to work with RequestFactory::create()
 
 
 #
 # SHOULD TEST WITH COMBINATIONS (I think in RQL already did but in headers and more?)? SUCH AS   ->    HOST: LOCALHOST(/)$!())($) -> 
 # VALID / INVALID / VALID - INVALID / INVALID - VALID / INVALID - VALID - INVALID / VALID - INVALID - VALID
+#
+
+#
+# REFACTOR: SHOULD ABSTRACT THE IS_PCT_ENCODED | IS_TCHAR... METHODS TO USE THEM ACROSS FILES AND NOT ONLY IN TOKENIZER
+#
+
+#
+# REFACTOR: VALIDATE PCT-ENCODED IN HOST HEADER IN REQUEST_VALIDATOR OR IN REQUEST_DECODER?????????? SHOULD BE IN VALIDATOR RIGHT?
 #
 
 

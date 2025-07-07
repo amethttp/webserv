@@ -678,3 +678,10 @@ TEST(take_as_failure_a_request_with_a_host_header_containing_wrong_pct_encoded_c
     assertRequestIsInvalidFromHeaders("Host: localhost_%f", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost_%", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_a_host_header_containing_invalid_characters)
+{
+    assertRequestIsInvalidFromHeaders("Host: loc alh ost", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: loc\talh\tost", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: loc{alh[ost", "400 Bad Request");
+}
