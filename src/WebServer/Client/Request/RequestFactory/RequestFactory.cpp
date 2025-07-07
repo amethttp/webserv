@@ -56,9 +56,9 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
         return Result<headers_t>::fail(requestHeadersResult.getError());
     headers_t requestHeaders = requestHeadersResult.getValue();
 
-    if (requestHeaders.find("Host") == requestHeaders.end()
-        || requestHeaders.at("Host").empty())
-        return Result<headers_t>::fail("400 Bad Request");
+    const SimpleResult requestHeaderValidationResult = RequestValidator::validateRequestHeaders(requestHeaders);
+    if (requestHeaderValidationResult.isFailure())
+        return Result<headers_t>::fail(requestHeaderValidationResult.getError());
 
     const Result<std::string> decodingResult = RequestPctDecoder::decode(requestHeaders.at("Host"));
     if (decodingResult.isFailure())

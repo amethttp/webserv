@@ -14,3 +14,12 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
 
     return SimpleResult::ok();
 }
+
+SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHeaders)
+{
+    if (requestHeaders.find("Host") == requestHeaders.end()
+        || requestHeaders.at("Host").empty())
+        return SimpleResult::fail("400 Bad Request");
+
+    return SimpleResult::ok();
+}
