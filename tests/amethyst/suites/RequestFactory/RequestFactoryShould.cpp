@@ -631,3 +631,7 @@ TEST(normalize_a_resource_outside_the_document_root)
 
 
 /* REQUEST HEADERS TESTS */
+TEST(take_as_failure_a_request_without_host_header)
+{
+    assertRequestIsInvalid("GET / HTTP/1.1\r\nConnection: keep-alive\r\n\r\n", "400 Bad Request");
+}

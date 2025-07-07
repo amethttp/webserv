@@ -54,6 +54,10 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
     if (requestHeadersResult.isFailure())
         return Result<headers_t>::fail(requestHeadersResult.getError());
 
+    headers_t requestHeaders = requestHeadersResult.getValue();
+    if (requestHeaders.find("Host") == requestHeaders.end())
+        return Result<headers_t>::fail("400 Bad Request");
+
     return Result<headers_t>::ok(requestHeadersResult.getValue());
 }
 

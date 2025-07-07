@@ -65,4 +65,3 @@ Result<headers_t> RequestParser::parseHeaders()
 
     return Result<headers_t>::ok(headers);
 }
-
