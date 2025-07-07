@@ -1,15 +1,15 @@
 #include "RequestProcesser.hpp"
-#include "WebServer/Client/Request/RequestFactory/RequestTargetDecoder/RequestTargetDecoder.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetSeparator/RequestTargetSeparator.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 
 SimpleResult RequestProcesser::decodeTargetComponents(Target_t &target)
 {
-    const Result<std::string> decodingPathResult = RequestTargetDecoder::decodePath(target.path);
+    const Result<std::string> decodingPathResult = RequestPctDecoder::decode(target.path);
 
     if (decodingPathResult.isFailure())
         return SimpleResult::fail(decodingPathResult.getError());
-    if (!RequestTargetDecoder::isEncodedQueryValid(target.query))
+    if (!RequestPctDecoder::isWellEncoded(target.query))
         return SimpleResult::fail("400 Bad Request");
 
     target.path = decodingPathResult.getValue();

@@ -2,8 +2,8 @@
 #include "utils/string/string.hpp"
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
-#include "RequestTargetDecoder/RequestTargetDecoder.hpp"
 #include "RequestProcesser/RequestProcesser.hpp"
+#include "RequestPctDecoder/RequestPctDecoder.hpp"
 
 std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
 {
@@ -60,7 +60,7 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
         || requestHeaders.at("Host").empty())
         return Result<headers_t>::fail("400 Bad Request");
 
-    const Result<std::string> decodingResult = RequestTargetDecoder::decodePath(requestHeaders.at("Host"));
+    const Result<std::string> decodingResult = RequestPctDecoder::decode(requestHeaders.at("Host"));
     if (decodingResult.isFailure())
         return Result<headers_t>::fail(decodingResult.getError());
     requestHeaders["Host"] = decodingResult.getValue();
