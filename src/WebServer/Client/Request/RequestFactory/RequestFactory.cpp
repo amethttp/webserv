@@ -35,20 +35,22 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 {
     Request_t request;
 
-    std::vector<std::string> splittedRequestBuffer = split(requestBuffer, "\r\n");
-    const std::string requestLine = splittedRequestBuffer[0];
+    const size_t requestLineEnd = requestBuffer.find("\r\n");
+    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
+    const size_t headersSize = headersEnd - requestLineEnd - 2;
+    const std::string requestLineString = requestBuffer.substr(0, requestLineEnd);
+    const std::string headersString = requestBuffer.substr(requestLineEnd + 2, headersSize);
 
 
 
-    const Result<RequestLineParams_t> requestLineResult = buildRequestLineFromString(requestLine);
+    const Result<RequestLineParams_t> requestLineResult = buildRequestLineFromString(requestLineString);
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
     request.requestLine = requestLineResult.getValue();
 
 
 
-    const std::string headerString = splittedRequestBuffer[1];
-    RequestParser requestParser = createParser(headerString);
+    RequestParser requestParser = createParser(headersString);
 
     const Result<headers_t> requestHeadersResult = requestParser.parseHeaders();
     if (requestHeadersResult.isFailure())
