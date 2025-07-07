@@ -655,10 +655,18 @@ TEST(take_as_failure_a_request_with_a_host_header_consisted_of_OWS)
 
 TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
 {
-    const std::string validCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=";
+    const std::string validCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~!$&'()*+,;=";
 
     request = createFromValidRequest("GET / HTTP/1.1\r\nHost: " + validCharacters + "\r\n\r\n");
 
     assertHeaderSize(1);
     assertHeader("Host", validCharacters);
+}
+
+TEST(recognize_and_decode_a_request_with_a_host_header_containing_valid_pct_encoded_chars)
+{
+    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost_%20_%5b_%7b\r\n\r\n");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost_ _[_{");
 }

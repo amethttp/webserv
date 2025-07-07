@@ -1068,10 +1068,10 @@
 "Host:  \t  \t\t  \r\n\r\n"
 
 ### 43. Recognize a Host header consisted of valid chars
-"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=\r\n\r\n"
+"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~!$&'()*+,;=\r\n\r\n"
 
 ### 44. Decode pct-encoded chars in Host header
-"Host: localhost_%20_%34_%56\r\n\r\n"
+"Host: localhost_%20_%5b_%7b\r\n\r\n"
 
 ### 45. Take as failure bad pct-encoded chars in Host header
 "Host: localhost_%00_%7f\r\n\r\n"

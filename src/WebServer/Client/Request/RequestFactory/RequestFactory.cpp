@@ -2,6 +2,7 @@
 #include "utils/string/string.hpp"
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
+#include "RequestTargetDecoder/RequestTargetDecoder.hpp"
 #include "RequestTargetProcesser/RequestTargetProcesser.hpp"
 
 std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
@@ -53,13 +54,18 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
     const Result<headers_t> requestHeadersResult = requestParser.parseHeaders();
     if (requestHeadersResult.isFailure())
         return Result<headers_t>::fail(requestHeadersResult.getError());
-
     headers_t requestHeaders = requestHeadersResult.getValue();
+
     if (requestHeaders.find("Host") == requestHeaders.end()
         || requestHeaders.at("Host").empty())
         return Result<headers_t>::fail("400 Bad Request");
 
-    return Result<headers_t>::ok(requestHeadersResult.getValue());
+    const Result<std::string> decodingResult = RequestTargetDecoder::decodePath(requestHeaders.at("Host"));
+    if (decodingResult.isFailure())
+        return Result<headers_t>::fail(decodingResult.getError());
+    requestHeaders["Host"] = decodingResult.getValue();
+
+    return Result<headers_t>::ok(requestHeaders);
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
