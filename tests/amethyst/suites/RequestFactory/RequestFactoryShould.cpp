@@ -635,3 +635,8 @@ TEST(take_as_failure_a_request_without_host_header)
 {
     assertRequestIsInvalid("GET / HTTP/1.1\r\nConnection: keep-alive\r\n\r\n", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_an_empty_host_header)
+{
+    assertRequestIsInvalid("GET / HTTP/1.1\r\nHost:\r\n\r\n", "400 Bad Request");
+}
