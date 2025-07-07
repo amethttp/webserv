@@ -42,19 +42,3 @@ std::string trim(const std::string &input, const std::string &charsToTrim)
 	size_t end = input.find_last_not_of(charsToTrim);
 	return input.substr(start, end - start + 1);
 }
-
-std::string toHttpHeaderCase(const std::string &string)
-{
-	std::string result = string;
-
-	result[0] = static_cast<char>(std::toupper(result[0]));
-	for (size_t i = 1; i < result.length(); i++)
-	{
-		if (result[i - 1] == '-')
-			result[i] = static_cast<char>(std::toupper(result[i]));
-		else
-			result[i] = static_cast<char>(std::tolower(result[i]));
-	}
-
-	return result;
-}
