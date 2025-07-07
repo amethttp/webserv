@@ -3,13 +3,13 @@
 #include "utils/Result/Result.hpp"
 #include "WebServer/Client/Request/RequestLineParams/RequestLineParams.hpp"
 
-class RequestTargetProcesser
+class RequestProcesser
 {
 private:
-    RequestTargetProcesser();
+    RequestProcesser();
 
     static SimpleResult decodeTargetComponents(Target_t &target);
 
 public:
-    static SimpleResult process(Target_t &target);
+    static SimpleResult processRequestTarget(Target_t &target);
 };

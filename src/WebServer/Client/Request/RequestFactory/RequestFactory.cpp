@@ -3,7 +3,7 @@
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestTargetDecoder/RequestTargetDecoder.hpp"
-#include "RequestTargetProcesser/RequestTargetProcesser.hpp"
+#include "RequestProcesser/RequestProcesser.hpp"
 
 std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
 {
@@ -40,7 +40,7 @@ Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std
     if (requestLineValidationResult.isFailure())
         return Result<RequestLineParams_t>::fail(requestLineValidationResult.getError());
 
-    const SimpleResult requestTargetProcessResult = RequestTargetProcesser::process(requestLineParams.target);
+    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestTarget(requestLineParams.target);
     if (requestTargetProcessResult.isFailure())
         return Result<RequestLineParams_t>::fail(requestTargetProcessResult.getError());
 

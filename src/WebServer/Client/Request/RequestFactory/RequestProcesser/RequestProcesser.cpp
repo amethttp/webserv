@@ -1,9 +1,9 @@
-#include "RequestTargetProcesser.hpp"
+#include "RequestProcesser.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetDecoder/RequestTargetDecoder.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetSeparator/RequestTargetSeparator.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 
-SimpleResult RequestTargetProcesser::decodeTargetComponents(Target_t &target)
+SimpleResult RequestProcesser::decodeTargetComponents(Target_t &target)
 {
     const Result<std::string> decodingPathResult = RequestTargetDecoder::decodePath(target.path);
 
@@ -16,7 +16,7 @@ SimpleResult RequestTargetProcesser::decodeTargetComponents(Target_t &target)
     return SimpleResult::ok();
 }
 
-SimpleResult RequestTargetProcesser::process(Target_t &target)
+SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
 {
     RequestTargetSeparator::separateComponents(target);
 
