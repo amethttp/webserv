@@ -8,6 +8,8 @@ class RequestTargetDecoder
 private:
     RequestTargetDecoder();
 
+    static bool isValidPctEncoded(char firstDigit, char secondDigit);
+
 public:
     static Result<std::string> decodePath(const std::string &path);
     static bool isEncodedQueryValid(const std::string &query);

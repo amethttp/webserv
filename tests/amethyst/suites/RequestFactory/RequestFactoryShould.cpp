@@ -670,3 +670,11 @@ TEST(recognize_and_decode_a_request_with_a_host_header_containing_valid_pct_enco
     assertHeaderSize(1);
     assertHeader("Host", "localhost_ _[_{");
 }
+
+TEST(take_as_failure_a_request_with_a_host_header_containing_wrong_pct_encoded_chars)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost_%00_%7f", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: localhost_%xx", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: localhost_%f", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: localhost_%", "400 Bad Request");
+}

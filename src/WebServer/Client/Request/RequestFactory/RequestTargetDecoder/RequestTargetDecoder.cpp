@@ -1,6 +1,11 @@
 #include "RequestTargetDecoder.hpp"
 #include "utils/numeric/numeric.hpp"
 
+bool RequestTargetDecoder::isValidPctEncoded(const char firstDigit, const char secondDigit)
+{
+    return (std::isxdigit(firstDigit) && std::isxdigit(secondDigit));
+}
+
 Result<std::string> RequestTargetDecoder::decodePath(const std::string &path)
 {
     std::string decodedPath;
@@ -12,6 +17,10 @@ Result<std::string> RequestTargetDecoder::decodePath(const std::string &path)
             decodedPath += path[i];
             continue ;
         }
+
+        if (i + 2 >= path.length()
+            || !isValidPctEncoded(path[i + 1], path[i + 2]))
+            return Result<std::string>::fail("400 Bad Request");
 
         const char decodedChar = hexToChar(path[i + 1], path[i + 2]);
 
