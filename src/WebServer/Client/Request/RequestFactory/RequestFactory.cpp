@@ -3,7 +3,6 @@
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestTargetProcesser/RequestTargetProcesser.hpp"
-#include <vector>
 
 RequestParser RequestFactory::createParser(const std::string &text)
 {
@@ -31,28 +30,32 @@ Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std
     return Result<RequestLineParams_t>::ok(requestLineParams);
 }
 
+Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::string &headersString)
+{
+    RequestParser requestParser = createParser(headersString);
+
+    const Result<headers_t> requestHeadersResult = requestParser.parseHeaders();
+    if (requestHeadersResult.isFailure())
+        return Result<headers_t>::fail(requestHeadersResult.getError());
+
+    return Result<headers_t>::ok(requestHeadersResult.getValue());
+}
+
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 {
     Request_t request;
-
     const size_t requestLineEnd = requestBuffer.find("\r\n");
     const size_t headersEnd = requestBuffer.find("\r\n\r\n");
     const size_t headersSize = headersEnd - requestLineEnd - 2;
     const std::string requestLineString = requestBuffer.substr(0, requestLineEnd);
     const std::string headersString = requestBuffer.substr(requestLineEnd + 2, headersSize);
 
-
-
     const Result<RequestLineParams_t> requestLineResult = buildRequestLineFromString(requestLineString);
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
     request.requestLine = requestLineResult.getValue();
 
-
-
-    RequestParser requestParser = createParser(headersString);
-
-    const Result<headers_t> requestHeadersResult = requestParser.parseHeaders();
+    const Result<headers_t> requestHeadersResult = buildRequestHeadersFromString(headersString);
     if (requestHeadersResult.isFailure())
         return Result<Request_t>::fail(requestHeadersResult.getError());
     request.headers = requestHeadersResult.getValue();
