@@ -530,7 +530,7 @@ static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_pa
 	return false;
 }
 
-static bool matchCGI(std::string &path, Location &location, std::pair<std::string, std::string> &cgi)
+static bool matchCGI(std::string &path, Location &location, Cgi &cgi)
 {
 	int pos = path.rfind('.');
 	std::map<std::string, std::string>::iterator cgiIt;
@@ -595,7 +595,7 @@ t_httpCode Response::waitForOutput(pid_t child, int pipefd[2], time_t start)
 	return OK;
 }
 
-t_httpCode Response::executeCGI(Parameters &p, std::pair<std::string, std::string> &cgi)
+t_httpCode Response::executeCGI(Parameters &p, Cgi &cgi)
 {
 	int pipefd[2];
 	pid_t child;
@@ -628,14 +628,13 @@ void Response::executeRequest(Parameters &p)
 	t_httpCode code;
 	t_connection mode;
 	t_error_page errorPage;
-	std::pair<std::string, std::string> cgi;
+	Cgi cgi;
 
 	if (matchCGI(p.targetPath_, p.location_, cgi))
 	{
 		if ((code = this->executeCGI(p, cgi)) == OK)
 		{
 			// check correctness?? || parse request
-			this->buffer_ = this->body_.content;
 			return ;
 		}
 	}

@@ -18,6 +18,8 @@
 #define CGI_TIMEOUT 2
 #define BUFFER_SIZE 4096
 
+typedef std::pair<std::string, std::string> Cgi;
+
 typedef struct s_body
 {
 	std::string content;
@@ -61,7 +63,7 @@ private:
 	t_httpCode methodPost(Parameters &p);
 	t_httpCode methodDelete(Parameters &p);
 	t_httpCode executeMethod(Parameters &p);
-	t_httpCode executeCGI(Parameters &p, std::pair<std::string, std::string> &cgi);
+	t_httpCode executeCGI(Parameters &p, Cgi &cgi);
 	t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start);
 
 	void executeRequest(Parameters &p);

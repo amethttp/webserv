@@ -28,6 +28,9 @@ std::string &operator+=(std::string &string, StatusLine &sl)
 {
 	std::ostringstream res;
 
+	if (sl.code_ == 0)
+		return string;
+
 	res << sl.httpVersion_ << " "
 		<< sl.code_ << " "
 		<< sl.statusMessage_
@@ -40,6 +43,9 @@ std::string &operator+=(std::string &string, StatusLine &sl)
 
 std::ostream &operator<<(std::ostream &stream, StatusLine &sl)
 {
+	if (sl.code_ == 0)
+		return stream;
+
 	stream
 		<< sl.httpVersion_ << " "
 		<< sl.code_ << " "
