@@ -1,5 +1,6 @@
 #include "RequestParser.hpp"
 #include "utils/string/string.hpp"
+#include "utils/headers/headers.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)
@@ -52,13 +53,8 @@ Result<headers_t> RequestParser::parseHeaders()
         const std::string header = this->currentToken_.getValue();
         hasFailed |= eat(HEADER);
 
-        const std::string headerKey = getHeaderKey(header);
-        const std::string headerValue = getHeaderValue(header);
-
-        if (headerKey.empty())
+        if (!tryAddHeader(headers, header))
             return Result<headers_t>::fail("400 Bad Request");
-
-        headers[headerKey] = trim(headerValue, " \t");
 
         if (this->currentToken_.getType() != CRLF)
             break;
