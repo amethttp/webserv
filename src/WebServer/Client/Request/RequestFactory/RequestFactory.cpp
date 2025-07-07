@@ -4,6 +4,22 @@
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestTargetProcesser/RequestTargetProcesser.hpp"
 
+std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
+{
+    const size_t requestLineEnd = requestBuffer.find("\r\n");
+
+    return requestBuffer.substr(0, requestLineEnd);
+}
+
+std::string RequestFactory::getRequestHeadersString(const std::string &requestBuffer)
+{
+    const size_t requestLineEnd = requestBuffer.find("\r\n");
+    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
+    const size_t headersSize = headersEnd - requestLineEnd - 2;
+
+    return requestBuffer.substr(requestLineEnd + 2, headersSize);
+}
+
 RequestParser RequestFactory::createParser(const std::string &text)
 {
     const RequestTokenizer tokenizer(text);
@@ -44,18 +60,15 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 {
     Request_t request;
-    const size_t requestLineEnd = requestBuffer.find("\r\n");
-    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
-    const size_t headersSize = headersEnd - requestLineEnd - 2;
-    const std::string requestLineString = requestBuffer.substr(0, requestLineEnd);
-    const std::string headersString = requestBuffer.substr(requestLineEnd + 2, headersSize);
+    const std::string requestLineString = getRequestLineString(requestBuffer);
+    const std::string requestHeadersString = getRequestHeadersString(requestBuffer);
 
     const Result<RequestLineParams_t> requestLineResult = buildRequestLineFromString(requestLineString);
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
     request.requestLine = requestLineResult.getValue();
 
-    const Result<headers_t> requestHeadersResult = buildRequestHeadersFromString(headersString);
+    const Result<headers_t> requestHeadersResult = buildRequestHeadersFromString(requestHeadersString);
     if (requestHeadersResult.isFailure())
         return Result<Request_t>::fail(requestHeadersResult.getError());
     request.headers = requestHeadersResult.getValue();
