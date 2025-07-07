@@ -5,6 +5,13 @@ StatusLine::StatusLine()
 {
 }
 
+void StatusLine::clear()
+{
+	this->code_ = (t_httpCode)0;
+	this->httpVersion_.clear();
+	this->statusMessage_.clear();
+}
+
 void StatusLine::setFields(t_httpCode code, const std::string &message)
 {
 	this->code_ = code;

@@ -12,6 +12,7 @@ public:
 	StatusLine();
 	~StatusLine();
 
+	void clear();
 	void setFields(t_httpCode code, const std::string &message);
 
 	t_httpCode getCode() const;

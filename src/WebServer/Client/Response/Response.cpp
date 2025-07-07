@@ -557,25 +557,6 @@ static bool timedOut(time_t start)
 	return false;
 }
 
-static t_httpCode waitForOutput(pid_t child, time_t start)
-{
-	int stat_loc = 0;
-
-	while (waitpid(child, &stat_loc, WNOHANG) == 0)
-	{
-		if (timedOut(start))
-		{
-			kill(child, SIGKILL);
-			return REQUEST_TIME_OUT;
-		}
-		usleep(100);
-	}
-	if (stat_loc < 0)
-		throw (std::runtime_error("WaitPid failed"));
-
-	return OK;
-}
-
 static std::string readOutput(int pipefd[2])
 {
 	std::stringstream output;
@@ -590,12 +571,35 @@ static std::string readOutput(int pipefd[2])
 	return output.str();
 }
 
+t_httpCode Response::waitForOutput(pid_t child, int pipefd[2], time_t start)
+{
+	int status = 0;
+
+	while (waitpid(child, &status, WNOHANG) == 0)
+	{
+		if (timedOut(start))
+		{
+			kill(child, SIGKILL);
+			return GATEWAY_TIME_OUT;
+		}
+		usleep(100);
+	}
+	if (status < 0)
+		throw (std::runtime_error("WaitPid failed"));
+	if (WEXITSTATUS(status) != 0)
+		return INTERNAL_SERVER_ERROR;
+
+	this->body_.content = readOutput(pipefd);
+	this->body_.type = this->extensionTypesDict_[".txt"];
+
+	return OK;
+}
+
 t_httpCode Response::executeCGI(Parameters &p, std::pair<std::string, std::string> &cgi)
 {
 	int pipefd[2];
 	pid_t child;
 	time_t start;
-	std::string result;	
 
 	if (pipe(pipefd))
 		throw (std::runtime_error("Ceci n'est pas une pipe"));
@@ -605,25 +609,18 @@ t_httpCode Response::executeCGI(Parameters &p, std::pair<std::string, std::strin
 		throw (std::runtime_error("Couldn't fork CGI properly"));
 	else if (child == CHILD_OK)
 	{
-		char **env;
-		*env = strdup(""); // refine this
-		char *argv[] = { strdup(p.targetPath_.c_str()), NULL }; // refine this
+		char *env[] = { NULL };
+		char *argv[] = { strdup(cgi.second.c_str()), strdup(p.targetPath_.c_str()), NULL };
 
 		close(pipefd[0]);
 		dup2(pipefd[1], STDOUT_FILENO);
 		close(pipefd[1]);
-		
-		execve(p.targetPath_.c_str(), argv, env);
-		throw (std::runtime_error("Failed execve")); // Throw inside the child?? / exit
+
+		execve(cgi.second.c_str(), argv, env);
+		exit(1);
 	}
 
-	if (waitForOutput(child, start) == REQUEST_TIME_OUT)
-		return REQUEST_TIME_OUT;
-
-	this->body_.content = readOutput(pipefd);
-	this->body_.type = this->extensionTypesDict_[".txt"];
-
-	return OK;
+	return waitForOutput(child, pipefd, start);
 }
 
 void Response::executeRequest(Parameters &p)
@@ -634,10 +631,16 @@ void Response::executeRequest(Parameters &p)
 	std::pair<std::string, std::string> cgi;
 
 	if (matchCGI(p.targetPath_, p.location_, cgi))
-		code = this->executeCGI(p, cgi);
+	{
+		if ((code = this->executeCGI(p, cgi)) == OK)
+		{
+			// check correctness?? || parse request
+			this->buffer_ = this->body_.content;
+			return ;
+		}
+	}
 	else
 		code = this->executeMethod(p);
-
 	mode = p.getConnectionMode();
 
 	if (matchCustomErrorPage(code, p.location_, errorPage))
@@ -690,6 +693,8 @@ void Response::clear()
 	this->buffer_.clear();
 	this->headers_.clear();
 	this->body_.content.clear();
+	this->body_.type.clear();
+	this->statusLine_.clear();
 }
 
 Response::~Response()

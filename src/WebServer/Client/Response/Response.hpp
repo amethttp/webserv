@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstdlib>
 #include <sys/wait.h>
 #include "utils/http.hpp"
 #include "StatusLine/StatusLine.hpp"
@@ -14,7 +15,7 @@
 #define INDEX_CLOSE "src/utils/htmlTemplates/closeIndex.html"
 
 #define CHILD_OK 0
-#define CGI_TIMEOUT 5000
+#define CGI_TIMEOUT 2
 #define BUFFER_SIZE 4096
 
 typedef struct s_body
@@ -61,6 +62,7 @@ private:
 	t_httpCode methodDelete(Parameters &p);
 	t_httpCode executeMethod(Parameters &p);
 	t_httpCode executeCGI(Parameters &p, std::pair<std::string, std::string> &cgi);
+	t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start);
 
 	void executeRequest(Parameters &p);
 public:

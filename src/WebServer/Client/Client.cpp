@@ -174,7 +174,9 @@ static Location getLocationPH(Request &request, Server &server)
 	indexes.push_back("test2.html");
 	allowedMethods.insert(M_GET);
 	allowedMethods.insert(M_POST);
-	test[".py"] = "./www/tests/";
+	test[".py"] = "/usr/bin/python3";
+	test[".sh"] = "/bin/bash";
+
 	location.setCGIs(test);
 	location.setRoot("tests/www");
 	location.setPath("/");
