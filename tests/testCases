@@ -1066,74 +1066,85 @@
 
 ### 42. Take as failure a Host header consisted of OWS
 "Host:  \t  \t\t  \r\n\r\n"
-"Host:  \t  \t\t  :8000\r\n\r\n"
 
-### 43. Take as failure a Host header with invalid characters
+### 43. Recognize a Host header consisted of valid chars
+"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=\r\n\r\n"
+
+### 44. Decode pct-encoded chars in Host header
+"Host: localhost_%20_%34_%56\r\n\r\n"
+
+### 45. Take as failure pct-encoded control chars in Host header
+"Host: localhost_%00_%7f\r\n\r\n"
+
+### 46. Take as failure a Host header with invalid characters
 "Host: loc alh ost\r\n\r\n"
 "Host: loc\talh\tost\r\n\r\n"
 "Host: loc\balh\fost\r\n\r\n"
+"Host: loc{alh[ost\r\n\r\n"
 
-### 44. Recognize a Host header with port
+### 47. Recognize a Host header with port
 "Host: localhost:8080\r\n\r\n"
 
-### 45. Recognize a Host header consisted of valid chars
-"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=\r\n\r\n"
+### 48. Take as failure a Host header with only port
+"Host:  \t  \t\t  :8000\r\n\r\n"
 
-### 46. Recognize a Host header consisted of valid chars and port
+### 49. Recognize a Host header consisted of valid chars and port
 "Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=:8080\r\n\r\n"
 
-### 47. Decode pct-encoded chars in Host header
-"Host: localhost_%20_%34_%56\r\n\r\n"
-
-### 48. Take as failure pct-encoded control chars in Host header
-"Host: localhost_%00_%7f\r\n\r\n"
-
-### 49. Take as failure a non-numeric port
+### 50. Take as failure a non-numeric port
 "Host: localhost:afda\r\n\r\n"
 "Host: localhost:31.023\r\n\r\n"
 
-### 50. Take as failure multiple ports
+### 51. Take as failure multiple ports
 "Host: localhost:31:30\r\n\r\n"
 
-### 51. Take as failure ports out of range
+### 52. Take as failure ports out of range
 "Host: localhost:-8419\r\n\r\n"
 "Host: localhost:1000000\r\n\r\n"
 
-### 52. Recognize a port with leading zeros
+### 53. Recognize a port with leading zeros
 "Host: localhost:0000000000008080\r\n\r\n"
 
-### 53. Take as failure a repeated Host header
+### 54. Take as failure a repeated Host header
 "Host: localhost\r\nHost: my.domain.com\r\n\r\n"
 
-### 54. Recognize case-insensitive headers
-"hOSt: localhost\r\nConNecTion: KEEP-ALIVE\r\n\r\n"
+### 55. Recognize case-insensitive headers
+"hOSt: localhost\r\nCoNNeCtIon: keep-alive\r\n\r\n"
 
-### 55. Recognize a request with valid CL header and size zero
+### 56. Recognize a request with valid CL header and size zero
 "Host: localhost\r\nContent-Length: 0\r\n\r\n"
 
-### 56. Recognize a request with valid CL header and size greater than zero
+### 57. Recognize a request with valid CL header and size greater than zero
 "Host: localhost\r\nContent-Length: 10\r\n\r\nValid body"
 
-### 57. Take as failure a non-numeric Content-Length value
+### 58. Take as failure a non-numeric Content-Length value
 "Host: localhost\r\nContent-Length: -23\r\n\r\n"
 "Host: localhost\r\nContent-Length: 2.03\r\n\r\n"
 "Host: localhost\r\nContent-Length: avc\r\n\r\n"
 
-### 58. Take as failure a repeated CL header
+### 59. Take as failure a repeated CL header
 "Host: localhost\r\nContent-Length: 0\r\nContent-Length: 0\r\n\r\n"
 
-### 59. Recognize a request with valid TE
+### 60. Recognize a request with valid TE
 "Host: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
-### 60. Recognize a request with valid case-insensitive TE
+### 61. Recognize a request with valid case-insensitive TE
 "Host: localhost\r\nTransfer-Encoding: cHUnKeD\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
-### 61. Take as failure a request with invalid TE
+### 62. Take as failure a request with invalid TE
 "Host: localhost\r\nTransfer-Encoding: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
-### 62. Take as failure a request with body CL and TE chunked headers
+### 63. Take as failure a request with body CL and TE chunked headers
 "Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked\r\n\r\n"
 
+### 64. Recognize a request with valid Connection header
+"Host: localhost\r\nConnection: close\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 65. Recognize a request with valid case-insensitive Connection header
+"Host: localhost\r\Connection: KeEp-AliVE\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 66. Take as failure a request with invalid Connection header
+"Host: localhost\r\nConnection: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
 
 # 1. Separate path-query (decode only path, not URI neither query)                      DONE
