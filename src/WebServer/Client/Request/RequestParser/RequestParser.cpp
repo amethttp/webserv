@@ -50,8 +50,7 @@ Result<headers_t> RequestParser::parseHeaders()
 
     do
     {
-        if (!tryAddHeader(headers, this->currentToken_.getValue()))
-            return Result<headers_t>::fail("400 Bad Request");
+        addHeader(headers, this->currentToken_.getValue());
         hasFailed |= eat(HEADER);
 
         if (this->currentToken_.getType() != EOF)

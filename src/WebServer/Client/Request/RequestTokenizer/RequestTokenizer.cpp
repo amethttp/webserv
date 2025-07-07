@@ -106,7 +106,7 @@ bool RequestTokenizer::isHeader() const
         headerChar = peek(distance++);
     }
 
-    return headerChar == ':';
+    return distance > 0 && headerChar == ':';
 }
 
 bool RequestTokenizer::isFieldLine() const
