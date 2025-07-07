@@ -640,3 +640,8 @@ TEST(take_as_failure_a_request_with_an_empty_host_header)
 {
     assertRequestIsInvalid("GET / HTTP/1.1\r\nHost:\r\n\r\n", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_a_host_header_consisted_of_OWS)
+{
+    assertRequestIsInvalid("GET / HTTP/1.1\r\nHost:  \t  \t\t  \r\n\r\n", "400 Bad Request");
+}
