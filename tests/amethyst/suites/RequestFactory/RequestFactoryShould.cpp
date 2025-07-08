@@ -847,3 +847,12 @@ TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_keep
     assertHeader("Host", "localhost");
     assertHeader("Connection", "keep-alive");
 }
+
+TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_close_value)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nConnection: cLOSe");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Connection", "close");
+}
