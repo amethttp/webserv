@@ -786,3 +786,12 @@ TEST(take_as_failure_a_request_with_multiple_content_length_headers)
 {
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 0\r\nContent-Length: 0", "400 Bad Request");
 }
+
+TEST(recognize_a_request_with_valid_transfer_encoding_header)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nTransfer-Encoding: chunked");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Transfer-Encoding", "chunked");
+}
