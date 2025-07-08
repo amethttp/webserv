@@ -83,10 +83,11 @@ bool RequestValidator::isValidContentLengthHeader(const headerValue_t &headerVal
     if (headerValues.size() != 1)
         return false;
 
-    if (!isLong(headerValues.front()))
+    const std::string contentLengthValue = headerValues.front();
+    if (!isLong(contentLengthValue))
         return false;
 
-    const long contentLengthSize = std::atol(headerValues.front().c_str());
+    const long contentLengthSize = std::atol(contentLengthValue.c_str());
     return contentLengthSize >= 0;
 }
 
