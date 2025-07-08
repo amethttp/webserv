@@ -123,6 +123,10 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
         return SimpleResult::fail("400 Bad Request");
 
     if (containsHeader(requestHeaders, "Content-Length")
+        && containsHeader(requestHeaders, "Transfer-Encoding"))
+        return SimpleResult::fail("400 Bad Request");
+
+    if (containsHeader(requestHeaders, "Content-Length")
         && !isValidContentLengthHeader(requestHeaders.at("Content-Length")))
         return SimpleResult::fail("400 Bad Request");
 

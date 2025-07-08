@@ -811,7 +811,12 @@ TEST(take_as_failure_a_request_with_a_transfer_encoding_header_with_invalid_valu
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding: invalid", "400 Bad Request");
 }
 
-TEST(take_as_failure_a_request_with_multiple_trasnfer_encoding_headers)
+TEST(take_as_failure_a_request_with_multiple_transfer_encoding_headers)
 {
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding: chunked\r\nTransfer-Encoding: chunked", "400 Bad Request");
+}
+
+TEST(take_as_failure_a_request_with_content_length_and_transfer_encoding_headers)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked", "400 Bad Request");
 }
