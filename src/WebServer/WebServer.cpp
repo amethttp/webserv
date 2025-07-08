@@ -124,14 +124,15 @@ void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 	}
 }
 
-void WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
+std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
 {
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, client->getFd(), NULL) == -1)
 		throw std::runtime_error("Couldn't delete client fd from epoll");
 	if (close(client->getFd()) == -1)
 		throw std::runtime_error("Couldn't close client fd");
 	std::cout << "Client (ID: " << client->getId() << ") " << reason << std::endl;
-	this->toDelete_.push_back(client);
+
+	return removeClient(client);
 }
 
 bool WebServer::tryBuildRequest(Client *client, char *buffer)
@@ -225,33 +226,30 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 				checkClientEvent(epoll, i);
 		}
 		disconnectTimedoutClients(epoll);
-		removeClients();
 	}
 }
 
-void WebServer::removeClients()
+std::vector<Client *>::iterator WebServer::removeClient(Client *client)
 {
-	for (std::vector<Client *>::iterator it =  toDelete_.begin(); it != toDelete_.end(); ++it)
+	int clientId = client->getId();
+
+	for (std::vector<Client *>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
 	{
-		for (std::vector<Client *>::iterator ite =  clients_.begin(); ite != clients_.end();)
+		if ((*it)->getId() == clientId)
 		{
-			if (*it == *ite)
-			{
-				delete *it;
-				ite = clients_.erase(ite);
-			}
-			else
-				++ite;
+			delete *it;
+			return this->clients_.erase(it);
 		}
 	}
-	toDelete_.clear();
+
+	return this->clients_.end();
 }
 
 void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 {
 	time_t now = std::time(NULL);
 
-	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end(); ++it)
+	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end();)
 	{
 		if ((now - (*it)->getLastReceivedPacket()) * 1000 > TIMEOUT)
 		{
@@ -261,8 +259,12 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 				this->readySendResponse(*it, epoll);
 			}
 			else
-				disconnectClient(*it, epoll, TIMED_OUT);
+			{
+				it = disconnectClient(*it, epoll, TIMED_OUT);
+				continue;
+			}
 		}
+		++it;
 	}
 }
 
