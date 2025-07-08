@@ -795,3 +795,12 @@ TEST(recognize_a_request_with_valid_transfer_encoding_header)
     assertHeader("Host", "localhost");
     assertHeader("Transfer-Encoding", "chunked");
 }
+
+TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nTransfer-Encoding: cHUnKeD");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Transfer-Encoding", "chunked");
+}

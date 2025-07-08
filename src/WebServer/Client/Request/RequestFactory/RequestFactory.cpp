@@ -65,6 +65,14 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
         return Result<headers_t>::fail(decodingResult.getError());
     requestHeaders["Host"][0] = decodingResult.getValue();
 
+    if (requestHeaders.find("Transfer-Encoding") != requestHeaders.end())
+    {
+        for (size_t i = 0; i < requestHeaders.at("Transfer-Encoding")[0].size(); i++)
+        {
+            requestHeaders["Transfer-Encoding"][0][i] = static_cast<char>(std::tolower(requestHeaders["Transfer-Encoding"][0][i]));
+        }
+    }
+
     return Result<headers_t>::ok(requestHeaders);
 }
 

@@ -1136,6 +1136,7 @@
 "Host: localhost\r\nTransfer-Encoding: cHUnKeD\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
 ### 62. Take as failure a request with invalid TE
+"Host: localhost\r\nTransfer-Encoding:\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 "Host: localhost\r\nTransfer-Encoding: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
 ### 63. Take as failure a request with body CL and TE chunked headers
@@ -1148,6 +1149,7 @@
 "Host: localhost\r\Connection: KeEp-AliVE\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
 ### 66. Take as failure a request with invalid Connection header
+"Host: localhost\r\nConnection:\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 "Host: localhost\r\nConnection: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
 ### 67. Recognize a request with overriding headers
