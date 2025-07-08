@@ -22,6 +22,13 @@ static Request_t createRequestFromValidRequestLine(const std::string &requestLin
     return createFromValidRequest(requestString);
 }
 
+static Request_t createRequestFromValidHeaders(const std::string &headersString)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\n" + headersString + "\r\n\r\n";
+
+    return createFromValidRequest(requestString);
+}
+
 static void assertTargetComponents(const std::string &path, const std::string &query)
 {
     ASSERT_EQUALS(path, request.requestLine.target.path);
@@ -657,7 +664,7 @@ TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
 {
     const std::string validCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~!$&'()*+,;=";
 
-    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: " + validCharacters + "\r\n\r\n");
+    request = createRequestFromValidHeaders("Host: " + validCharacters);
 
     assertHeaderSize(1);
     assertHeader("Host", validCharacters);
@@ -665,7 +672,7 @@ TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
 
 TEST(recognize_and_decode_a_request_with_a_host_header_containing_valid_pct_encoded_chars)
 {
-    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost_%20_%5b_%7b\r\n\r\n");
+    request = createRequestFromValidHeaders("Host: localhost_%20_%5b_%7b");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost_ _[_{");
@@ -688,7 +695,7 @@ TEST(take_as_failure_a_request_with_a_host_header_containing_invalid_characters)
 
 TEST(recognize_a_request_with_a_host_header_with_port)
 {
-    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+    request = createRequestFromValidHeaders("Host: localhost:8080");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost:8080");
