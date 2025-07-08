@@ -721,3 +721,8 @@ TEST(take_as_failure_a_request_with_a_host_header_with_a_non_numeric_port)
     assertRequestIsInvalidFromHeaders("Host: localhost:invalid", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost:31.023", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_a_host_header_with_multiple_ports)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost:31:30", "400 Bad Request");
+}
