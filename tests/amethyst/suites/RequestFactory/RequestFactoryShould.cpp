@@ -726,3 +726,9 @@ TEST(take_as_failure_a_request_with_a_host_header_with_multiple_ports)
 {
     assertRequestIsInvalidFromHeaders("Host: localhost:31:30", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_a_host_header_with_port_out_of_range)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost:-8419", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: localhost:1000000", "400 Bad Request");
+}

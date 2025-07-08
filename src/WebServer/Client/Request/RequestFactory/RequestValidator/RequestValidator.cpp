@@ -1,6 +1,7 @@
 #include "RequestValidator.hpp"
 #include "utils/headers/headers.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
+#include <stdlib.h>
 
 bool RequestValidator::isUnreserved(const char c)
 {
@@ -56,7 +57,8 @@ bool RequestValidator::isValidHostPort(const std::string &port)
             return false;
     }
 
-    return true;
+    const long portNum = std::atol(port.c_str());
+    return (portNum >= 0 && portNum <= 65535);
 }
 
 bool RequestValidator::isValidHostHeader(const std::string &header)
