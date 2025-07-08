@@ -1,11 +1,11 @@
 #include "RequestValidator.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
-bool RequestValidator::containsInvalidChars(const std::string &string, const std::string &validChars)
+bool RequestValidator::isValidHostHeader(const std::string &header, const std::string &validChars)
 {
-    for (size_t i = 0; i < string.length(); i++)
+    for (size_t i = 0; i < header.length(); i++)
     {
-        if (!std::isalnum(string[i]) && validChars.find(string[i]) == std::string::npos)
+        if (!std::isalnum(header[i]) && validChars.find(header[i]) == std::string::npos)
             return true;
     }
     return false;
@@ -29,7 +29,7 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
 {
     if (requestHeaders.find("Host") == requestHeaders.end()
         || requestHeaders.at("Host").empty()
-        || containsInvalidChars(requestHeaders.at("Host"), "%-._~!$&'()*+,;="))
+        || isValidHostHeader(requestHeaders.at("Host"), "%-._~!$&'()*+,;="))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();
