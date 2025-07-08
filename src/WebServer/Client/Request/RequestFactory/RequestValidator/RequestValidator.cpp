@@ -9,11 +9,21 @@ bool RequestValidator::isUnreserved(const char c)
     return (std::isalnum(c) || unreservedSymbols.find(c) != std::string::npos);
 }
 
-bool RequestValidator::isRegName(const char c)
+bool RequestValidator::isPctEncoded(const std::string &header, const size_t pos)
 {
-    const std::string symbols = "%!$&'()*+,;=";
+    if (pos + 2 >= header.length())
+        return false;
 
-    return (isUnreserved(c) || symbols.find(c) != std::string::npos);
+    return (header[pos] == '%'
+            && std::isxdigit(header[pos + 1])
+            && std::isxdigit(header[pos + 2]));
+}
+
+bool RequestValidator::isRegName(const std::string &header, const size_t pos)
+{
+    const std::string symbols = "!$&'()*+,;=";
+
+    return (isUnreserved(header[pos]) || isPctEncoded(header, pos) || symbols.find(header[pos]) != std::string::npos);
 }
 
 bool RequestValidator::isValidHostHeader(const std::string &header)
@@ -23,7 +33,7 @@ bool RequestValidator::isValidHostHeader(const std::string &header)
 
     for (size_t i = 0; i < header.length(); i++)
     {
-        if (!isRegName(header[i]))
+        if (!isRegName(header, i))
             return false;
     }
     return true;
