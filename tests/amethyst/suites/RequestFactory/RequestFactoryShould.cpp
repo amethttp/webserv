@@ -829,3 +829,12 @@ TEST(recognize_a_request_with_valid_connection_header_with_keep_alive_value)
     assertHeader("Host", "localhost");
     assertHeader("Connection", "keep-alive");
 }
+
+TEST(recognize_a_request_with_valid_connection_header_with_close_value)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nConnection: close");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Connection", "close");
+}
