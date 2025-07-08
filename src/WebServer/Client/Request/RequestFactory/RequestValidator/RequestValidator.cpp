@@ -1,14 +1,19 @@
 #include "RequestValidator.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
-bool RequestValidator::isValidHostHeader(const std::string &header, const std::string &validChars)
+bool RequestValidator::isValidHostHeader(const std::string &header)
 {
+    const std::string symbols = "%-._~!$&'()*+,;=";
+
+    if (header.empty())
+        return false;
+
     for (size_t i = 0; i < header.length(); i++)
     {
-        if (!std::isalnum(header[i]) && validChars.find(header[i]) == std::string::npos)
-            return true;
+        if (!std::isalnum(header[i]) && symbols.find(header[i]) == std::string::npos)
+            return false;
     }
-    return false;
+    return true;
 }
 
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
@@ -28,8 +33,7 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
 SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHeaders)
 {
     if (requestHeaders.find("Host") == requestHeaders.end()
-        || requestHeaders.at("Host").empty()
-        || isValidHostHeader(requestHeaders.at("Host"), "%-._~!$&'()*+,;="))
+        || !isValidHostHeader(requestHeaders.at("Host")))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();
