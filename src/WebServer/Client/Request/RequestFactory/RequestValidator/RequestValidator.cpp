@@ -94,6 +94,9 @@ bool RequestValidator::isValidContentLengthHeader(const headerValue_t &contentLe
 
 bool RequestValidator::isValidTransferEncodingHeader(const headerValue_t &transferEncodingHeaderValues)
 {
+    if (transferEncodingHeaderValues.size() != 1)
+        return false;
+
     const std::string transferEncodingValue = toLower(transferEncodingHeaderValues.front());
 
     return transferEncodingValue == "chunked";
