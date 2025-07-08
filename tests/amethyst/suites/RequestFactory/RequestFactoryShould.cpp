@@ -789,7 +789,7 @@ TEST(take_as_failure_a_request_with_multiple_content_length_headers)
 
 TEST(recognize_a_request_with_valid_transfer_encoding_header)
 {
-    request = createRequestFromValidHeaders("Host: localhost\r\nTransfer-Encoding: chunked");
+    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n");
 
     assertHeaderSize(2);
     assertHeader("Host", "localhost");
@@ -798,7 +798,7 @@ TEST(recognize_a_request_with_valid_transfer_encoding_header)
 
 TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
 {
-    request = createRequestFromValidHeaders("Host: localhost\r\nTransfer-Encoding: cHUnKeD");
+    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: cHUnKeD\r\n\r\n0\r\n\r\n");
 
     assertHeaderSize(2);
     assertHeader("Host", "localhost");

@@ -1158,10 +1158,7 @@
 "Host: localhost\r\nConnection: invalid\r\n\r\n"
 
 ### 68. Take as failure a repeated Connection header
-"Host: localhost\r\Connection: close\r\Connection: close\r\n\r\n"
-
-### 69. Recognize a request with overriding headers
-"Host: localhost\r\nX-Header: value\r\nX-Header: newValue"
+"Host: localhost\r\nConnection: close\r\Connection: close\r\n\r\n"
 
 
 # 1. Separate path-query (decode only path, not URI neither query)                      DONE
