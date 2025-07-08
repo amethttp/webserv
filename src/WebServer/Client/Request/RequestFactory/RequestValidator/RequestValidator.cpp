@@ -1,4 +1,5 @@
 #include "RequestValidator.hpp"
+#include "utils/string/string.hpp"
 #include "utils/headers/headers.hpp"
 #include "utils/numeric/numeric.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
@@ -93,12 +94,7 @@ bool RequestValidator::isValidContentLengthHeader(const headerValue_t &contentLe
 
 bool RequestValidator::isValidTransferEncodingHeader(const headerValue_t &transferEncodingHeaderValues)
 {
-    std::string transferEncodingValue = transferEncodingHeaderValues.front();
-
-    for (size_t i = 0; i < transferEncodingValue.length(); i++)
-    {
-        transferEncodingValue[i] = static_cast<char>(std::tolower(transferEncodingValue[i]));
-    }
+    const std::string transferEncodingValue = toLower(transferEncodingHeaderValues.front());
 
     return transferEncodingValue == "chunked";
 }

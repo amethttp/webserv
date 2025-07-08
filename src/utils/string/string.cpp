@@ -36,3 +36,15 @@ std::string trim(const std::string &input, const std::string &charsToTrim)
 	size_t end = input.find_last_not_of(charsToTrim);
 	return input.substr(start, end - start + 1);
 }
+
+std::string toLower(const std::string &string)
+{
+	std::string result;
+
+	for (size_t i = 0; i < string.length(); i++)
+	{
+		result += static_cast<char>(std::tolower(string[i]));
+	}
+
+	return result;
+}

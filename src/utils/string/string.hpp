@@ -10,3 +10,5 @@ std::vector<std::string> split(const std::string &input, const std::string &del)
 std::string trim(const std::string &input, const std::string &charsToTrim);
 
 std::string toHttpHeaderCase(const std::string &string);
+
+std::string toLower(const std::string &string);
