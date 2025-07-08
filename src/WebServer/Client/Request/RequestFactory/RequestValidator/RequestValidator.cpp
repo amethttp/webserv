@@ -1,4 +1,5 @@
 #include "RequestValidator.hpp"
+#include "utils/headers/headers.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
 bool RequestValidator::isValidHostHeader(const std::string &header)
@@ -32,7 +33,7 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
 
 SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHeaders)
 {
-    if (requestHeaders.find("Host") == requestHeaders.end()
+    if (!containsHeader(requestHeaders, "Host")
         || !isValidHostHeader(requestHeaders.at("Host")))
         return SimpleResult::fail("400 Bad Request");
 

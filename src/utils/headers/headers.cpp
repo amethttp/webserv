@@ -9,3 +9,8 @@ void addHeader(headers_t &headers, const std::string &header)
 
     headers[headerKey] = trim(headerValue, " \t");
 }
+
+bool containsHeader(const headers_t &headers, const std::string &headerKey)
+{
+    return headers.find(headerKey) != headers.end();
+}
