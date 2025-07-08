@@ -862,3 +862,8 @@ TEST(take_as_failure_a_request_with_a_connection_header_with_invalid_value)
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection:", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: invalid", "400 Bad Request");
 }
+
+TEST(take_as_failure_a_request_with_multiple_connection_headers)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: close\r\nConnection: close", "400 Bad Request");
+}

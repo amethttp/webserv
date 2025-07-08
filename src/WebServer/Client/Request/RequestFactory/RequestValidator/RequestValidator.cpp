@@ -104,6 +104,9 @@ bool RequestValidator::isValidTransferEncodingHeader(const headerValue_t &transf
 
 bool RequestValidator::isValidConnectionHeader(const headerValue_t &connectionHeaderValues)
 {
+    if (connectionHeaderValues.size() != 1)
+        return false;
+
     const std::string connectionHeaderValue = toLower(connectionHeaderValues.front());
 
     return (connectionHeaderValue == "keep-alive" || connectionHeaderValue == "close");
