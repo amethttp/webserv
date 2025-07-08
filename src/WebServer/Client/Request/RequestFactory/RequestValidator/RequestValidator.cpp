@@ -19,11 +19,16 @@ bool RequestValidator::isPctEncoded(const std::string &header, const size_t pos)
             && std::isxdigit(header[pos + 2]));
 }
 
+bool RequestValidator::isSubDelim(const char c)
+{
+    const std::string subDelimSymbols = "!$&'()*+,;=";
+
+    return subDelimSymbols.find(c) != std::string::npos;
+}
+
 bool RequestValidator::isRegName(const std::string &header, const size_t pos)
 {
-    const std::string symbols = "!$&'()*+,;=";
-
-    return (isUnreserved(header[pos]) || isPctEncoded(header, pos) || symbols.find(header[pos]) != std::string::npos);
+    return (isUnreserved(header[pos]) || isPctEncoded(header, pos) || isSubDelim(header[pos]));
 }
 
 bool RequestValidator::isValidHostHeader(const std::string &header)

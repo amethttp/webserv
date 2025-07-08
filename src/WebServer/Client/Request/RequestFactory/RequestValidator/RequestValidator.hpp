@@ -10,7 +10,9 @@ private:
 
     static bool isUnreserved(char c);
     static bool isPctEncoded(const std::string &header, size_t pos);
+    static bool isSubDelim(char c);
     static bool isRegName(const std::string &header, size_t pos);
+
     static bool isValidHostHeader(const std::string &header);
 
 public:
