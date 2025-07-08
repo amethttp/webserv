@@ -776,6 +776,7 @@ TEST(recognize_a_request_with_valid_content_length_header_and_value_greater_than
 
 TEST(take_as_failure_a_request_with_a_content_length_header_with_non_numeric_value)
 {
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length:", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: -23", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 2.03", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: invalid", "400 Bad Request");

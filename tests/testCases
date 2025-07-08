@@ -1094,7 +1094,8 @@
 "Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=:8080\r\n\r\n"
 
 ### 50. Take as failure a non-numeric port
-"Host: localhost:afda\r\n\r\n"
+"Host: localhost:\r\n\r\n"
+"Host: localhost:invalid\r\n\r\n"
 "Host: localhost:31.023\r\n\r\n"
 
 ### 51. Take as failure multiple ports
@@ -1120,9 +1121,10 @@
 "Host: localhost\r\nContent-Length: 10\r\n\r\nValid body"
 
 ### 58. Take as failure a non-numeric Content-Length value
+"Host: localhost\r\nContent-Length:\r\n\r\n"
 "Host: localhost\r\nContent-Length: -23\r\n\r\n"
 "Host: localhost\r\nContent-Length: 2.03\r\n\r\n"
-"Host: localhost\r\nContent-Length: avc\r\n\r\n"
+"Host: localhost\r\nContent-Length: invalid\r\n\r\n"
 
 ### 59. Take as failure a repeated CL header
 "Host: localhost\r\nContent-Length: 0\r\nContent-Length: 0\r\n\r\n"
