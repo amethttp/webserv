@@ -68,6 +68,9 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
     if (requestHeaders.find("Transfer-Encoding") != requestHeaders.end())
         requestHeaders["Transfer-Encoding"][0] = toLower(requestHeaders["Transfer-Encoding"][0]);
 
+    if (requestHeaders.find("Connection") != requestHeaders.end())
+        requestHeaders["Connection"][0] = toLower(requestHeaders["Connection"][0]);
+
     return Result<headers_t>::ok(requestHeaders);
 }
 
