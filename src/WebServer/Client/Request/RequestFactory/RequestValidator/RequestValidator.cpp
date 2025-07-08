@@ -46,7 +46,16 @@ bool RequestValidator::isValidHostHeader(const std::string &header)
         return false;
     if (i == header.length())
         return true;
-    return header[i] == ':';
+    if (header[i] != ':')
+        return false;
+
+    i++;
+    while (i < header.length() && std::isdigit(header[i]))
+    {
+        i++;
+    }
+
+    return i == header.length();
 }
 
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
