@@ -18,6 +18,7 @@ private:
 
     static bool isValidHostHeader(const headerValue_t &hostHeaderValues);
     static bool isValidContentLengthHeader(const headerValue_t &contentLengthHeaderValues);
+    static bool isValidTransferEncodingHeader(const headerValue_t &transferEncodingHeaderValues);
 
 public:
     static SimpleResult validateRequestLine(const RequestLineParams_t &requestLine);

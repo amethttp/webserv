@@ -91,6 +91,18 @@ bool RequestValidator::isValidContentLengthHeader(const headerValue_t &contentLe
     return contentLengthSize >= 0;
 }
 
+bool RequestValidator::isValidTransferEncodingHeader(const headerValue_t &transferEncodingHeaderValues)
+{
+    std::string transferEncodingValue = transferEncodingHeaderValues.front();
+
+    for (size_t i = 0; i < transferEncodingValue.length(); i++)
+    {
+        transferEncodingValue[i] = static_cast<char>(std::tolower(transferEncodingValue[i]));
+    }
+
+    return transferEncodingValue == "chunked";
+}
+
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
 {
     if (requestLine.method == NOT_IMPLEMENTED)
@@ -113,6 +125,10 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
 
     if (containsHeader(requestHeaders, "Content-Length")
         && !isValidContentLengthHeader(requestHeaders.at("Content-Length")))
+        return SimpleResult::fail("400 Bad Request");
+
+    if (containsHeader(requestHeaders, "Transfer-Encoding")
+        && !isValidTransferEncodingHeader(requestHeaders.at("Transfer-Encoding")))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();

@@ -804,3 +804,9 @@ TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
     assertHeader("Host", "localhost");
     assertHeader("Transfer-Encoding", "chunked");
 }
+
+TEST(take_as_failure_a_request_with_a_transfer_encoding_header_with_invalid_value)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding:", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding: invalid", "400 Bad Request");
+}
