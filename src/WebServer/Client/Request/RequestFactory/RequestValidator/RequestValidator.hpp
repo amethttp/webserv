@@ -13,6 +13,9 @@ private:
     static bool isSubDelim(char c);
     static bool isRegName(const std::string &header, size_t pos);
 
+    static bool isValidHostName(const std::string &hostName);
+    static bool isValidHostPort(const std::string &port);
+
     static bool isValidHostHeader(const std::string &header);
 
 public:

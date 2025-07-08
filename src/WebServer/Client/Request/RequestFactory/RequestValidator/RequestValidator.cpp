@@ -31,34 +31,52 @@ bool RequestValidator::isRegName(const std::string &header, const size_t pos)
     return (isUnreserved(header[pos]) || isPctEncoded(header, pos) || isSubDelim(header[pos]));
 }
 
+bool RequestValidator::isValidHostName(const std::string &hostName)
+{
+    if (hostName.empty())
+        return false;
+
+    for (size_t i = 0; i < hostName.length(); i++)
+    {
+        if (!isRegName(hostName, i))
+            return false;
+    }
+
+    return true;
+}
+
+bool RequestValidator::isValidHostPort(const std::string &port)
+{
+    if (port.empty())
+        return false;
+
+    for (size_t i = 0; i < port.length(); i++)
+    {
+        if (!std::isdigit(port[i]))
+            return false;
+    }
+
+    return true;
+}
+
 bool RequestValidator::isValidHostHeader(const std::string &header)
 {
     if (header.empty())
         return false;
 
-    size_t i = 0;
-    while (i < header.length() && isRegName(header, i))
-    {
-        i++;
-    }
+    const size_t portSeparator = header.find(':');
+    const std::string hostName = header.substr(0, portSeparator);
+    std::string hostPort;
 
-    if (i == 0)
+    if (portSeparator != std::string::npos)
+        hostPort = header.substr(portSeparator + 1);
+
+    if (!isValidHostName(hostName))
         return false;
-    if (i == header.length())
-        return true;
-    if (header[i] != ':')
-        return false;
-
-    i++;
-    while (i < header.length() && std::isdigit(header[i]))
-    {
-        i++;
-    }
-
-    if (header[i - 1] == ':')
+    if (portSeparator != std::string::npos && !isValidHostPort(hostPort))
         return false;
 
-    return i == header.length();
+    return true;
 }
 
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
