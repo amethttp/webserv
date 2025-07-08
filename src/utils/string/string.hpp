@@ -3,8 +3,6 @@
 #include <vector>
 #include <string>
 
-bool isEmpty(const std::string &str);
-
 bool endsWith(const std::string &str, const std::string &suffix);
 
 std::vector<std::string> split(const std::string &input, const std::string &del);

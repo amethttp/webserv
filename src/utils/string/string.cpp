@@ -1,10 +1,4 @@
 #include "string.hpp"
-#include <algorithm>
-
-bool isEmpty(const std::string &str)
-{
-	return str.empty();
-}
 
 bool endsWith(const std::string &str, const std::string &suffix)
 {
