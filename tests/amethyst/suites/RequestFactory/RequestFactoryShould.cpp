@@ -764,3 +764,12 @@ TEST(recognize_a_request_with_valid_content_length_header_and_value_equal_to_zer
     assertHeader("Host", "localhost");
     assertHeader("Content-Length", "0");
 }
+
+TEST(recognize_a_request_with_valid_content_length_header_and_value_greater_than_zero)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nContent-Length: 10");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Content-Length", "10");
+}
