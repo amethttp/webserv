@@ -700,3 +700,10 @@ TEST(recognize_a_request_with_a_host_header_with_port)
     assertHeaderSize(1);
     assertHeader("Host", "localhost:8080");
 }
+
+TEST(take_as_failure_a_host_header_with_only_port)
+{
+    assertRequestIsInvalidFromHeaders("Host::8000\r\n\r\n", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: :8000\r\n\r\n", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  :8000\r\n\r\n", "400 Bad Request");
+}

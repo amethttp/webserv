@@ -42,6 +42,8 @@ bool RequestValidator::isValidHostHeader(const std::string &header)
         i++;
     }
 
+    if (i == 0)
+        return false;
     if (i == header.length())
         return true;
     return header[i] == ':';
