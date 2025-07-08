@@ -8,7 +8,7 @@ namespace
     headers_t headers;
 }
 
-static RequestLineParams_t createFromValidRequestLine(const std::string &requestLineString)
+static RequestLineParams_t parseFromValidRequestLine(const std::string &requestLineString)
 {
     const RequestTokenizer requestTokenizer(requestLineString);
     RequestParser sut(requestTokenizer);
@@ -18,7 +18,7 @@ static RequestLineParams_t createFromValidRequestLine(const std::string &request
     return result.getValue();
 }
 
-static headers_t createFromValidHeaders(const std::string &requestHeaders)
+static headers_t parseFromValidHeaders(const std::string &requestHeaders)
 {
     const RequestTokenizer requestTokenizer(requestHeaders);
     RequestParser sut(requestTokenizer);
@@ -71,21 +71,21 @@ static void assertHeader(const std::string &key, const std::string &value)
 /* BASIC REQUEST LINE */
 TEST(recognize_a_basic_GET_request_line)
 {
-    requestLine = createFromValidRequestLine("GET / HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET / HTTP/1.1");
 
     assertRequestLine(GET, "/", "HTTP/1.1");
 }
 
 TEST(recognize_a_basic_POST_request_line)
 {
-    requestLine = createFromValidRequestLine("POST / HTTP/1.1");
+    requestLine = parseFromValidRequestLine("POST / HTTP/1.1");
 
     assertRequestLine(POST, "/", "HTTP/1.1");
 }
 
 TEST(recognize_a_basic_DELETE_request_line)
 {
-    requestLine = createFromValidRequestLine("DELETE / HTTP/1.1");
+    requestLine = parseFromValidRequestLine("DELETE / HTTP/1.1");
 
     assertRequestLine(DELETE, "/", "HTTP/1.1");
 }
@@ -94,14 +94,14 @@ TEST(recognize_a_basic_DELETE_request_line)
 /* REQUEST LINE METHOD CRITERIA */
 TEST(recognize_as_not_implemented_a_case_insensitive_method)
 {
-    requestLine = createFromValidRequestLine("get / HTTP/1.1");
+    requestLine = parseFromValidRequestLine("get / HTTP/1.1");
 
     assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
 
 TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_only_of_alphabetic_characters)
 {
-    requestLine = createFromValidRequestLine("NotImplemented / HTTP/1.1");
+    requestLine = parseFromValidRequestLine("NotImplemented / HTTP/1.1");
 
     assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
@@ -111,7 +111,7 @@ TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_of_tchars)
     const std::string tchars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     const std::string nonImplementedRequestLineString = tchars + " / HTTP/1.1";
 
-    requestLine = createFromValidRequestLine(nonImplementedRequestLineString);
+    requestLine = parseFromValidRequestLine(nonImplementedRequestLineString);
 
     assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
@@ -172,42 +172,42 @@ TEST(take_as_failure_a_request_line_with_multiple_first_SP)
 /* REQUEST LINE TARGET CRITERIA */
 TEST(recognize_a_simple_alphabetic_target)
 {
-    requestLine = createFromValidRequestLine("GET /index HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /index HTTP/1.1");
 
     assertRequestLine(GET, "/index", "HTTP/1.1");
 }
 
 TEST(recognize_a_target_with_extension)
 {
-    requestLine = createFromValidRequestLine("GET /index.html HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /index.html HTTP/1.1");
 
     assertRequestLine(GET, "/index.html", "HTTP/1.1");
 }
 
 TEST(recognize_a_target_with_one_directory_level)
 {
-    requestLine = createFromValidRequestLine("GET /profile/contact.php HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /profile/contact.php HTTP/1.1");
 
     assertRequestLine(GET, "/profile/contact.php", "HTTP/1.1");
 }
 
 TEST(recognize_a_target_with_multiple_directory_levels)
 {
-    requestLine = createFromValidRequestLine("GET /courses/science/physics.py HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /courses/science/physics.py HTTP/1.1");
 
     assertRequestLine(GET, "/courses/science/physics.py", "HTTP/1.1");
 }
 
 TEST(recognize_a_directory_target)
 {
-    requestLine = createFromValidRequestLine("GET /about/ HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /about/ HTTP/1.1");
 
     assertRequestLine(GET, "/about/", "HTTP/1.1");
 }
 
 TEST(recognize_a_multiple_directory_target)
 {
-    requestLine = createFromValidRequestLine("GET /about/services/ HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /about/services/ HTTP/1.1");
 
     assertRequestLine(GET, "/about/services/", "HTTP/1.1");
 }
@@ -225,7 +225,7 @@ TEST(recognize_a_target_consisted_of_pchars)
     const std::string target = "/" + pchars;
     const std::string validRequestLine = "GET " + target + " HTTP/1.1";
 
-    requestLine = createFromValidRequestLine(validRequestLine);
+    requestLine = parseFromValidRequestLine(validRequestLine);
 
     assertRequestLine(GET, target, "HTTP/1.1");
 }
@@ -248,7 +248,7 @@ TEST(recognize_a_target_with_valid_pct_encoded_pchars)
     const std::string target = "/%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF";
     const std::string validRequestLine = "GET " + target + " HTTP/1.1";
 
-    requestLine = createFromValidRequestLine(validRequestLine);
+    requestLine = parseFromValidRequestLine(validRequestLine);
 
     assertRequestLine(GET, target, "HTTP/1.1");
 }
@@ -268,28 +268,28 @@ TEST(take_as_failure_a_target_with_incomplete_pct_encoded_pchars)
 
 TEST(recognize_a_target_with_an_empty_query)
 {
-    requestLine = createFromValidRequestLine("GET /VALID/PATH/? HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/? HTTP/1.1");
 
     assertRequestLine(GET, "/VALID/PATH/?", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_an_empty_parameter)
 {
-    requestLine = createFromValidRequestLine("GET /VALID/PATH/?param HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param HTTP/1.1");
 
     assertRequestLine(GET, "/VALID/PATH/?param", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_full_parameter)
 {
-    requestLine = createFromValidRequestLine("GET /VALID/PATH/?param=anyValue HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param=anyValue HTTP/1.1");
 
     assertRequestLine(GET, "/VALID/PATH/?param=anyValue", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_multiple_parameters)
 {
-    requestLine = createFromValidRequestLine("GET /VALID/PATH/?param=anyValue&mode= HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param=anyValue&mode= HTTP/1.1");
 
     assertRequestLine(GET, "/VALID/PATH/?param=anyValue&mode=", "HTTP/1.1");
 }
@@ -300,7 +300,7 @@ TEST(recognize_a_query_consisted_of_valid_characters)
     const std::string target = "/VALID/PATH/?" + validChars;
     const std::string validRequestLine = "GET " + target + " HTTP/1.1";
 
-    requestLine = createFromValidRequestLine(validRequestLine);
+    requestLine = parseFromValidRequestLine(validRequestLine);
 
     assertRequestLine(GET, target, "HTTP/1.1");
 }
@@ -323,7 +323,7 @@ TEST(recognize_a_query_with_valid_pct_encoded_pchars)
     const std::string target = "/VALID/PATH/?%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF";
     const std::string validRequestLine = "GET " + target + " HTTP/1.1";
 
-    requestLine = createFromValidRequestLine(validRequestLine);
+    requestLine = parseFromValidRequestLine(validRequestLine);
 
     assertRequestLine(GET, target, "HTTP/1.1");
 }
@@ -354,7 +354,7 @@ TEST(recognize_a_target_longer_than_maximum_length)
     const std::string target = "/" + std::string(MAX_URI_LENGTH, anyValidCharacter);
     const std::string targetTooLongRequestLine = "GET " + target + " HTTP/1.1";
 
-    requestLine = createFromValidRequestLine(targetTooLongRequestLine);
+    requestLine = parseFromValidRequestLine(targetTooLongRequestLine);
 
     assertRequestLine(GET, target, "HTTP/1.1");
 }
@@ -367,35 +367,35 @@ TEST(take_as_failure_a_target_mixed_with_HTTP_version)
 
 TEST(recognize_a_not_normalized_pct_encoded_target)
 {
-    requestLine = createFromValidRequestLine("GET /%2e%2e/%2e%2e/%2e%2e/etc/passwd HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /%2e%2e/%2e%2e/%2e%2e/etc/passwd HTTP/1.1");
 
     assertRequestLine(GET, "/%2e%2e/%2e%2e/%2e%2e/etc/passwd", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_single_question_mark)
 {
-    requestLine = createFromValidRequestLine("GET /?? HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /?? HTTP/1.1");
 
     assertRequestLine(GET, "/??", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_single_equal)
 {
-    requestLine = createFromValidRequestLine("GET /?= HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /?= HTTP/1.1");
 
     assertRequestLine(GET, "/?=", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_single_ampersand)
 {
-    requestLine = createFromValidRequestLine("GET /?& HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /?& HTTP/1.1");
 
     assertRequestLine(GET, "/?&", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_multiple_ampersands)
 {
-    requestLine = createFromValidRequestLine("GET /?&&&&&& HTTP/1.1");
+    requestLine = parseFromValidRequestLine("GET /?&&&&&& HTTP/1.1");
 
     assertRequestLine(GET, "/?&&&&&&", "HTTP/1.1");
 }
@@ -513,7 +513,7 @@ TEST(take_as_failure_an_empty_HTTP_version_slash)
 
 TEST(recognize_a_non_supported_major_version)
 {
-    requestLine = createFromValidRequestLine("GET / HTTP/2.1");
+    requestLine = parseFromValidRequestLine("GET / HTTP/2.1");
 
     assertRequestLine(GET, "/", "HTTP/2.1");
 }
@@ -579,7 +579,7 @@ TEST(take_as_failure_an_empty_HTTP_version_dot)
 
 TEST(recognize_a_non_supported_minor_version)
 {
-    requestLine = createFromValidRequestLine("GET / HTTP/1.0");
+    requestLine = parseFromValidRequestLine("GET / HTTP/1.0");
 
     assertRequestLine(GET, "/", "HTTP/1.0");
 }
@@ -695,7 +695,7 @@ TEST(take_as_failure_an_empty_request_line)
 /* REQUEST HEADERS CRITERIA */
 TEST(recognize_a_simple_header)
 {
-    headers = createFromValidHeaders("Host: localhost");
+    headers = parseFromValidHeaders("Host: localhost");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -703,7 +703,7 @@ TEST(recognize_a_simple_header)
 
 TEST(recognize_a_complex_header)
 {
-    headers = createFromValidHeaders("Content-Length: 1312");
+    headers = parseFromValidHeaders("Content-Length: 1312");
 
     assertHeaderSize(1);
     assertHeader("Content-Length", "1312");
@@ -711,7 +711,7 @@ TEST(recognize_a_complex_header)
 
 TEST(recognize_a_case_insensitive_header)
 {
-    headers = createFromValidHeaders("Host: localhost");
+    headers = parseFromValidHeaders("Host: localhost");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -722,7 +722,7 @@ TEST(recognize_a_header_whose_key_is_consisted_of_tchars)
     const std::string validKey = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     const std::string expectedKey = "!#$%&'*+-.^_`|~0123456789abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
 
-    headers = createFromValidHeaders(validKey + ": localhost");
+    headers = parseFromValidHeaders(validKey + ": localhost");
 
     assertHeaderSize(1);
     assertHeader(expectedKey, "localhost");
@@ -788,7 +788,7 @@ TEST(take_as_failure_a_header_that_has_HTAB_instead_of_the_colon_separator)
 
 TEST(recognize_a_header_with_repeated_colon_separator)
 {
-    headers = createFromValidHeaders("Host:: localhost");
+    headers = parseFromValidHeaders("Host:: localhost");
 
     assertHeaderSize(1);
     assertHeader("Host", ": localhost");
@@ -796,7 +796,7 @@ TEST(recognize_a_header_with_repeated_colon_separator)
 
 TEST(recognize_a_header_without_the_first_OWS)
 {
-    headers = createFromValidHeaders("Host:localhost");
+    headers = parseFromValidHeaders("Host:localhost");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -804,7 +804,7 @@ TEST(recognize_a_header_without_the_first_OWS)
 
 TEST(recognize_a_header_with_a_single_SP_as_first_OWS)
 {
-    headers = createFromValidHeaders("Host: localhost");
+    headers = parseFromValidHeaders("Host: localhost");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -812,7 +812,7 @@ TEST(recognize_a_header_with_a_single_SP_as_first_OWS)
 
 TEST(recognize_a_header_with_a_single_HTAB_as_first_OWS)
 {
-    headers = createFromValidHeaders("Host:\tlocalhost");
+    headers = parseFromValidHeaders("Host:\tlocalhost");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -820,7 +820,7 @@ TEST(recognize_a_header_with_a_single_HTAB_as_first_OWS)
 
 TEST(recognize_a_header_with_a_combination_of_first_OWS)
 {
-    headers = createFromValidHeaders("Host: \t   \t\t  \t\tlocalhost");
+    headers = parseFromValidHeaders("Host: \t   \t\t  \t\tlocalhost");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -830,7 +830,7 @@ TEST(recognize_a_header_whose_value_has_valid_printable_characters_and_HTAB)
 {
     const std::string validValue = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ \t[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    headers = createFromValidHeaders("Host: " + validValue);
+    headers = parseFromValidHeaders("Host: " + validValue);
 
     assertHeaderSize(1);
     assertHeader("Host", validValue);
@@ -838,7 +838,7 @@ TEST(recognize_a_header_whose_value_has_valid_printable_characters_and_HTAB)
 
 TEST(recognize_a_header_whose_value_has_multiple_words_using_SP_as_separator)
 {
-    headers = createFromValidHeaders("Host: localhost and something else");
+    headers = parseFromValidHeaders("Host: localhost and something else");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost and something else");
@@ -846,7 +846,7 @@ TEST(recognize_a_header_whose_value_has_multiple_words_using_SP_as_separator)
 
 TEST(recognize_a_header_whose_value_has_multiple_words_using_HTAB_as_separator)
 {
-    headers = createFromValidHeaders("Host: localhost\tand\tsomething\telse");
+    headers = parseFromValidHeaders("Host: localhost\tand\tsomething\telse");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost\tand\tsomething\telse");
@@ -854,7 +854,7 @@ TEST(recognize_a_header_whose_value_has_multiple_words_using_HTAB_as_separator)
 
 TEST(recognize_a_header_whose_value_has_multiple_words_using_multiple_OWS_as_separator)
 {
-    headers = createFromValidHeaders("Host: localhost\t \tand   \tsomething\t   \t\telse");
+    headers = parseFromValidHeaders("Host: localhost\t \tand   \tsomething\t   \t\telse");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost\t \tand   \tsomething\t   \t\telse");
@@ -867,7 +867,7 @@ TEST(take_as_failure_a_header_whose_value_contains_invalid_characters)
 
 TEST(recognize_a_header_whose_value_is_a_single_SP)
 {
-    headers = createFromValidHeaders("Host: ");
+    headers = parseFromValidHeaders("Host: ");
 
     assertHeaderSize(1);
     assertHeader("Host", "");
@@ -875,7 +875,7 @@ TEST(recognize_a_header_whose_value_is_a_single_SP)
 
 TEST(recognize_a_header_whose_value_is_a_single_HTAB)
 {
-    headers = createFromValidHeaders("Host:\t");
+    headers = parseFromValidHeaders("Host:\t");
 
     assertHeaderSize(1);
     assertHeader("Host", "");
@@ -883,7 +883,7 @@ TEST(recognize_a_header_whose_value_is_a_single_HTAB)
 
 TEST(recognize_a_header_whose_value_is_multiple_OWS)
 {
-    headers = createFromValidHeaders("Host:\t \t\t   \t \t");
+    headers = parseFromValidHeaders("Host:\t \t\t   \t \t");
 
     assertHeaderSize(1);
     assertHeader("Host", "");
@@ -891,7 +891,7 @@ TEST(recognize_a_header_whose_value_is_multiple_OWS)
 
 TEST(recognize_a_header_whose_value_is_empty)
 {
-    headers = createFromValidHeaders("Host:");
+    headers = parseFromValidHeaders("Host:");
 
     assertHeaderSize(1);
     assertHeader("Host", "");
@@ -899,7 +899,7 @@ TEST(recognize_a_header_whose_value_is_empty)
 
 TEST(recognize_a_header_with_a_single_SP_as_last_OWS)
 {
-    headers = createFromValidHeaders("Host: localhost ");
+    headers = parseFromValidHeaders("Host: localhost ");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -907,7 +907,7 @@ TEST(recognize_a_header_with_a_single_SP_as_last_OWS)
 
 TEST(recognize_a_header_with_a_single_HTAB_as_last_OWS)
 {
-    headers = createFromValidHeaders("Host: localhost\t");
+    headers = parseFromValidHeaders("Host: localhost\t");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -915,7 +915,7 @@ TEST(recognize_a_header_with_a_single_HTAB_as_last_OWS)
 
 TEST(recognize_a_header_with_a_combination_of_last_OWS)
 {
-    headers = createFromValidHeaders("Host: localhost \t   \t\t  \t\t");
+    headers = parseFromValidHeaders("Host: localhost \t   \t\t  \t\t");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
@@ -923,7 +923,7 @@ TEST(recognize_a_header_with_a_combination_of_last_OWS)
 
 TEST(recognize_multiple_headers_separated_with_CRLF)
 {
-    headers = createFromValidHeaders("Host: localhost\r\nContent-Length:0\r\nConnection:\tclose");
+    headers = parseFromValidHeaders("Host: localhost\r\nContent-Length:0\r\nConnection:\tclose");
 
     assertHeaderSize(3);
     assertHeader("Host", "localhost");
