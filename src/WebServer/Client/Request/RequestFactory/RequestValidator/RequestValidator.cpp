@@ -57,12 +57,12 @@ bool RequestValidator::isValidHostPort(const std::string &port)
     return (portNum >= 0 && portNum <= 65535);
 }
 
-bool RequestValidator::isValidHostHeader(const headerValue_t &headerValues)
+bool RequestValidator::isValidHostHeader(const headerValue_t &hostHeaderValues)
 {
-    if (headerValues.size() != 1)
+    if (hostHeaderValues.size() != 1)
         return false;
 
-    const std::string hostValue = headerValues.front();
+    const std::string hostValue = hostHeaderValues.front();
     const size_t portSeparator = hostValue.find(':');
     const std::string hostName = hostValue.substr(0, portSeparator);
     std::string hostPort;
@@ -78,12 +78,12 @@ bool RequestValidator::isValidHostHeader(const headerValue_t &headerValues)
     return true;
 }
 
-bool RequestValidator::isValidContentLengthHeader(const headerValue_t &headerValues)
+bool RequestValidator::isValidContentLengthHeader(const headerValue_t &contentLengthHeaderValues)
 {
-    if (headerValues.size() != 1)
+    if (contentLengthHeaderValues.size() != 1)
         return false;
 
-    const std::string contentLengthValue = headerValues.front();
+    const std::string contentLengthValue = contentLengthHeaderValues.front();
     if (!isLong(contentLengthValue))
         return false;
 
