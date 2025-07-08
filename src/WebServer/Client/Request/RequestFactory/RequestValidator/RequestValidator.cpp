@@ -2,16 +2,21 @@
 #include "utils/headers/headers.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
-bool RequestValidator::isValidHostHeader(const std::string &header)
+bool RequestValidator::isRegName(const char c)
 {
     const std::string symbols = "%-._~!$&'()*+,;=";
 
+    return std::isalnum(c) || symbols.find(c) != std::string::npos;
+}
+
+bool RequestValidator::isValidHostHeader(const std::string &header)
+{
     if (header.empty())
         return false;
 
     for (size_t i = 0; i < header.length(); i++)
     {
-        if (!std::isalnum(header[i]) && symbols.find(header[i]) == std::string::npos)
+        if (!isRegName(header[i]))
             return false;
     }
     return true;

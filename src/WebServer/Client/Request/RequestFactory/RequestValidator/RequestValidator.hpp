@@ -7,9 +7,11 @@ class RequestValidator
 {
 private:
     RequestValidator();
+    
+    static bool isRegName(char c);
+    static bool isValidHostHeader(const std::string &header);
 
 public:
-    static bool isValidHostHeader(const std::string &header);
     static SimpleResult validateRequestLine(const RequestLineParams_t &requestLine);
     static SimpleResult validateRequestHeaders(const headers_t &requestHeaders);
 };
