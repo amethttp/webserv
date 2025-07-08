@@ -1146,14 +1146,14 @@
 "Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked\r\n\r\n"
 
 ### 65. Recognize a request with valid Connection header
-"Host: localhost\r\nConnection: close\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+"Host: localhost\r\nConnection: close\r\n\r\n"
 
 ### 66. Recognize a request with valid case-insensitive Connection header
-"Host: localhost\r\Connection: KeEp-AliVE\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+"Host: localhost\r\Connection: KeEp-AliVE\r\n\r\n"
 
 ### 67. Take as failure a request with invalid Connection header
-"Host: localhost\r\nConnection:\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
-"Host: localhost\r\nConnection: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+"Host: localhost\r\nConnection:\r\n\r\n"
+"Host: localhost\r\nConnection: invalid\r\n\r\n"
 
 ### 68. Take as failure a repeated Connection header
 "Host: localhost\r\Connection: close\r\Connection: close\r\n\r\n"

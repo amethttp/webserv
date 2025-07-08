@@ -820,3 +820,12 @@ TEST(take_as_failure_a_request_with_content_length_and_transfer_encoding_headers
 {
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked", "400 Bad Request");
 }
+
+TEST(recognize_a_request_with_valid_connection_header_with_keep_alive_value)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nConnection: keep-alive");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Connection", "keep-alive");
+}
