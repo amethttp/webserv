@@ -64,7 +64,7 @@ static void assertHeaderSize(const size_t size)
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, headers.at(key));
+    ASSERT_EQUALS(value, headers.at(key).back());
 }
 
 

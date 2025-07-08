@@ -3,8 +3,10 @@
 #include "RequestLineParams/RequestLineParams.hpp"
 #include <map>
 #include <string>
+#include <vector>
 
-typedef std::map<std::string, std::string> headers_t;
+typedef std::vector<std::string> headerValue_t;
+typedef std::map<std::string, headerValue_t> headers_t;
 
 typedef struct Request_s
 {

@@ -60,10 +60,10 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
     if (requestHeaderValidationResult.isFailure())
         return Result<headers_t>::fail(requestHeaderValidationResult.getError());
 
-    const Result<std::string> decodingResult = RequestPctDecoder::decode(requestHeaders.at("Host"));
+    const Result<std::string> decodingResult = RequestPctDecoder::decode(requestHeaders.at("Host").back());
     if (decodingResult.isFailure())
         return Result<headers_t>::fail(decodingResult.getError());
-    requestHeaders["Host"] = decodingResult.getValue();
+    requestHeaders["Host"][0] = decodingResult.getValue();
 
     return Result<headers_t>::ok(requestHeaders);
 }

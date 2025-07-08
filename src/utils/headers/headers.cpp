@@ -5,9 +5,9 @@
 void addHeader(headers_t &headers, const std::string &header)
 {
     const std::string headerKey = getHeaderKey(header);
-    const std::string headerValue = getHeaderValue(header);
+    const std::string headerValue = trim(getHeaderValue(header), " \t");
 
-    headers[headerKey] = trim(headerValue, " \t");
+    headers[headerKey].push_back(headerValue);
 }
 
 bool containsHeader(const headers_t &headers, const std::string &headerKey)

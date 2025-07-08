@@ -49,7 +49,7 @@ static void assertHeaderSize(const size_t size)
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, request.headers.at(key));
+    ASSERT_EQUALS(value, request.headers.at(key).back());
 }
 
 static void assertBodyIsEmpty()
@@ -739,4 +739,9 @@ TEST(recognize_a_request_with_a_host_header_with_a_port_with_leading_zeros)
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost:0000000000008080");
+}
+
+TEST(take_as_failure_a_request_with_multiple_host_headers)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nHost: my.domain.com", "400 Bad Request");
 }

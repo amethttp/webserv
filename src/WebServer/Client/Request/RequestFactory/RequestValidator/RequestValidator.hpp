@@ -16,7 +16,7 @@ private:
     static bool isValidHostName(const std::string &hostName);
     static bool isValidHostPort(const std::string &port);
 
-    static bool isValidHostHeader(const std::string &header);
+    static bool isValidHostHeader(const headerValue_t &headerValues);
 
 public:
     static SimpleResult validateRequestLine(const RequestLineParams_t &requestLine);
