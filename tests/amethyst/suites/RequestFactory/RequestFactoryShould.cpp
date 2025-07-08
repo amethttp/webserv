@@ -29,6 +29,13 @@ static Request_t createRequestFromValidHeaders(const std::string &headersString)
     return createFromValidRequest(requestString);
 }
 
+static Request_t createRequestFromValidBody(const std::string &bodyTypeHeader, const std::string &body)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
+
+    return createFromValidRequest(requestString);
+}
+
 static void assertTargetComponents(const std::string &path, const std::string &query)
 {
     ASSERT_EQUALS(path, request.requestLine.target.path);
@@ -767,7 +774,7 @@ TEST(recognize_a_request_with_valid_content_length_header_and_value_equal_to_zer
 
 TEST(recognize_a_request_with_valid_content_length_header_and_value_greater_than_zero)
 {
-    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nValid body");
+    request = createRequestFromValidBody("Content-Length: 10", "Valid body");
 
     assertHeaderSize(2);
     assertHeader("Host", "localhost");
@@ -789,7 +796,7 @@ TEST(take_as_failure_a_request_with_multiple_content_length_headers)
 
 TEST(recognize_a_request_with_valid_transfer_encoding_header)
 {
-    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n");
+    request = createRequestFromValidBody("Transfer-Encoding: chunked", "0\r\n\r\n");
 
     assertHeaderSize(2);
     assertHeader("Host", "localhost");
@@ -798,7 +805,7 @@ TEST(recognize_a_request_with_valid_transfer_encoding_header)
 
 TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
 {
-    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: cHUnKeD\r\n\r\n0\r\n\r\n");
+    request = createRequestFromValidBody("Transfer-Encoding: cHUnKeD", "0\r\n\r\n");
 
     assertHeaderSize(2);
     assertHeader("Host", "localhost");
