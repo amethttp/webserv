@@ -2,11 +2,18 @@
 #include "utils/headers/headers.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 
+bool RequestValidator::isUnreserved(const char c)
+{
+    const std::string unreservedSymbols = "-._~";
+
+    return (std::isalnum(c) || unreservedSymbols.find(c) != std::string::npos);
+}
+
 bool RequestValidator::isRegName(const char c)
 {
-    const std::string symbols = "%-._~!$&'()*+,;=";
+    const std::string symbols = "%!$&'()*+,;=";
 
-    return std::isalnum(c) || symbols.find(c) != std::string::npos;
+    return (isUnreserved(c) || symbols.find(c) != std::string::npos);
 }
 
 bool RequestValidator::isValidHostHeader(const std::string &header)

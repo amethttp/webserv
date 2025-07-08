@@ -7,7 +7,8 @@ class RequestValidator
 {
 private:
     RequestValidator();
-    
+
+    static bool isUnreserved(char c);
     static bool isRegName(char c);
     static bool isValidHostHeader(const std::string &header);
 
