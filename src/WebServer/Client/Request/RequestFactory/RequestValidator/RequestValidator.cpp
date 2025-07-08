@@ -37,10 +37,9 @@ bool RequestValidator::isValidHostHeader(const std::string &header)
         return false;
 
     size_t i = 0;
-    for (; i < header.length(); i++)
+    while (i < header.length() && isRegName(header, i))
     {
-        if (!isRegName(header, i))
-            break;
+        i++;
     }
 
     if (i == header.length())
