@@ -732,3 +732,11 @@ TEST(take_as_failure_a_request_with_a_host_header_with_port_out_of_range)
     assertRequestIsInvalidFromHeaders("Host: localhost:-8419", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost:1000000", "400 Bad Request");
 }
+
+TEST(recognize_a_request_with_a_host_header_with_a_port_with_leading_zeros)
+{
+    request = createRequestFromValidHeaders("Host: localhost:0000000000008080");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost:0000000000008080");
+}
