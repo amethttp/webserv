@@ -102,6 +102,13 @@ bool RequestValidator::isValidTransferEncodingHeader(const headerValue_t &transf
     return transferEncodingValue == "chunked";
 }
 
+bool RequestValidator::isValidConnectionHeader(const headerValue_t &connectionHeaderValues)
+{
+    const std::string connectionHeaderValue = toLower(connectionHeaderValues.front());
+
+    return (connectionHeaderValue == "keep-alive" || connectionHeaderValue == "close");
+}
+
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
 {
     if (requestLine.method == NOT_IMPLEMENTED)
@@ -132,6 +139,10 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
 
     if (containsHeader(requestHeaders, "Transfer-Encoding")
         && !isValidTransferEncodingHeader(requestHeaders.at("Transfer-Encoding")))
+        return SimpleResult::fail("400 Bad Request");
+
+    if (containsHeader(requestHeaders, "Connection")
+        && !isValidConnectionHeader(requestHeaders.at("Connection")))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();
