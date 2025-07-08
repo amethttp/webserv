@@ -755,3 +755,12 @@ TEST(recognize_a_request_with_case_insensitive_headers)
     assertHeader("Connection", "keep-alive");
     assertHeader("Content-Length", "0");
 }
+
+TEST(recognize_a_request_with_valid_content_length_header_and_value_equal_to_zero)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nContent-Length: 0");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Content-Length", "0");
+}
