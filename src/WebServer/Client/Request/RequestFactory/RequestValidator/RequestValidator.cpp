@@ -85,6 +85,9 @@ bool RequestValidator::isValidHostHeader(const headerValue_t &headerValues)
 
 bool RequestValidator::isValidContentLengthHeader(const headerValue_t &headerValues)
 {
+    if (headerValues.size() != 1)
+        return false;
+
     if (!isLong(headerValues.front()))
         return false;
 
