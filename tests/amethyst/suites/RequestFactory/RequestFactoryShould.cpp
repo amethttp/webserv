@@ -767,7 +767,7 @@ TEST(recognize_a_request_with_valid_content_length_header_and_value_equal_to_zer
 
 TEST(recognize_a_request_with_valid_content_length_header_and_value_greater_than_zero)
 {
-    request = createRequestFromValidHeaders("Host: localhost\r\nContent-Length: 10");
+    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nValid body");
 
     assertHeaderSize(2);
     assertHeader("Host", "localhost");
