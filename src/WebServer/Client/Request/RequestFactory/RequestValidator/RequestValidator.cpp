@@ -1,5 +1,6 @@
 #include "RequestValidator.hpp"
 #include "utils/headers/headers.hpp"
+#include "utils/numeric/numeric.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 #include <stdlib.h>
 
@@ -82,6 +83,15 @@ bool RequestValidator::isValidHostHeader(const headerValue_t &headerValues)
     return true;
 }
 
+bool RequestValidator::isValidContentLengthHeader(const headerValue_t &headerValues)
+{
+    if (!isLong(headerValues.front()))
+        return false;
+
+    const long contentLengthSize = std::atol(headerValues.front().c_str());
+    return contentLengthSize >= 0;
+}
+
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
 {
     if (requestLine.method == NOT_IMPLEMENTED)
@@ -100,6 +110,10 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
 {
     if (!containsHeader(requestHeaders, "Host")
         || !isValidHostHeader(requestHeaders.at("Host")))
+        return SimpleResult::fail("400 Bad Request");
+
+    if (containsHeader(requestHeaders, "Content-Length")
+        && !isValidContentLengthHeader(requestHeaders.at("Content-Length")))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();
