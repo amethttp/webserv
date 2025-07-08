@@ -49,16 +49,11 @@ bool RequestValidator::isValidHostName(const std::string &hostName)
 
 bool RequestValidator::isValidHostPort(const std::string &port)
 {
-    if (port.empty())
+    if (port.empty() || !isLong(port))
         return false;
 
-    for (size_t i = 0; i < port.length(); i++)
-    {
-        if (!std::isdigit(port[i]))
-            return false;
-    }
-
     const long portNum = std::atol(port.c_str());
+
     return (portNum >= 0 && portNum <= 65535);
 }
 
