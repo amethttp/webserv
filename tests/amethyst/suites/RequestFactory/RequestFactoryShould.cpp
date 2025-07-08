@@ -685,3 +685,11 @@ TEST(take_as_failure_a_request_with_a_host_header_containing_invalid_characters)
     assertRequestIsInvalidFromHeaders("Host: loc\talh\tost", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: loc{alh[ost", "400 Bad Request");
 }
+
+TEST(recognize_a_request_with_a_host_header_with_port)
+{
+    request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost:8080");
+}
