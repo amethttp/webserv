@@ -76,8 +76,8 @@ bool RequestValidator::isValidHostHeader(const headerValue_t &headerValues)
 
     if (!isValidHostName(hostName))
         return false;
-    if (portSeparator != std::string::npos && !isValidHostPort(hostPort))
-        return false;
+    if (portSeparator != std::string::npos)
+        return isValidHostPort(hostPort);
 
     return true;
 }
