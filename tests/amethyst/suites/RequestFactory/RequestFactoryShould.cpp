@@ -707,3 +707,10 @@ TEST(take_as_failure_a_host_header_with_only_port)
     assertRequestIsInvalidFromHeaders("Host: :8000\r\n\r\n", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  :8000\r\n\r\n", "400 Bad Request");
 }
+
+TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters_and_port)
+{
+    const std::string validCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=";
+
+    request = createRequestFromValidHeaders("Host: " + validCharacters + ":8080");
+}
