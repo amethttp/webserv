@@ -745,3 +745,13 @@ TEST(take_as_failure_a_request_with_multiple_host_headers)
 {
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nHost: my.domain.com", "400 Bad Request");
 }
+
+TEST(recognize_a_request_with_case_insensitive_headers)
+{
+    request = createRequestFromValidHeaders("hOSt: localhost\r\nCoNNeCtIon: keep-alive\r\ncOntENT-leNGTH: 0");
+
+    assertHeaderSize(3);
+    assertHeader("Host", "localhost");
+    assertHeader("Connection", "keep-alive");
+    assertHeader("Content-Length", "0");
+}

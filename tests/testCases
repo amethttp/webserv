@@ -1111,7 +1111,7 @@
 "Host: localhost\r\nHost: my.domain.com\r\n\r\n"
 
 ### 55. Recognize case-insensitive headers
-"hOSt: localhost\r\nCoNNeCtIon: keep-alive\r\n\r\n"
+"hOSt: localhost\r\nCoNNeCtIon: keep-alive\r\ncOntENT-leNGTH: 0\r\n\r\n"
 
 ### 56. Recognize a request with valid CL header and size zero
 "Host: localhost\r\nContent-Length: 0\r\n\r\n"
@@ -1148,6 +1148,9 @@
 ### 66. Take as failure a request with invalid Connection header
 "Host: localhost\r\nConnection: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
 
+### 67. Recognize a request with overriding headers
+"Host: localhost\r\nX-Header: value\r\nX-Header: newValue"
+
 
 # 1. Separate path-query (decode only path, not URI neither query)                      DONE
 # 2. Target pct-decoder                                                                 DONE
@@ -1176,11 +1179,6 @@
 #
 # REFACTOR: SHOULD ABSTRACT THE IS_PCT_ENCODED | IS_TCHAR... METHODS TO USE THEM ACROSS FILES AND NOT ONLY IN TOKENIZER
 #
-
-#
-# REFACTOR: VALIDATE PCT-ENCODED IN HOST HEADER IN REQUEST_VALIDATOR OR IN REQUEST_DECODER?????????? SHOULD BE IN VALIDATOR RIGHT?
-#
-
 
 # 
 # CREATE REQUEST_PROCESSER_SHOULD SUITE AND MOVE SEPARATOR, DECODER AND NORMALIZER TESTS THERE
