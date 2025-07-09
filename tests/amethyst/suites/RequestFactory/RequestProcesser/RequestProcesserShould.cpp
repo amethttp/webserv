@@ -126,7 +126,7 @@ TEST(decode_valid_case_insensitive_pct_encoded_pchars)
     assertRequestLine(GET, "/index/%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B", "HTTP/1.1");
 }
 
-TEST(take_as_failure_a_target_with_pct_encoded_control_chars)
+TEST(take_as_failure_a_target_path_with_pct_encoded_control_chars)
 {
     assertRequestIsInvalidFromRequestLine("GET /index/%0d HTTP/1.1");
     assertRequestIsInvalidFromRequestLine("GET /index/%0A HTTP/1.1");

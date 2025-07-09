@@ -162,6 +162,14 @@ TEST(process_a_request_target_separation_and_decoding_and_normalization)
     assertRequestLine(GET, unprocessedTarget, "HTTP/1.1");
 }
 
+TEST(take_as_failure_a_target_with_pct_encoded_control_chars)
+{
+    assertRequestIsInvalidFromRequestLine("GET /index/%0d HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/%0A HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/?%00 HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/?%7f HTTP/1.1", "400 Bad Request");
+}
+
 
 /* REQUEST HEADERS TESTS */
 TEST(take_as_failure_a_request_without_host_header)
