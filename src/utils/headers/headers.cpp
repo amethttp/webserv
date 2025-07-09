@@ -1,6 +1,7 @@
 #include "headers.hpp"
 #include "utils/HTTP/http.hpp"
 #include "utils/string/string.hpp"
+#include <stdexcept>
 
 void addHeader(headers_t &headers, const std::string &header)
 {
@@ -13,4 +14,12 @@ void addHeader(headers_t &headers, const std::string &header)
 bool containsHeader(const headers_t &headers, const std::string &headerKey)
 {
     return headers.find(headerKey) != headers.end();
+}
+
+std::string getHeader(const headers_t &headers, const std::string &headerKey)
+{
+    if (!containsHeader(headers, headerKey))
+        throw std::logic_error("The header '" + headerKey + "' does not exist");
+
+    return headers.at(headerKey).back();
 }

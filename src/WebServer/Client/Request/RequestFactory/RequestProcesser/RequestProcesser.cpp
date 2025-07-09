@@ -20,7 +20,8 @@ SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
 
 SimpleResult RequestProcesser::processHostHeaderPctDecoding(headers_t &headers)
 {
-    const Result<std::string> decodingResult = RequestPctDecoder::decode(headers.at("Host").back());
+    const std::string hostValue = getHeader(headers, "Host");
+    const Result<std::string> decodingResult = RequestPctDecoder::decode(hostValue);
     if (decodingResult.isFailure())
         return SimpleResult::fail(decodingResult.getError());
 
@@ -48,10 +49,10 @@ SimpleResult RequestProcesser::processHeaders(headers_t &headers)
         return SimpleResult::fail(headerDecodingResult.getError());
 
     if (containsHeader(headers, "Transfer-Encoding"))
-        headers["Transfer-Encoding"][0] = toLower(headers["Transfer-Encoding"][0]);
+        headers["Transfer-Encoding"][0] = toLower(getHeader(headers, "Transfer-Encoding"));
 
     if (containsHeader(headers, "Connection"))
-        headers["Connection"][0] = toLower(headers["Connection"][0]);
+        headers["Connection"][0] = toLower(getHeader(headers, "Connection"));
 
     return SimpleResult::ok();
 }
