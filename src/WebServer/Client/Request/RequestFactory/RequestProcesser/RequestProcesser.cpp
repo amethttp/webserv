@@ -25,7 +25,7 @@ SimpleResult RequestProcesser::processHostHeaderPctDecoding(headers_t &headers)
     if (decodingResult.isFailure())
         return SimpleResult::fail(decodingResult.getError());
 
-    headers["Host"][0] = decodingResult.getValue();
+    updateHeader(headers, "Host", decodingResult.getValue());
     return SimpleResult::ok();
 }
 
@@ -49,10 +49,16 @@ SimpleResult RequestProcesser::processHeaders(headers_t &headers)
         return SimpleResult::fail(headerDecodingResult.getError());
 
     if (containsHeader(headers, "Transfer-Encoding"))
-        headers["Transfer-Encoding"][0] = toLower(getHeader(headers, "Transfer-Encoding"));
+    {
+        const std::string transferEncodingNewValue = toLower(getHeader(headers, "Transfer-Encoding"));
+        updateHeader(headers, "Transfer-Encoding", transferEncodingNewValue);
+    }
 
     if (containsHeader(headers, "Connection"))
-        headers["Connection"][0] = toLower(getHeader(headers, "Connection"));
+    {
+        const std::string connectionNewValue = toLower(getHeader(headers, "Connection"));
+        updateHeader(headers, "Connection", connectionNewValue);
+    }
 
     return SimpleResult::ok();
 }

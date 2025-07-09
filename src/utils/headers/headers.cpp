@@ -23,3 +23,12 @@ std::string getHeader(const headers_t &headers, const std::string &headerKey)
 
     return headers.at(headerKey).back();
 }
+
+void updateHeader(headers_t &headers, const std::string &headerKey, const std::string &newValue)
+{
+    if (!containsHeader(headers, headerKey))
+        throw std::logic_error("The header '" + headerKey + "' does not exist");
+
+    headers[headerKey].clear();
+    headers[headerKey].push_back(newValue);
+}
