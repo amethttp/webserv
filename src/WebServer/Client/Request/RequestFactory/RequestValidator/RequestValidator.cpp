@@ -2,82 +2,9 @@
 #include "utils/string/string.hpp"
 #include "utils/headers/headers.hpp"
 #include "utils/numeric/numeric.hpp"
+#include "HostHeaderValidator/HostHeaderValidator.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 #include <stdlib.h>
-
-bool RequestValidator::isUnreserved(const char c)
-{
-    const std::string unreservedSymbols = "-._~";
-
-    return (std::isalnum(c) || unreservedSymbols.find(c) != std::string::npos);
-}
-
-bool RequestValidator::isPctEncoded(const std::string &header, const size_t pos)
-{
-    if (pos + 2 >= header.length())
-        return false;
-
-    return (header[pos] == '%'
-            && std::isxdigit(header[pos + 1])
-            && std::isxdigit(header[pos + 2]));
-}
-
-bool RequestValidator::isSubDelim(const char c)
-{
-    const std::string subDelimSymbols = "!$&'()*+,;=";
-
-    return subDelimSymbols.find(c) != std::string::npos;
-}
-
-bool RequestValidator::isRegName(const std::string &header, const size_t pos)
-{
-    return (isUnreserved(header[pos]) || isPctEncoded(header, pos) || isSubDelim(header[pos]));
-}
-
-bool RequestValidator::isValidHostName(const std::string &hostName)
-{
-    if (hostName.empty())
-        return false;
-
-    for (size_t i = 0; i < hostName.length(); i++)
-    {
-        if (!isRegName(hostName, i))
-            return false;
-    }
-
-    return true;
-}
-
-bool RequestValidator::isValidHostPort(const std::string &port)
-{
-    if (port.empty() || !isLong(port))
-        return false;
-
-    const long portNum = std::atol(port.c_str());
-
-    return (portNum >= 0 && portNum <= 65535);
-}
-
-bool RequestValidator::isValidHostHeader(const headerValue_t &hostHeaderValues)
-{
-    if (hostHeaderValues.size() != 1)
-        return false;
-
-    const std::string hostValue = hostHeaderValues.front();
-    const size_t portSeparator = hostValue.find(':');
-    const std::string hostName = hostValue.substr(0, portSeparator);
-    std::string hostPort;
-
-    if (portSeparator != std::string::npos)
-        hostPort = hostValue.substr(portSeparator + 1);
-
-    if (!isValidHostName(hostName))
-        return false;
-    if (portSeparator != std::string::npos)
-        return isValidHostPort(hostPort);
-
-    return true;
-}
 
 bool RequestValidator::isValidContentLengthHeader(const headerValue_t &contentLengthHeaderValues)
 {
@@ -129,7 +56,7 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
 SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHeaders)
 {
     if (!containsHeader(requestHeaders, "Host")
-        || !isValidHostHeader(requestHeaders.at("Host")))
+        || !HostHeaderValidator::isValid(requestHeaders.at("Host")))
         return SimpleResult::fail("400 Bad Request");
 
     if (containsHeader(requestHeaders, "Content-Length")
