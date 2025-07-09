@@ -4,16 +4,7 @@
 #include "HostHeaderValidator/HostHeaderValidator.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 #include "ContentLengthHeaderValidator/ContentLengthHeaderValidator.hpp"
-
-bool RequestValidator::isValidTransferEncodingHeader(const headerValue_t &transferEncodingHeaderValues)
-{
-    if (transferEncodingHeaderValues.size() != 1)
-        return false;
-
-    const std::string transferEncodingValue = toLower(transferEncodingHeaderValues.front());
-
-    return transferEncodingValue == "chunked";
-}
+#include "TransferEncodingHeaderValidator/TransferEncodingHeaderValidator.hpp"
 
 bool RequestValidator::isValidConnectionHeader(const headerValue_t &connectionHeaderValues)
 {
@@ -54,7 +45,7 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
         return SimpleResult::fail("400 Bad Request");
 
     if (containsHeader(requestHeaders, "Transfer-Encoding")
-        && !isValidTransferEncodingHeader(requestHeaders.at("Transfer-Encoding")))
+        && !TransferEncodingHeaderValidator::isValid(requestHeaders.at("Transfer-Encoding")))
         return SimpleResult::fail("400 Bad Request");
 
     if (containsHeader(requestHeaders, "Connection")
