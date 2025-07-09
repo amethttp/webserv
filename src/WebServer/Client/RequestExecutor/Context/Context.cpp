@@ -1,11 +1,11 @@
-#include "Parameters.hpp"
+#include "Context.hpp"
 
-Parameters::Parameters(Request &req, Location &loc) : request_(req), location_(loc)
+Context::Context(Request &req, Location &loc) : request_(req), location_(loc)
 {
-	this->setParameters();
+	this->setContext();
 }
 
-void Parameters::checkRequestHeaders()
+void Context::checkRequestHeaders()
 {
 	std::map<std::string, std::string> reqHeaders = this->request_.getHeaders();
 
@@ -16,12 +16,12 @@ void Parameters::checkRequestHeaders()
 	}
 }
 
-void Parameters::routeTarget()
+void Context::routeTarget()
 {
 	this->targetPath_ = this->location_.getRoot() + this->request_.getTarget();
 }
 
-void  Parameters::fitMethod()
+void  Context::fitMethod()
 {
 	t_method reqMethod = this->request_.getMethod();
 
@@ -38,7 +38,7 @@ void  Parameters::fitMethod()
 	}
 }
 
-void Parameters::setParameters()
+void Context::setContext()
 {
 	this->connectionMode_ = C_KEEP_ALIVE;
 
@@ -47,21 +47,21 @@ void Parameters::setParameters()
 	checkRequestHeaders();
 }
 
-std::string Parameters::getTargetPath() const
+std::string Context::getTargetPath() const
 {
 	return this->targetPath_;
 }
 
-t_connection Parameters::getConnectionMode() const
+t_connection Context::getConnectionMode() const
 {
 	return this->connectionMode_;
 }
 
-t_method Parameters::getMethod() const
+t_method Context::getMethod() const
 {
 	return this->method_;
 }
 
-Parameters::~Parameters()
+Context::~Context()
 {
 }

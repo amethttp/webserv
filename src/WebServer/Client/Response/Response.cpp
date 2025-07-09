@@ -354,7 +354,7 @@ static void setIndexNames(struct dirent *dir, std::string &anchorName, std::stri
 		displayName = anchorName.substr(0,22) + "..>";
 }
 
-t_httpCode Response::tryAutoIndex(Parameters &p)
+t_httpCode Response::tryAutoIndex(Context &p)
 {
 	if (!p.location_.getAutoIndex())
 		return FORBIDDEN;
@@ -387,7 +387,7 @@ t_httpCode Response::tryAutoIndex(Parameters &p)
 	return FORBIDDEN;
 }
 
-static bool findIndex(Parameters &p)
+static bool findIndex(Context &p)
 {
 	std::string indexPath;
 	std::vector<std::string> indexList = p.location_.getIndexList();
@@ -405,7 +405,7 @@ static bool findIndex(Parameters &p)
 	return false;
 }
 
-t_httpCode Response::tryIndex(Parameters &p)
+t_httpCode Response::tryIndex(Context &p)
 {
 	// normalizeTrailingSlash(p.targetPath_);
 	if (findIndex(p))
@@ -414,7 +414,7 @@ t_httpCode Response::tryIndex(Parameters &p)
 	return tryAutoIndex(p);
 }
 
-t_httpCode Response::methodGet(Parameters &p)
+t_httpCode Response::methodGet(Context &p)
 {
 	int statCheck;
 
@@ -433,7 +433,7 @@ t_httpCode Response::methodGet(Parameters &p)
 	}
 }
 
-t_httpCode Response::postFile(Parameters &p)
+t_httpCode Response::postFile(Context &p)
 {
 	if (pathExists(p.targetPath_))
 		return CONFLICT;
@@ -451,7 +451,7 @@ t_httpCode Response::postFile(Parameters &p)
 	return CREATED;
 }
 
-t_httpCode Response::methodPost(Parameters &p)
+t_httpCode Response::methodPost(Context &p)
 {
 	int statCheck;
 
@@ -476,7 +476,7 @@ static t_httpCode removeFile(const char *path)
 	return NO_CONTENT;
 }
 
-t_httpCode Response::methodDelete(Parameters &p)
+t_httpCode Response::methodDelete(Context &p)
 {
 	int statCheck;
 
@@ -494,7 +494,7 @@ t_httpCode Response::methodDelete(Parameters &p)
 	}
 }
 
-t_httpCode Response::executeMethod(Parameters &p)
+t_httpCode Response::executeMethod(Context &p)
 {
 	switch (p.getMethod())
 	{
@@ -595,7 +595,7 @@ t_httpCode Response::waitForOutput(pid_t child, int pipefd[2], time_t start)
 	return OK;
 }
 
-t_httpCode Response::executeCGI(Parameters &p, t_cgi &cgi)
+t_httpCode Response::executeCGI(Context &p, t_cgi &cgi)
 {
 	int pipefd[2];
 	pid_t child;
@@ -623,7 +623,7 @@ t_httpCode Response::executeCGI(Parameters &p, t_cgi &cgi)
 	return waitForOutput(child, pipefd, start);
 }
 
-void Response::executeRequest(Parameters &p)
+void Response::executeRequest(Context &p)
 {
 	t_httpCode code;
 	t_connection mode;
@@ -670,7 +670,7 @@ static bool checkReturn(Location &location)
 	return (location.getReturn().code != 0);
 }
 
-void Response::build(Parameters &p) 
+void Response::build(Context &p) 
 {
 	this->clear();
 

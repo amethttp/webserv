@@ -8,7 +8,7 @@
 #include "WebServer/Server/Server.hpp"
 #include "WebServer/Client/Request/Request.hpp"
 #include "WebServer/Server/Location/Location.hpp"
-#include "RequestExecutor/Parameters/Parameters.hpp"
+#include "RequestExecutor/Context/Context.hpp"
 
 #define INDEX_STYLE "src/utils/htmlTemplates/indexStyle.html"
 #define INDEX_FILE_LIST "src/utils/htmlTemplates/indexFileList.html"
@@ -56,18 +56,18 @@ private:
 	// request executor
 	std::string getMIME(std::string &target);
 
-	t_httpCode tryIndex(Parameters &p);
-	t_httpCode tryAutoIndex(Parameters &p);
+	t_httpCode tryIndex(Context &p);
+	t_httpCode tryAutoIndex(Context &p);
 	t_httpCode getFile(std::string &target);
-	t_httpCode postFile(Parameters &p);
-	t_httpCode methodGet(Parameters &p);
-	t_httpCode methodPost(Parameters &p);
-	t_httpCode methodDelete(Parameters &p);
-	t_httpCode executeMethod(Parameters &p);
-	t_httpCode executeCGI(Parameters &p, t_cgi &cgi);
+	t_httpCode postFile(Context &p);
+	t_httpCode methodGet(Context &p);
+	t_httpCode methodPost(Context &p);
+	t_httpCode methodDelete(Context &p);
+	t_httpCode executeMethod(Context &p);
+	t_httpCode executeCGI(Context &p, t_cgi &cgi);
 	t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start);
 
-	void executeRequest(Parameters &p);
+	void executeRequest(Context &p);
 public:
 	Response();
 	~Response();
@@ -82,6 +82,6 @@ public:
 
 	void clear();
 
-	void build(Parameters &responseParams);
+	void build(Context &responseParams);
 	void build(t_httpCode code, t_connection mode);
 };

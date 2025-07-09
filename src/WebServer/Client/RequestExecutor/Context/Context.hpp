@@ -5,7 +5,7 @@
 #include "WebServer/Server/Location/Location.hpp"
 #include "utils/http.hpp"
 
-class Parameters
+class Context
 {
 public:
 	t_method method_;
@@ -18,10 +18,10 @@ public:
 	void checkRequestHeaders();
 	void routeTarget();
 	void fitMethod();
-	void setParameters();
+	void setContext();
 public:
-	Parameters(Request &request, Location &location);
-	~Parameters();
+	Context(Request &request, Location &location);
+	~Context();
 
 	t_method getMethod() const;
 	std::string getTargetPath() const;

@@ -151,7 +151,7 @@ void Client::executeRequest(std::vector<Server> &serverList)
 	Server server = ServerMatcher::matchServer(request_, serverList);
 	setLocationsPH(request_, server);
 	Location location = LocationMatcher::matchLocation(request_, server);
-	Parameters responseParams(request_, location);
+	Context responseParams(request_, location);
 	responseParams.uploadPath_ = server.getUploadPath();
 
 	if (request_.getHTTPVersion() == "HTTP/1.1")
