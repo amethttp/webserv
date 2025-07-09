@@ -197,17 +197,8 @@ TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
     assertHeader("Host", validCharacters);
 }
 
-TEST(recognize_and_decode_a_request_with_a_host_header_containing_valid_pct_encoded_chars)
-{
-    request = createRequestFromValidHeaders("Host: localhost_%20_%5b_%7b");
-
-    assertHeaderSize(1);
-    assertHeader("Host", "localhost_ _[_{");
-}
-
 TEST(take_as_failure_a_request_with_a_host_header_containing_wrong_pct_encoded_chars)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost_%00_%7f", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost_%xx", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost_%f", "400 Bad Request");
     assertRequestIsInvalidFromHeaders("Host: localhost_%", "400 Bad Request");
@@ -323,15 +314,6 @@ TEST(recognize_a_request_with_valid_transfer_encoding_header)
     assertHeader("Transfer-Encoding", "chunked");
 }
 
-TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
-{
-    request = createRequestFromValidBody("Transfer-Encoding: cHUnKeD", "0\r\n\r\n");
-
-    assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Transfer-Encoding", "chunked");
-}
-
 TEST(take_as_failure_a_request_with_a_transfer_encoding_header_with_invalid_value)
 {
     assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding:", "400 Bad Request");
@@ -366,6 +348,41 @@ TEST(recognize_a_request_with_valid_connection_header_with_close_value)
     assertHeader("Connection", "close");
 }
 
+TEST(take_as_failure_a_request_with_a_connection_header_with_invalid_value)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection:", "400 Bad Request");
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: invalid", "400 Bad Request");
+}
+
+TEST(take_as_failure_a_request_with_multiple_connection_headers)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: close\r\nConnection: close", "400 Bad Request");
+}
+
+
+/* REQUEST HEADERS PROCESSING TESTS */
+TEST(recognize_and_decode_a_request_with_a_host_header_containing_valid_pct_encoded_chars)
+{
+    request = createRequestFromValidHeaders("Host: localhost_%20_%5b_%7b");
+
+    assertHeaderSize(1);
+    assertHeader("Host", "localhost_ _[_{");
+}
+
+TEST(take_as_failure_a_host_name_with_pct_encoded_control_characters)
+{
+    assertRequestIsInvalidFromHeaders("Host: localhost_%00_%7f", "400 Bad Request");
+}
+
+TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
+{
+    request = createRequestFromValidBody("Transfer-Encoding: cHUnKeD", "0\r\n\r\n");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Transfer-Encoding", "chunked");
+}
+
 TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_keep_alive_value)
 {
     request = createRequestFromValidHeaders("Host: localhost\r\nConnection: KeEP-ALivE");
@@ -382,15 +399,4 @@ TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_clos
     assertHeaderSize(2);
     assertHeader("Host", "localhost");
     assertHeader("Connection", "close");
-}
-
-TEST(take_as_failure_a_request_with_a_connection_header_with_invalid_value)
-{
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection:", "400 Bad Request");
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: invalid", "400 Bad Request");
-}
-
-TEST(take_as_failure_a_request_with_multiple_connection_headers)
-{
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: close\r\nConnection: close", "400 Bad Request");
 }
