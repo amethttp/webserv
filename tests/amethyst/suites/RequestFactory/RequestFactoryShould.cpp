@@ -15,6 +15,13 @@ static Request_t createFromValidRequest(const std::string &requestString)
     return result.getValue();
 }
 
+static Request_t createRequestFromValidRequestLine(const std::string &requestLineString)
+{
+    const std::string requestString = requestLineString + "\r\nHost: localhost\r\n\r\n";
+
+    return createFromValidRequest(requestString);
+}
+
 static Request_t createRequestFromValidHeaders(const std::string &headersString)
 {
     const std::string requestString = "GET / HTTP/1.1\r\n" + headersString + "\r\n\r\n";
@@ -142,7 +149,18 @@ TEST(take_as_failure_a_non_supported_HTTP_version)
 }
 
 
-/* REQUEST TARGET PATH-QUERY SEPARATION TESTS */
+/* REQUEST TARGET PROCESSING TESTS */
+TEST(process_a_request_target_separation_and_decoding_and_normalization)
+{
+    const std::string unprocessedPath = "//../%2e%2E/about/./%2e/%2F//index.html_%3c_%3C_%3e_%3Fvoid";
+    const std::string unprocessedQuery = "query?/../var_%3c_%3C_%3e";
+    const std::string unprocessedTarget = unprocessedPath + '?' + unprocessedQuery;
+
+    request = createRequestFromValidRequestLine("GET " + unprocessedTarget + " HTTP/1.1");
+
+    assertTargetComponents("/about/index.html_<_<_>_?void", unprocessedQuery);
+    assertRequestLine(GET, unprocessedTarget, "HTTP/1.1");
+}
 
 
 /* REQUEST HEADERS TESTS */
