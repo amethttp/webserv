@@ -2,19 +2,10 @@
 #include "utils/string/string.hpp"
 #include "utils/headers/headers.hpp"
 #include "HostHeaderValidator/HostHeaderValidator.hpp"
+#include "ConnectionHeaderValidator/ConnectionHeaderValidator.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 #include "ContentLengthHeaderValidator/ContentLengthHeaderValidator.hpp"
 #include "TransferEncodingHeaderValidator/TransferEncodingHeaderValidator.hpp"
-
-bool RequestValidator::isValidConnectionHeader(const headerValue_t &connectionHeaderValues)
-{
-    if (connectionHeaderValues.size() != 1)
-        return false;
-
-    const std::string connectionHeaderValue = toLower(connectionHeaderValues.front());
-
-    return (connectionHeaderValue == "keep-alive" || connectionHeaderValue == "close");
-}
 
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
 {
@@ -49,7 +40,7 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
         return SimpleResult::fail("400 Bad Request");
 
     if (containsHeader(requestHeaders, "Connection")
-        && !isValidConnectionHeader(requestHeaders.at("Connection")))
+        && !ConnectionHeaderValidator::isValid(requestHeaders.at("Connection")))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();
