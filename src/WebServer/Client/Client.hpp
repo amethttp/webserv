@@ -6,6 +6,8 @@
 #include "utils/fd.hpp"
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"
+#include "RouteMatchers/Server/ServerMatcher.hpp"
+#include "RouteMatchers/Location/LocationMatcher.hpp"
 
 #define DISCONNECTED "disconnected"
 #define TIMED_OUT "timed out"

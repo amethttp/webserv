@@ -199,6 +199,11 @@ void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
 {
 	Client *client = static_cast<Client *>(epoll.eventBuffer[eventIndex].data.ptr);
 
+	// struct sockaddr_in addr;
+	// socklen_t len = sizeof(addr);
+	// getsockname(client->getFd(), (struct sockaddr*)&addr, &len);
+	// int local_port = ntohs(addr.sin_port);
+
 	if (epoll.eventBuffer[eventIndex].events & EPOLLIN)
 		receiveRequest(client, epoll);
 	else if (epoll.eventBuffer[eventIndex].events & EPOLLOUT)

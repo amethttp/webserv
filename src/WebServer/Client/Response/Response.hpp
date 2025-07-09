@@ -5,10 +5,10 @@
 #include <sys/wait.h>
 #include "utils/http.hpp"
 #include "StatusLine/StatusLine.hpp"
-#include "Parameters/Parameters.hpp"
 #include "WebServer/Server/Server.hpp"
 #include "WebServer/Client/Request/Request.hpp"
 #include "WebServer/Server/Location/Location.hpp"
+#include "RequestExecutor/Parameters/Parameters.hpp"
 
 #define INDEX_STYLE "src/utils/htmlTemplates/indexStyle.html"
 #define INDEX_FILE_LIST "src/utils/htmlTemplates/indexFileList.html"
@@ -18,7 +18,8 @@
 #define CGI_TIMEOUT 2
 #define BUFFER_SIZE 4096
 
-typedef std::pair<std::string, std::string> Cgi;
+typedef std::pair<std::string, std::string> t_cgi;
+typedef std::map<std::string, std::string> t_headers;
 
 typedef struct s_body
 {
@@ -35,7 +36,7 @@ private:
 	std::string buffer_; // to client
 
 	StatusLine statusLine_;
-	std::map<std::string, std::string> headers_; // make response a dto/simpler class
+	t_headers headers_; // make response a dto/simpler class
 	t_body body_;
 
 	// to response generator
@@ -63,7 +64,7 @@ private:
 	t_httpCode methodPost(Parameters &p);
 	t_httpCode methodDelete(Parameters &p);
 	t_httpCode executeMethod(Parameters &p);
-	t_httpCode executeCGI(Parameters &p, Cgi &cgi);
+	t_httpCode executeCGI(Parameters &p, t_cgi &cgi);
 	t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start);
 
 	void executeRequest(Parameters &p);

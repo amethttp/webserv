@@ -8,6 +8,17 @@ Server::~Server()
 {
 }
 
+bool Server::matchesName(std::string &match)
+{
+	for (std::vector<std::string>::iterator name = this->names_.begin(); name != this->names_.end(); ++name)
+	{
+		if (*name == match)
+			return true;
+	}
+
+	return false;
+}
+
 std::vector<int> Server::getPorts()
 {
 	return this->ports_;

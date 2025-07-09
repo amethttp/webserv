@@ -106,59 +106,7 @@ bool Client::shouldClose()
     return this->response_.getConnection();
 }
 
-// Decide if we normalize slashes or not || Nginx default beaviour doesnt do it
-static void removeTrailingSlashes(std::string &str)
-{
-	if (*(str.rbegin()) == '/' && str.length() > 1)
-		str.erase(str.length() - 1);
-}
-
-static int countMatchingDepth(std::string base, std::string target)
-{
-	size_t i = 0;
-	size_t len = 0;
-
-	if (base.length() > target.length())
-		return -1;
-
-	while (i < base.length())
-	{
-		if (base[i] != target[i])
-			break ;
-		i++;
-	}
-
-	if (i != base.length())
-		return -1;
-	else if ((base.length() != target.length()) && (base[i - 1] != '/'))
-		return -1;
-
-	return i;
-}
-
-// Decide on no locations defined on server
-static Location matchLocation(Request &request, Server &server)
-{
-	int matchIndex = 0;
-	int matchLength = 0;
-	int longestMatch = 0;
-	std::string targetRoute = request.getTarget();
-	std::vector<Location> locations = server.getLocations();
-
-	for (size_t i = 0; i < locations.size(); ++i)
-	{
-		matchLength = countMatchingDepth(locations[i].getPath(), targetRoute);
-		if (matchLength > longestMatch)
-		{
-			matchIndex = i;
-			longestMatch = matchLength;
-		}
-	}
-
-	return locations[matchIndex];
-}
-
-static Location getLocationPH(Request &request, Server &server)
+static void setLocationsPH(Request &request, Server &server)
 {
 	Location location;
 	std::vector<Location> testLocations;
@@ -196,39 +144,20 @@ static Location getLocationPH(Request &request, Server &server)
 	testLocations.push_back(location);
 	server.setLocations(testLocations);
 	server.setUploadPath("tests/www/uploads/");
-
-	return matchLocation(request, server); // this prob belongs to server
 }
 
-// resolve no name match // same server name dieferent ports... || need to know the port etc..
-// Handle when server / location fields might not be filled... eg: no names...
-static Server getServerPH(Request &request, std::vector<Server> &serverList)
+void Client::executeRequest(std::vector<Server> &serverList)
 {
-	std::string host = request.getHeaders()["Host"];
+	Server server = ServerMatcher::matchServer(request_, serverList);
+	setLocationsPH(request_, server);
+	Location location = LocationMatcher::matchLocation(request_, server);
+	Parameters responseParams(request_, location);
+	responseParams.uploadPath_ = server.getUploadPath();
 
-	for (std::vector<Server>::iterator serverIt = serverList.begin(); serverIt != serverList.end(); ++serverIt)
-	{
-		for (std::vector<std::string>::iterator name = serverIt->getNames().begin(); name != serverIt->getNames().end(); ++name)
-		{
-			if (*name == host)
-				return *serverIt;
-		}
-	}
-
-	return *serverList.begin();
-}
-
-void Client::executeRequest(std::vector<Server> &serversList)
-{
-	Server server = getServerPH(this->request_, serversList);
-	Location location = getLocationPH(this->request_, server);
-	Parameters responseParams(this->request_, location);
-	responseParams.uploadPath_ = "tests/www/"; // from server??
-
-	if (this->request_.getHTTPVersion() == "HTTP/1.1")
-		this->response_.build(responseParams);
+	if (request_.getHTTPVersion() == "HTTP/1.1")
+		response_.build(responseParams);
 	else
-		this->response_.build(HTTP_VERSION_NOT_SUPPORTED, C_KEEP_ALIVE);
+		response_.build(HTTP_VERSION_NOT_SUPPORTED, C_KEEP_ALIVE);
 }
 
 // instead of build response implement request executor ?? 
