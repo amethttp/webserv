@@ -22,6 +22,20 @@ static Request_t createRequestFromValidRequestLine(const std::string &requestLin
     return createFromValidRequest(requestString);
 }
 
+static Request_t createRequestFromValidHeaders(const std::string &headersString)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\n" + headersString + "\r\n\r\n";
+
+    return createFromValidRequest(requestString);
+}
+
+static Request_t createRequestFromValidBody(const std::string &bodyTypeHeader, const std::string &body)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
+
+    return createFromValidRequest(requestString);
+}
+
 static void assertTargetComponents(const std::string &path, const std::string &query)
 {
     ASSERT_EQUALS(path, request.requestLine.target.path);
@@ -33,6 +47,16 @@ static void assertRequestLine(method_t method, const std::string &targetUri, con
     ASSERT_EQUALS(method, request.requestLine.method);
     ASSERT_EQUALS(targetUri, request.requestLine.target.uri);
     ASSERT_EQUALS(version, request.requestLine.httpVersion);
+}
+
+static void assertHeaderSize(const size_t size)
+{
+    ASSERT_EQUALS(size, request.headers.size());
+}
+
+static void assertHeader(const std::string &key, const std::string &value)
+{
+    ASSERT_EQUALS(value, request.headers.at(key).back());
 }
 
 static void assertRequestIsInvalid(const std::string &invalidRequestString)
@@ -93,7 +117,7 @@ TEST(separate_a_path_from_a_query_with_multiple_question_mark_characters)
 }
 
 
-/* REQUEST TARGET PCT-DECODING TESTS */
+/* REQUEST PCT-DECODING TESTS */
 TEST(leave_the_same_file_target_if_it_does_not_contain_pct_encoded_pchars)
 {
     request = createRequestFromValidRequestLine("GET /index.html HTTP/1.1");
@@ -191,7 +215,7 @@ TEST(decode_the_target_path_pct_encoded_question_marks_separating_the_path_from_
 }
 
 
-/* REQUEST TARGET'S PATH NORMALIZING TESTS */
+/* REQUEST TARGET PATH NORMALIZATION TESTS */
 TEST(leave_the_same_basic_path_if_it_does_not_need_to_be_normalized)
 {
     request = createRequestFromValidRequestLine("GET / HTTP/1.1");
@@ -550,4 +574,33 @@ TEST(normalize_a_resource_outside_the_document_root)
 
     assertTargetComponents("/etc/passwd", "");
     assertRequestLine(GET, "/../../../../..%2f..%2F%2e%2E/%2e%2E/%2e%2E/%2e%2E/%2e%2E/etc/passwd", "HTTP/1.1");
+}
+
+
+/* REQUEST HEADERS */
+TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
+{
+    request = createRequestFromValidBody("Transfer-Encoding: cHUnKeD", "0\r\n\r\n");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Transfer-Encoding", "chunked");
+}
+
+TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_keep_alive_value)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nConnection: KeEP-ALivE");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Connection", "keep-alive");
+}
+
+TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_close_value)
+{
+    request = createRequestFromValidHeaders("Host: localhost\r\nConnection: cLOSe");
+
+    assertHeaderSize(2);
+    assertHeader("Host", "localhost");
+    assertHeader("Connection", "close");
 }
