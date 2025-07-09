@@ -47,10 +47,10 @@ SimpleResult RequestProcesser::processHeaders(headers_t &headers)
     if (headerDecodingResult.isFailure())
         return SimpleResult::fail(headerDecodingResult.getError());
 
-    if (headers.find("Transfer-Encoding") != headers.end())
+    if (containsHeader(headers, "Transfer-Encoding"))
         headers["Transfer-Encoding"][0] = toLower(headers["Transfer-Encoding"][0]);
 
-    if (headers.find("Connection") != headers.end())
+    if (containsHeader(headers, "Connection"))
         headers["Connection"][0] = toLower(headers["Connection"][0]);
 
     return SimpleResult::ok();
