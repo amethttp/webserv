@@ -35,19 +35,19 @@ static void assertRequestLine(method_t method, const std::string &targetUri, con
     ASSERT_EQUALS(version, request.requestLine.httpVersion);
 }
 
-static void assertRequestIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
+static void assertRequestIsInvalid(const std::string &invalidRequestString)
 {
     Result<Request_t> result = RequestFactory::create(invalidRequestString);
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS(errorMessage, result.getError());
+    ASSERT_EQUALS("400 Bad Request", result.getError());
 }
 
-static void assertRequestIsInvalidFromRequestLine(const std::string &invalidRequestLineString, const std::string &errorMessage)
+static void assertRequestIsInvalidFromRequestLine(const std::string &invalidRequestLineString)
 {
     const std::string invalidRequestString = invalidRequestLineString + "\r\nHost: localhost\r\n\r\n";
 
-    assertRequestIsInvalid(invalidRequestString, errorMessage);
+    assertRequestIsInvalid(invalidRequestString);
 }
 
 
@@ -128,10 +128,10 @@ TEST(decode_valid_case_insensitive_pct_encoded_pchars)
 
 TEST(take_as_failure_a_target_with_pct_encoded_control_chars)
 {
-    assertRequestIsInvalidFromRequestLine("GET /index/%0d HTTP/1.1", "400 Bad Request");
-    assertRequestIsInvalidFromRequestLine("GET /index/%0A HTTP/1.1", "400 Bad Request");
-    assertRequestIsInvalidFromRequestLine("GET /index/%00 HTTP/1.1", "400 Bad Request");
-    assertRequestIsInvalidFromRequestLine("GET /index/%7f HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/%0d HTTP/1.1");
+    assertRequestIsInvalidFromRequestLine("GET /index/%0A HTTP/1.1");
+    assertRequestIsInvalidFromRequestLine("GET /index/%00 HTTP/1.1");
+    assertRequestIsInvalidFromRequestLine("GET /index/%7f HTTP/1.1");
 }
 
 TEST(leave_the_same_target_query_if_it_does_contain_valid_pct_encoded_pchars)
@@ -152,10 +152,10 @@ TEST(leave_the_same_target_query_if_it_does_contain_valid_case_insensitive_pct_e
 
 TEST(take_as_failure_a_target_query_with_pct_encoded_control_chars)
 {
-    assertRequestIsInvalidFromRequestLine("GET /index/query?%0d HTTP/1.1", "400 Bad Request");
-    assertRequestIsInvalidFromRequestLine("GET /index/query?%0A HTTP/1.1", "400 Bad Request");
-    assertRequestIsInvalidFromRequestLine("GET /index/query?%00 HTTP/1.1", "400 Bad Request");
-    assertRequestIsInvalidFromRequestLine("GET /index/query?%7f HTTP/1.1", "400 Bad Request");
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%0d HTTP/1.1");
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%0A HTTP/1.1");
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%00 HTTP/1.1");
+    assertRequestIsInvalidFromRequestLine("GET /index/query?%7f HTTP/1.1");
 }
 
 TEST(decode_valid_pct_encoded_pchars_inside_absolute_path_and_leave_the_same_target_query)
