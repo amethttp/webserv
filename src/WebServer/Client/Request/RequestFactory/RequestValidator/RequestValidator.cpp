@@ -1,23 +1,9 @@
 #include "RequestValidator.hpp"
 #include "utils/string/string.hpp"
 #include "utils/headers/headers.hpp"
-#include "utils/numeric/numeric.hpp"
 #include "HostHeaderValidator/HostHeaderValidator.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
-#include <stdlib.h>
-
-bool RequestValidator::isValidContentLengthHeader(const headerValue_t &contentLengthHeaderValues)
-{
-    if (contentLengthHeaderValues.size() != 1)
-        return false;
-
-    const std::string contentLengthValue = contentLengthHeaderValues.front();
-    if (!isLong(contentLengthValue))
-        return false;
-
-    const long contentLengthSize = std::atol(contentLengthValue.c_str());
-    return contentLengthSize >= 0;
-}
+#include "ContentLengthHeaderValidator/ContentLengthHeaderValidator.hpp"
 
 bool RequestValidator::isValidTransferEncodingHeader(const headerValue_t &transferEncodingHeaderValues)
 {
@@ -64,7 +50,7 @@ SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHe
         return SimpleResult::fail("400 Bad Request");
 
     if (containsHeader(requestHeaders, "Content-Length")
-        && !isValidContentLengthHeader(requestHeaders.at("Content-Length")))
+        && !ContentLengthHeaderValidator::isValid(requestHeaders.at("Content-Length")))
         return SimpleResult::fail("400 Bad Request");
 
     if (containsHeader(requestHeaders, "Transfer-Encoding")
