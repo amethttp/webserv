@@ -1,9 +1,10 @@
 #pragma once
 
 #include <string>
-#include "WebServer/Client/Request/Request.hpp"
-#include "WebServer/Server/Location/Location.hpp"
 #include "utils/http.hpp"
+#include "WebServer/Client/Request/Request.hpp"
+#include "WebServer/Server/Server.hpp"
+#include "WebServer/Server/Location/Location.hpp"
 
 class Context
 {
@@ -18,9 +19,8 @@ public:
 	void checkRequestHeaders();
 	void routeTarget();
 	void fitMethod();
-	void setContext();
 public:
-	Context(Request &request, Location &location);
+	Context(Request &request, Location &location, Server &server);
 	~Context();
 
 	t_method getMethod() const;

@@ -56,18 +56,18 @@ private:
 	// request executor
 	std::string getMIME(std::string &target);
 
-	t_httpCode tryIndex(Context &p);
-	t_httpCode tryAutoIndex(Context &p);
+	t_httpCode tryIndex(Context &c);
+	t_httpCode tryAutoIndex(Context &c);
 	t_httpCode getFile(std::string &target);
-	t_httpCode postFile(Context &p);
-	t_httpCode methodGet(Context &p);
-	t_httpCode methodPost(Context &p);
-	t_httpCode methodDelete(Context &p);
-	t_httpCode executeMethod(Context &p);
-	t_httpCode executeCGI(Context &p, t_cgi &cgi);
+	t_httpCode postFile(Context &c);
+	t_httpCode methodGet(Context &c);
+	t_httpCode methodPost(Context &c);
+	t_httpCode methodDelete(Context &c);
+	t_httpCode executeMethod(Context &c);
+	t_httpCode executeCGI(Context &c, t_cgi &cgi);
 	t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start);
 
-	void executeRequest(Context &p);
+	void executeRequest(Context &c);
 public:
 	Response();
 	~Response();

@@ -88,30 +88,6 @@ Response::Response()
 {
 }
 
-static void normalizeTrailingSlash(std::string &path)
-{
-	if (*path.rbegin() != '/')
-		path += '/';
-}
-
-static bool pathExists(std::string &path)
-{
-	struct stat st;
-
-	return (stat(path.c_str(), &st) == 0);
-}
-
-static int checkPath(std::string &path)
-{
-	struct stat st;
-
-	if (stat(path.c_str(), &st))
-		return errno;
-	if (access(path.c_str(), R_OK))
-		return EACCES;
-
-	return (st.st_mode & S_IFMT);
-}
 
 std::string Response::toString()
 {
@@ -158,33 +134,6 @@ void Response::eraseBuffer(size_t bytesToErase)
 	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
 }
 
-static std::string readFileToString(const char *path)
-{
-	struct stat st;
-	std::string str;
-	std::ifstream file(path, std::ifstream::binary);
-
-    if (!file.is_open())
-	{
-		file.close();
-        throw (std::runtime_error("Couldn't open file"));
-	}
-	if (stat(path, &st))
-	{
-		file.close();
-		throw (std::runtime_error("Stat operation failed"));
-	}
-	str.resize(static_cast<size_t>(st.st_size));
-	file.read(&str[0], static_cast<size_t>(st.st_size));
-	if (!file)
-	{
-		file.close();
-		throw (std::runtime_error("Reading operation failed"));
-	}
-    file.close();
-
-	return str;
-}
 
 static std::string getImfFixdate()
 {
@@ -254,20 +203,6 @@ void Response::setResponseHeaders(t_connection mode)
 	this->headers_["Connection"] = mode ? "close" : "keep-alive";
 }
 
-std::string Response::getMIME(std::string &target)
-{
-	int pos;
-	std::string res = "text/plain";
-
-	pos = target.rfind('.');
-	if (pos != std::string::npos)
-	{
-		if (this->extensionTypesDict_.find(target.substr(pos)) != this->extensionTypesDict_.end())
-			res = this->extensionTypesDict_[target.substr(pos)];
-	}
-	
-	return res;
-}
 
 void Response::setRepresentationHeaders()
 {
@@ -284,232 +219,6 @@ void Response::generateResponse(t_httpCode code, t_connection mode)
 	setStatusLine(code);
 	this->setResponseHeaders(mode);
 	this->setRepresentationHeaders();
-}
-
-void Response::setBodyFromString(std::string str)
-{
-	this->body_.content = str;
-	this->body_.type = this->extensionTypesDict_[".txt"];
-}
-
-void Response::setBodyFromFile(std::string target)
-{
-	this->body_.content = readFileToString(target.c_str());
-	this->body_.type = getMIME(target);
-}
-
-t_httpCode Response::getFile(std::string &target)
-{
-	this->setBodyFromFile(target);
-
-	return OK;
-}
-
-static void startHTML(std::ostringstream &html, const std::string &targetName)
-{
-	html << "<!DOCTYPE html>\n"
-		<< "<html>\n"
-			<< "<head>\n"
-				<< "<title>" << "Index of: " << targetName << "</title>\n"
-				<< readFileToString(INDEX_STYLE)
-			<< "</head>\n"
-			<< "<body>\n"
-				<< "<h2>" << "Index of: " << targetName << "</h2>\n"
-					<< readFileToString(INDEX_FILE_LIST)
-					<< "<ul>\n";
-}
-
-static void closeHTML(std::ostringstream &html)
-{
-	html << readFileToString(INDEX_CLOSE);
-}
-
-static void appendElementToHTML(std::ostringstream &html, std::string &targetPath, std::string &anchorName, std::string displayName, unsigned char type)
-{
-	struct stat st;
-	std::ostringstream size;
-	std::string lastModified = "";
-	std::string filePath = targetPath + anchorName;
-
-	if (!stat(filePath.c_str(), &st))
-	{
-		if (type != DT_DIR)
-			size << (st.st_size / 1000) << " KB";
-		lastModified = ctime(&st.st_mtime);
-	}
-	html << "<li class=\"file-item\">"
-			<< "<div><a href=\"" << anchorName << "\">" << displayName <<"</a></div>\n"
-			<< "<div>" << size.str() << "</div>\n"
-			<< "<div>" << lastModified << "</div>\n"
-		<< "</li>\n";
-}
-
-static void setIndexNames(struct dirent *dir, std::string &anchorName, std::string &displayName)
-{
-	anchorName = dir->d_name;
-	if (dir->d_type == DT_DIR)
-		anchorName += "/";
-	displayName = anchorName;
-	if (displayName.length() > 25)
-		displayName = anchorName.substr(0,22) + "..>";
-}
-
-t_httpCode Response::tryAutoIndex(Context &p)
-{
-	if (!p.location_.getAutoIndex())
-		return FORBIDDEN;
-
-	DIR *d;
-	struct dirent *dir;
-	std::string anchorName;
-	std::string displayName;
-	std::ostringstream html;
-
-	d = opendir(p.targetPath_.c_str());
-	if (d)
-	{
-		startHTML(html, p.targetPath_.c_str());
-		dir = readdir(d);
-		while (dir != NULL)
-		{
-			// if (dir->d_type == DT_REG || dir->d_type == DT_LNK || dir->d_type == DT_UNKNOWN)
-			setIndexNames(dir, anchorName, displayName);
-			appendElementToHTML(html, p.targetPath_, anchorName, displayName, dir->d_type);
-			dir = readdir(d);
-		}
-		closedir(d);
-		closeHTML(html);
-		this->body_.content = html.str();
-		this->body_.type = this->extensionTypesDict_[".html"];
-		return OK;
-	}
-
-	return FORBIDDEN;
-}
-
-static bool findIndex(Context &p)
-{
-	std::string indexPath;
-	std::vector<std::string> indexList = p.location_.getIndexList();
-
-	for (std::vector<std::string>::iterator ite = indexList.begin(); ite != indexList.end(); ++ite)
-	{
-		indexPath = p.targetPath_ + (*ite);
-		if (checkPath(indexPath) == S_IFREG)
-		{
-			p.targetPath_ = indexPath;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-t_httpCode Response::tryIndex(Context &p)
-{
-	// normalizeTrailingSlash(p.targetPath_);
-	if (findIndex(p))
-		return getFile(p.targetPath_);
-	
-	return tryAutoIndex(p);
-}
-
-t_httpCode Response::methodGet(Context &p)
-{
-	int statCheck;
-
-	statCheck = checkPath(p.targetPath_);
-	switch (statCheck)
-	{
-		case S_IFREG:
-			return getFile(p.targetPath_);
-		case S_IFDIR:
-			return tryIndex(p);
-		case EACCES:
-			return FORBIDDEN;
-
-		default:
-			return NOT_FOUND;
-	}
-}
-
-t_httpCode Response::postFile(Context &p)
-{
-	if (pathExists(p.targetPath_))
-		return CONFLICT;
-
-	// normalizeTrailingSlash(p.targetPath_);
-	std::ofstream file(p.targetPath_.c_str(), std::ofstream::trunc);
-	if (!file.is_open())
-	{
-		file.close();
-		throw (std::runtime_error("Error creating file"));
-	}
-	file << p.request_.getBody();
-	this->headers_["Content-Location"] = p.targetPath_;
-
-	return CREATED;
-}
-
-t_httpCode Response::methodPost(Context &p)
-{
-	int statCheck;
-
-	statCheck = checkPath(p.uploadPath_);
-	switch (statCheck)
-	{
-		case S_IFDIR:
-			return postFile(p);
-		case EACCES:
-			return FORBIDDEN;
-
-		default:
-			return NOT_FOUND;
-	}
-}
-
-static t_httpCode removeFile(const char *path)
-{
-	if (std::remove(path) < 0)
-		throw std::runtime_error("Couldn't remove resource");
-
-	return NO_CONTENT;
-}
-
-t_httpCode Response::methodDelete(Context &p)
-{
-	int statCheck;
-
-	statCheck = checkPath(p.targetPath_);
-	switch (statCheck)
-	{
-		case S_IFREG:
-			return removeFile(p.targetPath_.c_str());
-		case EACCES:
-		case S_IFDIR:
-			return FORBIDDEN;
-
-		default:
-			return NOT_FOUND;
-	}
-}
-
-t_httpCode Response::executeMethod(Context &p)
-{
-	switch (p.getMethod())
-	{
-		case M_GET:
-			return this->methodGet(p);
-		case M_POST:
-			return this->methodPost(p);
-		case M_DELETE:
-			return this->methodDelete(p);
-		case M_NOT_ALLOWED:
-			return METHOD_NOT_ALLOWED;
-		
-		default:
-			return NOT_IMPLEMENTED;
-	}
 }
 
 // Set necessary ??
@@ -530,128 +239,6 @@ static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_pa
 	return false;
 }
 
-static bool matchCGI(std::string &path, Location &location, t_cgi &cgi)
-{
-	int pos = path.rfind('.');
-	std::map<std::string, std::string>::iterator cgiIt;
-	std::map<std::string, std::string> allowedCGIs = location.getCGIs();
-
-	if (pos != std::string::npos)
-	{
-		cgiIt = allowedCGIs.find(path.substr(pos));
-		if (cgiIt != allowedCGIs.end())
-		{
-			cgi.first = cgiIt->first;
-			cgi.second = cgiIt->second;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-static bool timedOut(time_t start)
-{
-	if ((std::time(NULL) - start) > CGI_TIMEOUT)
-		return true;
-	return false;
-}
-
-static std::string readOutput(int pipefd[2])
-{
-	std::stringstream output;
-	char buffer[BUFFER_SIZE];
-	ssize_t bytes_read;
-
-	close(pipefd[1]);
-	while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
-		output.write(buffer, bytes_read);
-	close(pipefd[0]);
-
-	return output.str();
-}
-
-t_httpCode Response::waitForOutput(pid_t child, int pipefd[2], time_t start)
-{
-	int status = 0;
-
-	while (waitpid(child, &status, WNOHANG) == 0)
-	{
-		if (timedOut(start))
-		{
-			kill(child, SIGKILL);
-			return GATEWAY_TIME_OUT;
-		}
-		usleep(100);
-	}
-	if (status < 0)
-		throw (std::runtime_error("WaitPid failed"));
-	if (WEXITSTATUS(status) != 0)
-		return INTERNAL_SERVER_ERROR;
-
-	this->body_.content = readOutput(pipefd);
-	this->body_.type = this->extensionTypesDict_[".txt"];
-
-	return OK;
-}
-
-t_httpCode Response::executeCGI(Context &p, t_cgi &cgi)
-{
-	int pipefd[2];
-	pid_t child;
-	time_t start;
-
-	if (pipe(pipefd))
-		throw (std::runtime_error("Ceci n'est pas une pipe"));
-	start = std::time(NULL);
-	child = fork();
-	if (child < 0)
-		throw (std::runtime_error("Couldn't fork CGI properly"));
-	else if (child == CHILD_OK)
-	{
-		char *env[] = { NULL };
-		char *argv[] = { strdup(cgi.second.c_str()), strdup(p.targetPath_.c_str()), NULL };
-
-		close(pipefd[0]);
-		dup2(pipefd[1], STDOUT_FILENO);
-		close(pipefd[1]);
-
-		execve(cgi.second.c_str(), argv, env);
-		exit(1);
-	}
-
-	return waitForOutput(child, pipefd, start);
-}
-
-void Response::executeRequest(Context &p)
-{
-	t_httpCode code;
-	t_connection mode;
-	t_error_page errorPage;
-	t_cgi cgi;
-
-	if (matchCGI(p.targetPath_, p.location_, cgi))
-	{
-		if ((code = this->executeCGI(p, cgi)) == OK)
-		{
-			// check correctness?? || parse request
-			return ;
-		}
-	}
-	else
-		code = this->executeMethod(p);
-	mode = p.getConnectionMode();
-
-	if (matchCustomErrorPage(code, p.location_, errorPage))
-	{
-		// config parse that an error page MUST have a URI page 
-		this->setBodyFromFile(errorPage.page);
-		this->generateResponse(errorPage.code, mode);
-	}
-	else
-		this->generateResponse(code, mode);
-}
-
 void Response::handleReturnDirective(t_return ret, t_connection mode)
 {
 	if (!ret.path.empty())
@@ -670,14 +257,23 @@ static bool checkReturn(Location &location)
 	return (location.getReturn().code != 0);
 }
 
-void Response::build(Context &p) 
+void Response::build(Context &ctx) 
 {
 	this->clear();
 
-	if (checkReturn(p.location_))
-		this->handleReturnDirective(p.location_.getReturn(), p.getConnectionMode());
+	if (checkReturn(ctx.location_))
+		this->handleReturnDirective(ctx.location_.getReturn(), ctx.getConnectionMode());
 	else
-		this->executeRequest(p);
+		this->executeRequest(ctx);
+	
+	if (matchCustomErrorPage(code, ctx.location_, errorPage))
+	{
+		// config parse that an error page MUST have a URI page 
+		this->setBodyFromFile(errorPage.page);
+		this->generateResponse(errorPage.code, mode);
+	}
+	else
+		this->generateResponse(code, mode);
 }
 
 void Response::build(t_httpCode code, t_connection mode)

@@ -146,27 +146,21 @@ static void setLocationsPH(Request &request, Server &server)
 	server.setUploadPath("tests/www/uploads/");
 }
 
-void Client::executeRequest(std::vector<Server> &serverList)
-{
-	Server server = ServerMatcher::matchServer(request_, serverList);
-	setLocationsPH(request_, server);
-	Location location = LocationMatcher::matchLocation(request_, server);
-	Context responseParams(request_, location);
-	responseParams.uploadPath_ = server.getUploadPath();
-
-	if (request_.getHTTPVersion() == "HTTP/1.1")
-		response_.build(responseParams);
-	else
-		response_.build(HTTP_VERSION_NOT_SUPPORTED, C_KEEP_ALIVE);
-}
-
 // instead of build response implement request executor ?? 
 void Client::buildResponse(std::vector<Server> &servers)
 {
-	if (this->request_.isComplete())
-		this->executeRequest(servers);
-	else
-		this->response_.build(BAD_REQUEST, C_CLOSE);
+	Server server;
+	Location location;
+	
+
+	server = ServerMatcher::matchServer(request_, servers);
+	setLocationsPH(request_, server);
+	location = LocationMatcher::matchLocation(request_, server);
+
+	Context exeContext(request_, location, server);
+	
+	exeResult = RequestExecutor::executeRequest(exeContext);
+	this->response_ = ResponseFactory::create(exeResult);
 }
 
 void Client::buildResponse(t_httpCode code, t_connection mode)

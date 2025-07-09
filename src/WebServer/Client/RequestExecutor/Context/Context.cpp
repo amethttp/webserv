@@ -1,8 +1,14 @@
 #include "Context.hpp"
 
-Context::Context(Request &req, Location &loc) : request_(req), location_(loc)
+Context::Context(Request &req, Location &loc, Server &server) : request_(req), location_(loc)
 {
-	this->setContext();
+	this->connectionMode_ = C_KEEP_ALIVE;
+
+	routeTarget();
+	fitMethod();
+	checkRequestHeaders();
+
+	this->uploadPath_ = server.getUploadPath();
 }
 
 void Context::checkRequestHeaders()
@@ -24,27 +30,12 @@ void Context::routeTarget()
 void  Context::fitMethod()
 {
 	t_method reqMethod = this->request_.getMethod();
+	std::set<t_method> allowedMethods = this->location_.getMethods();
 
-	if (reqMethod == M_NOT_IMPLEMENTED)
-		this->method_ = M_NOT_IMPLEMENTED;
+	if (allowedMethods.find(reqMethod) != allowedMethods.end())
+		this->method_ = reqMethod;
 	else
-	{
-		std::set<t_method> allowedMethods = this->location_.getMethods();
-
-		if (allowedMethods.find(reqMethod) != allowedMethods.end())
-			this->method_ = reqMethod;
-		else
-			this->method_ = M_NOT_ALLOWED;
-	}
-}
-
-void Context::setContext()
-{
-	this->connectionMode_ = C_KEEP_ALIVE;
-
-	routeTarget();
-	fitMethod();
-	checkRequestHeaders();
+		this->method_ = NULL;
 }
 
 std::string Context::getTargetPath() const
@@ -57,7 +48,7 @@ t_connection Context::getConnectionMode() const
 	return this->connectionMode_;
 }
 
-t_method Context::getMethod() const
+AMethod *Context::getMethod() const
 {
 	return this->method_;
 }
