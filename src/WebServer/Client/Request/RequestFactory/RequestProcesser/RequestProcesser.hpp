@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils/Result/Result.hpp"
+#include "WebServer/Client/Request/Request.hpp"
 #include "WebServer/Client/Request/RequestLineParams/RequestLineParams.hpp"
 
 class RequestProcesser
@@ -12,4 +13,5 @@ private:
 
 public:
     static SimpleResult processRequestTarget(Target_t &target);
+    static SimpleResult processHeaders(headers_t &headers);
 };

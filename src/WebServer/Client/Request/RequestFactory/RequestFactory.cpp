@@ -60,16 +60,9 @@ Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::strin
     if (requestHeaderValidationResult.isFailure())
         return Result<headers_t>::fail(requestHeaderValidationResult.getError());
 
-    const Result<std::string> decodingResult = RequestPctDecoder::decode(requestHeaders.at("Host").back());
-    if (decodingResult.isFailure())
-        return Result<headers_t>::fail(decodingResult.getError());
-    requestHeaders["Host"][0] = decodingResult.getValue();
-
-    if (requestHeaders.find("Transfer-Encoding") != requestHeaders.end())
-        requestHeaders["Transfer-Encoding"][0] = toLower(requestHeaders["Transfer-Encoding"][0]);
-
-    if (requestHeaders.find("Connection") != requestHeaders.end())
-        requestHeaders["Connection"][0] = toLower(requestHeaders["Connection"][0]);
+    const SimpleResult headerProcessingResult = RequestProcesser::processHeaders(requestHeaders);
+    if (headerProcessingResult.isFailure())
+        return Result<headers_t>::fail(headerProcessingResult.getError());
 
     return Result<headers_t>::ok(requestHeaders);
 }
