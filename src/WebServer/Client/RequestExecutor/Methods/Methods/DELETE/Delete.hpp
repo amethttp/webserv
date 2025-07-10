@@ -1,0 +1,12 @@
+#include "Methods/AMethod.hpp"
+#include "utils/fileHandler/files.hpp"
+
+class mDelete : public AMethod
+{
+private:
+public:
+	mDelete();
+	~mDelete();
+
+	ExecutionResult execute(Context &ctx);
+};

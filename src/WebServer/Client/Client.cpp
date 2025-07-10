@@ -146,11 +146,12 @@ static void setLocationsPH(Request &request, Server &server)
 	server.setUploadPath("tests/www/uploads/");
 }
 
-// instead of build response implement request executor ?? 
 void Client::buildResponse(std::vector<Server> &servers)
 {
 	Server server;
 	Location location;
+	ExecutionResult exeResult;
+	
 	
 
 	server = ServerMatcher::matchServer(request_, servers);
@@ -160,7 +161,7 @@ void Client::buildResponse(std::vector<Server> &servers)
 	Context exeContext(request_, location, server);
 	
 	exeResult = RequestExecutor::executeRequest(exeContext);
-	this->response_ = ResponseFactory::create(exeResult);
+	response_ = ResponseFactory::create(exeResult);
 }
 
 void Client::buildResponse(t_httpCode code, t_connection mode)

@@ -10,17 +10,12 @@
 #include "WebServer/Client/Response/Response.hpp"
 #include "WebServer/Server/Location/Location.hpp"
 #include "RequestExecutor/Context/Context.hpp"
-#include "RequestExecutor/ExecutionResult/ExecutionResult.hpp"
-
-#define INDEX_STYLE "src/utils/htmlTemplates/indexStyle.html"
-#define INDEX_FILE_LIST "src/utils/htmlTemplates/indexFileList.html"
-#define INDEX_CLOSE "src/utils/htmlTemplates/closeIndex.html"
+#include "RequestExecutor/Result/ExecutionResult.hpp"
 
 #define CHILD_OK 0
 #define CGI_TIMEOUT 2
 #define BUFFER_SIZE 4096
 
-typedef std::pair<std::string, std::string> t_cgi;
 typedef std::map<std::string, std::string> t_headers;
 
 class RequestExecutor
