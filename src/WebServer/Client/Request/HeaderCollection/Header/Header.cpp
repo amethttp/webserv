@@ -14,11 +14,6 @@ const std::string &Header::getValue() const
     return this->values_.back();
 }
 
-std::vector<std::string> Header::getValues() const
-{
-    return this->values_;
-}
-
 size_t Header::getAmountOfValues() const
 {
     return this->values_.size();

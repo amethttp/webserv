@@ -27,11 +27,6 @@ Header HeaderCollection::getHeader(const std::string &headerKey) const
     throw std::invalid_argument("Header with key '" + headerKey + "' does not exist inside the collection");
 }
 
-std::vector<Header> HeaderCollection::getHeaders() const
-{
-    return this->headers_;
-}
-
 size_t HeaderCollection::getAmountOfHeaders() const
 {
     return this->headers_.size();
@@ -54,18 +49,10 @@ void HeaderCollection::addHeader(const std::string &headerString)
     const std::string headerValue = trim(getHeaderValue(headerString), " \t");
 
     if (contains(headerKey))
-    {
-        addToExistingHeader(headerKey, headerValue);
-        return;
-    }
+        return addToExistingHeader(headerKey, headerValue);
 
     Header newHeader = Header(headerKey);
     newHeader.addValue(headerValue);
-    this->headers_.push_back(newHeader);
-}
-
-void HeaderCollection::addHeader(const Header &newHeader)
-{
     this->headers_.push_back(newHeader);
 }
 
