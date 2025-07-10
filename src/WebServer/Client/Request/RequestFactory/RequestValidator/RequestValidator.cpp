@@ -21,27 +21,32 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
     return SimpleResult::ok();
 }
 
-SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHeaders)
+SimpleResult RequestValidator::validateRequestHeadersNew(const HeaderCollection &requestHeaders)
 {
-    if (!containsHeader(requestHeaders, "Host")
-        || !HostHeaderValidator::isValid(requestHeaders.at("Host")))
+    if (!requestHeaders.contains("Host")
+    || !HostHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Host"))))
         return SimpleResult::fail("400 Bad Request");
 
-    if (containsHeader(requestHeaders, "Content-Length")
-        && containsHeader(requestHeaders, "Transfer-Encoding"))
+    if (requestHeaders.contains("Content-Length")
+        && requestHeaders.contains("Transfer-Encoding"))
         return SimpleResult::fail("400 Bad Request");
 
-    if (containsHeader(requestHeaders, "Content-Length")
-        && !ContentLengthHeaderValidator::isValid(requestHeaders.at("Content-Length")))
+    if (requestHeaders.contains("Content-Length")
+        && !ContentLengthHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Content-Length"))))
         return SimpleResult::fail("400 Bad Request");
 
-    if (containsHeader(requestHeaders, "Transfer-Encoding")
-        && !TransferEncodingHeaderValidator::isValid(requestHeaders.at("Transfer-Encoding")))
+    if (requestHeaders.contains("Transfer-Encoding")
+        && !TransferEncodingHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Transfer-Encoding"))))
         return SimpleResult::fail("400 Bad Request");
 
-    if (containsHeader(requestHeaders, "Connection")
-        && !ConnectionHeaderValidator::isValid(requestHeaders.at("Connection")))
+    if (requestHeaders.contains("Connection")
+        && !ConnectionHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Connection"))))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();
+}
+
+SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHeaders)
+{
+    return validateRequestHeadersNew(headersToCollection(requestHeaders));
 }

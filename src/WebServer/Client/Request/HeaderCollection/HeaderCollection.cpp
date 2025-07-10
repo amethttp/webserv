@@ -1,6 +1,7 @@
 #include "utils/HTTP/http.hpp"
 #include "HeaderCollection.hpp"
 #include "utils/string/string.hpp"
+#include <stdexcept>
 
 void HeaderCollection::addToExistingHeader(const std::string &headerKey, const std::string &headerValue)
 {
@@ -14,6 +15,17 @@ void HeaderCollection::addToExistingHeader(const std::string &headerKey, const s
 HeaderCollection::HeaderCollection() {}
 
 HeaderCollection::~HeaderCollection() {}
+
+Header HeaderCollection::getHeader(const std::string &headerKey) const
+{
+    for (std::vector<Header>::const_iterator it = headers_.begin(); it != headers_.end(); ++it)
+    {
+        if (it->getKey() == headerKey)
+            return *it;
+    }
+
+    throw std::invalid_argument("Header with key '" + headerKey + "' does not exist inside the collection");
+}
 
 std::vector<Header> HeaderCollection::getHeaders() const
 {
@@ -44,5 +56,10 @@ void HeaderCollection::addHeader(const std::string &headerString)
 
     Header newHeader = Header(headerKey);
     newHeader.addValue(headerValue);
+    this->headers_.push_back(newHeader);
+}
+
+void HeaderCollection::addHeader(const Header &newHeader)
+{
     this->headers_.push_back(newHeader);
 }

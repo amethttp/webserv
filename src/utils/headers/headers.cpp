@@ -47,3 +47,27 @@ headers_t collectionToHeaders(const HeaderCollection &collection)
 
     return newHeaders;
 }
+
+HeaderCollection headersToCollection(const headers_t &headers)
+{
+    HeaderCollection newHeaders;
+
+    for (headers_t::const_iterator it = headers.begin(); it != headers.end(); ++it)
+    {
+        Header newHeader = Header(it->first);
+
+        for (headerValue_t::const_iterator itVal = it->second.begin(); itVal != it->second.end(); ++itVal)
+        {
+            newHeader.addValue(*itVal);
+        }
+
+        newHeaders.addHeader(newHeader);
+    }
+
+    return newHeaders;
+}
+
+headerValue_t headerToValue(const Header &header)
+{
+    return header.getValues();
+}

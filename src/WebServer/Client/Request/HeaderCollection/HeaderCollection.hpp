@@ -14,9 +14,11 @@ public:
     HeaderCollection();
     ~HeaderCollection();
 
+    Header getHeader(const std::string &headerKey) const;
     std::vector<Header> getHeaders() const;
 
     bool contains(const std::string &headerKey) const;
 
     void addHeader(const std::string &headerString);
+    void addHeader(const Header &newHeader);
 };

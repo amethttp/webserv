@@ -11,5 +11,6 @@ private:
 
 public:
     static SimpleResult validateRequestLine(const RequestLineParams_t &requestLine);
+    static SimpleResult validateRequestHeadersNew(const HeaderCollection &requestHeaders);
     static SimpleResult validateRequestHeaders(const headers_t &requestHeaders);
 };
