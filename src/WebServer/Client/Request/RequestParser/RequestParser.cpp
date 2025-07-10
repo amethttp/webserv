@@ -43,14 +43,14 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     return Result<RequestLineParams_t>::ok(params);
 }
 
-Result<headers_t> RequestParser::parseHeaders()
+Result<HeaderCollection> RequestParser::parseHeadersNew()
 {
     int hasFailed = 0;
-    headers_t headers;
+    HeaderCollection headers;
 
     do
     {
-        addHeader(headers, this->currentToken_.getValue());
+        headers.addHeader(this->currentToken_.getValue());
         hasFailed |= eat(HEADER);
 
         if (this->currentToken_.getType() != EOF)
@@ -61,7 +61,16 @@ Result<headers_t> RequestParser::parseHeaders()
     hasFailed |= eat(EOF);
 
     if (hasFailed)
-        return Result<headers_t>::fail("400 Bad Request");
+        return Result<HeaderCollection>::fail("400 Bad Request");
 
-    return Result<headers_t>::ok(headers);
+    return Result<HeaderCollection>::ok(headers);
+}
+
+Result<headers_t> RequestParser::parseHeaders()
+{
+    const Result<HeaderCollection> headersResult = parseHeadersNew();
+    if (headersResult.isFailure())
+        return Result<headers_t>::fail(headersResult.getError());
+
+    return Result<headers_t>::ok(collectionToHeaders(headersResult.getValue()));
 }
