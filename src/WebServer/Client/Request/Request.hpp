@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HeaderCollection/HeaderCollection.hpp"
 #include "RequestLineParams/RequestLineParams.hpp"
 #include <map>
 #include <string>
@@ -12,5 +13,6 @@ typedef struct Request_s
 {
 	RequestLineParams_t requestLine;
 	headers_t headers;
+	HeaderCollection headersNew;
 	std::string body;
 } Request_t;
