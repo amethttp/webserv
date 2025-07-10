@@ -5,7 +5,7 @@
 namespace
 {
     RequestLineParams_t requestLine;
-    headers_t headers;
+    HeaderCollection headers;
 }
 
 static RequestLineParams_t parseFromValidRequestLine(const std::string &requestLineString)
@@ -18,12 +18,12 @@ static RequestLineParams_t parseFromValidRequestLine(const std::string &requestL
     return result.getValue();
 }
 
-static headers_t parseFromValidHeaders(const std::string &requestHeaders)
+static HeaderCollection parseFromValidHeaders(const std::string &requestHeaders)
 {
     const RequestTokenizer requestTokenizer(requestHeaders);
     RequestParser sut(requestTokenizer);
 
-    const Result<headers_t> result = sut.parseHeaders();
+    const Result<HeaderCollection> result = sut.parseHeadersNew();
 
     return result.getValue();
 }
@@ -51,7 +51,7 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
     const RequestTokenizer requestTokenizer(invalidHeader);
     RequestParser sut(requestTokenizer);
 
-    const Result<headers_t> result = sut.parseHeaders();
+    const Result<HeaderCollection> result = sut.parseHeadersNew();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS("400 Bad Request", result.getError());
@@ -59,12 +59,12 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
 
 static void assertHeaderSize(const size_t size)
 {
-    ASSERT_EQUALS(size, headers.size());
+    ASSERT_EQUALS(size, headers.getAmountOfHeaders());
 }
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, headers.at(key).back());
+    ASSERT_EQUALS(value, headers.getHeader(key).getValue());
 }
 
 

@@ -16,6 +16,7 @@ public:
 
     Header getHeader(const std::string &headerKey) const;
     std::vector<Header> getHeaders() const;
+    size_t getAmountOfHeaders();
 
     bool contains(const std::string &headerKey) const;
 

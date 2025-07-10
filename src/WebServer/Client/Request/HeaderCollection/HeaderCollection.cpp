@@ -32,6 +32,11 @@ std::vector<Header> HeaderCollection::getHeaders() const
     return this->headers_;
 }
 
+size_t HeaderCollection::getAmountOfHeaders()
+{
+    return this->headers_.size();
+}
+
 bool HeaderCollection::contains(const std::string &headerKey) const
 {
     for (std::vector<Header>::const_iterator it = this->headers_.begin(); it != this->headers_.end(); ++it)
