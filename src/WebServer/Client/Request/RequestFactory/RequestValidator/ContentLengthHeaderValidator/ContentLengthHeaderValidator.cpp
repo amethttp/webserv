@@ -2,12 +2,12 @@
 #include "ContentLengthHeaderValidator.hpp"
 #include <cstdlib>
 
-bool ContentLengthHeaderValidator::isValid(const headerValue_t &contentLengthHeaderValues)
+bool ContentLengthHeaderValidator::isValid(const Header &contentLengthHeader)
 {
-    if (contentLengthHeaderValues.size() != 1)
+    if (contentLengthHeader.getAmountOfValues() != 1)
         return false;
 
-    const std::string contentLengthValue = contentLengthHeaderValues.front();
+    const std::string contentLengthValue = contentLengthHeader.getValue();
     if (!isLong(contentLengthValue))
         return false;
 

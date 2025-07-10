@@ -32,7 +32,7 @@ SimpleResult RequestValidator::validateRequestHeadersNew(const HeaderCollection 
         return SimpleResult::fail("400 Bad Request");
 
     if (requestHeaders.contains("Content-Length")
-        && !ContentLengthHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Content-Length"))))
+        && !ContentLengthHeaderValidator::isValid(requestHeaders.getHeader("Content-Length")))
         return SimpleResult::fail("400 Bad Request");
 
     if (requestHeaders.contains("Transfer-Encoding")

@@ -5,5 +5,5 @@
 class ContentLengthHeaderValidator
 {
 public:
-    static bool isValid(const headerValue_t &contentLengthHeaderValues);
+    static bool isValid(const Header &contentLengthHeader);
 };
