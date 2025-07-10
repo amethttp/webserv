@@ -32,7 +32,7 @@ std::vector<Header> HeaderCollection::getHeaders() const
     return this->headers_;
 }
 
-size_t HeaderCollection::getAmountOfHeaders()
+size_t HeaderCollection::getAmountOfHeaders() const
 {
     return this->headers_.size();
 }
@@ -79,4 +79,9 @@ void HeaderCollection::updateHeader(const std::string &headerKey, const std::str
             it->addValue(newHeaderValue);
         }
     }
+}
+
+void HeaderCollection::removeHeaders()
+{
+    this->headers_.clear();
 }

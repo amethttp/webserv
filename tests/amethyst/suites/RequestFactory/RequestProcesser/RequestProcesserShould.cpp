@@ -7,7 +7,7 @@
 namespace
 {
     Target_t target;
-    headers_t headers;
+    HeaderCollection headers;
 }
 
 static void processFromValidTargetUri(const std::string &requestTargetUri)
@@ -21,11 +21,11 @@ static void processFromValidTargetUri(const std::string &requestTargetUri)
 
 static void processValidHeader(const std::string &headerKey, const std::string &headerValue)
 {
-    headers.clear();
-    headers["Host"].push_back("localhost");
-    headers[headerKey].push_back(headerValue);
+    headers.removeHeaders();
+    headers.addHeader("Host: localhost");
+    headers.addHeader(headerKey + ": " + headerValue);
 
-    RequestProcesser::processHeaders(headers);
+    RequestProcesser::processHeadersNew(headers);
 }
 
 static void assertTargetComponents(const std::string &path, const std::string &query)
@@ -36,7 +36,7 @@ static void assertTargetComponents(const std::string &path, const std::string &q
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, headers.at(key).back());
+    ASSERT_EQUALS(value, headers.getHeader(key).getValue());
 }
 
 static void assertRequestIsInvalidFromTargetUri(const std::string &invalidRequestTargetUri)
