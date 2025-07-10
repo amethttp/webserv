@@ -40,7 +40,7 @@ SimpleResult RequestValidator::validateRequestHeadersNew(const HeaderCollection 
         return SimpleResult::fail("400 Bad Request");
 
     if (requestHeaders.contains("Connection")
-        && !ConnectionHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Connection"))))
+        && !ConnectionHeaderValidator::isValid(requestHeaders.getHeader("Connection")))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();

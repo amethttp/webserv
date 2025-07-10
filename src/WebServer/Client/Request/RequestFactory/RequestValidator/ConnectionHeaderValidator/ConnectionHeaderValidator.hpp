@@ -5,5 +5,5 @@
 class ConnectionHeaderValidator
 {
 public:
-    static bool isValid(const headerValue_t &connectionHeaderValues);
+    static bool isValid(const Header &connectionHeader);
 };
