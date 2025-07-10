@@ -19,4 +19,5 @@ public:
     size_t getAmountOfValues() const;
 
     void addValue(const std::string &newValue);
+    void removeValues();
 };

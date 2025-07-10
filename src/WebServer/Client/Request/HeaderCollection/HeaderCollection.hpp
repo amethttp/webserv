@@ -21,4 +21,5 @@ public:
 
     void addHeader(const std::string &headerString);
     void addHeader(const Header &newHeader);
+    void updateHeader(const std::string &headerKey, const std::string &newHeaderValue);
 };

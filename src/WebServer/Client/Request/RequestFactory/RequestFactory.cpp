@@ -3,7 +3,6 @@
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestProcesser/RequestProcesser.hpp"
-#include "RequestPctDecoder/RequestPctDecoder.hpp"
 
 std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
 {

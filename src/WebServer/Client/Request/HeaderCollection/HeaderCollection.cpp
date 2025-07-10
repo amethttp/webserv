@@ -63,3 +63,15 @@ void HeaderCollection::addHeader(const Header &newHeader)
 {
     this->headers_.push_back(newHeader);
 }
+
+void HeaderCollection::updateHeader(const std::string &headerKey, const std::string &newHeaderValue)
+{
+    for (std::vector<Header>::iterator it = headers_.begin(); it != headers_.end(); ++it)
+    {
+        if (it->getKey() == headerKey)
+        {
+            it->removeValues();
+            it->addValue(newHeaderValue);
+        }
+    }
+}

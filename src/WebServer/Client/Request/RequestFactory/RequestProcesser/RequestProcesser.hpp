@@ -10,9 +10,10 @@ private:
     RequestProcesser();
 
     static SimpleResult processTargetPctDecoding(Target_t &target);
-    static SimpleResult processHostHeaderPctDecoding(headers_t &headers);
+    static SimpleResult processHostHeaderPctDecoding(HeaderCollection &headers);
 
 public:
     static SimpleResult processRequestTarget(Target_t &target);
+    static SimpleResult processHeadersNew(HeaderCollection &headers);
     static SimpleResult processHeaders(headers_t &headers);
 };

@@ -18,14 +18,14 @@ SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
     return SimpleResult::ok();
 }
 
-SimpleResult RequestProcesser::processHostHeaderPctDecoding(headers_t &headers)
+SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &headers)
 {
-    const std::string hostValue = getHeader(headers, "Host");
+    const std::string hostValue = headers.getHeader("Host").getValue();
     const Result<std::string> decodingResult = RequestPctDecoder::decode(hostValue);
     if (decodingResult.isFailure())
         return SimpleResult::fail(decodingResult.getError());
 
-    updateHeader(headers, "Host", decodingResult.getValue());
+    headers.updateHeader("Host", decodingResult.getValue());
     return SimpleResult::ok();
 }
 
@@ -42,23 +42,35 @@ SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
     return SimpleResult::ok();
 }
 
-SimpleResult RequestProcesser::processHeaders(headers_t &headers)
+SimpleResult RequestProcesser::processHeadersNew(HeaderCollection &headers)
 {
     const SimpleResult headerDecodingResult = processHostHeaderPctDecoding(headers);
     if (headerDecodingResult.isFailure())
         return SimpleResult::fail(headerDecodingResult.getError());
 
-    if (containsHeader(headers, "Transfer-Encoding"))
+    if (headers.contains("Transfer-Encoding"))
     {
-        const std::string transferEncodingNewValue = toLower(getHeader(headers, "Transfer-Encoding"));
-        updateHeader(headers, "Transfer-Encoding", transferEncodingNewValue);
+        const std::string transferEncodingNewValue = toLower(headers.getHeader("Transfer-Encoding").getValue());
+        headers.updateHeader("Transfer-Encoding", transferEncodingNewValue);
     }
 
-    if (containsHeader(headers, "Connection"))
+    if (headers.contains("Connection"))
     {
-        const std::string connectionNewValue = toLower(getHeader(headers, "Connection"));
-        updateHeader(headers, "Connection", connectionNewValue);
+        const std::string connectionNewValue = toLower(headers.getHeader("Connection").getValue());
+        headers.updateHeader("Connection", connectionNewValue);
     }
 
+    return SimpleResult::ok();
+}
+
+SimpleResult RequestProcesser::processHeaders(headers_t &headers)
+{
+    HeaderCollection headerCollection = headersToCollection(headers);
+
+    const SimpleResult processResult = processHeadersNew(headerCollection);
+    if (processResult.isFailure())
+        return SimpleResult::fail(processResult.getError());
+
+    headers = collectionToHeaders(headerCollection);
     return SimpleResult::ok();
 }

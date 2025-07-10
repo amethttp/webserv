@@ -28,3 +28,8 @@ void Header::addValue(const std::string &newValue)
 {
     this->values_.push_back(newValue);
 }
+
+void Header::removeValues()
+{
+    this->values_.clear();
+}
