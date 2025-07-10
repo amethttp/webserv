@@ -32,3 +32,18 @@ void updateHeader(headers_t &headers, const std::string &headerKey, const std::s
     headers[headerKey].clear();
     headers[headerKey].push_back(newValue);
 }
+
+headers_t collectionToHeaders(const HeaderCollection &collection)
+{
+    headers_t newHeaders;
+    const std::vector<Header> collectionHeaders = collection.getHeaders();
+
+    for (std::vector<Header>::const_iterator it = collectionHeaders.begin(); it != collectionHeaders.end(); ++it)
+    {
+        const std::vector<std::string> headerValues = it->getValues();
+
+        newHeaders[it->getKey()] = headerValues;
+    }
+
+    return newHeaders;
+}

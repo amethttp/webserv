@@ -11,4 +11,6 @@ private:
 public:
     HeaderCollection();
     ~HeaderCollection();
+
+    std::vector<Header> getHeaders() const;
 };
