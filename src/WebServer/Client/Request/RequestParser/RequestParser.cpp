@@ -47,10 +47,12 @@ Result<headers_t> RequestParser::parseHeaders()
 {
     int hasFailed = 0;
     headers_t headers;
+    HeaderCollection headersNew;
 
     do
     {
         addHeader(headers, this->currentToken_.getValue());
+        headersNew.addHeader(this->currentToken_.getValue());
         hasFailed |= eat(HEADER);
 
         if (this->currentToken_.getType() != EOF)

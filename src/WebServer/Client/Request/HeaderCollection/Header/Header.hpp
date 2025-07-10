@@ -16,4 +16,6 @@ public:
     const std::string &getKey() const;
     const std::string &getValue() const;
     size_t getAmountOfValues() const;
+
+    void addValue(const std::string &newValue);
 };

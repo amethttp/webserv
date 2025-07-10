@@ -18,3 +18,8 @@ size_t Header::getAmountOfValues() const
 {
     return this->values_.size();
 }
+
+void Header::addValue(const std::string &newValue)
+{
+    this->values_.push_back(newValue);
+}
