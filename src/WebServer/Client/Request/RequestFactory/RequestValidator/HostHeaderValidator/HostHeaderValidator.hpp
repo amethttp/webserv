@@ -15,5 +15,5 @@ private:
     static bool isValidHostPort(const std::string &port);
 
 public:
-    static bool isValid(const headerValue_t &hostHeaderValues);
+    static bool isValid(const Header &hostHeader);
 };

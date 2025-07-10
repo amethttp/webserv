@@ -56,12 +56,12 @@ bool HostHeaderValidator::isValidHostPort(const std::string &port)
     return (portNum >= 0 && portNum <= 65535);
 }
 
-bool HostHeaderValidator::isValid(const headerValue_t &hostHeaderValues)
+bool HostHeaderValidator::isValid(const Header &hostHeader)
 {
-    if (hostHeaderValues.size() != 1)
+    if (hostHeader.getAmountOfValues() != 1)
         return false;
 
-    const std::string hostValue = hostHeaderValues.front();
+    const std::string hostValue = hostHeader.getValue();
     const size_t portSeparator = hostValue.find(':');
     const std::string hostName = hostValue.substr(0, portSeparator);
     std::string hostPort;

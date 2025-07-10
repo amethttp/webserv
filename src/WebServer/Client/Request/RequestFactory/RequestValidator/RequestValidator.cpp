@@ -24,7 +24,7 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
 SimpleResult RequestValidator::validateRequestHeadersNew(const HeaderCollection &requestHeaders)
 {
     if (!requestHeaders.contains("Host")
-    || !HostHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Host"))))
+    || !HostHeaderValidator::isValid(requestHeaders.getHeader("Host")))
         return SimpleResult::fail("400 Bad Request");
 
     if (requestHeaders.contains("Content-Length")
