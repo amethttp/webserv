@@ -2,12 +2,12 @@
 #include "TransferEncodingHeaderValidator.hpp"
 #include "WebServer/Client/Request/Request.hpp"
 
-bool TransferEncodingHeaderValidator::isValid(const headerValue_t &transferEncodingHeaderValues)
+bool TransferEncodingHeaderValidator::isValid(const Header &transferEncodingHeader)
 {
-    if (transferEncodingHeaderValues.size() != 1)
+    if (transferEncodingHeader.getAmountOfValues() != 1)
         return false;
 
-    const std::string transferEncodingValue = toLower(transferEncodingHeaderValues.front());
+    const std::string transferEncodingValue = toLower(transferEncodingHeader.getValue());
 
     return transferEncodingValue == "chunked";
 }

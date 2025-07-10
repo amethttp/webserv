@@ -5,5 +5,5 @@
 class TransferEncodingHeaderValidator
 {
 public:
-    static bool isValid(const headerValue_t &transferEncodingHeaderValues);
+    static bool isValid(const Header &transferEncodingHeader);
 };

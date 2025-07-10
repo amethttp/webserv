@@ -36,7 +36,7 @@ SimpleResult RequestValidator::validateRequestHeadersNew(const HeaderCollection 
         return SimpleResult::fail("400 Bad Request");
 
     if (requestHeaders.contains("Transfer-Encoding")
-        && !TransferEncodingHeaderValidator::isValid(headerToValue(requestHeaders.getHeader("Transfer-Encoding"))))
+        && !TransferEncodingHeaderValidator::isValid(requestHeaders.getHeader("Transfer-Encoding")))
         return SimpleResult::fail("400 Bad Request");
 
     if (requestHeaders.contains("Connection")
