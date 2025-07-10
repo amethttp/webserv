@@ -46,24 +46,24 @@ Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std
     return Result<RequestLineParams_t>::ok(requestLineParams);
 }
 
-Result<headers_t> RequestFactory::buildRequestHeadersFromString(const std::string &headersString)
+Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std::string &headersString)
 {
     RequestParser requestParser = createParser(headersString);
 
-    const Result<headers_t> requestHeadersResult = requestParser.parseHeaders();
+    const Result<HeaderCollection> requestHeadersResult = requestParser.parseHeaders();
     if (requestHeadersResult.isFailure())
-        return Result<headers_t>::fail(requestHeadersResult.getError());
-    headers_t requestHeaders = requestHeadersResult.getValue();
+        return Result<HeaderCollection>::fail(requestHeadersResult.getError());
+    HeaderCollection requestHeaders = requestHeadersResult.getValue();
 
     const SimpleResult requestHeaderValidationResult = RequestValidator::validateRequestHeaders(requestHeaders);
     if (requestHeaderValidationResult.isFailure())
-        return Result<headers_t>::fail(requestHeaderValidationResult.getError());
+        return Result<HeaderCollection>::fail(requestHeaderValidationResult.getError());
 
     const SimpleResult headerProcessingResult = RequestProcesser::processHeaders(requestHeaders);
     if (headerProcessingResult.isFailure())
-        return Result<headers_t>::fail(headerProcessingResult.getError());
+        return Result<HeaderCollection>::fail(headerProcessingResult.getError());
 
-    return Result<headers_t>::ok(requestHeaders);
+    return Result<HeaderCollection>::ok(requestHeaders);
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
@@ -77,7 +77,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         return Result<Request_t>::fail(requestLineResult.getError());
     request.requestLine = requestLineResult.getValue();
 
-    const Result<headers_t> requestHeadersResult = buildRequestHeadersFromString(requestHeadersString);
+    const Result<HeaderCollection> requestHeadersResult = buildRequestHeadersFromString(requestHeadersString);
     if (requestHeadersResult.isFailure())
         return Result<Request_t>::fail(requestHeadersResult.getError());
     request.headers = requestHeadersResult.getValue();

@@ -1,6 +1,5 @@
 #include "RequestValidator.hpp"
 #include "utils/string/string.hpp"
-#include "utils/headers/headers.hpp"
 #include "HostHeaderValidator/HostHeaderValidator.hpp"
 #include "ConnectionHeaderValidator/ConnectionHeaderValidator.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
@@ -21,7 +20,7 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
     return SimpleResult::ok();
 }
 
-SimpleResult RequestValidator::validateRequestHeadersNew(const HeaderCollection &requestHeaders)
+SimpleResult RequestValidator::validateRequestHeaders(const HeaderCollection &requestHeaders)
 {
     if (!requestHeaders.contains("Host")
     || !HostHeaderValidator::isValid(requestHeaders.getHeader("Host")))
@@ -44,9 +43,4 @@ SimpleResult RequestValidator::validateRequestHeadersNew(const HeaderCollection 
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();
-}
-
-SimpleResult RequestValidator::validateRequestHeaders(const headers_t &requestHeaders)
-{
-    return validateRequestHeadersNew(headersToCollection(requestHeaders));
 }

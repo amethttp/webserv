@@ -23,7 +23,7 @@ static HeaderCollection parseFromValidHeaders(const std::string &requestHeaders)
     const RequestTokenizer requestTokenizer(requestHeaders);
     RequestParser sut(requestTokenizer);
 
-    const Result<HeaderCollection> result = sut.parseHeadersNew();
+    const Result<HeaderCollection> result = sut.parseHeaders();
 
     return result.getValue();
 }
@@ -51,7 +51,7 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
     const RequestTokenizer requestTokenizer(invalidHeader);
     RequestParser sut(requestTokenizer);
 
-    const Result<HeaderCollection> result = sut.parseHeadersNew();
+    const Result<HeaderCollection> result = sut.parseHeaders();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS("400 Bad Request", result.getError());

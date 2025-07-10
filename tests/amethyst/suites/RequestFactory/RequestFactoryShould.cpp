@@ -51,12 +51,12 @@ static void assertRequestLine(method_t method, const std::string &targetUri, con
 
 static void assertHeaderSize(const size_t size)
 {
-    ASSERT_EQUALS(size, request.headers.size());
+    ASSERT_EQUALS(size, request.headers.getAmountOfHeaders());
 }
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, request.headers.at(key).back());
+    ASSERT_EQUALS(value, request.headers.getHeader(key).getValue());
 }
 
 static void assertBodyIsEmpty()

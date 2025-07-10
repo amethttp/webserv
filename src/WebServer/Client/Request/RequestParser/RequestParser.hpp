@@ -25,6 +25,5 @@ public:
     RequestParser(const RequestTokenizer &tokenizer);
 
     Result<RequestLineParams_t> parseRequestLine();
-    Result<HeaderCollection> parseHeadersNew();
-    Result<headers_t> parseHeaders();
+    Result<HeaderCollection> parseHeaders();
 };

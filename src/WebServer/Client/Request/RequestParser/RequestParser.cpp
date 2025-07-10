@@ -1,6 +1,5 @@
 #include "RequestParser.hpp"
 #include "utils/string/string.hpp"
-#include "utils/headers/headers.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)
@@ -43,7 +42,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     return Result<RequestLineParams_t>::ok(params);
 }
 
-Result<HeaderCollection> RequestParser::parseHeadersNew()
+Result<HeaderCollection> RequestParser::parseHeaders()
 {
     int hasFailed = 0;
     HeaderCollection headers;
@@ -64,13 +63,4 @@ Result<HeaderCollection> RequestParser::parseHeadersNew()
         return Result<HeaderCollection>::fail("400 Bad Request");
 
     return Result<HeaderCollection>::ok(headers);
-}
-
-Result<headers_t> RequestParser::parseHeaders()
-{
-    const Result<HeaderCollection> headersResult = parseHeadersNew();
-    if (headersResult.isFailure())
-        return Result<headers_t>::fail(headersResult.getError());
-
-    return Result<headers_t>::ok(collectionToHeaders(headersResult.getValue()));
 }

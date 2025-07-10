@@ -25,7 +25,7 @@ static void processValidHeader(const std::string &headerKey, const std::string &
     headers.addHeader("Host: localhost");
     headers.addHeader(headerKey + ": " + headerValue);
 
-    RequestProcesser::processHeadersNew(headers);
+    RequestProcesser::processHeaders(headers);
 }
 
 static void assertTargetComponents(const std::string &path, const std::string &query)

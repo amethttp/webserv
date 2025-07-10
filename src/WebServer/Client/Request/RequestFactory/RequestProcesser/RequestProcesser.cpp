@@ -1,6 +1,5 @@
 #include "RequestProcesser.hpp"
 #include "utils/string/string.hpp"
-#include "utils/headers/headers.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetSeparator/RequestTargetSeparator.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
@@ -42,7 +41,7 @@ SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
     return SimpleResult::ok();
 }
 
-SimpleResult RequestProcesser::processHeadersNew(HeaderCollection &headers)
+SimpleResult RequestProcesser::processHeaders(HeaderCollection &headers)
 {
     const SimpleResult headerDecodingResult = processHostHeaderPctDecoding(headers);
     if (headerDecodingResult.isFailure())
@@ -60,17 +59,5 @@ SimpleResult RequestProcesser::processHeadersNew(HeaderCollection &headers)
         headers.updateHeader("Connection", connectionNewValue);
     }
 
-    return SimpleResult::ok();
-}
-
-SimpleResult RequestProcesser::processHeaders(headers_t &headers)
-{
-    HeaderCollection headerCollection = headersToCollection(headers);
-
-    const SimpleResult processResult = processHeadersNew(headerCollection);
-    if (processResult.isFailure())
-        return SimpleResult::fail(processResult.getError());
-
-    headers = collectionToHeaders(headerCollection);
     return SimpleResult::ok();
 }

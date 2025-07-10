@@ -14,6 +14,5 @@ private:
 
 public:
     static SimpleResult processRequestTarget(Target_t &target);
-    static SimpleResult processHeadersNew(HeaderCollection &headers);
-    static SimpleResult processHeaders(headers_t &headers);
+    static SimpleResult processHeaders(HeaderCollection &headers);
 };
