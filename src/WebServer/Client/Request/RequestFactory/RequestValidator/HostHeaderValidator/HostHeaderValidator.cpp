@@ -56,23 +56,41 @@ bool HostHeaderValidator::isValidHostPort(const std::string &port)
     return (portNum >= 0 && portNum <= 65535);
 }
 
+bool HostHeaderValidator::hasPort(const std::string &hostValue)
+{
+    return hostValue.find(':') != std::string::npos;
+}
+
+std::string HostHeaderValidator::getHostName(const std::string &hostValue)
+{
+    const size_t portSeparator = hostValue.find(':');
+    const std::string hostName = hostValue.substr(0, portSeparator);
+
+    return hostName;
+}
+
+std::string HostHeaderValidator::getHostPort(const std::string &hostValue)
+{
+    const size_t portSeparator = hostValue.find(':');
+    const std::string hostPort = hostValue.substr(portSeparator + 1);
+
+    return hostPort;
+}
+
 bool HostHeaderValidator::isValid(const Header &hostHeader)
 {
     if (hostHeader.getAmountOfValues() != 1)
         return false;
 
     const std::string hostValue = hostHeader.getValue();
-    const size_t portSeparator = hostValue.find(':');
-    const std::string hostName = hostValue.substr(0, portSeparator);
-    std::string hostPort;
 
-    if (portSeparator != std::string::npos)
-        hostPort = hostValue.substr(portSeparator + 1);
-
+    const std::string hostName = getHostName(hostValue);
     if (!isValidHostName(hostName))
         return false;
-    if (portSeparator != std::string::npos)
-        return isValidHostPort(hostPort);
 
-    return true;
+    if (!hasPort(hostValue))
+        return true;
+
+    const std::string hostPort = getHostPort(hostValue);
+    return isValidHostPort(hostPort);
 }

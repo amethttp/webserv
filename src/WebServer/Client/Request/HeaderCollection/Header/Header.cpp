@@ -66,4 +66,3 @@ std::string Header::getHeaderValue(const std::string &headerString)
 
     return headerValue;
 }
-
