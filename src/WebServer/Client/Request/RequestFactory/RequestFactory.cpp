@@ -74,6 +74,20 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
     return Result<HeaderCollection>::ok(requestHeaders);
 }
 
+Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
+{
+    if (headers.contains("Content-Length")
+    && static_cast<size_t>(std::atol(headers.getHeader("Content-Length").getValue().c_str())) < bodyString.length())
+        return Result<std::string>::fail("400 Bad Request");
+
+    if (!headers.contains("Content-Length")
+        && !headers.contains("Transfer-Encoding")
+        && !bodyString.empty())
+        return Result<std::string>::fail("411 Length Required");
+
+    return Result<std::string>::ok(bodyString);
+}
+
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 {
     Request_t request;
@@ -91,16 +105,10 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         return Result<Request_t>::fail(requestHeadersResult.getError());
     request.headers = requestHeadersResult.getValue();
 
-    request.body = requestBodyString;
-
-    if (request.headers.contains("Content-Length")
-        && static_cast<size_t>(std::atol(request.headers.getHeader("Content-Length").getValue().c_str())) < request.body.length())
-        return Result<Request_t>::fail("400 Bad Request");
-
-    if (!request.headers.contains("Content-Length")
-        && !request.headers.contains("Transfer-Encoding")
-        && !request.body.empty())
-        return Result<Request_t>::fail("411 Length Required");
+    const Result<std::string> requestBodyResult = buildRequestBodyFromString(request.headers, requestBodyString);
+    if (requestBodyResult.isFailure())
+        return Result<Request_t>::fail(requestBodyResult.getError());
+    request.body = requestBodyResult.getValue();
 
     return Result<Request_t>::ok(request);
 }
