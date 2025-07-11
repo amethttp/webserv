@@ -21,6 +21,13 @@ std::string RequestFactory::getRequestHeadersString(const std::string &requestBu
     return requestBuffer.substr(requestLineEnd + 2, headersSize);
 }
 
+std::string RequestFactory::getRequestBodyString(const std::string &requestBuffer)
+{
+    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
+
+    return requestBuffer.substr(headersEnd + 4);
+}
+
 RequestParser RequestFactory::createParser(const std::string &text)
 {
     const RequestTokenizer tokenizer(text);
@@ -72,6 +79,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     Request_t request;
     const std::string requestLineString = getRequestLineString(requestBuffer);
     const std::string requestHeadersString = getRequestHeadersString(requestBuffer);
+    const std::string requestBodyString = getRequestBodyString(requestBuffer);
 
     const Result<RequestLineParams_t> requestLineResult = buildRequestLineFromString(requestLineString);
     if (requestLineResult.isFailure())
@@ -83,8 +91,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         return Result<Request_t>::fail(requestHeadersResult.getError());
     request.headers = requestHeadersResult.getValue();
 
-    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
-    request.body = requestBuffer.substr(headersEnd + 4);
+    request.body = requestBodyString;
 
     if (request.headers.contains("Content-Length")
         && static_cast<size_t>(std::atol(request.headers.getHeader("Content-Length").getValue().c_str())) < request.body.length())
