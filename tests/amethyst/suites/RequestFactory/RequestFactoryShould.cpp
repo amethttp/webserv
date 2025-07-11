@@ -432,3 +432,10 @@ TEST(recognize_a_request_with_a_body_with_all_octets)
 
     assertBody(octets);
 }
+
+TEST(recognize_a_request_with_an_empty_body_without_content_length_header)
+{
+    request = createRequestFromValidBody("No-Header: no header", "");
+
+    assertBodyIsEmpty();
+}
