@@ -82,5 +82,8 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         return Result<Request_t>::fail(requestHeadersResult.getError());
     request.headers = requestHeadersResult.getValue();
 
+    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
+    request.body = requestBuffer.substr(headersEnd + 4);
+
     return Result<Request_t>::ok(request);
 }

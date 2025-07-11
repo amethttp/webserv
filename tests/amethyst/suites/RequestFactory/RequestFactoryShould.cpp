@@ -409,3 +409,10 @@ TEST(recognize_a_request_with_an_empty_body)
 
     assertBodyIsEmpty();
 }
+
+TEST(recognize_a_request_with_a_non_empty_body)
+{
+    request = createRequestFromValidBody("Content-Length: 10", "Valid body");
+
+    ASSERT_EQUALS("Valid body", request.body)
+}
