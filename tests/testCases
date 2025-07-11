@@ -1184,10 +1184,7 @@
 "Content-Length: 0\r\n\r\n\t\t\t\t"
 
 #----# No Content-Length header #----#
-### 6. Ignore body if Transfer-Encoding chunked is present
-"Transfer-Encoding: chunked\r\n\r\n0\r\n\r\n"
-
-### 7. Take as failure with 411 Length Required when a body is specified without Content-Length nor Transfer-Encoding: chunked
+### 6. Take as failure with 411 Length Required when a body is specified without Content-Length nor Transfer-Encoding: chunked
 "Invalid body"
 
 

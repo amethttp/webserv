@@ -400,3 +400,12 @@ TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_clos
     assertHeader("Host", "localhost");
     assertHeader("Connection", "close");
 }
+
+
+/* REQUEST FULL BODY TESTS */
+TEST(recognize_a_request_with_an_empty_body)
+{
+    request = createRequestFromValidBody("Content-Length: 0", "");
+
+    assertBodyIsEmpty();
+}
