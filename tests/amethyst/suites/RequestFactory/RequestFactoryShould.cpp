@@ -64,6 +64,11 @@ static void assertBodyIsEmpty()
     ASSERT_EQUALS("", request.body);
 }
 
+static void assertBody(const std::string &body)
+{
+    ASSERT_EQUALS(body, request.body);
+}
+
 static void assertRequestIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
     Result<Request_t> result = RequestFactory::create(invalidRequestString);
@@ -414,10 +419,10 @@ TEST(recognize_a_request_with_a_non_empty_body)
 {
     request = createRequestFromValidBody("Content-Length: 10", "Valid body");
 
-    ASSERT_EQUALS("Valid body", request.body);
+    assertBody("Valid body");
 }
 
-TEST(recognize_a_request_with_all_octets)
+TEST(recognize_a_request_with_a_body_with_all_octets)
 {
     const std::string controlChars = "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F\x7f";
     const std::string printableChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x00";
@@ -425,5 +430,5 @@ TEST(recognize_a_request_with_all_octets)
 
     request = createRequestFromValidBody("Content-Length: 127", octets);
 
-    ASSERT_EQUALS(octets, request.body);
+    assertBody(octets);
 }
