@@ -19,4 +19,8 @@ public:
 
     void addValue(const std::string &newValue);
     void removeValues();
+
+    static std::string toHttpHeaderCase(const std::string &string);
+    static std::string getHeaderKey(const std::string &header);
+    static std::string getHeaderValue(const std::string &header);
 };

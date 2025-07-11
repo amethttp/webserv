@@ -1,14 +1,13 @@
-#include "utils/HTTP/http.hpp"
 #include "HeaderCollection.hpp"
 #include "utils/string/string.hpp"
 #include <stdexcept>
 
 void HeaderCollection::addToExistingHeader(const std::string &headerKey, const std::string &headerValue)
 {
-    for (std::vector<Header>::iterator it = headers_.begin(); it != headers_.end(); ++it)
+    for (std::vector<Header>::iterator it = this->headers_.begin(); it != this->headers_.end(); ++it)
     {
         if (it->getKey() == headerKey)
-            it->addValue(headerValue);
+            return it->addValue(headerValue);
     }
 }
 
@@ -18,7 +17,7 @@ HeaderCollection::~HeaderCollection() {}
 
 Header HeaderCollection::getHeader(const std::string &headerKey) const
 {
-    for (std::vector<Header>::const_iterator it = headers_.begin(); it != headers_.end(); ++it)
+    for (std::vector<Header>::const_iterator it = this->headers_.begin(); it != this->headers_.end(); ++it)
     {
         if (it->getKey() == headerKey)
             return *it;
@@ -45,11 +44,11 @@ bool HeaderCollection::contains(const std::string &headerKey) const
 
 void HeaderCollection::addHeader(const std::string &headerString)
 {
-    const std::string headerKey = getHeaderKey(headerString);
-    const std::string headerValue = trim(getHeaderValue(headerString), " \t");
+    const std::string headerKey = Header::getHeaderKey(headerString);
+    const std::string headerValue = Header::getHeaderValue(headerString);
 
-    if (contains(headerKey))
-        return addToExistingHeader(headerKey, headerValue);
+    if (this->contains(headerKey))
+        return this->addToExistingHeader(headerKey, headerValue);
 
     Header newHeader = Header(headerKey);
     newHeader.addValue(headerValue);
@@ -58,12 +57,13 @@ void HeaderCollection::addHeader(const std::string &headerString)
 
 void HeaderCollection::updateHeader(const std::string &headerKey, const std::string &newHeaderValue)
 {
-    for (std::vector<Header>::iterator it = headers_.begin(); it != headers_.end(); ++it)
+    for (std::vector<Header>::iterator it = this->headers_.begin(); it != this->headers_.end(); ++it)
     {
         if (it->getKey() == headerKey)
         {
             it->removeValues();
             it->addValue(newHeaderValue);
+            return;
         }
     }
 }
