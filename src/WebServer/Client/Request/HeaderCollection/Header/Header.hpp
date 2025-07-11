@@ -9,6 +9,8 @@ private:
     std::string key_;
     std::vector<std::string> values_;
 
+    static std::string toHeaderCase(const std::string &string);
+
 public:
     Header(const std::string &key);
     ~Header();
@@ -20,7 +22,6 @@ public:
     void addValue(const std::string &newValue);
     void removeValues();
 
-    static std::string toHttpHeaderCase(const std::string &string);
-    static std::string getHeaderKey(const std::string &header);
-    static std::string getHeaderValue(const std::string &header);
+    static std::string getHeaderKey(const std::string &headerString);
+    static std::string getHeaderValue(const std::string &headerString);
 };

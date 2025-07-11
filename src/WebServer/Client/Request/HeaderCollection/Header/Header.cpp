@@ -1,7 +1,7 @@
 #include "Header.hpp"
 #include "utils/string/string.hpp"
 
-std::string Header::toHttpHeaderCase(const std::string &string)
+std::string Header::toHeaderCase(const std::string &string)
 {
     std::string result = string;
 
@@ -17,23 +17,10 @@ std::string Header::toHttpHeaderCase(const std::string &string)
     return result;
 }
 
-std::string Header::getHeaderKey(const std::string &header)
+Header::Header(const std::string &key)
 {
-    const size_t headerKeyEnd = header.find(':');
-    const std::string headerKey = header.substr(0, headerKeyEnd);
-
-    return toHttpHeaderCase(headerKey);
+    this->key_ = toHeaderCase(key);
 }
-
-std::string Header::getHeaderValue(const std::string &header)
-{
-    const size_t headerValueStart = header.find(':') + 1;
-    const std::string headerValue = header.substr(headerValueStart);
-
-    return trim(headerValue, " \t");
-}
-
-Header::Header(const std::string &key) : key_(key) {}
 
 Header::~Header() {}
 
@@ -54,10 +41,29 @@ size_t Header::getAmountOfValues() const
 
 void Header::addValue(const std::string &newValue)
 {
-    this->values_.push_back(newValue);
+    const std::string trimmedValue = trim(newValue, " \t");
+
+    this->values_.push_back(trimmedValue);
 }
 
 void Header::removeValues()
 {
     this->values_.clear();
 }
+
+std::string Header::getHeaderKey(const std::string &headerString)
+{
+    const size_t headerKeyEnd = headerString.find(':');
+    const std::string headerKey = headerString.substr(0, headerKeyEnd);
+
+    return headerKey;
+}
+
+std::string Header::getHeaderValue(const std::string &headerString)
+{
+    const size_t headerValueStart = headerString.find(':') + 1;
+    const std::string headerValue = headerString.substr(headerValueStart);
+
+    return headerValue;
+}
+
