@@ -3,6 +3,7 @@
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestProcesser/RequestProcesser.hpp"
+#include <cstdlib>
 
 std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
 {
@@ -84,6 +85,10 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
 
     const size_t headersEnd = requestBuffer.find("\r\n\r\n");
     request.body = requestBuffer.substr(headersEnd + 4);
+
+    if (request.headers.contains("Content-Length")
+        && static_cast<size_t>(std::atol(request.headers.getHeader("Content-Length").getValue().c_str())) < request.body.length())
+        return Result<Request_t>::fail("400 Bad Request");
 
     return Result<Request_t>::ok(request);
 }

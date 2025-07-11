@@ -439,3 +439,16 @@ TEST(recognize_a_request_with_an_empty_body_without_content_length_header)
 
     assertBodyIsEmpty();
 }
+
+TEST(take_as_failure_a_request_with_a_body_length_superior_than_content_length_header_size)
+{
+    const std::string validRequestLine = "GET / HTTP/1.1";
+    const std::string validHeaders = "Host: localhost\r\nContent-Length: 0";
+    const std::string invalidBody = "Invalid body";
+    const std::string invalidRequest = validRequestLine + "\r\n" + validHeaders + "\r\n\r\n" + invalidBody;
+
+    const Result<Request_t> result = RequestFactory::create(invalidRequest);
+
+    ASSERT_TRUE(result.isFailure())
+    ASSERT_EQUALS("400 Bad Request", result.getError());
+}
