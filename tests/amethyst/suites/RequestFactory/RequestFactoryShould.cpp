@@ -91,6 +91,12 @@ static void assertRequestIsInvalidFromHeaders(const std::string &invalidHeadersS
     assertRequestIsInvalid(invalidRequestString, errorMessage);
 }
 
+static void assertRequestIsInvalidFromBody(const std::string &bodyTypeHeader, const std::string &body, const std::string &errorMessage)
+{
+    const std::string invalidRequestString = "GET / HTTP/1.1\r\nHost:localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
+
+    assertRequestIsInvalid(invalidRequestString, errorMessage);
+}
 
 /* BASIC REQUEST LINE TESTS */
 TEST(recognize_basic_HTTP_GET_request)
@@ -442,39 +448,17 @@ TEST(recognize_a_request_with_an_empty_body_without_content_length_header)
 
 TEST(take_as_failure_a_request_with_a_body_length_superior_than_content_length_header_size)
 {
-    const std::string validRequestLine = "GET / HTTP/1.1";
-    const std::string validHeaders = "Host: localhost\r\nContent-Length: 0";
-    const std::string invalidBody = "Invalid body";
-    const std::string invalidRequest = validRequestLine + "\r\n" + validHeaders + "\r\n\r\n" + invalidBody;
-
-    const Result<Request_t> result = RequestFactory::create(invalidRequest);
-
-    ASSERT_TRUE(result.isFailure())
-    ASSERT_EQUALS("400 Bad Request", result.getError());
+    assertRequestIsInvalidFromBody("Content-Length: 0", "Invalid body", "400 Bad Request");
+    assertRequestIsInvalidFromBody("Content-Length: 10", "Invalid body", "400 Bad Request");
 }
 
 TEST(take_as_failure_a_request_with_a_body_consisted_of_WS_and_with_length_superior_than_content_length_header_size)
 {
-    const std::string validRequestLine = "GET / HTTP/1.1";
-    const std::string validHeaders = "Host: localhost\r\nContent-Length: 0";
-    const std::string invalidBody = "          ";
-    const std::string invalidRequest = validRequestLine + "\r\n" + validHeaders + "\r\n\r\n" + invalidBody;
-
-    const Result<Request_t> result = RequestFactory::create(invalidRequest);
-
-    ASSERT_TRUE(result.isFailure())
-    ASSERT_EQUALS("400 Bad Request", result.getError());
+    assertRequestIsInvalidFromBody("Content-Length: 0", "          ", "400 Bad Request");
+    assertRequestIsInvalidFromBody("Content-Length: 0", "\t\t\t\t\t", "400 Bad Request");
 }
 
 TEST(take_as_failure_a_request_with_body_without_content_length_nor_transfer_encoding_headers)
 {
-    const std::string validRequestLine = "GET / HTTP/1.1";
-    const std::string validHeaders = "Host: localhost";
-    const std::string invalidBody = "Invalid body";
-    const std::string invalidRequest = validRequestLine + "\r\n" + validHeaders + "\r\n\r\n" + invalidBody;
-
-    const Result<Request_t> result = RequestFactory::create(invalidRequest);
-
-    ASSERT_TRUE(result.isFailure())
-    ASSERT_EQUALS("411 Length Required", result.getError());
+    assertRequestIsInvalidFromBody("No-Length: specified", "Invalid body", "411 Length Required");
 }
