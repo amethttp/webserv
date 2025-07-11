@@ -90,5 +90,10 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         && static_cast<size_t>(std::atol(request.headers.getHeader("Content-Length").getValue().c_str())) < request.body.length())
         return Result<Request_t>::fail("400 Bad Request");
 
+    if (!request.headers.contains("Content-Length")
+        && !request.headers.contains("Transfer-Encoding")
+        && !request.body.empty())
+        return Result<Request_t>::fail("411 Length Required");
+
     return Result<Request_t>::ok(request);
 }

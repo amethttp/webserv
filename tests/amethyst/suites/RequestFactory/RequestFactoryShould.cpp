@@ -465,3 +465,16 @@ TEST(take_as_failure_a_request_with_a_body_consisted_of_WS_and_with_length_super
     ASSERT_TRUE(result.isFailure())
     ASSERT_EQUALS("400 Bad Request", result.getError());
 }
+
+TEST(take_as_failure_a_request_with_body_without_content_length_nor_transfer_encoding_headers)
+{
+    const std::string validRequestLine = "GET / HTTP/1.1";
+    const std::string validHeaders = "Host: localhost";
+    const std::string invalidBody = "Invalid body";
+    const std::string invalidRequest = validRequestLine + "\r\n" + validHeaders + "\r\n\r\n" + invalidBody;
+
+    const Result<Request_t> result = RequestFactory::create(invalidRequest);
+
+    ASSERT_TRUE(result.isFailure())
+    ASSERT_EQUALS("411 Length Required", result.getError());
+}
