@@ -106,7 +106,8 @@ bool RequestTokenizer::isHeader() const
 
     while (!hasFinishedText() && isTchar(headerChar))
     {
-        headerChar = peek(distance++);
+        distance++;
+        headerChar = peek(distance);
     }
 
     return headerChar == ':';
@@ -127,10 +128,11 @@ bool RequestTokenizer::isLastChunk() const
 
     while (!hasFinishedText() && lastChunkChar == '0')
     {
-        lastChunkChar = peek(distance++);
+        distance++;
+        lastChunkChar = peek(distance);
     }
 
-    return peek(distance) == '\r' && peek(distance + 1) == '\n';
+    return lastChunkChar == '\r' && peek(distance + 1) == '\n';
 }
 
 bool RequestTokenizer::isCrlf() const
