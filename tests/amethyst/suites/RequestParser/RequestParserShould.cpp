@@ -6,6 +6,7 @@ namespace
 {
     RequestLineParams_t requestLine;
     HeaderCollection headers;
+    std::string body;
 }
 
 static RequestLineParams_t parseFromValidRequestLine(const std::string &requestLineString)
@@ -18,12 +19,22 @@ static RequestLineParams_t parseFromValidRequestLine(const std::string &requestL
     return result.getValue();
 }
 
-static HeaderCollection parseFromValidHeaders(const std::string &requestHeaders)
+static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersString)
 {
-    const RequestTokenizer requestTokenizer(requestHeaders);
+    const RequestTokenizer requestTokenizer(requestHeadersString);
     RequestParser sut(requestTokenizer);
 
     const Result<HeaderCollection> result = sut.parseHeaders();
+
+    return result.getValue();
+}
+
+static std::string parseFromValidBody(const std::string &requestBodyString)
+{
+    const RequestTokenizer requestTokenizer(requestBodyString);
+    RequestParser sut(requestTokenizer);
+
+    const Result<std::string> result = sut.parseChunkedBody();
 
     return result.getValue();
 }
@@ -76,6 +87,11 @@ static void assertHeaderSize(const size_t size)
 static void assertHeader(const std::string &key, const std::string &value)
 {
     ASSERT_EQUALS(value, headers.getHeader(key).getValue());
+}
+
+static void assertBodyIsEmpty()
+{
+    ASSERT_EQUALS("", body);
 }
 
 
@@ -984,22 +1000,16 @@ TEST(take_as_failure_an_empty_header_line)
 /* REQUEST CHUNKED BODY CRITERIA */
 TEST(recognize_a_basic_chunked_body)
 {
-    const RequestTokenizer tokenizer("0\r\n\r\n");
-    RequestParser sut(tokenizer);
+    body = parseFromValidBody("0\r\n\r\n");
 
-    const std::string body = sut.parseChunkedBody().getValue();
-
-    ASSERT_EQUALS("", body);
+    assertBodyIsEmpty();
 }
 
 TEST(recognize_a_basic_chunked_body_with_a_last_chunk_whose_chunk_size_has_multiple_zeros)
 {
-    const RequestTokenizer tokenizer("0000000\r\n\r\n");
-    RequestParser sut(tokenizer);
+    body = parseFromValidBody("0000000\r\n\r\n");
 
-    const std::string body = sut.parseChunkedBody().getValue();
-
-    ASSERT_EQUALS("", body);
+    assertBodyIsEmpty();
 }
 
 TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_chunk_size_has_a_value_different_from_zero)
@@ -1050,10 +1060,7 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_contains_chunk_data)
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension)
 {
-    const RequestTokenizer tokenizer("0;extension\r\n\r\n");
-    RequestParser sut(tokenizer);
+    body = parseFromValidBody("0;extension\r\n\r\n");
 
-    const std::string body = sut.parseChunkedBody().getValue();
-
-    ASSERT_EQUALS("", body);
+    assertBodyIsEmpty();
 }
