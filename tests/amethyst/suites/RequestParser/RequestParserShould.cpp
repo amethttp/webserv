@@ -1008,3 +1008,9 @@ TEST(take_as_failure_a_chunked_body_with_last_chunk_with_chunk_size_with_a_value
     assertRequestChunkedBodyIsInvalid("0a\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("x\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_last_chunk_with_chunk_size_with_WS)
+{
+    assertRequestChunkedBodyIsInvalid("0 \r\n\r\n");
+    assertRequestChunkedBodyIsInvalid(" 0\r\n\r\n");
+}
