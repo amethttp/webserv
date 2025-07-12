@@ -992,7 +992,7 @@ TEST(recognize_a_basic_chunked_body)
     ASSERT_EQUALS("", body);
 }
 
-TEST(recognize_a_basic_chunked_body_with_last_chunk_with_multiple_zeros_as_chunk_size)
+TEST(recognize_a_basic_chunked_body_with_a_last_chunk_whose_chunk_size_has_multiple_zeros)
 {
     const RequestTokenizer tokenizer("0000000\r\n\r\n");
     RequestParser sut(tokenizer);
@@ -1002,14 +1002,14 @@ TEST(recognize_a_basic_chunked_body_with_last_chunk_with_multiple_zeros_as_chunk
     ASSERT_EQUALS("", body);
 }
 
-TEST(take_as_failure_a_chunked_body_with_last_chunk_with_chunk_size_with_a_value_different_from_zero)
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_chunk_size_has_a_value_different_from_zero)
 {
     assertRequestChunkedBodyIsInvalid("5\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("0a\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("x\r\n\r\n");
 }
 
-TEST(take_as_failure_a_chunked_body_with_last_chunk_with_chunk_size_with_WS)
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_chunk_size_has_WS)
 {
     assertRequestChunkedBodyIsInvalid("0 \r\n\r\n");
     assertRequestChunkedBodyIsInvalid(" 0\r\n\r\n");
