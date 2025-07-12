@@ -64,3 +64,8 @@ Result<HeaderCollection> RequestParser::parseHeaders()
 
     return Result<HeaderCollection>::ok(headers);
 }
+
+Result<std::string> RequestParser::parseBody()
+{
+    return Result<std::string>::ok("");
+}

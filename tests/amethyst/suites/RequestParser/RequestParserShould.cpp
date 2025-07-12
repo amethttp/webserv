@@ -968,3 +968,15 @@ TEST(take_as_failure_an_empty_header_line)
 {
     assertRequestHeaderIsInvalid("");
 }
+
+
+/* REQUEST CHUNKED BODY CRITERIA */
+TEST(recognize_a_basic_chunked_body)
+{
+    const RequestTokenizer tokenizer("0\r\n\r\n");
+    RequestParser sut(tokenizer);
+
+    const std::string body = sut.parseBody().getValue();
+
+    ASSERT_EQUALS("", body);
+}
