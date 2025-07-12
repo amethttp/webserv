@@ -1103,3 +1103,12 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_with_
 
     assertBodyIsEmpty();
 }
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_contains_valid_chars)
+{
+    const std::string validChars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    body = parseFromValidBody("0;ext=" + validChars + "\r\n\r\n");
+
+    assertBodyIsEmpty();
+}

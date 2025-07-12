@@ -52,7 +52,7 @@ bool RequestTokenizer::isTchar() const
     return (std::isalnum(this->currentChar_) || tcharsSymbols.find(this->currentChar_) != std::string::npos);
 }
 
-bool RequestTokenizer::isTchar(const char c) const
+bool RequestTokenizer::isTchar(const char c)
 {
     return (std::isalnum(c) || tcharsSymbols.find(c) != std::string::npos);
 }

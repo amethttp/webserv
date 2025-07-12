@@ -1306,6 +1306,8 @@
 "0;=val\r\n\r\n"
 "0;=\r\n\r\n"
 "0;\"ext\"=val\r\n\r\n"
+"0;ext===\r\n\r\n"
+"0;===\r\n\r\n"
 
 ### 31. Recognize a last-chunk with multiple basic chunk-extensions
 "0;ext;ext\r\n\r\n"

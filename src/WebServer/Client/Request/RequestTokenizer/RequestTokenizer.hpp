@@ -20,7 +20,7 @@ private:
 
     bool hasFinishedText() const;
     bool isTchar() const;
-    bool isTchar(char c) const;
+    static bool isTchar(char c);
     bool startsWithHttpPrefixAtCurrentPos() const;
     bool isHttpVersion() const;
     bool isUnreserved() const;
