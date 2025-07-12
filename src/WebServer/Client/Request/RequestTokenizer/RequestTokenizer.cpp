@@ -136,6 +136,10 @@ bool RequestTokenizer::isLastChunk() const
     {
         ++distance;
         lastChunkChar = peek(distance);
+
+        if (!isTchar(lastChunkChar))
+            return false;
+
         while (!hasFinishedText() && isTchar(lastChunkChar))
         {
             ++distance;
