@@ -1047,3 +1047,13 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_contains_chunk_data)
 {
     assertRequestChunkedBodyIsInvalid("0\r\nInvalid\r\n");
 }
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension)
+{
+    const RequestTokenizer tokenizer("0;extension\r\n\r\n");
+    RequestParser sut(tokenizer);
+
+    const std::string body = sut.parseChunkedBody().getValue();
+
+    ASSERT_EQUALS("", body);
+}

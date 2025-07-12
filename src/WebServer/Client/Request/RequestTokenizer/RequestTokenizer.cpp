@@ -132,6 +132,15 @@ bool RequestTokenizer::isLastChunk() const
         lastChunkChar = peek(distance);
     }
 
+    if (lastChunkChar == ';')
+    {
+        while (!hasFinishedText() && std::isprint(lastChunkChar))
+        {
+            ++distance;
+            lastChunkChar = peek(distance);
+        }
+    }
+
     return isCrlfAtDistance(distance);
 }
 
@@ -227,7 +236,7 @@ std::string RequestTokenizer::lastChunk()
 {
     std::string lastChunkString;
 
-    while (!hasFinishedText() && this->currentChar_ == '0')
+    while (!hasFinishedText() && std::isprint(this->currentChar_))
     {
         lastChunkString += this->currentChar_;
         advance();
