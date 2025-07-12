@@ -980,3 +980,13 @@ TEST(recognize_a_basic_chunked_body)
 
     ASSERT_EQUALS("", body);
 }
+
+TEST(recognize_a_basic_chunked_body_with_last_chunk_with_multiple_zeros_as_chunk_size)
+{
+    const RequestTokenizer tokenizer("0000000\r\n\r\n");
+    RequestParser sut(tokenizer);
+
+    const std::string body = sut.parseBody().getValue();
+
+    ASSERT_EQUALS("", body);
+}
