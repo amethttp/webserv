@@ -1096,3 +1096,10 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_an_empty_chunk_ex
 {
     assertRequestChunkedBodyIsInvalid("0;\r\n\r\n");
 }
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_with_value)
+{
+    body = parseFromValidBody("0;ext=value\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
