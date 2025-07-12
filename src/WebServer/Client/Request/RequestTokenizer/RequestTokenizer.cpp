@@ -101,12 +101,15 @@ bool RequestTokenizer::isHeader() const
     int distance = 0;
     char headerChar = peek(distance);
 
+    if (!isTchar(headerChar))
+        return false;
+
     while (!hasFinishedText() && isTchar(headerChar))
     {
         headerChar = peek(distance++);
     }
 
-    return distance > 0 && headerChar == ':';
+    return headerChar == ':';
 }
 
 bool RequestTokenizer::isFieldLine() const
