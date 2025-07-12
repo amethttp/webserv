@@ -1440,12 +1440,15 @@
 ### 68. Take as failure chunked body with a trailer-field as last-chunk
 "0c\r\nInvalid body\r\nTrailer:value"
 
-### 69. Take as failure an invalid chunked body
+### 69. Take as failure chunked body with text at the end
+"0\r\n\r\nInvalid text"
+
+### 70. Take as failure an invalid chunked body
 "INVALID"
 "0"
 "\r\n"
 
-### 70. Take as failure an empty chunked body
+### 71. Take as failure an empty chunked body
 ""
 
 

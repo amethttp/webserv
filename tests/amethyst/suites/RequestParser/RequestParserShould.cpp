@@ -1037,3 +1037,8 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_last_crlf_is_SP)
 {
     assertRequestChunkedBodyIsInvalid("0 \r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_last_crlf_is_empty)
+{
+    assertRequestChunkedBodyIsInvalid("0\r\n");
+}
