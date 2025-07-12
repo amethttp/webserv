@@ -131,7 +131,33 @@ bool RequestTokenizer::isFieldLine() const
 
 bool RequestTokenizer::isChunkExtensionAtDistance(const int distance) const
 {
-    return (peek(distance) == ';' && isTchar(peek(distance + 1)));
+    int tempDistance = distance;
+    char lastChunkExtensionChar = peek(tempDistance);
+
+    if (lastChunkExtensionChar != ';')
+        return false;
+
+    tempDistance++;
+    lastChunkExtensionChar = peek(tempDistance);
+    if (!isTchar(lastChunkExtensionChar))
+        return false;
+
+    while (isTchar(lastChunkExtensionChar))
+    {
+        tempDistance++;
+        lastChunkExtensionChar = peek(tempDistance);
+    }
+
+    if (lastChunkExtensionChar == '=')
+    {
+        tempDistance++;
+        lastChunkExtensionChar = peek(tempDistance);
+
+        if (!isTchar(lastChunkExtensionChar))
+            return false;
+    }
+
+    return true;
 }
 
 bool RequestTokenizer::isLastChunk() const
