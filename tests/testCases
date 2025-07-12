@@ -1240,8 +1240,8 @@
 "0;!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\r\n\r\n"
 
 ### 13. Take as failure a last-chunk with chunk-ext-name with invalid chars
-"0;(),/:;\r<=>\b?@\f[\\]\t{}\n\r\n\r\n"
-"0;exten(),/:;\r<=>\b?@\f[\\]\t{}\nsion\r\n\r\n"
+"0;(),/:;<=>?@[\\]{}\r\n\r\n"
+"0;exten(),/:;<=>?@[\\]{}sion\r\n\r\n"
 
 ### 14. Take as failure a last-chunk with chunk-ext-name with SP
 "0;ext en sion\r\n\r\n"

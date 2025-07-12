@@ -134,7 +134,9 @@ bool RequestTokenizer::isLastChunk() const
 
     if (lastChunkChar == ';')
     {
-        while (!hasFinishedText() && std::isprint(lastChunkChar))
+        ++distance;
+        lastChunkChar = peek(distance);
+        while (!hasFinishedText() && isTchar(lastChunkChar))
         {
             ++distance;
             lastChunkChar = peek(distance);

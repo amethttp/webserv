@@ -1073,3 +1073,9 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_consi
 
     assertBodyIsEmpty();
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_that_contains_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("0;(),/:;<=>?@[\\]{}\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;exten(),/:;<=>?@[\\]{}sion\r\n\r\n");
+}
