@@ -57,6 +57,17 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
     ASSERT_EQUALS("400 Bad Request", result.getError());
 }
 
+static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
+{
+    const RequestTokenizer requestTokenizer(invalidBody);
+    RequestParser sut(requestTokenizer);
+
+    Result<std::string> result = sut.parseBody();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS("400 Bad Request", result.getError());
+}
+
 static void assertHeaderSize(const size_t size)
 {
     ASSERT_EQUALS(size, headers.getAmountOfHeaders());
@@ -993,27 +1004,7 @@ TEST(recognize_a_basic_chunked_body_with_last_chunk_with_multiple_zeros_as_chunk
 
 TEST(take_as_failure_a_chunked_body_with_last_chunk_with_chunk_size_with_a_value_different_from_zero)
 {
-    RequestTokenizer tokenizer("5\r\n\r\n");
-    RequestParser sut(tokenizer);
-
-    Result<std::string> result = sut.parseBody();
-
-    ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError())
-
-    tokenizer = RequestTokenizer("0a\r\n\r\n");
-    sut = RequestParser(tokenizer);
-
-    result = sut.parseBody();
-
-    ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError())
-
-    tokenizer = RequestTokenizer("x\r\n\r\n");
-    sut = RequestParser(tokenizer);
-
-    result = sut.parseBody();
-
-    ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError())
+    assertRequestChunkedBodyIsInvalid("5\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0a\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("x\r\n\r\n");
 }
