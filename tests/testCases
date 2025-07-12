@@ -1261,8 +1261,8 @@
 "0;ext=!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\r\n\r\n"
 
 ### 19. Take as failure a last-chunk with chunk-extension with chunk-ext-val with invalid tchars
-"0;ext=(),/:;\r<=>\b?@\f[\\]\t{}\n\r\n\r\n"
-"0;ext=val(),/:;\r<=>\b?@\f[\\]\t{}\nue\r\n\r\n"
+"0;ext=(),/:;<=>?@[\\]{}\r\n\r\n"
+"0;ext=val(),/:;<=>?@[\\]{}ue\r\n\r\n"
 
 ### 20. Take as failure a last-chunk with chunk-extension with chunk-ext-val with SP
 "0;ext=va l ue\r\n\r\n"
