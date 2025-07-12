@@ -1161,7 +1161,7 @@
 "Host: localhost\r\nConnection: close\r\Connection: close\r\n\r\n"
 
 
-### REQUEST FULL BODY
+### REQUEST FULL BODY CRITERIA
 #----# Having Content-Length header matching size #----#
 ### 1. Accept empty body
 ""
@@ -1174,22 +1174,279 @@
 + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F" \
 + " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F" 
 
+### 4. Accept CRLF inside body
+"Valid\r\nbody"
+
 #----# No Content-Length header but no body #----#
-### 4. Accept empty body without Content-Length header
+### 5. Accept empty body without Content-Length header
 ""
 
 #----# Having Content-Length header with wrong size #----#
-### 5. Take as failure a body with length superior than Content-Length size
+### 6. Take as failure a body with length superior than Content-Length size
 "Content-Length: 0\r\n\r\nInvalid body"
 "Content-Length: 10\r\n\r\nInvalid body"
 
-### 6. Take as failure a body with length superior than Content-Length size consisted of WS
+### 7. Take as failure a body with length superior than Content-Length size consisted of WS
 "Content-Length: 0\r\n\r\n        "
 "Content-Length: 0\r\n\r\n\t\t\t\t"
 
 #----# No Content-Length header and body #----#
-### 7. Take as failure with 411 Length Required when a body is specified without Content-Length nor Transfer-Encoding: chunked
+### 8. Take as failure with 411 Length Required when a body is specified without Content-Length nor Transfer-Encoding: chunked
 "Invalid body"
+
+
+### REQUEST CHUNKED BODY CRITERIA
+#----# Having Transfer-Encoding header matching size #----#
+### 1. Recognize a basic chunked body with only last-chunk
+"0\r\n\r\n"
+
+### 2. Recognize a basic chunked body with only last-chunk with multiple 0s
+"0000000\r\n\r\n"
+
+### 3. Take as failure a last-chunk with other value than zero for chunk-size
+"5\r\n\r\n"
+"0a\r\n\r\n"
+"x\r\n\r\n"
+
+### 4. Take as failure a last-chunk with WS in chunk-size
+"0 \r\n\r\n"
+" 0\r\n\r\n"
+
+### 5. Take as failure a last-chunk with a SP as chunk-size
+" \r\n\r\n"
+
+### 6. Take as failure a last-chunk without chunk-size
+"\r\n\r\n"
+
+### 7. Take as failure a last-chunk with bad CRLF separator
+"0\r\r\n"
+"0\n\r\n"
+"0\f\b\r\n"
+"0\r \n\r\n"
+
+### 8. Take as failure a last-chunk with a SP as CRLF separator
+"0 \r\n"
+
+### 9. Take as failure a last-chunk without CRLF separator
+"0\r\n"
+
+### 10. Take as failure a last-chunk with data
+"0\r\nInvalid\r\n"
+
+### 11. Recognize a last-chunk with a basic chunk-extension with only chunk-ext-name
+"0;extension\r\n\r\n"
+
+### 12. Recognize a last-chunk with chunk-ext-name with valid chars
+"0;!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\r\n\r\n"
+
+### 13. Take as failure a last-chunk with chunk-ext-name with invalid chars
+"0;(),/:;\r<=>\b?@\f[\\]\t{}\n\r\n\r\n"
+"0;exten(),/:;\r<=>\b?@\f[\\]\t{}\nsion\r\n\r\n"
+
+### 14. Take as failure a last-chunk with chunk-ext-name with SP
+"0;ext en sion\r\n\r\n"
+"0; ext\r\n\r\n"
+"0;ext \r\n\r\n"
+
+### 15. Take as failure a last-chunk with SP as chunk-ext-name
+"0; \r\n\r\n"
+
+### 16. Take as failure a last-chunk with an empty chunk-extension
+"0;\r\n\r\n"
+
+### 17. Recognize a last-chunk with basic chunk-extension with chunk-ext-val
+"0;ext=value\r\n\r\n"
+
+### 18. Recognize a last-chunk with chunk-extension with chunk-ext-val with valid tchars
+"0;ext=!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\r\n\r\n"
+
+### 19. Take as failure a last-chunk with chunk-extension with chunk-ext-val with invalid tchars
+"0;ext=(),/:;\r<=>\b?@\f[\\]\t{}\n\r\n\r\n"
+"0;ext=val(),/:;\r<=>\b?@\f[\\]\t{}\nue\r\n\r\n"
+
+### 20. Take as failure a last-chunk with chunk-extension with chunk-ext-val with SP
+"0;ext=va l ue\r\n\r\n"
+"0;ext= value\r\n\r\n"
+"0;ext=value \r\n\r\n"
+
+### 21. Take as failure a last-chunk with chunk-extension with SP as chunk-ext-val
+"0;ext= \r\n\r\n"
+
+### 22. Take as failure a last-chunk with chunk-extension with empty chunk-ext-val 
+"0;ext=\r\n\r\n"
+
+### 23. Recognize a last-chunk with chunk-extension with an empty quoted-string chunk-ext-val 
+"0;ext=\"\"\r\n\r\n"
+
+### 24. Recognize a last-chunk with chunk-extension with a non-empty quoted-string chunk-ext-val 
+"0;ext=\"validBody\"\r\n\r\n"
+
+### 25. Recognize a last-chunk with chunk-extension with a quoted-string chunk-ext-val with valid qdtext 
+"0;ext=\"!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~\t \\\\ \\\"\"\r\n\r\n"
+
+### 26. Recognize a last-chunk with chunk-extension with a quoted-string chunk-ext-val with valid quoted-pairs
+"0;ext=\"\\\\ \\\" \\ \\\t\"\r\n\r\n"
+
+### 27. Take as failure a last-chunk with chunk-extension with a quoted-string chunk-ext-val with invalid chars
+"0;ext=\"\r\f\b\x04\x01\"\r\n\r\n"
+"0;ext=\"\\\r\\\b\"\r\n\r\n"
+"0;ext=\"\\\"\r\n\r\n"
+"0;ext=\"\"\"\r\n\r\n"
+
+### 28. Take as failure a last-chunk with chunk-extension with a quoted-string chunk-ext-val with surrounding SP
+"0;ext= \"\"\r\n\r\n"
+"0;ext=\"\" \r\n\r\n"
+
+### 29. Take as failure a last-chunk with chunk-extension with a mal-formed quoted-string
+"0;ext=\"invalid\r\n\r\n"
+"0;ext=invalid\"\r\n\r\n"
+"0;ext=\"\r\n\r\n"
+
+### 30. Take as failure a last-chunk with mal-formed chunk-extension
+"0;=val\r\n\r\n"
+"0;=\r\n\r\n"
+"0;\"ext\"=val\r\n\r\n"
+
+### 31. Recognize a last-chunk with multiple basic chunk-extensions
+"0;ext;ext\r\n\r\n"
+
+### 32. Recognize a last-chunk with multiple chunk-extensions with values
+"0;ext=val;ext=val\r\n\r\n"
+
+### 33. Recognize a last-chunk with multiple chunk-extensions with valid chars
+"0;ext=val;!#$%&'*+-.^_`|~=!#$%&'*+-.^_`|~\r\n\r\n"
+
+### 34. Recognize a last-chunk with multiple chunk-extensions with valid chars and valid quoted-pairs
+"0;ext=val;!#$%&'*+-.^_`|~=\"{|}~\t \\\\ \\\"\"\r\n\r\n"
+
+### 35. Take as failure a last-chunk with multiple chunk-extensions with invalid chars
+"0;ext=val;\r\b=val\r\n\r\n"
+"0;ext=val;ext=\b\f\r\n\r\n"
+"0;ext=val;ext=\"\\\b\"\r\n\r\n"
+
+### 36. Take as failure a last-chunk with multiple mal-formed chunk-extensions
+"0;ext=val;ext=\r\n\r\n"
+"0;ext=val;=val\r\n\r\n"
+"0;ext=val;=\r\n\r\n"
+
+### 37. Take as failure a last-chunk with multiple chunk-extensions separators
+"0;ext=val;;;ext=val\r\n\r\n"
+
+### 38. Take as failure a last-chunk with multiple chunk-extensions with mal-formed separator
+"0;ext=val ;ext=val\r\n\r\n"
+"0;ext=val; ext=val\r\n\r\n"
+
+### 39. Take as failure a last-chunk with multiple chunk-extensions with other character as chunk-extension separator
+"0;ext=valXext=val\r\n\r\n"
+"0;ext=val\"ext=val\r\n\r\n"
+
+### 40. Recognize a basic chunk
+"5\r\nValid\r\n0\r\n\r\n"
+
+### 41. Recognize a chunk with leading zeros in chunk-size 
+"000000000000000005\r\nValid\r\n0\r\n\r\n"
+
+### 42. Recognize a chunk with multiple hexadecimal digits in chunk-size 
+"0a\r\nValid body\r\n0\r\n\r\n"
+
+### 43. Recognize a chunk with case-insensitive hexadecimal digits in chunk-size 
+"0A\r\nValid body\r\n0\r\n\r\n"
+
+### 44. Take as failure a chunk with non-hexadecimal digits in chunk-size 
+"0g\r\nInvalid\r\n0\r\n\r\n"
+"0G\r\nInvalid\r\n0\r\n\r\n"
+"-4\r\nInvalid\r\n0\r\n\r\n"
+
+### 45. Take as failure a chunk with SP in chunk-size 
+"7 \r\nInvalid\r\n0\r\n\r\n"
+" 7\r\nInvalid\r\n0\r\n\r\n"
+
+### 46. Take as failure a chunk with SP as chunk-size 
+" \r\nInvalid\r\n0\r\n\r\n"
+
+### 47. Take as failure a chunk without chunk-size 
+"\r\nInvalid\r\n0\r\n\r\n"
+
+### 48. Recognize a chunk with chunk-extension 
+"0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n"
+
+### 49. Take as failure a chunk with a mal-formed first CRLF separator 
+"7\rInvalid\r\n0\r\n\r\n"
+"7\nInvalid\r\n0\r\n\r\n"
+"7\f\bInvalid\r\n0\r\n\r\n"
+
+### 50. Take as failure a chunk with a SP as first CRLF separator 
+"7 Invalid\r\n0\r\n\r\n"
+
+### 51. Take as failure a chunk without first CRLF separator 
+"7Invalid\r\n0\r\n\r\n"
+
+### 52. Recognize a chunk with CRLF separators in chunk-data as data (not as separator) 
+"0a\r\nValid body\r\n0\r\n\r\n"
+"0b\r\nValid\r\nbody\r\n0\r\n\r\n"
+"07\r\n\b\n\rbody\r\n0\r\n\r\n"
+
+### 53. Recognize a chunk with all octets in chunk-data 
+"7f\r\n\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f" \
++ "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F" \
++ " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F\r\n0\r\n\r\n" 
+
+### 54. Take as failure a chunk with a mal-formed last CRLF separator 
+"7\r\nInvalid\r0\r\n\r\n"
+"7\r\nInvalid\n0\r\n\r\n"
+"7\r\nInvalid\b\f0\r\n\r\n"
+
+### 55. Take as failure a chunk with a SP as last CRLF separator
+"7\r\nInvalid 0\r\n\r\n"
+
+### 56. Take as failure a chunk without last CRLF separator
+"7\r\nInvalid0\r\n\r\n"
+
+### 57. Recognize a chunked-body with multiple chunks
+"05\r\nValid\r\n01\r\n \r\n04\r\nbody\r\n0\r\n\r\n"
+
+### 58. Recognize a chunked-body with multiple chunks with chunk-extensions
+"05\r\nValid\r\n01;ext=value\r\n \r\n04;ext=\"value\"\r\nbody\r\n0\r\n\r\n"
+
+### 59. Take as failure a chunked-body with multiple chunks with invalid chars
+"05\r\nValid\r\n01\r\n\b \r\n04\r\nbody\r\n0\r\n\r\n"
+"05\r\nValid\r\n01\r\n \r\n04\r\n\bbody\r\n0\r\n\r\n"
+
+### 60. Recognize a chunked-body with a basic trailer-field
+"0\r\nTrailer: value\r\n"
+
+### 61. Recognize a chunked-body with multiple trailer-field
+"0\r\nTrailer: value\r\nTrailer2: value2\r\n"
+
+### 62. Take as failure a chunked-body with invalid trailer-field
+"0\r\nTrailer: value\b\r\nTrailer2: value2\r\n"
+"0\r\nTrailer: value\r\nTrailer2\b: value2\r\n"
+
+### 63. Take as failure a chunked-body without the last CRLF separator
+"0\r\nTrailer: value"
+
+### 64. Take as failure a trailer-field as chunked-body
+"Header: value"
+
+### 65. Take as failure chunk with a chunk-data length bigger than chunk-size
+"01\r\nInvalid body\r\n0\r\n\r\n"
+
+### 66. Take as failure chunk with a chunk-data length smaller than chunk-size
+"FF\r\nInvalid body\r\n0\r\n\r\n"
+
+### 67. Take as failure chunked body without last-chunk
+"0c\r\nInvalid body\r\n"
+
+### 68. Take as failure chunked body with a trailer-field as last-chunk
+"0c\r\nInvalid body\r\nTrailer:value"
+
+### 69. Take as failure an invalid chunked body
+"INVALID"
+"0"
+"\r\n"
+
+### 70. Take as failure an empty chunked body
+""
 
 
 
@@ -1203,8 +1460,8 @@
 # 8. Headers parsing                                                                    DONE
 # 9. TODO THINGS                                                                        DONE
 # 10. Full body parsing criteria                                                        DONE
-# 11. Full body parsing                                                                 
-# 12. Chunked body parsing criteria                                                     
+# 11. Full body parsing                                                                 DONE
+# 12. Chunked body parsing criteria                                                     DONE
 # 13. Chunked body parsing                                                              
 # 14. RequestFactory::canCreateResponse() criteria                                      
 # 15. RequestFactory::canCreateResponse()                                               
