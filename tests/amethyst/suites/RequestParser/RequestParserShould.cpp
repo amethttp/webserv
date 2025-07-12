@@ -1125,3 +1125,8 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension
     assertRequestChunkedBodyIsInvalid("0;ext= value\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("0;ext=value \r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_SP)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext= \r\n\r\n");
+}
