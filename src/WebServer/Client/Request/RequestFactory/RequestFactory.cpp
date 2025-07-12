@@ -76,6 +76,13 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
 
 Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
+    RequestParser requestParser = createParser(bodyString);
+
+    const Result<std::string> requestBodyResult = requestParser.parseBody();
+    if (requestBodyResult.isFailure())
+        return Result<std::string>::fail(requestBodyResult.getError());
+    std::string requestBody = requestBodyResult.getValue();
+
     if (headers.contains("Content-Length")
     && static_cast<size_t>(std::atol(headers.getHeader("Content-Length").getValue().c_str())) < bodyString.length())
         return Result<std::string>::fail("400 Bad Request");
@@ -85,7 +92,10 @@ Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderColle
         && !bodyString.empty())
         return Result<std::string>::fail("411 Length Required");
 
-    return Result<std::string>::ok(bodyString);
+    if (headers.contains("Content-Length"))
+        requestBody = bodyString;
+
+    return Result<std::string>::ok(requestBody);
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
