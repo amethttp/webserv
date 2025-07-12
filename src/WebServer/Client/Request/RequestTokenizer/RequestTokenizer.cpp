@@ -31,6 +31,17 @@ char RequestTokenizer::peek(const size_t distance) const
     return this->text_[peekedCharacterPos];
 }
 
+void RequestTokenizer::skipChunkExtension(int &distance) const
+{
+    char lastChunkExtensionChar = peek(distance);
+
+    while (!hasFinishedText() && isTchar(lastChunkExtensionChar))
+    {
+        ++distance;
+        lastChunkExtensionChar = peek(distance);
+    }
+}
+
 bool RequestTokenizer::hasFinishedText() const
 {
     return this->pos_ >= this->text_.length();
@@ -118,6 +129,11 @@ bool RequestTokenizer::isFieldLine() const
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
 }
 
+bool RequestTokenizer::isChunkExtensionAtDistance(const int distance) const
+{
+    return (peek(distance) == ';' && isTchar(peek(distance + 1)));
+}
+
 bool RequestTokenizer::isLastChunk() const
 {
     int distance = 0;
@@ -132,20 +148,8 @@ bool RequestTokenizer::isLastChunk() const
         lastChunkChar = peek(distance);
     }
 
-    if (lastChunkChar == ';')
-    {
-        ++distance;
-        lastChunkChar = peek(distance);
-
-        if (!isTchar(lastChunkChar))
-            return false;
-
-        while (!hasFinishedText() && isTchar(lastChunkChar))
-        {
-            ++distance;
-            lastChunkChar = peek(distance);
-        }
-    }
+    if (isChunkExtensionAtDistance(distance))
+        skipChunkExtension(++distance);
 
     return isCrlfAtDistance(distance);
 }
