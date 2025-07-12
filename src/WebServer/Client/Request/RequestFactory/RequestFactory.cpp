@@ -76,28 +76,31 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
 
 Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
-    RequestParser requestParser = createParser(bodyString);
+    if (headers.contains("Content-Length"))
+    {
+        const size_t contentLengthSize = std::atol(headers.getHeader("Content-Length").getValue().c_str());
 
-    std::string requestBody;
-    const Result<std::string> requestBodyResult = requestParser.parseChunkedBody();
-    if (headers.contains("Transfer-Encoding") && requestBodyResult.isFailure())
-        return Result<std::string>::fail(requestBodyResult.getError());
+        if (contentLengthSize < bodyString.length())
+            return Result<std::string>::fail("400 Bad Request");
+
+        return Result<std::string>::ok(bodyString);
+    }
+
     if (headers.contains("Transfer-Encoding"))
-        requestBody = requestBodyResult.getValue();
+    {
+        RequestParser requestParser = createParser(bodyString);
 
-    if (headers.contains("Content-Length")
-    && static_cast<size_t>(std::atol(headers.getHeader("Content-Length").getValue().c_str())) < bodyString.length())
-        return Result<std::string>::fail("400 Bad Request");
+        const Result<std::string> requestBodyResult = requestParser.parseChunkedBody();
+        if (requestBodyResult.isFailure())
+            return Result<std::string>::fail(requestBodyResult.getError());
 
-    if (!headers.contains("Content-Length")
-        && !headers.contains("Transfer-Encoding")
-        && !bodyString.empty())
+        return Result<std::string>::ok(requestBodyResult.getValue());
+    }
+
+    if (!bodyString.empty())
         return Result<std::string>::fail("411 Length Required");
 
-    if (headers.contains("Content-Length"))
-        requestBody = bodyString;
-
-    return Result<std::string>::ok(requestBody);
+    return Result<std::string>::ok(bodyString);
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
