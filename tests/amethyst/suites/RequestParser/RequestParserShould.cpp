@@ -1079,3 +1079,10 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension
     assertRequestChunkedBodyIsInvalid("0;(),/:;<=>?@[\\]{}\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("0;exten(),/:;<=>?@[\\]{}sion\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_that_contains_SP)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext en sion\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0; ext\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext \r\n\r\n");
+}
