@@ -31,6 +31,7 @@ private:
     bool isQuery() const;
     bool isHeader() const;
     bool isFieldLine() const;
+    bool isLastChunk() const;
     bool isCrlf() const;
 
     std::string method();
@@ -40,6 +41,7 @@ private:
     std::string target();
     std::string sp();
     std::string header();
+    std::string lastChunk();
     std::string crlf();
 
 public:

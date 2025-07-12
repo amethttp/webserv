@@ -78,10 +78,12 @@ Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderColle
 {
     RequestParser requestParser = createParser(bodyString);
 
+    std::string requestBody;
     const Result<std::string> requestBodyResult = requestParser.parseBody();
-    if (requestBodyResult.isFailure())
+    if (headers.contains("Transfer-Encoding") && requestBodyResult.isFailure())
         return Result<std::string>::fail(requestBodyResult.getError());
-    std::string requestBody = requestBodyResult.getValue();
+    if (headers.contains("Transfer-Encoding"))
+        requestBody = requestBodyResult.getValue();
 
     if (headers.contains("Content-Length")
     && static_cast<size_t>(std::atol(headers.getHeader("Content-Length").getValue().c_str())) < bodyString.length())

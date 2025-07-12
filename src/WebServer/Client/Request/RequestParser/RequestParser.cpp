@@ -67,5 +67,8 @@ Result<HeaderCollection> RequestParser::parseHeaders()
 
 Result<std::string> RequestParser::parseBody()
 {
+    if (eat(LAST_CHUNK) == FAIL)
+        return Result<std::string>::fail("400 Bad Request");
+
     return Result<std::string>::ok("");
 }

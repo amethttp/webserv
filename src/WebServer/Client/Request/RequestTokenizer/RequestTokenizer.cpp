@@ -114,6 +114,18 @@ bool RequestTokenizer::isFieldLine() const
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
 }
 
+bool RequestTokenizer::isLastChunk() const
+{
+    int distance = 0;
+
+    while (!hasFinishedText() && peek(distance) == '0')
+    {
+        distance++;
+    }
+
+    return distance > 0 && peek(distance) == '\r' && peek(distance + 1) == '\n';
+}
+
 bool RequestTokenizer::isCrlf() const
 {
     return this->currentChar_ == '\r' && peek() == '\n';
@@ -197,6 +209,21 @@ std::string RequestTokenizer::header()
     return headerString;
 }
 
+std::string RequestTokenizer::lastChunk()
+{
+    std::string lastChunkString;
+
+    while (!hasFinishedText() && this->currentChar_ == '0')
+    {
+        lastChunkString += this->currentChar_;
+        advance();
+    }
+
+    lastChunkString += crlf();
+
+    return lastChunkString;
+}
+
 std::string RequestTokenizer::crlf()
 {
     advance(2);
@@ -216,6 +243,9 @@ RequestToken RequestTokenizer::getNextToken()
 
     if (isHttpVersion())
         return RequestToken(HTTP_VERSION, httpVersion());
+
+    if (isLastChunk())
+        return RequestToken(LAST_CHUNK, lastChunk());
 
     if (isHeader())
         return RequestToken(HEADER, header());
