@@ -132,12 +132,17 @@ bool RequestTokenizer::isLastChunk() const
         lastChunkChar = peek(distance);
     }
 
-    return lastChunkChar == '\r' && peek(distance + 1) == '\n';
+    return isCrlfAtDistance(distance);
 }
 
 bool RequestTokenizer::isCrlf() const
 {
     return this->currentChar_ == '\r' && peek() == '\n';
+}
+
+bool RequestTokenizer::isCrlfAtDistance(const int distance) const
+{
+    return peek(distance) == '\r' && peek(distance + 1) == '\n';
 }
 
 std::string RequestTokenizer::method()

@@ -33,6 +33,7 @@ private:
     bool isFieldLine() const;
     bool isLastChunk() const;
     bool isCrlf() const;
+    bool isCrlfAtDistance(int distance) const;
 
     std::string method();
     std::string httpVersion();
