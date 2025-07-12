@@ -26,5 +26,5 @@ public:
 
     Result<RequestLineParams_t> parseRequestLine();
     Result<HeaderCollection> parseHeaders();
-    Result<std::string> parseBody();
+    Result<std::string> parseChunkedBody();
 };

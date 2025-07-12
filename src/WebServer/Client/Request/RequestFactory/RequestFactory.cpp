@@ -79,7 +79,7 @@ Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderColle
     RequestParser requestParser = createParser(bodyString);
 
     std::string requestBody;
-    const Result<std::string> requestBodyResult = requestParser.parseBody();
+    const Result<std::string> requestBodyResult = requestParser.parseChunkedBody();
     if (headers.contains("Transfer-Encoding") && requestBodyResult.isFailure())
         return Result<std::string>::fail(requestBodyResult.getError());
     if (headers.contains("Transfer-Encoding"))

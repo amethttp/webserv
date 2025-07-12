@@ -62,7 +62,7 @@ static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
 
-    Result<std::string> result = sut.parseBody();
+    Result<std::string> result = sut.parseChunkedBody();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS("400 Bad Request", result.getError());
@@ -987,7 +987,7 @@ TEST(recognize_a_basic_chunked_body)
     const RequestTokenizer tokenizer("0\r\n\r\n");
     RequestParser sut(tokenizer);
 
-    const std::string body = sut.parseBody().getValue();
+    const std::string body = sut.parseChunkedBody().getValue();
 
     ASSERT_EQUALS("", body);
 }
@@ -997,7 +997,7 @@ TEST(recognize_a_basic_chunked_body_with_last_chunk_with_multiple_zeros_as_chunk
     const RequestTokenizer tokenizer("0000000\r\n\r\n");
     RequestParser sut(tokenizer);
 
-    const std::string body = sut.parseBody().getValue();
+    const std::string body = sut.parseChunkedBody().getValue();
 
     ASSERT_EQUALS("", body);
 }
