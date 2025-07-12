@@ -120,13 +120,17 @@ bool RequestTokenizer::isFieldLine() const
 bool RequestTokenizer::isLastChunk() const
 {
     int distance = 0;
+    char lastChunkChar = peek(distance);
 
-    while (!hasFinishedText() && peek(distance) == '0')
+    if (lastChunkChar != '0')
+        return false;
+
+    while (!hasFinishedText() && lastChunkChar == '0')
     {
-        distance++;
+        lastChunkChar = peek(distance++);
     }
 
-    return distance > 0 && peek(distance) == '\r' && peek(distance + 1) == '\n';
+    return peek(distance) == '\r' && peek(distance + 1) == '\n';
 }
 
 bool RequestTokenizer::isCrlf() const
