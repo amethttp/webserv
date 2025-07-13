@@ -1149,3 +1149,12 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose
 
     assertBodyIsEmpty();
 }
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_valid_qdtext)
+{
+    const std::string validQdtext = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~ \t";
+
+    body = parseFromValidBody("0;ext=\"" + validQdtext + "\"\r\n\r\n");
+
+    assertBodyIsEmpty();
+}

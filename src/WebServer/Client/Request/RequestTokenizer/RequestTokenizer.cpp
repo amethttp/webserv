@@ -68,7 +68,7 @@ void RequestTokenizer::skipChunkExtensionAtDistance(int &distance) const
             startingDistance++;
             lastChunkExtensionChar = peek(startingDistance);
 
-            while (std::isprint(lastChunkExtensionChar) && lastChunkExtensionChar != '\"')
+            while ((std::isprint(lastChunkExtensionChar) || lastChunkExtensionChar == '\t') && lastChunkExtensionChar != '\"')
             {
                 startingDistance++;
                 lastChunkExtensionChar = peek(startingDistance);
