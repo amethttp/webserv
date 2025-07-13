@@ -31,28 +31,21 @@ void RequestExecutor::setBodyFromString(std::string str)
 	this->body_.type = this->extensionTypesDict_[".txt"];
 }
 
-ExecutionResult RequestExecutor::executeRequest(Context &ctx)
+HandlingResult RequestExecutor::executeRequest(Context &ctx)
 {
 	AMethod *method;
-	ExecutionResult result;
+	HandlingResult result;
 	MethodFactory mFactory(ctx.location_.getMethods());
 
-	if (matchCGI(ctx.targetPath_, ctx.location_, cgi)) // keep only this here
-	{
-		if (this->executeCGI(ctx, cgi) == OK) // to each method ...
-		{
-			// check correctness?? || parse request
-			result.isCGI_ = true;
-			return OK;
-		}
-	}
-
-	method = mFactory.create(ctx.method_);
+	method = mFactory.create(ctx.getMethod());
 	if (!method)
-		result.code = METHOD_NOT_ALLOWED;
+	{
+		result.code_ = METHOD_NOT_ALLOWED;
+		result.mode_ = ctx.getConnectionMode(); // check this
+	}
 	else
 	{
-		result = method.execute(ctx);
+		result = method->execute(ctx);
 		delete method;
 	}
 	

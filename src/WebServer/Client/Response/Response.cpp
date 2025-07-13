@@ -252,11 +252,6 @@ void Response::handleReturnDirective(t_return ret, t_connection mode)
 	this->generateResponse(ret.code, mode);
 }
 
-static bool checkReturn(Location &location)
-{
-	return (location.getReturn().code != 0);
-}
-
 void Response::build(Context &ctx) 
 {
 	this->clear();

@@ -1,8 +1,10 @@
+#pragma once
+
 #include <vector>
 #include "Methods/AMethod.hpp"
-#include "Methods/GET/Get.hpp"
-#include "Methods/POST/Post.hpp"
-#include "Methods/DELETE/Delete.hpp"
+#include "Methods/Implemented/GET/Get.hpp"
+#include "Methods/Implemented/POST/Post.hpp"
+#include "Methods/Implemented/DELETE/Delete.hpp"
 
 typedef AMethod* (*CreateFunc)();
 
@@ -13,7 +15,7 @@ private:
 public:
     ~MethodFactory();
 	MethodFactory();
-	MethodFactory(std::vector<t_method> &methods);
+	MethodFactory(std::set<t_method> methods);
 
     bool addMethod(const t_method& type, CreateFunc func);
     AMethod *create(const t_method& type);

@@ -4,9 +4,9 @@ MethodFactory::MethodFactory()
 {
 }
 
-MethodFactory::MethodFactory(std::vector<t_method> &methods)
+MethodFactory::MethodFactory(std::set<t_method> methods)
 {
-	for (std::vector<t_method>::iterator methodIt = methods.begin(); methodIt != methods.end(); ++methodIt)
+	for (std::set<t_method>::iterator methodIt = methods.begin(); methodIt != methods.end(); ++methodIt)
 	{
 		switch (*methodIt)
 		{

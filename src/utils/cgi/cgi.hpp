@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ctime>
 #include <string>
 #include <sstream>
@@ -6,7 +8,7 @@
 #include "utils/http.hpp"
 #include "Context/Context.hpp"
 #include "Location/Location.hpp"
-#include "Result/ExecutionResult.hpp"
+#include "Result/HandlingResult.hpp"
 
 typedef std::pair<std::string, std::string> t_cgi;
 

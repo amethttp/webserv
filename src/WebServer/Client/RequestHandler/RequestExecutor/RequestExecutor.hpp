@@ -9,8 +9,9 @@
 #include "WebServer/Client/Request/Request.hpp"
 #include "WebServer/Client/Response/Response.hpp"
 #include "WebServer/Server/Location/Location.hpp"
-#include "RequestExecutor/Context/Context.hpp"
-#include "RequestExecutor/Result/ExecutionResult.hpp"
+#include "RequestHandler/Context/Context.hpp"
+#include "RequestHandler/Result/HandlingResult.hpp"
+#include "Methods/Factory/MethodFactory.hpp"
 
 #define CHILD_OK 0
 #define CGI_TIMEOUT 2
@@ -39,5 +40,5 @@ public:
 	RequestExecutor();
 	~RequestExecutor();
 
-	static ExecutionResult executeRequest(Context &c);
+	static HandlingResult executeRequest(Context &c);
 };

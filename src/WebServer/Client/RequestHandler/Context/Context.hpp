@@ -24,6 +24,7 @@ public:
 	~Context();
 
 	t_method getMethod() const;
+	t_return getReturn() const;
 	std::string getTargetPath() const;
 	t_connection getConnectionMode() const;
 };

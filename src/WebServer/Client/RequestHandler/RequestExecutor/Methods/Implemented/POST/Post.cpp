@@ -4,7 +4,7 @@ mPost::mPost()
 {
 }
 
-static t_httpCode postFile(Context &ctx, ExecutionResult res)
+static t_httpCode postFile(Context &ctx, HandlingResult res)
 {
 	if (pathExists(ctx.targetPath_))
 		return CONFLICT;
@@ -22,9 +22,9 @@ static t_httpCode postFile(Context &ctx, ExecutionResult res)
 	return CREATED;
 }
 
-ExecutionResult mPost::execute(Context &ctx)
+HandlingResult mPost::execute(Context &ctx)
 {
-	ExecutionResult res;
+	HandlingResult res;
 
 	int statCheck;
 

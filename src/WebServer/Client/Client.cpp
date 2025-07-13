@@ -150,21 +150,17 @@ void Client::buildResponse(std::vector<Server> &servers)
 {
 	Server server;
 	Location location;
-	ExecutionResult exeResult;
-	
-	
+	HandlingResult res;
 
 	server = ServerMatcher::matchServer(request_, servers);
 	setLocationsPH(request_, server);
 	location = LocationMatcher::matchLocation(request_, server);
 
-	Context exeContext(request_, location, server);
-	
-	exeResult = RequestExecutor::executeRequest(exeContext);
-	response_ = ResponseFactory::create(exeResult);
+	res = RequestHandler::handleRequest(request_, location, server);
+	response_ = ResponseFactory::create(res);
 }
 
 void Client::buildResponse(t_httpCode code, t_connection mode)
 {
-	this->response_.build(code, mode);
+	this->response_ = ResponseFactory::create(code, mode);
 }

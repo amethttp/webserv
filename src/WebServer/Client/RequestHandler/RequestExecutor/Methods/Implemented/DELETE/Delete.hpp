@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Methods/AMethod.hpp"
 #include "utils/fileHandler/files.hpp"
 
@@ -8,5 +10,5 @@ public:
 	mDelete();
 	~mDelete();
 
-	ExecutionResult execute(Context &ctx);
+	HandlingResult execute(Context &ctx);
 };

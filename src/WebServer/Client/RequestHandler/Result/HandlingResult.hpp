@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <map>
 #include "utils/http.hpp"
@@ -10,7 +12,7 @@ typedef struct s_body
 	std::string type;
 } t_body;
 
-class ExecutionResult
+class HandlingResult
 {
 public:
 	t_httpCode code_;
@@ -20,6 +22,6 @@ public:
 	bool isCGI_;
 
 public:
-	ExecutionResult();
-	~ExecutionResult();
+	HandlingResult();
+	~HandlingResult();
 };

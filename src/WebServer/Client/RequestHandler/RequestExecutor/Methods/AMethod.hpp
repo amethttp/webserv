@@ -1,8 +1,9 @@
 #pragma once
 
 #include "utils/http.hpp"
+#include "utils/cgi/cgi.hpp"
 #include "Context/Context.hpp"
-#include "Result/ExecutionResult.hpp"
+#include "Result/HandlingResult.hpp"
 
 class AMethod
 {
@@ -12,5 +13,5 @@ public:
 	virtual ~AMethod();
 
 	t_method const & getType() const;
-	virtual ExecutionResult execute(Context &ctx) = 0;
+	virtual HandlingResult execute(Context &ctx) = 0;
 };

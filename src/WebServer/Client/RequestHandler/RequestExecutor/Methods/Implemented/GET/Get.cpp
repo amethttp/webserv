@@ -4,34 +4,6 @@ mGet::mGet()
 {
 }
 
-static t_httpCode executeCGI(Context &ctx, t_cgi &cgi, t_body &body)
-{
-	int pipefd[2];
-	pid_t child;
-	time_t startTime;
-
-	if (pipe(pipefd))
-		throw (std::runtime_error("Ceci n'est pas une pipe"));
-	startTime = std::time(NULL);
-	child = fork();
-	if (child < 0)
-		throw (std::runtime_error("Couldn't fork CGI properly"));
-	else if (child == CHILD_OK)
-	{
-		char *env[] = { NULL };
-		char *argv[] = { strdup(cgi.second.c_str()), strdup(ctx.targetPath_.c_str()), NULL };
-
-		close(pipefd[0]);
-		dup2(pipefd[1], STDOUT_FILENO);
-		close(pipefd[1]);
-
-		execve(cgi.second.c_str(), argv, env);
-		exit(1);
-	}
-
-	return waitForOutput(child, pipefd, startTime, body);
-}
-
 static t_httpCode getFile(std::string &target, t_body &body)
 {
 	body.content = readFileToString(target.c_str());
@@ -149,10 +121,8 @@ static t_httpCode tryIndex(Context &ctx, t_body &body)
 	return tryAutoIndex(ctx, body);
 }
 
-ExecutionResult mGet::execute(Context &ctx)
+static void run(Context &ctx, HandlingResult &res)
 {
-	ExecutionResult res;
-
 	int statCheck;
 
 	statCheck = checkPath(ctx.targetPath_);
@@ -172,6 +142,53 @@ ExecutionResult mGet::execute(Context &ctx)
 			res.code_ = NOT_FOUND;
 			break ;
 	}
+
+}
+
+static t_httpCode handleCgiOutput(Context &ctx, t_cgi &cgi, t_body &body)
+{
+	int pipefd[2];
+	pid_t child;
+	time_t startTime;
+
+	if (pipe(pipefd))
+		throw (std::runtime_error("Ceci n'est pas une pipe"));
+	startTime = std::time(NULL);
+	child = fork();
+	if (child < 0)
+		throw (std::runtime_error("Couldn't fork CGI properly"));
+	else if (child == CHILD_OK)
+	{
+		char *env[] = { NULL };
+		char *argv[] = { strdup(cgi.second.c_str()), strdup(ctx.targetPath_.c_str()), NULL };
+
+		close(pipefd[0]);
+		dup2(pipefd[1], STDOUT_FILENO);
+		close(pipefd[1]);
+
+		execve(cgi.second.c_str(), argv, env);
+		exit(1);
+	}
+
+	return waitForOutput(child, pipefd, startTime, body);
+}
+
+static void runCGI(Context &ctx, t_cgi &cgi, HandlingResult &res)
+{
+	res.code_ = handleCgiOutput(ctx, cgi, res.tempBody_);
+	if (res.code_ == OK)
+		res.isCGI_ = true;
+}
+
+HandlingResult mGet::execute(Context &ctx)
+{
+	t_cgi cgi;
+	HandlingResult res;
+
+	if (matchCGI(ctx.targetPath_, ctx.location_, cgi))
+		runCGI(ctx, cgi, res);
+	else
+		run(ctx, res);
 
 	return res;
 }

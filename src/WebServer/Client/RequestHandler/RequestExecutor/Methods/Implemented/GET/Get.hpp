@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sstream>
 #include "utils/cgi/cgi.hpp"
 #include "Methods/AMethod.hpp"
@@ -14,5 +16,5 @@ public:
 	mGet();
 	~mGet();
 
-	ExecutionResult execute(Context &ctx);
+	HandlingResult execute(Context &ctx);
 };

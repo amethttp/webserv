@@ -48,7 +48,12 @@ t_connection Context::getConnectionMode() const
 	return this->connectionMode_;
 }
 
-AMethod *Context::getMethod() const
+t_return Context::getReturn() const
+{
+	return this->location_.getReturn();
+}
+
+t_method Context::getMethod() const
 {
 	return this->method_;
 }

@@ -7,7 +7,7 @@
 #include "Request/Request.hpp"
 #include "Response/Response.hpp"
 #include "utils/Result/Result.hpp"
-#include "Result/ExecutionResult.hpp"
+#include "Result/HandlingResult.hpp"
 #include "RequestExecutor/RequestExecutor.hpp"
 #include "RouteMatchers/Server/ServerMatcher.hpp"
 #include "RouteMatchers/Location/LocationMatcher.hpp"
