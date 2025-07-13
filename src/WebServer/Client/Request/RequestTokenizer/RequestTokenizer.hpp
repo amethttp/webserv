@@ -13,6 +13,7 @@ private:
     static const std::string tcharsSymbols;
     static const std::string unreservedSymbols;
     static const std::string subDelimSymbols;
+    static const std::string qdTextSymbols;
 
     void advance(int amount = 1);
     char peek(size_t distance = 1) const;
@@ -33,6 +34,7 @@ private:
     bool isHeader() const;
     bool isFieldLine() const;
     bool isLastChunk() const;
+    static bool isQdText(char c);
     bool isCrlf() const;
     bool isCrlfAtDistance(int distance) const;
 

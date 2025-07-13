@@ -3,6 +3,7 @@
 const std::string RequestTokenizer::tcharsSymbols = "!#$%&'*+-.^_`|~";
 const std::string RequestTokenizer::unreservedSymbols = "-._~";
 const std::string RequestTokenizer::subDelimSymbols = "!$&'()*+,;=";
+const std::string RequestTokenizer::qdTextSymbols = "!#$%&'()*+,-./:;<=>?@[]^_`{|}~ \t";
 
 RequestTokenizer::RequestTokenizer(const std::string &text)
 {
@@ -68,7 +69,7 @@ void RequestTokenizer::skipChunkExtensionAtDistance(int &distance) const
             startingDistance++;
             lastChunkExtensionChar = peek(startingDistance);
 
-            while ((std::isprint(lastChunkExtensionChar) || lastChunkExtensionChar == '\t') && lastChunkExtensionChar != '\"')
+            while (isQdText(lastChunkExtensionChar))
             {
                 startingDistance++;
                 lastChunkExtensionChar = peek(startingDistance);
@@ -186,6 +187,11 @@ bool RequestTokenizer::isLastChunk() const
     skipChunkExtensionAtDistance(distance);
 
     return isCrlfAtDistance(distance);
+}
+
+bool RequestTokenizer::isQdText(const char c)
+{
+    return (std::isalnum(c) || qdTextSymbols.find(c) != std::string::npos);
 }
 
 bool RequestTokenizer::isCrlf() const
