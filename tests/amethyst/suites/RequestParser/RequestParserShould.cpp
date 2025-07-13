@@ -1262,3 +1262,10 @@ TEST(recognize_a_chunked_body_with_a_basic_chunk)
 
     ASSERT_EQUALS("Valid", body);
 }
+
+TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_leading_zeroes)
+{
+    body = parseFromValidBody("000000000000000005\r\nValid\r\n0\r\n\r\n");
+
+    ASSERT_EQUALS("Valid", body);
+}

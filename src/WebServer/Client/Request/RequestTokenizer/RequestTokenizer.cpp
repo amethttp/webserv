@@ -178,7 +178,7 @@ bool RequestTokenizer::isChunk() const
 {
     int distance = 0;
 
-    if (!std::isxdigit(this->currentChar_))
+    if (!std::isxdigit(peek(distance)))
         return false;
 
     while (std::isxdigit(peek(distance)))
