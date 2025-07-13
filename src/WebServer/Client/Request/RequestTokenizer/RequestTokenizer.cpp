@@ -76,6 +76,8 @@ void RequestTokenizer::skipChunkExtensionAtDistance(int &distance) const
                 startingDistance++;
                 lastChunkExtensionChar = peek(startingDistance);
             }
+            if (lastChunkExtensionChar != '\"')
+                return;
             startingDistance++;
         }
         else
