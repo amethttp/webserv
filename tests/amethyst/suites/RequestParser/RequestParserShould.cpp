@@ -1165,3 +1165,11 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose
 
     assertBodyIsEmpty();
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\r\f\b\x04\x01\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\\\r\\\b\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\\\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\"\"\r\n\r\n");
+}
