@@ -1268,46 +1268,46 @@ TEST(recognize_a_chunked_body_with_a_basic_chunk)
     assertBody("Valid");
 }
 
-TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_leading_zeroes)
+TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_leading_zeroes)
 {
     body = parseFromValidBody("000000000000000005\r\nValid\r\n0\r\n\r\n");
 
     assertBody("Valid");
 }
 
-TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_multiple_hexadecimal_digits)
+TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_multiple_hexadecimal_digits)
 {
     body = parseFromValidBody("0a\r\nValid body\r\n0\r\n\r\n");
 
     assertBody("Valid body");
 }
 
-TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_multiple_case_insensitive_hexadecimal_digits)
+TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_multiple_case_insensitive_hexadecimal_digits)
 {
     body = parseFromValidBody("0A\r\nValid body\r\n0\r\n\r\n");
 
     assertBody("Valid body");
 }
 
-TEST(take_as_failure_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_non_hexadecimal_digits)
+TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_has_non_hexadecimal_digits)
 {
     assertRequestChunkedBodyIsInvalid("0g\r\nInvalid\r\n0\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("0G\r\nInvalid\r\n0\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("-4\r\nInvalid\r\n0\r\n\r\n");
 }
 
-TEST(take_as_failure_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_SP)
+TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_has_SP)
 {
     assertRequestChunkedBodyIsInvalid("7 \r\nInvalid\r\n0\r\n\r\n");
     assertRequestChunkedBodyIsInvalid(" 7\r\nInvalid\r\n0\r\n\r\n");
 }
 
-TEST(take_as_failure_a_chunked_body_with_a_basic_chunk_whose_chunk_size_is_SP)
+TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_SP)
 {
     assertRequestChunkedBodyIsInvalid(" \r\nInvalid\r\n0\r\n\r\n");
 }
 
-TEST(take_as_failure_a_chunked_body_with_a_basic_chunk_without_chunk_size)
+TEST(take_as_failure_a_chunked_body_with_a_chunk_without_chunk_size)
 {
     assertRequestChunkedBodyIsInvalid("\r\nInvalid\r\n0\r\n\r\n");
 }
