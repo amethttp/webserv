@@ -78,6 +78,7 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
                 if (lastChunkExtensionChar != '\"')
                     return;
                 startingDistance++;
+                lastChunkExtensionChar = peek(startingDistance);
             }
             else
                 return;
@@ -185,6 +186,8 @@ bool RequestTokenizer::isChunk() const
     {
         distance++;
     }
+
+    skipChunkExtensionsAtDistance(distance);
 
     if (!isCrlfAtDistance(distance))
         return false;

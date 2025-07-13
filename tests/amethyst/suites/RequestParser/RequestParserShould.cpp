@@ -1311,3 +1311,10 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_without_chunk_size)
 {
     assertRequestChunkedBodyIsInvalid("\r\nInvalid\r\n0\r\n\r\n");
 }
+
+TEST(recognize_a_chunked_body_with_a_chunk_that_has_chunk_extensions)
+{
+    body = parseFromValidBody("0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
