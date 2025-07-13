@@ -1243,3 +1243,9 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_ex
 {
     assertRequestChunkedBodyIsInvalid("0;ext=val;;;ext=val\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_with_mal_formed_separator)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=val ;ext=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val; ext=val\r\n\r\n");
+}
