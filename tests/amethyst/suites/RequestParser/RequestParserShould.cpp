@@ -1318,3 +1318,10 @@ TEST(recognize_a_chunked_body_with_a_chunk_that_has_chunk_extensions)
 
     assertBody("Valid body");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_first_crlf_separator_is_mal_formed)
+{
+    assertRequestChunkedBodyIsInvalid("7\rInvalid\r\n0\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("7\nInvalid\r\n0\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("7\f\bInvalid\r\n0\r\n\r\n");
+}
