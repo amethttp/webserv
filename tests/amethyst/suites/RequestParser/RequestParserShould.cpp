@@ -1288,3 +1288,10 @@ TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_multiple_c
 
     assertBody("Valid body");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_non_hexadecimal_digits)
+{
+    assertRequestChunkedBodyIsInvalid("0g\r\nInvalid\r\n0\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0G\r\nInvalid\r\n0\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("-4\r\nInvalid\r\n0\r\n\r\n");
+}
