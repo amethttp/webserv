@@ -1281,3 +1281,10 @@ TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_multiple_h
 
     assertBody("Valid body");
 }
+
+TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_multiple_case_insensitive_hexadecimal_digits)
+{
+    body = parseFromValidBody("0A\r\nValid body\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
