@@ -1330,3 +1330,8 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_first_crlf_separator_is_S
 {
     assertRequestChunkedBodyIsInvalid("7 Invalid\r\n0\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_chunk_without_first_crlf_separator)
+{
+    assertRequestChunkedBodyIsInvalid("7Invalid\r\n0\r\n\r\n");
+}
