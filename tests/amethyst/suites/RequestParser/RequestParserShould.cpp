@@ -94,6 +94,11 @@ static void assertBodyIsEmpty()
     ASSERT_EQUALS("", body);
 }
 
+static void assertBody(const std::string &expectedBody)
+{
+    ASSERT_EQUALS(expectedBody, body);
+}
+
 
 /* BASIC REQUEST LINE */
 TEST(recognize_a_basic_GET_request_line)
@@ -1260,19 +1265,19 @@ TEST(recognize_a_chunked_body_with_a_basic_chunk)
 {
     body = parseFromValidBody("5\r\nValid\r\n0\r\n\r\n");
 
-    ASSERT_EQUALS("Valid", body);
+    assertBody("Valid");
 }
 
 TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_leading_zeroes)
 {
     body = parseFromValidBody("000000000000000005\r\nValid\r\n0\r\n\r\n");
 
-    ASSERT_EQUALS("Valid", body);
+    assertBody("Valid");
 }
 
 TEST(recognize_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_multiple_hexadecimal_digits)
 {
     body = parseFromValidBody("0a\r\nValid body\r\n0\r\n\r\n");
 
-    ASSERT_EQUALS("Valid body", body);
+    assertBody("Valid body");
 }
