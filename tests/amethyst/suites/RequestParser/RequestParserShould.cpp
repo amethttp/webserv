@@ -1301,3 +1301,8 @@ TEST(take_as_failure_a_chunked_body_with_a_basic_chunk_whose_chunk_size_has_SP)
     assertRequestChunkedBodyIsInvalid("7 \r\nInvalid\r\n0\r\n\r\n");
     assertRequestChunkedBodyIsInvalid(" 7\r\nInvalid\r\n0\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_basic_chunk_whose_chunk_size_is_SP)
+{
+    assertRequestChunkedBodyIsInvalid(" \r\nInvalid\r\n0\r\n\r\n");
+}
