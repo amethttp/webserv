@@ -35,7 +35,7 @@ void RequestTokenizer::skipChunkExtension(int &distance) const
 {
     char lastChunkExtensionChar = peek(distance);
 
-    while (!hasFinishedText() && (isTchar(lastChunkExtensionChar) || lastChunkExtensionChar == '='))
+    while (!hasFinishedText() && (isTchar(lastChunkExtensionChar) || lastChunkExtensionChar == '=' || lastChunkExtensionChar == '\"'))
     {
         ++distance;
         lastChunkExtensionChar = peek(distance);
@@ -153,7 +153,7 @@ bool RequestTokenizer::isChunkExtensionAtDistance(const int distance) const
         tempDistance++;
         lastChunkExtensionChar = peek(tempDistance);
 
-        if (!isTchar(lastChunkExtensionChar))
+        if (!isTchar(lastChunkExtensionChar) && lastChunkExtensionChar != '\"')
             return false;
     }
 
