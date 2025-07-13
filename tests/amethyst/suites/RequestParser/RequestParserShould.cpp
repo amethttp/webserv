@@ -1200,4 +1200,6 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_mal_formed_chun
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions)
 {
     body = parseFromValidBody("0;ext;ext\r\n\r\n");
+
+    assertBodyIsEmpty();
 }
