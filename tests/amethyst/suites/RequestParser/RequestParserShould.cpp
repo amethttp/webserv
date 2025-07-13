@@ -1158,3 +1158,10 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose
 
     assertBodyIsEmpty();
 }
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_valid_quoted_pairs)
+{
+    body = parseFromValidBody("0;ext=\"\\\\ \\\" \\ \\\t\"\r\n\r\n");
+
+    assertBodyIsEmpty();
+}

@@ -35,6 +35,7 @@ private:
     bool isFieldLine() const;
     bool isLastChunk() const;
     static bool isQdText(char c);
+    bool isQuotedPairAtDistance(int distance) const;
     bool isCrlf() const;
     bool isCrlfAtDistance(int distance) const;
 

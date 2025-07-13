@@ -69,8 +69,10 @@ void RequestTokenizer::skipChunkExtensionAtDistance(int &distance) const
             startingDistance++;
             lastChunkExtensionChar = peek(startingDistance);
 
-            while (isQdText(lastChunkExtensionChar))
+            while (isQdText(lastChunkExtensionChar) || isQuotedPairAtDistance(startingDistance))
             {
+                if (isQuotedPairAtDistance(startingDistance))
+                    startingDistance++;
                 startingDistance++;
                 lastChunkExtensionChar = peek(startingDistance);
             }
@@ -192,6 +194,14 @@ bool RequestTokenizer::isLastChunk() const
 bool RequestTokenizer::isQdText(const char c)
 {
     return (std::isalnum(c) || qdTextSymbols.find(c) != std::string::npos);
+}
+
+bool RequestTokenizer::isQuotedPairAtDistance(const int distance) const
+{
+    const char currentChar = peek(distance);
+    const char nextChar = peek(distance + 1);
+
+    return (currentChar == '\\' && (std::isprint(nextChar) || nextChar == '\t'));
 }
 
 bool RequestTokenizer::isCrlf() const
