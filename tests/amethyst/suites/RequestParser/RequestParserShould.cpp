@@ -1210,3 +1210,10 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensio
 
     assertBodyIsEmpty();
 }
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_whose_values_have_valid_chars)
+{
+    body = parseFromValidBody("0;ext=val;!#$%&'*+-.^_`|~=!#$%&'*+-.^_`|~\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
