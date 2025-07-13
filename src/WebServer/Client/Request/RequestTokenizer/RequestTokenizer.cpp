@@ -298,7 +298,7 @@ std::string RequestTokenizer::lastChunk()
 {
     std::string lastChunkString;
 
-    while (!hasFinishedText() && std::isprint(this->currentChar_))
+    while (!hasFinishedText() && (std::isprint(this->currentChar_) || this->currentChar_ == '\t'))
     {
         lastChunkString += this->currentChar_;
         advance();
