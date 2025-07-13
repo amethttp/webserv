@@ -1224,3 +1224,10 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensio
 
     assertBodyIsEmpty();
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_with_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=val;\r\b=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val;ext=\b\f\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val;ext=\"\\\b\"\r\n\r\n");
+}
