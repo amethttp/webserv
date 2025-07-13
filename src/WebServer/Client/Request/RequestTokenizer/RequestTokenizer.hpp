@@ -17,7 +17,7 @@ private:
 
     void advance(int amount = 1);
     char peek(size_t distance = 1) const;
-    void skipChunkExtensionAtDistance(int &distance) const;
+    void skipChunkExtensionsAtDistance(int &distance) const;
 
     bool hasFinishedText() const;
     bool isTchar() const;

@@ -32,56 +32,56 @@ char RequestTokenizer::peek(const size_t distance) const
     return this->text_[peekedCharacterPos];
 }
 
-void RequestTokenizer::skipChunkExtensionAtDistance(int &distance) const
+void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 {
     int startingDistance = distance;
     char lastChunkExtensionChar = peek(startingDistance);
 
-    if (lastChunkExtensionChar != ';')
-        return;
-
-    startingDistance++;
-    lastChunkExtensionChar = peek(startingDistance);
-    if (!isTchar(lastChunkExtensionChar))
-        return;
-
-    while (isTchar(lastChunkExtensionChar))
+    while (lastChunkExtensionChar == ';')
     {
         startingDistance++;
         lastChunkExtensionChar = peek(startingDistance);
-    }
+        if (!isTchar(lastChunkExtensionChar))
+            return;
 
-    if (lastChunkExtensionChar == '=')
-    {
-        startingDistance++;
-        lastChunkExtensionChar = peek(startingDistance);
-
-        if (isTchar(lastChunkExtensionChar))
+        while (isTchar(lastChunkExtensionChar))
         {
-            while (isTchar(lastChunkExtensionChar))
-            {
-                startingDistance++;
-                lastChunkExtensionChar = peek(startingDistance);
-            }
+            startingDistance++;
+            lastChunkExtensionChar = peek(startingDistance);
         }
-        else if (lastChunkExtensionChar == '\"')
+
+        if (lastChunkExtensionChar == '=')
         {
             startingDistance++;
             lastChunkExtensionChar = peek(startingDistance);
 
-            while (isQdText(lastChunkExtensionChar) || isQuotedPairAtDistance(startingDistance))
+            if (isTchar(lastChunkExtensionChar))
             {
-                if (isQuotedPairAtDistance(startingDistance))
+                while (isTchar(lastChunkExtensionChar))
+                {
                     startingDistance++;
+                    lastChunkExtensionChar = peek(startingDistance);
+                }
+            }
+            else if (lastChunkExtensionChar == '\"')
+            {
                 startingDistance++;
                 lastChunkExtensionChar = peek(startingDistance);
+
+                while (isQdText(lastChunkExtensionChar) || isQuotedPairAtDistance(startingDistance))
+                {
+                    if (isQuotedPairAtDistance(startingDistance))
+                        startingDistance++;
+                    startingDistance++;
+                    lastChunkExtensionChar = peek(startingDistance);
+                }
+                if (lastChunkExtensionChar != '\"')
+                    return;
+                startingDistance++;
             }
-            if (lastChunkExtensionChar != '\"')
+            else
                 return;
-            startingDistance++;
         }
-        else
-            return;
     }
 
     distance = startingDistance;
@@ -188,7 +188,7 @@ bool RequestTokenizer::isLastChunk() const
         lastChunkChar = peek(distance);
     }
 
-    skipChunkExtensionAtDistance(distance);
+    skipChunkExtensionsAtDistance(distance);
 
     return isCrlfAtDistance(distance);
 }
