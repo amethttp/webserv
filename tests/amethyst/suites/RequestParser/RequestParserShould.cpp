@@ -1186,3 +1186,13 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension
     assertRequestChunkedBodyIsInvalid("0;ext=invalid\"\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("0;ext=\"\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_mal_formed_chunk_extension)
+{
+    assertRequestChunkedBodyIsInvalid("0;=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;=\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;\"ext\"=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext===\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val=lue\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;===\r\n\r\n");
+}
