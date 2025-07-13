@@ -174,6 +174,34 @@ bool RequestTokenizer::isFieldLine() const
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
 }
 
+bool RequestTokenizer::isChunk() const
+{
+    int distance = 0;
+
+    if (!std::isxdigit(this->currentChar_))
+        return false;
+
+    while (std::isxdigit(peek(distance)))
+    {
+        distance++;
+    }
+
+    if (!isCrlfAtDistance(distance))
+        return false;
+
+    distance += 2;
+
+    while (std::isprint(peek(distance)))
+    {
+        distance++;
+    }
+
+    if (!isCrlfAtDistance(distance))
+        return false;
+
+    return true;
+}
+
 bool RequestTokenizer::isLastChunk() const
 {
     int distance = 0;
@@ -294,6 +322,29 @@ std::string RequestTokenizer::header()
     return headerString;
 }
 
+std::string RequestTokenizer::chunk()
+{
+    std::string chunkString;
+
+    while (std::isprint(this->currentChar_))
+    {
+        chunkString += this->currentChar_;
+        advance();
+    }
+
+    chunkString += crlf();
+
+    while (std::isprint(this->currentChar_))
+    {
+        chunkString += this->currentChar_;
+        advance();
+    }
+
+    chunkString += crlf();
+
+    return chunkString;
+}
+
 std::string RequestTokenizer::lastChunk()
 {
     std::string lastChunkString;
@@ -331,6 +382,9 @@ RequestToken RequestTokenizer::getNextToken()
 
     if (isLastChunk())
         return RequestToken(LAST_CHUNK, lastChunk());
+
+    if (isChunk())
+        return RequestToken(CHUNK, chunk());
 
     if (isHeader())
         return RequestToken(HEADER, header());

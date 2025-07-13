@@ -33,6 +33,7 @@ private:
     bool isQuery() const;
     bool isHeader() const;
     bool isFieldLine() const;
+    bool isChunk() const;
     bool isLastChunk() const;
     static bool isQdText(char c);
     bool isQuotedPairAtDistance(int distance) const;
@@ -46,6 +47,7 @@ private:
     std::string target();
     std::string sp();
     std::string header();
+    std::string chunk();
     std::string lastChunk();
     std::string crlf();
 

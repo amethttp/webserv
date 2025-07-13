@@ -9,6 +9,7 @@ typedef enum tokenType_e
     TARGET,
     HTTP_VERSION,
     HEADER,
+    CHUNK,
     LAST_CHUNK,
     CRLF,
     EOF,

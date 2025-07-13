@@ -67,11 +67,22 @@ Result<HeaderCollection> RequestParser::parseHeaders()
 
 Result<std::string> RequestParser::parseChunkedBody()
 {
+    std::string chunkedBody;
+
+    if (this->currentToken_.getType() == CHUNK)
+    {
+        const std::string chunk = this->currentToken_.getValue();
+        const std::string chunkData = chunk.substr(chunk.find("\r\n") + 2, chunk.length() - chunk.find("\r\n") - 2 - 2);
+
+        chunkedBody = chunkData;
+        eat(CHUNK);
+    }
+
     if (eat(LAST_CHUNK) == FAIL)
         return Result<std::string>::fail("400 Bad Request");
 
     if (eat(CRLF) == FAIL)
         return Result<std::string>::fail("400 Bad Request");
 
-    return Result<std::string>::ok("");
+    return Result<std::string>::ok(chunkedBody);
 }
