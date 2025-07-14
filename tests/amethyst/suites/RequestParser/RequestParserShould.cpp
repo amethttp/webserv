@@ -1466,3 +1466,8 @@ TEST(take_as_failure_an_invalid_chunked_body)
     assertRequestChunkedBodyIsInvalid("0");
     assertRequestChunkedBodyIsInvalid("\r\n");
 }
+
+TEST(take_as_failure_an_empty_chunked_body)
+{
+    assertRequestChunkedBodyIsInvalid("");
+}
