@@ -1459,3 +1459,10 @@ TEST(take_as_failure_a_chunked_body_with_trailing_text)
 {
     assertRequestChunkedBodyIsInvalid("0\r\n\r\nInvalid text");
 }
+
+TEST(take_as_failure_an_invalid_chunked_body)
+{
+    assertRequestChunkedBodyIsInvalid("INVALID");
+    assertRequestChunkedBodyIsInvalid("0");
+    assertRequestChunkedBodyIsInvalid("\r\n");
+}
