@@ -1377,3 +1377,10 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_without_last_crlf_separator)
 {
     assertRequestChunkedBodyIsInvalid("7\r\nInvalid0\r\n\r\n");
 }
+
+TEST(recognize_a_chunked_body_with_multiple_chunks)
+{
+    body = parseFromValidBody("05\r\nValid\r\n01\r\n \r\n04\r\nbody\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}

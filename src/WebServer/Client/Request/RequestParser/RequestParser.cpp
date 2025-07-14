@@ -69,13 +69,13 @@ Result<std::string> RequestParser::parseChunkedBody()
 {
     std::string chunkedBody;
 
-    if (this->currentToken_.getType() == CHUNK_SIZE)
+    while (this->currentToken_.getType() == CHUNK_SIZE)
     {
         const std::string chunkSizeString = this->currentToken_.getValue();
         const std::string chunkSizeValue = chunkSizeString.substr(0, chunkSizeString.find("\r\n"));
         const size_t chunkSize = hexToDec(chunkSizeValue.substr(0, chunkSizeString.find(';')));
 
-        chunkedBody = this->tokenizer_.getOctetStreamToken(chunkSize).getValue();
+        chunkedBody += this->tokenizer_.getOctetStreamToken(chunkSize).getValue();
         this->currentToken_ = this->tokenizer_.getNextToken();
 
         if (eat(CRLF) == FAIL)
