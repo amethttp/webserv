@@ -1372,3 +1372,8 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_last_crlf_separator_is_SP
 {
     assertRequestChunkedBodyIsInvalid("7\r\nInvalid 0\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_chunk_without_last_crlf_separator)
+{
+    assertRequestChunkedBodyIsInvalid("7\r\nInvalid0\r\n\r\n");
+}
