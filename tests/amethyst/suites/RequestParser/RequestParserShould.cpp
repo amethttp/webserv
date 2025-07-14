@@ -1429,3 +1429,8 @@ TEST(take_as_failure_a_chunked_body_without_the_final_crlf)
 {
     assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value");
 }
+
+TEST(take_as_failure_a_trailer_field_as_chunked_body)
+{
+    assertRequestChunkedBodyIsInvalid("Header: value");
+}
