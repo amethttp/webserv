@@ -485,3 +485,8 @@ TEST(recognize_a_request_with_a_chunked_body)
 
     assertBody("Valid body: Completed!!");
 }
+
+TEST(take_as_failure_a_request_with_an_invalid_body)
+{
+    assertRequestIsInvalidFromBody("Transfer-Encoding: chunked", "INVALID BODY", "400 Bad Request");
+}
