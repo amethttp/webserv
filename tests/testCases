@@ -1420,37 +1420,40 @@
 ### 61. Recognize a chunked-body with multiple trailer-field
 "0\r\nTrailer: value\r\nTrailer2: value2\r\n"
 
-### 62. Take as failure a chunked-body with invalid trailer-field
+### 62. Recognize a chunked-body with multiple trailer-field and chunks
+"5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n"
+
+### 63. Take as failure a chunked-body with invalid trailer-field
 "0\r\nTrailer: value\b\r\nTrailer2: value2\r\n"
 "0\r\nTrailer: value\r\nTrailer2\b: value2\r\n"
 
-### 63. Take as failure a chunked-body without the last CRLF separator
+### 64. Take as failure a chunked-body without the last CRLF separator
 "0\r\nTrailer: value"
 
-### 64. Take as failure a trailer-field as chunked-body
+### 65. Take as failure a trailer-field as chunked-body
 "Header: value"
 
-### 65. Take as failure chunk with a chunk-data length bigger than chunk-size
+### 66. Take as failure chunk with a chunk-data length bigger than chunk-size
 "01\r\nInvalid body\r\n0\r\n\r\n"
 
-### 66. Take as failure chunk with a chunk-data length smaller than chunk-size
+### 67. Take as failure chunk with a chunk-data length smaller than chunk-size
 "FF\r\nInvalid body\r\n0\r\n\r\n"
 
-### 67. Take as failure chunked body without last-chunk
+### 68. Take as failure chunked body without last-chunk
 "0c\r\nInvalid body\r\n"
 
-### 68. Take as failure chunked body with a trailer-field as last-chunk
+### 69. Take as failure chunked body with a trailer-field as last-chunk
 "0c\r\nInvalid body\r\nTrailer:value"
 
-### 69. Take as failure chunked body with text at the end
+### 70. Take as failure chunked body with text at the end
 "0\r\n\r\nInvalid text"
 
-### 70. Take as failure an invalid chunked body
+### 71. Take as failure an invalid chunked body
 "INVALID"
 "0"
 "\r\n"
 
-### 71. Take as failure an empty chunked body
+### 72. Take as failure an empty chunked body
 ""
 
 
