@@ -98,7 +98,8 @@ static void assertRequestIsInvalidFromBody(const std::string &bodyTypeHeader, co
     assertRequestIsInvalid(invalidRequestString, errorMessage);
 }
 
-/* BASIC REQUEST LINE TESTS */
+
+/* BASIC REQUEST TESTS */
 TEST(recognize_basic_HTTP_GET_request)
 {
     request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
@@ -133,7 +134,15 @@ TEST(recognize_basic_HTTP_POST_request)
 }
 
 
-/* REQUEST LINE FAILURE TESTS */
+/* REQUEST LINE TESTS */
+TEST(recognize_a_request_with_valid_request_line)
+{
+    request = createRequestFromValidRequestLine("GET /index.html?param=value HTTP/1.1");
+
+    assertTargetComponents("/index.html", "param=value");
+    assertRequestLine(GET, "/index.html?param=value", "HTTP/1.1");
+}
+
 TEST(take_as_failure_an_invalid_request_line)
 {
     assertRequestIsInvalidFromRequestLine("INVALID", "400 Bad Request");
