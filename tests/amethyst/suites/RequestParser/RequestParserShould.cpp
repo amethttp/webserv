@@ -1349,3 +1349,14 @@ TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_control_chars_as_
 
     assertBody("\r\n\b\f\x01\x04\x07");
 }
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_all_octets_as_plain_text)
+{
+    const std::string controlChars = "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F\x7f";
+    const std::string printableChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x00";
+    const std::string octets = controlChars + printableChars;
+
+    body = parseFromValidBody("7f\r\n" + octets + "\r\n0\r\n\r\n");
+
+    assertBody(octets);
+}
