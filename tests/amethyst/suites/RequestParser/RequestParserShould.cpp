@@ -1384,3 +1384,10 @@ TEST(recognize_a_chunked_body_with_multiple_chunks)
 
     assertBody("Valid body");
 }
+
+TEST(recognize_a_chunked_body_with_multiple_chunks_that_have_chunk_extensions)
+{
+    body = parseFromValidBody("05\r\nValid\r\n01;ext=value\r\n \r\n04;ext=\"value\"\r\nbody\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
