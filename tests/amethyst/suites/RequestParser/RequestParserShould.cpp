@@ -1418,3 +1418,9 @@ TEST(recognize_a_chunked_body_with_multiple_chunks_and_multiple_trailer_fields)
 
     assertBody("Valid body");
 }
+
+TEST(take_as_failure_a_chunked_body_with_invalid_trailer_fields)
+{
+    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\b\r\nTrailer2: value2\r\n");
+    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\r\nTrailer2\b: value2\r\n");
+}
