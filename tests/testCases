@@ -1385,9 +1385,8 @@
 "7Invalid\r\n0\r\n\r\n"
 
 ### 52. Recognize a chunk with CRLF separators in chunk-data as data (not as separator) 
-"0a\r\nValid body\r\n0\r\n\r\n"
 "0b\r\nValid\r\nbody\r\n0\r\n\r\n"
-"07\r\n\b\n\rbody\r\n0\r\n\r\n"
+"07\r\n\r\n\bbody\r\n0\r\n\r\n"
 
 ### 53. Recognize a chunk with all octets in chunk-data 
 "7f\r\n\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f" \
@@ -1478,8 +1477,10 @@
 # FINAL REFACTORS: 
 # 0. GET_HEADER(X).GET_VALUE() -> GET_HEADER_VALUE(X) ?
 # 1. MACROS? FOR ERRORS AND HEADERS ("TRANSFER-ENCODING" and "400 BAD REQUEST")
+# 1.1 CREATE PARSE_FULL_BODY FUNCTION IN PARSER AND USE GET_OCTECT_STREAM_TOKEN
 # 1.2 CHECK THAT IN TOKENIZER FUNCTIONS WE ARE USING "THE SAME" CONDITIONS IN IS... AND ... (example: isMethod and method() are using the same while conditions?)
 # 1.5 REMOVE IS... METHODS FROM TOKENIZER
+# 1.8 SHOULD CREATE BODY CLASS
 # 2. SHOULD CREATE REQUEST_LINE_PARAMS (RQL) CLASS?
 # 3. SHOULD CREATE TARGET CLASS?
 # 4. SHOULD CREATE REQUEST CLASS?

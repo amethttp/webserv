@@ -15,7 +15,7 @@ private:
     static const std::string subDelimSymbols;
     static const std::string qdTextSymbols;
 
-    void advance(int amount = 1);
+    void advance(size_t amount = 1);
     char peek(size_t distance = 1) const;
     void skipChunkExtensionsAtDistance(int &distance) const;
 
@@ -33,7 +33,7 @@ private:
     bool isQuery() const;
     bool isHeader() const;
     bool isFieldLine() const;
-    bool isChunk() const;
+    bool isChunkSize() const;
     bool isLastChunk() const;
     static bool isQdText(char c);
     bool isQuotedPairAtDistance(int distance) const;
@@ -47,7 +47,6 @@ private:
     std::string target();
     std::string sp();
     std::string header();
-    std::string chunk();
     std::string chunkSize();
     std::string crlf();
 
@@ -56,4 +55,5 @@ public:
     ~RequestTokenizer();
 
     RequestToken getNextToken();
+    RequestToken getOctetStreamToken(size_t size);
 };

@@ -1,5 +1,5 @@
 #include "RequestParser.hpp"
-#include "utils/string/string.hpp"
+#include "utils/numeric/numeric.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)
@@ -69,13 +69,17 @@ Result<std::string> RequestParser::parseChunkedBody()
 {
     std::string chunkedBody;
 
-    if (this->currentToken_.getType() == CHUNK)
+    if (this->currentToken_.getType() == CHUNK_SIZE)
     {
-        const std::string chunk = this->currentToken_.getValue();
-        const std::string chunkData = chunk.substr(chunk.find("\r\n") + 2, chunk.length() - chunk.find("\r\n") - 2 - 2);
+        const std::string chunkSizeString = this->currentToken_.getValue();
+        const std::string chunkSizeValue = chunkSizeString.substr(0, chunkSizeString.find("\r\n"));
+        const size_t chunkSize = hexToDec(chunkSizeValue.substr(0, chunkSizeString.find(';')));
 
-        chunkedBody = chunkData;
-        eat(CHUNK);
+        chunkedBody = this->tokenizer_.getOctetStreamToken(chunkSize).getValue();
+        this->currentToken_ = this->tokenizer_.getNextToken();
+
+        if (eat(CRLF) == FAIL)
+            return Result<std::string>::fail("400 Bad Request");
     }
 
     if (eat(LAST_CHUNK) == FAIL)

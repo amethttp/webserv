@@ -14,7 +14,7 @@ RequestTokenizer::RequestTokenizer(const std::string &text)
 
 RequestTokenizer::~RequestTokenizer() {}
 
-void RequestTokenizer::advance(const int amount)
+void RequestTokenizer::advance(const size_t amount)
 {
     this->pos_ += amount;
 
@@ -175,7 +175,7 @@ bool RequestTokenizer::isFieldLine() const
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
 }
 
-bool RequestTokenizer::isChunk() const
+bool RequestTokenizer::isChunkSize() const
 {
     int distance = 0;
 
@@ -189,20 +189,7 @@ bool RequestTokenizer::isChunk() const
 
     skipChunkExtensionsAtDistance(distance);
 
-    if (!isCrlfAtDistance(distance))
-        return false;
-
-    distance += 2;
-
-    while (std::isprint(peek(distance)))
-    {
-        distance++;
-    }
-
-    if (!isCrlfAtDistance(distance))
-        return false;
-
-    return true;
+    return isCrlfAtDistance(distance);
 }
 
 bool RequestTokenizer::isLastChunk() const
@@ -325,29 +312,6 @@ std::string RequestTokenizer::header()
     return headerString;
 }
 
-std::string RequestTokenizer::chunk()
-{
-    std::string chunkString;
-
-    while (std::isprint(this->currentChar_))
-    {
-        chunkString += this->currentChar_;
-        advance();
-    }
-
-    chunkString += crlf();
-
-    while (std::isprint(this->currentChar_))
-    {
-        chunkString += this->currentChar_;
-        advance();
-    }
-
-    chunkString += crlf();
-
-    return chunkString;
-}
-
 std::string RequestTokenizer::chunkSize()
 {
     std::string lastChunkString;
@@ -386,8 +350,8 @@ RequestToken RequestTokenizer::getNextToken()
     if (isLastChunk())
         return RequestToken(LAST_CHUNK, chunkSize());
 
-    if (isChunk())
-        return RequestToken(CHUNK, chunk());
+    if (isChunkSize())
+        return RequestToken(CHUNK_SIZE, chunkSize());
 
     if (isHeader())
         return RequestToken(HEADER, header());
@@ -400,3 +364,16 @@ RequestToken RequestTokenizer::getNextToken()
 
     return RequestToken(UNKNOWN, "UNKNOWN");
 }
+
+RequestToken RequestTokenizer::getOctetStreamToken(const size_t size)
+{
+    if (hasFinishedText())
+        return RequestToken(EOF, "");
+
+    const std::string octetStreamString = this->text_.substr(this->pos_, size);
+
+    advance(size);
+
+    return RequestToken(OCTET_STREAM, octetStreamString);
+}
+
