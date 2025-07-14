@@ -469,3 +469,19 @@ TEST(take_as_failure_a_request_with_body_without_content_length_nor_transfer_enc
 {
     assertRequestIsInvalidFromBody("No-Length: specified", "Invalid body", "411 Length Required");
 }
+
+
+/* REQUEST CHUNKED BODY TESTS */
+TEST(recognize_a_request_with_a_chunked_body)
+{
+    const std::string firstChunk = "a;ext=val;!ext2_=\"Ext: \\\"Valid\\\"\"\r\nValid body\r\n";
+    const std::string secondChunk = "0000000002;extension=!_~$#\r\n: \r\n";
+    const std::string thirdChunk = "00b;!_~$#=!_~$#;a=b;ggg=\"\";lol=\"\t val \t\"\r\nCompleted!!\r\n";
+    const std::string lastChunk = "0;lastExt=\"\t \\\" \\\\ \\\\ \t\"\r\n";
+    const std::string trailerFields = "Trailer: fields\r\nNew: header\r\nDynamic: values\r\n";
+    const std::string validBody = firstChunk + secondChunk + thirdChunk + lastChunk + trailerFields;
+
+    request = createRequestFromValidBody("Transfer-Encoding: chunked", validBody);
+
+    assertBody("Valid body: Completed!!");
+}
