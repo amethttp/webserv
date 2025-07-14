@@ -1444,3 +1444,8 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_bigger_than
 {
     assertRequestChunkedBodyIsInvalid("FF\r\nInvalid body\r\n0\r\n\r\n");
 }
+
+TEST(take_as_failure_a_chunked_body_without_last_chunk)
+{
+    assertRequestChunkedBodyIsInvalid("0c\r\nInvalid body\r\n");
+}
