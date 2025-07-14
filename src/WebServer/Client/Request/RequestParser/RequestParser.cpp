@@ -85,6 +85,9 @@ Result<std::string> RequestParser::parseChunkedBody()
     if (eat(LAST_CHUNK) == FAIL)
         return Result<std::string>::fail("400 Bad Request");
 
+    if (this->currentToken_.getType() == HEADER && eat(HEADER) == FAIL)
+        return Result<std::string>::fail("400 Bad Request");
+
     if (eat(CRLF) == FAIL)
         return Result<std::string>::fail("400 Bad Request");
 

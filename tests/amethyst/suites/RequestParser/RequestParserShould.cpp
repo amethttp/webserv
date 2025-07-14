@@ -1397,3 +1397,10 @@ TEST(take_as_failure_a_chunked_body_with_multiple_chunks_that_have_invalid_chars
     assertRequestChunkedBodyIsInvalid("05\r\nValid\r\n01\r\n\b \r\n04\r\nbody\r\n0\r\n\r\n");
     assertRequestChunkedBodyIsInvalid("05\r\nValid\r\n01\r\n \r\n04\r\n\bbody\r\n0\r\n\r\n");
 }
+
+TEST(recognize_a_chunked_body_with_a_final_basic_trailer_field)
+{
+    body = parseFromValidBody("0\r\nTrailer: value\r\n");
+
+    assertBodyIsEmpty();
+}
