@@ -25,12 +25,6 @@ std::string RequestExecutor::getMIME(std::string &target)
 	return res;
 }
 
-void RequestExecutor::setBodyFromString(std::string str)
-{
-	this->body_.content = str;
-	this->body_.type = this->extensionTypesDict_[".txt"];
-}
-
 HandlingResult RequestExecutor::executeRequest(Context &ctx)
 {
 	AMethod *method;

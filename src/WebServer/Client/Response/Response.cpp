@@ -134,7 +134,6 @@ void Response::eraseBuffer(size_t bytesToErase)
 	this->buffer_.erase(this->buffer_.begin(), this->buffer_.begin() + bytesToErase);
 }
 
-
 static std::string getImfFixdate()
 {
     std::time_t timeNow = std::time(NULL);
