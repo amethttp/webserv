@@ -1342,3 +1342,10 @@ TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_crlf_separators_a
 
     assertBody("Valid\r\nbody");
 }
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_control_chars_as_plain_text)
+{
+    body = parseFromValidBody("07\r\n\r\n\b\f\x01\x04\x07\r\n0\r\n\r\n");
+
+    assertBody("\r\n\b\f\x01\x04\x07");
+}
