@@ -1454,3 +1454,8 @@ TEST(take_as_failure_a_chunked_body_with_a_trailer_field_instead_of_a_last_chunk
 {
     assertRequestChunkedBodyIsInvalid("0c\r\nInvalid body\r\nTrailer:value");
 }
+
+TEST(take_as_failure_a_chunked_body_with_trailing_text)
+{
+    assertRequestChunkedBodyIsInvalid("0\r\n\r\nInvalid text");
+}
