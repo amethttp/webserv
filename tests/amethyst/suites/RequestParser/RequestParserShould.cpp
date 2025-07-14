@@ -1405,9 +1405,16 @@ TEST(recognize_a_chunked_body_with_a_final_basic_trailer_field)
     assertBodyIsEmpty();
 }
 
-TEST(recognize_a_chunked_body_with_a_multiple_trailer_fields)
+TEST(recognize_a_chunked_body_with_multiple_trailer_fields)
 {
     body = parseFromValidBody("0\r\nTrailer: value\r\nTrailer2: value2\r\n");
 
     assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_multiple_chunks_and_multiple_trailer_fields)
+{
+    body = parseFromValidBody("5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n");
+
+    assertBody("Valid body");
 }
