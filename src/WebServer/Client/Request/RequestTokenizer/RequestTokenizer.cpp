@@ -348,7 +348,7 @@ std::string RequestTokenizer::chunk()
     return chunkString;
 }
 
-std::string RequestTokenizer::lastChunk()
+std::string RequestTokenizer::chunkSize()
 {
     std::string lastChunkString;
 
@@ -384,7 +384,7 @@ RequestToken RequestTokenizer::getNextToken()
         return RequestToken(HTTP_VERSION, httpVersion());
 
     if (isLastChunk())
-        return RequestToken(LAST_CHUNK, lastChunk());
+        return RequestToken(LAST_CHUNK, chunkSize());
 
     if (isChunk())
         return RequestToken(CHUNK, chunk());

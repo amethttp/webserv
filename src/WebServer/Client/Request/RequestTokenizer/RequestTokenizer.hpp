@@ -48,7 +48,7 @@ private:
     std::string sp();
     std::string header();
     std::string chunk();
-    std::string lastChunk();
+    std::string chunkSize();
     std::string crlf();
 
 public:
