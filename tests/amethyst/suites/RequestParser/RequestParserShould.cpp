@@ -1434,3 +1434,8 @@ TEST(take_as_failure_a_trailer_field_as_chunked_body)
 {
     assertRequestChunkedBodyIsInvalid("Header: value");
 }
+
+TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_smaller_than_chunk_data_length)
+{
+    assertRequestChunkedBodyIsInvalid("01\r\nInvalid body\r\n0\r\n\r\n");
+}
