@@ -36,6 +36,7 @@ private:
     bool isHeader() const;
     bool isFieldLine() const;
     bool isChunkExtensionNameAtDistance(int distance) const;
+    bool isChunkExtensionValAtDistance(int distance) const;
     bool isChunk() const;
     bool isChunkSize() const;
     bool isLastChunk() const;
