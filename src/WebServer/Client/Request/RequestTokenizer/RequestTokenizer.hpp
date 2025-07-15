@@ -43,7 +43,7 @@ private:
     bool isChunk() const;
     bool isChunkSize() const;
     bool isLastChunk() const;
-    static bool isQdText(char c);
+    bool isQdTextAtDistance(int distance) const;
     bool isQuotedPairAtDistance(int distance) const;
     bool isCrlf() const;
     bool isCrlfAtDistance(int distance) const;

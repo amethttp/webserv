@@ -47,14 +47,12 @@ void RequestTokenizer::skipQuotedStringAtDistance(int &distance) const
 {
     distance++;
 
-    char lastQuotedStringChar = peek(distance);
-    while (isQdText(lastQuotedStringChar) || isQuotedPairAtDistance(distance))
+    while (isQdTextAtDistance(distance) || isQuotedPairAtDistance(distance))
     {
         if (isQuotedPairAtDistance(distance))
             distance += 2;
         else
             distance++;
-        lastQuotedStringChar = peek(distance);
     }
 
     distance++;
@@ -238,9 +236,9 @@ bool RequestTokenizer::isLastChunk() const
     return isCrlfAtDistance(distance);
 }
 
-bool RequestTokenizer::isQdText(const char c)
+bool RequestTokenizer::isQdTextAtDistance(const int distance) const
 {
-    return (std::isalnum(c) || qdTextSymbols.find(c) != std::string::npos);
+    return (std::isalnum(peek(distance)) || qdTextSymbols.find(peek(distance)) != std::string::npos);
 }
 
 bool RequestTokenizer::isQuotedPairAtDistance(const int distance) const
@@ -398,7 +396,6 @@ RequestToken RequestTokenizer::getOctetStreamToken(const size_t size)
         return RequestToken(EOF, "");
 
     const std::string octetStreamString = this->text_.substr(this->pos_, size);
-
     advance(size);
 
     return RequestToken(OCTET_STREAM, octetStreamString);
