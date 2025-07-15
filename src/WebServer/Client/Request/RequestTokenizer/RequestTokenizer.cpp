@@ -73,18 +73,18 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
         skipTokenAtDistance(++skippedDistance);
 
         lastChunkExtensionChar = peek(skippedDistance);
-        if (lastChunkExtensionChar == '=')
-        {
-            if (!isChunkExtensionValAtDistance(++skippedDistance))
-                return;
+        if (lastChunkExtensionChar != '=')
+            continue;
 
-            lastChunkExtensionChar = peek(skippedDistance);
-            if (isTokenAtDistance(skippedDistance))
-                skipTokenAtDistance(skippedDistance);
-            else if (isQuotedStringAtDistance(skippedDistance))
-                skipQuotedStringAtDistance(skippedDistance);
-            lastChunkExtensionChar = peek(skippedDistance);
-        }
+        if (!isChunkExtensionValAtDistance(++skippedDistance))
+            return;
+
+        lastChunkExtensionChar = peek(skippedDistance);
+        if (isTokenAtDistance(skippedDistance))
+            skipTokenAtDistance(skippedDistance);
+        else if (isQuotedStringAtDistance(skippedDistance))
+            skipQuotedStringAtDistance(skippedDistance);
+        lastChunkExtensionChar = peek(skippedDistance);
     }
 
     distance = skippedDistance;
