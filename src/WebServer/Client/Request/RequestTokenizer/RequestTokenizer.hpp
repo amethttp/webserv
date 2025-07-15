@@ -36,6 +36,7 @@ private:
     bool isQuery() const;
     bool isHeader() const;
     bool isFieldLine() const;
+    bool hasChunkValueAtDistance(int distance) const;
     bool isTokenAtDistance(int distance) const;
     bool isQuotedStringAtDistance(int distance) const;
     bool isChunkExtensionValAtDistance(int distance) const;

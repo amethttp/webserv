@@ -72,7 +72,7 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 
         skipTokenAtDistance(skippedDistance);
 
-        if (peek(skippedDistance) != '=')
+        if (!hasChunkValueAtDistance(skippedDistance))
             continue;
 
         skippedDistance++;
@@ -173,6 +173,11 @@ bool RequestTokenizer::isHeader() const
 bool RequestTokenizer::isFieldLine() const
 {
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
+}
+
+bool RequestTokenizer::hasChunkValueAtDistance(const int distance) const
+{
+    return peek(distance) == '=';
 }
 
 bool RequestTokenizer::isTokenAtDistance(const int distance) const
