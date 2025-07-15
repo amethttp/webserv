@@ -32,14 +32,14 @@ char RequestTokenizer::peek(const size_t distance) const
     return this->text_[peekedCharacterPos];
 }
 
-void RequestTokenizer::skipChunkExtensionNameAtDistance(int &distance) const
+void RequestTokenizer::skipTokenAtDistance(int &distance) const
 {
-    char lastChunkExtensionNameChar = peek(distance);
+    char lastTokenChar = peek(distance);
 
-    while (isTchar(lastChunkExtensionNameChar))
+    while (isTchar(lastTokenChar))
     {
         distance++;
-        lastChunkExtensionNameChar = peek(distance);
+        lastTokenChar = peek(distance);
     }
 }
 
@@ -50,10 +50,10 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 
     while (lastChunkExtensionChar == ';')
     {
-        if (!isChunkExtensionNameAtDistance(++skippedDistance))
+        if (!isTokenAtDistance(++skippedDistance))
             return;
 
-        skipChunkExtensionNameAtDistance(++skippedDistance);
+        skipTokenAtDistance(++skippedDistance);
 
         lastChunkExtensionChar = peek(skippedDistance);
         if (lastChunkExtensionChar == '=')
@@ -62,8 +62,8 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
                 return;
 
             lastChunkExtensionChar = peek(skippedDistance);
-            if (isChunkExtensionNameAtDistance(skippedDistance))
-                skipChunkExtensionNameAtDistance(skippedDistance);
+            if (isTokenAtDistance(skippedDistance))
+                skipTokenAtDistance(skippedDistance);
             else if (lastChunkExtensionChar == '\"')
             {
                 skippedDistance++;
@@ -172,14 +172,14 @@ bool RequestTokenizer::isFieldLine() const
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
 }
 
-bool RequestTokenizer::isChunkExtensionNameAtDistance(const int distance) const
+bool RequestTokenizer::isTokenAtDistance(const int distance) const
 {
     return isTchar(peek(distance));
 }
 
 bool RequestTokenizer::isChunkExtensionValAtDistance(const int distance) const
 {
-    return (isTchar(peek(distance)) || peek(distance) == '\"');
+    return (isTokenAtDistance(distance) || peek(distance) == '\"');
 }
 
 bool RequestTokenizer::isChunk() const

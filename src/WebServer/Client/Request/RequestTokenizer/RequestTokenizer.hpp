@@ -18,7 +18,7 @@ private:
     void advance(size_t amount = 1);
     char peek(size_t distance = 1) const;
 
-    void skipChunkExtensionNameAtDistance(int &distance) const;
+    void skipTokenAtDistance(int &distance) const;
     void skipChunkExtensionsAtDistance(int &distance) const;
 
     bool hasFinishedText() const;
@@ -35,7 +35,7 @@ private:
     bool isQuery() const;
     bool isHeader() const;
     bool isFieldLine() const;
-    bool isChunkExtensionNameAtDistance(int distance) const;
+    bool isTokenAtDistance(int distance) const;
     bool isChunkExtensionValAtDistance(int distance) const;
     bool isChunk() const;
     bool isChunkSize() const;
