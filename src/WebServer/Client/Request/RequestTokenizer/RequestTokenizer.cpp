@@ -62,14 +62,8 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
                 return;
 
             lastChunkExtensionChar = peek(skippedDistance);
-            if (isTchar(lastChunkExtensionChar))
-            {
-                while (isTchar(lastChunkExtensionChar))
-                {
-                    skippedDistance++;
-                    lastChunkExtensionChar = peek(skippedDistance);
-                }
-            }
+            if (isChunkExtensionNameAtDistance(skippedDistance))
+                skipChunkExtensionNameAtDistance(skippedDistance);
             else if (lastChunkExtensionChar == '\"')
             {
                 skippedDistance++;
@@ -83,8 +77,8 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
                     lastChunkExtensionChar = peek(skippedDistance);
                 }
                 skippedDistance++;
-                lastChunkExtensionChar = peek(skippedDistance);
             }
+            lastChunkExtensionChar = peek(skippedDistance);
         }
     }
 
