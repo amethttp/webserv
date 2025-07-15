@@ -67,6 +67,7 @@ Result<HeaderCollection> RequestParser::parseHeaders()
 
 Result<std::string> RequestParser::parseChunkedBody()
 {
+    int hasFailed = 0;
     std::string chunkedBody;
 
     while (this->currentToken_.getType() == CHUNK_SIZE)
@@ -78,26 +79,23 @@ Result<std::string> RequestParser::parseChunkedBody()
         chunkedBody += this->tokenizer_.getOctetStreamToken(chunkSize).getValue();
         this->currentToken_ = this->tokenizer_.getNextToken();
 
-        if (eat(CRLF) == FAIL)
-            return Result<std::string>::fail("400 Bad Request");
+        hasFailed |= eat(CRLF);
     }
 
-    if (eat(LAST_CHUNK) == FAIL)
-        return Result<std::string>::fail("400 Bad Request");
+    hasFailed |= eat(LAST_CHUNK);
 
-    if (this->currentToken_.getType() != HEADER && eat(CRLF) == FAIL)
-        return Result<std::string>::fail("400 Bad Request");
+    if (this->currentToken_.getType() != HEADER)
+        hasFailed |= eat(CRLF);
 
     while (this->currentToken_.getType() == HEADER)
     {
-        if (eat(HEADER) == FAIL)
-            return Result<std::string>::fail("400 Bad Request");
-
-        if (eat(CRLF) == FAIL)
-            return Result<std::string>::fail("400 Bad Request");
+        hasFailed |= eat(HEADER);
+        hasFailed |= eat(CRLF);
     }
 
-    if (eat(EOF) == FAIL)
+    hasFailed |= eat(EOF);
+
+    if (hasFailed)
         return Result<std::string>::fail("400 Bad Request");
 
     return Result<std::string>::ok(chunkedBody);
