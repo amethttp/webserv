@@ -33,6 +33,7 @@ private:
     bool isQuery() const;
     bool isHeader() const;
     bool isFieldLine() const;
+    bool isChunk() const;
     bool isChunkSize() const;
     bool isLastChunk() const;
     static bool isQdText(char c);

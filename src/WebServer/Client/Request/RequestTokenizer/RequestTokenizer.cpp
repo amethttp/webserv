@@ -175,6 +175,11 @@ bool RequestTokenizer::isFieldLine() const
     return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
 }
 
+bool RequestTokenizer::isChunk() const
+{
+    return (std::isprint(this->currentChar_) || this->currentChar_ == '\t');
+}
+
 bool RequestTokenizer::isChunkSize() const
 {
     int distance = 0;
@@ -318,7 +323,7 @@ std::string RequestTokenizer::chunkSize()
 {
     std::string lastChunkString;
 
-    while (!hasFinishedText() && (std::isprint(this->currentChar_) || this->currentChar_ == '\t'))
+    while (!hasFinishedText() && isChunk())
     {
         lastChunkString += this->currentChar_;
         advance();
