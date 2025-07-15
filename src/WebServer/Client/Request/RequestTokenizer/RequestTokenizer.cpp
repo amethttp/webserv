@@ -161,7 +161,7 @@ bool RequestTokenizer::isHeader() const
     if (!isTchar(headerChar))
         return false;
 
-    while (!hasFinishedText() && isTchar(headerChar))
+    while (isTchar(headerChar))
     {
         distance++;
         headerChar = peek(distance);
@@ -202,7 +202,7 @@ bool RequestTokenizer::isLastChunk() const
     if (lastChunkChar != '0')
         return false;
 
-    while (!hasFinishedText() && lastChunkChar == '0')
+    while (lastChunkChar == '0')
     {
         distance++;
         lastChunkChar = peek(distance);
