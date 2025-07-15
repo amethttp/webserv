@@ -51,8 +51,9 @@ void RequestTokenizer::skipQuotedStringAtDistance(int &distance) const
     while (isQdText(lastQuotedStringChar) || isQuotedPairAtDistance(distance))
     {
         if (isQuotedPairAtDistance(distance))
+            distance += 2;
+        else
             distance++;
-        distance++;
         lastQuotedStringChar = peek(distance);
     }
 
