@@ -39,3 +39,12 @@ char hexToChar(const char firstDigit, const char secondDigit)
 
     return static_cast<char>(result);
 }
+
+size_t strToUlong(const std::string &str)
+{
+    size_t result = 0;
+    std::stringstream stream(str);
+
+    stream >> result;
+    return result;
+}

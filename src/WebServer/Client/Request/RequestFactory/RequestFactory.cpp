@@ -1,9 +1,9 @@
 #include "RequestFactory.hpp"
 #include "utils/string/string.hpp"
+#include "utils/numeric/numeric.hpp"
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestProcesser/RequestProcesser.hpp"
-#include <cstdlib>
 
 std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
 {
@@ -76,7 +76,7 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
 
 Result<std::string> RequestFactory::buildFullBodyFromString(const Header &contentLengthHeader, const std::string &bodyString)
 {
-    const size_t contentLengthSize = std::atol(contentLengthHeader.getValue().c_str());
+    const size_t contentLengthSize = strToUlong(contentLengthHeader.getValue());
 
     if (contentLengthSize < bodyString.length())
         return Result<std::string>::fail("400 Bad Request");
