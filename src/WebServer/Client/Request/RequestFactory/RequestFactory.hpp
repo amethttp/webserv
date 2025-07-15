@@ -16,6 +16,7 @@ private:
     static Result<RequestLineParams_t> buildRequestLineFromString(const std::string &requestLineString);
     static Result<HeaderCollection> buildRequestHeadersFromString(const std::string &headersString);
     static Result<std::string> buildFullBodyFromString(const Header &contentLengthHeader, const std::string &bodyString);
+    static Result<std::string> buildChunkedBodyFromString(const std::string &bodyString);
     static Result<std::string> buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString);
 
 public:

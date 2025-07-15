@@ -84,21 +84,24 @@ Result<std::string> RequestFactory::buildFullBodyFromString(const Header &conten
     return Result<std::string>::ok(bodyString);
 }
 
+Result<std::string> RequestFactory::buildChunkedBodyFromString(const std::string &bodyString)
+{
+    RequestParser requestParser = createParser(bodyString);
+
+    const Result<std::string> requestBodyResult = requestParser.parseChunkedBody();
+    if (requestBodyResult.isFailure())
+        return Result<std::string>::fail(requestBodyResult.getError());
+
+    return Result<std::string>::ok(requestBodyResult.getValue());
+}
+
 Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
     if (headers.contains("Content-Length"))
         return buildFullBodyFromString(headers.getHeader("Content-Length"), bodyString);
 
     if (headers.contains("Transfer-Encoding"))
-    {
-        RequestParser requestParser = createParser(bodyString);
-
-        const Result<std::string> requestBodyResult = requestParser.parseChunkedBody();
-        if (requestBodyResult.isFailure())
-            return Result<std::string>::fail(requestBodyResult.getError());
-
-        return Result<std::string>::ok(requestBodyResult.getValue());
-    }
+        return buildChunkedBodyFromString(bodyString);
 
     if (!bodyString.empty())
         return Result<std::string>::fail("411 Length Required");
