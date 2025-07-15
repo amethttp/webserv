@@ -32,6 +32,17 @@ char RequestTokenizer::peek(const size_t distance) const
     return this->text_[peekedCharacterPos];
 }
 
+void RequestTokenizer::skipChunkExtensionNameAtDistance(int &distance) const
+{
+    char lastChunkExtensionNameChar = peek(distance);
+
+    while (isTchar(lastChunkExtensionNameChar))
+    {
+        distance++;
+        lastChunkExtensionNameChar = peek(distance);
+    }
+}
+
 void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 {
     int startingDistance = distance;
@@ -39,17 +50,12 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 
     while (lastChunkExtensionChar == ';')
     {
-        startingDistance++;
-        lastChunkExtensionChar = peek(startingDistance);
-        if (!isTchar(lastChunkExtensionChar))
+        if (!isTchar(peek(++startingDistance)))
             return;
 
-        while (isTchar(lastChunkExtensionChar))
-        {
-            startingDistance++;
-            lastChunkExtensionChar = peek(startingDistance);
-        }
+        skipChunkExtensionNameAtDistance(++startingDistance);
 
+        lastChunkExtensionChar = peek(startingDistance);
         if (lastChunkExtensionChar == '=')
         {
             startingDistance++;
@@ -75,8 +81,6 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
                     startingDistance++;
                     lastChunkExtensionChar = peek(startingDistance);
                 }
-                if (lastChunkExtensionChar != '\"')
-                    return;
                 startingDistance++;
                 lastChunkExtensionChar = peek(startingDistance);
             }
