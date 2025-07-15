@@ -66,10 +66,10 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 
     while (peek(skippedDistance) == ';')
     {
+        skippedDistance++;
         if (!isTokenAtDistance(skippedDistance))
             return;
 
-        skippedDistance++;
         skipTokenAtDistance(skippedDistance);
 
         if (peek(skippedDistance) != '=')
@@ -180,7 +180,7 @@ bool RequestTokenizer::isTokenAtDistance(const int distance) const
     return isTchar(peek(distance));
 }
 
-bool RequestTokenizer::isQuotedStringAtDistance(int distance) const
+bool RequestTokenizer::isQuotedStringAtDistance(const int distance) const
 {
     return peek(distance) == '"';
 }
