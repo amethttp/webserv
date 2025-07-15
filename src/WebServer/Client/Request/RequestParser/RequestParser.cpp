@@ -16,6 +16,15 @@ result_t RequestParser::eat(const tokenType_t type)
     return SUCCESS;
 }
 
+std::string RequestParser::eatOctetStreamToken(const size_t &streamSize)
+{
+    std::string octetStream = this->tokenizer_.getOctetStreamToken(streamSize).getValue();
+
+    this->currentToken_ = this->tokenizer_.getNextToken();
+
+    return octetStream;
+}
+
 Result<RequestLineParams_t> RequestParser::parseRequestLine()
 {
     int hasFailed = 0;
@@ -76,9 +85,7 @@ Result<std::string> RequestParser::parseChunkedBody()
         const std::string chunkSizeValue = chunkSizeString.substr(0, chunkSizeString.find("\r\n"));
         const size_t chunkSize = hexToDec(chunkSizeValue.substr(0, chunkSizeString.find(';')));
 
-        chunkedBody += this->tokenizer_.getOctetStreamToken(chunkSize).getValue();
-        this->currentToken_ = this->tokenizer_.getNextToken();
-
+        chunkedBody += eatOctetStreamToken(chunkSize);
         hasFailed |= eat(CRLF);
     }
 
