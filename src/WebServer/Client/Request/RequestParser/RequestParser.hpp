@@ -20,7 +20,9 @@ private:
     RequestToken currentToken_;
 
     result_t eat(tokenType_t type);
+
     std::string eatOctetStreamToken(const size_t &streamSize);
+    result_t eatTrailerFields();
 
 public:
     RequestParser(const RequestTokenizer &tokenizer);

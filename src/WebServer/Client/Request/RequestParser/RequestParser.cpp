@@ -26,6 +26,21 @@ std::string RequestParser::eatOctetStreamToken(const size_t &streamSize)
     return octetStream;
 }
 
+result_t RequestParser::eatTrailerFields()
+{
+    if (this->currentToken_.getType() != HEADER)
+        return eat(CRLF);
+
+    int hasFailed = 0;
+    while (this->currentToken_.getType() == HEADER)
+    {
+        hasFailed |= eat(HEADER);
+        hasFailed |= eat(CRLF);
+    }
+
+    return hasFailed ? FAIL : SUCCESS;
+}
+
 Result<RequestLineParams_t> RequestParser::parseRequestLine()
 {
     int hasFailed = 0;
@@ -105,14 +120,7 @@ Result<std::string> RequestParser::parseChunkedBody()
 
     hasFailed |= eat(LAST_CHUNK);
 
-    if (this->currentToken_.getType() != HEADER)
-        hasFailed |= eat(CRLF);
-
-    while (this->currentToken_.getType() == HEADER)
-    {
-        hasFailed |= eat(HEADER);
-        hasFailed |= eat(CRLF);
-    }
+    hasFailed |= eatTrailerFields();
 
     hasFailed |= eat(EOF);
 
