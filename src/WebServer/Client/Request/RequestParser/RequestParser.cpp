@@ -1,6 +1,7 @@
 #include "RequestParser.hpp"
 #include "utils/numeric/numeric.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
+#include <algorithm>
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)
     : tokenizer_(tokenizer), currentToken_(tokenizer_.getNextToken())
@@ -74,6 +75,21 @@ Result<HeaderCollection> RequestParser::parseHeaders()
     return Result<HeaderCollection>::ok(headers);
 }
 
+static bool isNotHex(const char c)
+{
+    return !std::isxdigit(c);
+}
+
+static size_t getChunkSize(const std::string &chunkSize)
+{
+    const std::string::const_iterator chunkSizeBegin = chunkSize.begin();
+    const std::string::const_iterator chunkSizeEnd = chunkSize.end();
+    const std::string::const_iterator chunkSizeValueEnd = std::find_if(chunkSizeBegin, chunkSizeEnd, isNotHex);
+    const std::string chunkSizeValue = std::string(chunkSizeBegin, chunkSizeValueEnd);
+
+    return hexToDec(chunkSizeValue);
+}
+
 Result<std::string> RequestParser::parseChunkedBody()
 {
     int hasFailed = 0;
@@ -81,9 +97,7 @@ Result<std::string> RequestParser::parseChunkedBody()
 
     while (this->currentToken_.getType() == CHUNK_SIZE)
     {
-        const std::string chunkSizeString = this->currentToken_.getValue();
-        const std::string chunkSizeValue = chunkSizeString.substr(0, chunkSizeString.find("\r\n"));
-        const size_t chunkSize = hexToDec(chunkSizeValue.substr(0, chunkSizeString.find(';')));
+        const size_t chunkSize = getChunkSize(this->currentToken_.getValue());
 
         chunkedBody += eatOctetStreamToken(chunkSize);
         hasFailed |= eat(CRLF);
