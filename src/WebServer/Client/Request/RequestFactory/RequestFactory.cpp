@@ -74,17 +74,20 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
     return Result<HeaderCollection>::ok(requestHeaders);
 }
 
+Result<std::string> RequestFactory::buildFullBodyFromString(const Header &contentLengthHeader, const std::string &bodyString)
+{
+    const size_t contentLengthSize = std::atol(contentLengthHeader.getValue().c_str());
+
+    if (contentLengthSize < bodyString.length())
+        return Result<std::string>::fail("400 Bad Request");
+
+    return Result<std::string>::ok(bodyString);
+}
+
 Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
     if (headers.contains("Content-Length"))
-    {
-        const size_t contentLengthSize = std::atol(headers.getHeader("Content-Length").getValue().c_str());
-
-        if (contentLengthSize < bodyString.length())
-            return Result<std::string>::fail("400 Bad Request");
-
-        return Result<std::string>::ok(bodyString);
-    }
+        return buildFullBodyFromString(headers.getHeader("Content-Length"), bodyString);
 
     if (headers.contains("Transfer-Encoding"))
     {
