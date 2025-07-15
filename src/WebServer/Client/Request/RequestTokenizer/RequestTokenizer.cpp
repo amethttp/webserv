@@ -43,6 +43,22 @@ void RequestTokenizer::skipTokenAtDistance(int &distance) const
     }
 }
 
+void RequestTokenizer::skipQuotedStringAtDistance(int &distance) const
+{
+    distance++;
+
+    char lastQuotedStringChar = peek(distance);
+    while (isQdText(lastQuotedStringChar) || isQuotedPairAtDistance(distance))
+    {
+        if (isQuotedPairAtDistance(distance))
+            distance++;
+        distance++;
+        lastQuotedStringChar = peek(distance);
+    }
+
+    distance++;
+}
+
 void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 {
     int skippedDistance = distance;
@@ -65,19 +81,7 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
             if (isTokenAtDistance(skippedDistance))
                 skipTokenAtDistance(skippedDistance);
             else if (isQuotedStringAtDistance(skippedDistance))
-            {
-                skippedDistance++;
-                lastChunkExtensionChar = peek(skippedDistance);
-
-                while (isQdText(lastChunkExtensionChar) || isQuotedPairAtDistance(skippedDistance))
-                {
-                    if (isQuotedPairAtDistance(skippedDistance))
-                        skippedDistance++;
-                    skippedDistance++;
-                    lastChunkExtensionChar = peek(skippedDistance);
-                }
-                skippedDistance++;
-            }
+                skipQuotedStringAtDistance(skippedDistance);
             lastChunkExtensionChar = peek(skippedDistance);
         }
     }

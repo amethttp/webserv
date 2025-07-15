@@ -19,6 +19,7 @@ private:
     char peek(size_t distance = 1) const;
 
     void skipTokenAtDistance(int &distance) const;
+    void skipQuotedStringAtDistance(int &distance) const;
     void skipChunkExtensionsAtDistance(int &distance) const;
 
     bool hasFinishedText() const;
