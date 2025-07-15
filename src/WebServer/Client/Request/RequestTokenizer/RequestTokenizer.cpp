@@ -178,13 +178,15 @@ bool RequestTokenizer::isFieldLine() const
 bool RequestTokenizer::isChunkSize() const
 {
     int distance = 0;
+    char chunkSizeChar = peek(distance);
 
-    if (!std::isxdigit(peek(distance)))
+    if (!std::isxdigit(chunkSizeChar))
         return false;
 
-    while (std::isxdigit(peek(distance)))
+    while (std::isxdigit(chunkSizeChar))
     {
         distance++;
+        chunkSizeChar = peek(distance);
     }
 
     skipChunkExtensionsAtDistance(distance);
