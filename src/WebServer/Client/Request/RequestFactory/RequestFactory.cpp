@@ -74,10 +74,8 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
     return Result<HeaderCollection>::ok(requestHeaders);
 }
 
-Result<std::string> RequestFactory::buildFullBodyFromString(const Header &contentLengthHeader, const std::string &bodyString)
+Result<std::string> RequestFactory::buildFullBodyFromString(const size_t &contentLengthSize, const std::string &bodyString)
 {
-    const size_t contentLengthSize = strToUlong(contentLengthHeader.getValue());
-
     if (contentLengthSize < bodyString.length())
         return Result<std::string>::fail("400 Bad Request");
 
@@ -98,13 +96,20 @@ Result<std::string> RequestFactory::buildChunkedBodyFromString(const std::string
 Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
     if (headers.contains("Content-Length"))
-        return buildFullBodyFromString(headers.getHeader("Content-Length"), bodyString);
+    {
+        const size_t contentLengthSize = strToUlong(headers.getHeader("Content-Length").getValue());
+        return buildFullBodyFromString(contentLengthSize, bodyString);
+    }
 
     if (headers.contains("Transfer-Encoding"))
+    {
         return buildChunkedBodyFromString(bodyString);
+    }
 
     if (!bodyString.empty())
+    {
         return Result<std::string>::fail("411 Length Required");
+    }
 
     return Result<std::string>::ok(bodyString);
 }
