@@ -66,15 +66,17 @@ void RequestTokenizer::skipChunkExtensionsAtDistance(int &distance) const
 
     while (peek(skippedDistance) == ';')
     {
-        if (!isTokenAtDistance(++skippedDistance))
+        if (!isTokenAtDistance(skippedDistance))
             return;
 
-        skipTokenAtDistance(++skippedDistance);
+        skippedDistance++;
+        skipTokenAtDistance(skippedDistance);
 
         if (peek(skippedDistance) != '=')
             continue;
 
-        if (!isChunkExtensionValAtDistance(++skippedDistance))
+        skippedDistance++;
+        if (!isChunkExtensionValAtDistance(skippedDistance))
             return;
 
         if (isTokenAtDistance(skippedDistance))
