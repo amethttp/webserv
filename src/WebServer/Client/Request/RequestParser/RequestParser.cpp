@@ -62,7 +62,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     hasFailed |= eat(EOF);
 
     if (hasFailed)
-        return Result<RequestLineParams_t>::fail("400 Bad Request");
+        return Result<RequestLineParams_t>::fail(BAD_REQUEST_ERR);
 
     return Result<RequestLineParams_t>::ok(params);
 }
@@ -85,7 +85,7 @@ Result<HeaderCollection> RequestParser::parseHeaders()
     hasFailed |= eat(EOF);
 
     if (hasFailed)
-        return Result<HeaderCollection>::fail("400 Bad Request");
+        return Result<HeaderCollection>::fail(BAD_REQUEST_ERR);
 
     return Result<HeaderCollection>::ok(headers);
 }
@@ -125,7 +125,7 @@ Result<std::string> RequestParser::parseChunkedBody()
     hasFailed |= eat(EOF);
 
     if (hasFailed)
-        return Result<std::string>::fail("400 Bad Request");
+        return Result<std::string>::fail(BAD_REQUEST_ERR);
 
     return Result<std::string>::ok(chunkedBody);
 }

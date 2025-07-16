@@ -11,7 +11,7 @@ SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
     if (decodingPathResult.isFailure())
         return SimpleResult::fail(decodingPathResult.getError());
     if (!RequestPctDecoder::isWellEncoded(target.query))
-        return SimpleResult::fail("400 Bad Request");
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     target.path = decodingPathResult.getValue();
     return SimpleResult::ok();

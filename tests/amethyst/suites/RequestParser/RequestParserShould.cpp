@@ -54,7 +54,7 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
     const Result<RequestLineParams_t> result = sut.parseRequestLine();
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
 }
 
 static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
@@ -65,7 +65,7 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
     const Result<HeaderCollection> result = sut.parseHeaders();
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
 }
 
 static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
@@ -76,7 +76,7 @@ static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
     Result<std::string> result = sut.parseChunkedBody();
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
 }
 
 static void assertHeaderSize(const size_t size)

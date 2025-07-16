@@ -9,13 +9,13 @@
 SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
 {
     if (requestLine.method == NOT_IMPLEMENTED)
-        return SimpleResult::fail("501 Not Implemented");
+        return SimpleResult::fail(NOT_IMPLEMENTED_ERR);
 
     if (requestLine.target.uri.length() > MAX_URI_LENGTH)
-        return SimpleResult::fail("414 URI Too Long");
+        return SimpleResult::fail(URI_TOO_LONG_ERR);
 
     if (requestLine.httpVersion != "HTTP/1.1")
-        return SimpleResult::fail("505 HTTP Version Not Supported");
+        return SimpleResult::fail(HTTP_VERSION_NOT_SUPPORTED_ERR);
 
     return SimpleResult::ok();
 }
@@ -24,23 +24,23 @@ SimpleResult RequestValidator::validateRequestHeaders(const HeaderCollection &re
 {
     if (!requestHeaders.contains(HOST)
     || !HostHeaderValidator::isValid(requestHeaders.getHeader(HOST)))
-        return SimpleResult::fail("400 Bad Request");
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     if (requestHeaders.contains(CONTENT_LENGTH)
         && requestHeaders.contains(TRANSFER_ENCODING))
-        return SimpleResult::fail("400 Bad Request");
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     if (requestHeaders.contains(CONTENT_LENGTH)
         && !ContentLengthHeaderValidator::isValid(requestHeaders.getHeader(CONTENT_LENGTH)))
-        return SimpleResult::fail("400 Bad Request");
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     if (requestHeaders.contains(TRANSFER_ENCODING)
         && !TransferEncodingHeaderValidator::isValid(requestHeaders.getHeader(TRANSFER_ENCODING)))
-        return SimpleResult::fail("400 Bad Request");
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     if (requestHeaders.contains(CONNECTION)
         && !ConnectionHeaderValidator::isValid(requestHeaders.getHeader(CONNECTION)))
-        return SimpleResult::fail("400 Bad Request");
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     return SimpleResult::ok();
 }

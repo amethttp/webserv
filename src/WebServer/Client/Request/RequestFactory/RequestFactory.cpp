@@ -77,7 +77,7 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
 Result<std::string> RequestFactory::buildFullBodyFromString(const size_t &contentLengthSize, const std::string &bodyString)
 {
     if (contentLengthSize < bodyString.length())
-        return Result<std::string>::fail("400 Bad Request");
+        return Result<std::string>::fail(BAD_REQUEST_ERR);
 
     return Result<std::string>::ok(bodyString);
 }
@@ -108,7 +108,7 @@ Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderColle
 
     if (!bodyString.empty())
     {
-        return Result<std::string>::fail("411 Length Required");
+        return Result<std::string>::fail(LENGTH_REQUIRED_ERR);
     }
 
     return Result<std::string>::ok(bodyString);

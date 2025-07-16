@@ -16,7 +16,7 @@ Result<std::string> RequestPctDecoder::decode(const std::string &string)
         const char decodedChar = hexToChar(string[i + 1], string[i + 2]);
 
         if (std::iscntrl(decodedChar))
-            return Result<std::string>::fail("400 Bad Request");
+            return Result<std::string>::fail(BAD_REQUEST_ERR);
 
         decodedPath += decodedChar;
         i += 2;

@@ -46,7 +46,7 @@ static void assertRequestIsInvalidFromTargetUri(const std::string &invalidReques
     const SimpleResult result = RequestProcesser::processRequestTarget(target);
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS("400 Bad Request", result.getError());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
 }
 
 
