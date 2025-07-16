@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WebServer/Client/Request/RequestLineParams/RequestLineParams.hpp"
+#include "WebServer/Client/Request/RequestLine/RequestLine.hpp"
 
 class RequestTargetSeparator
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "HeaderCollection/HeaderCollection.hpp"
-#include "RequestLineParams/RequestLineParams.hpp"
 #include "Body/Body.hpp"
+#include "RequestLine/RequestLine.hpp"
+#include "HeaderCollection/HeaderCollection.hpp"
 
 typedef struct Request_s
 {

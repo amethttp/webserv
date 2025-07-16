@@ -1,7 +1,6 @@
 #pragma once
 
-#include "utils/Result/Result.hpp"
-#include "WebServer/Client/Request/RequestLineParams/RequestLineParams.hpp"
+#include "WebServer/Client/Request/RequestLine/RequestLine.hpp"
 
 class RequestPctDecoder
 {

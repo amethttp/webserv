@@ -71,6 +71,7 @@ vpath %.cpp $(SRC):\
             $(SRC)test/TestFailure:\
             $(SUITES):\
             $(SUITES_DIRECTORIES)\
+            $(PROJ_SRC)WebServer/Client/Request/RequestLine/\
             $(PROJ_SRC)WebServer/Client/Request/HeaderCollection/\
             $(PROJ_SRC)WebServer/Client/Request/HeaderCollection/Header\
             $(PROJ_SRC)WebServer/Client/Request/Body/\
@@ -98,6 +99,7 @@ SRCS = main.cpp \
        test.cpp \
        TestFailure.cpp \
        $(SUITES_FILES) \
+       RequestLine.cpp \
        HeaderCollection.cpp \
        Header.cpp \
        Body.cpp \
