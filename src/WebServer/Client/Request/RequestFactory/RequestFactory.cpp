@@ -137,8 +137,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     const Result<Body> requestBodyResult = buildRequestBodyFromString(request.headers, requestBodyString);
     if (requestBodyResult.isFailure())
         return Result<Request_t>::fail(requestBodyResult.getError());
-    request.bodyNew = requestBodyResult.getValue();
-    request.body = request.bodyNew.getMessage();
+    request.body = requestBodyResult.getValue();
 
     return Result<Request_t>::ok(request);
 }

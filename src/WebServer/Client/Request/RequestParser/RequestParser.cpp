@@ -1,6 +1,5 @@
 #include "RequestParser.hpp"
 #include "utils/numeric/numeric.hpp"
-#include "WebServer/Client/Request/Body/Body.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)

@@ -61,12 +61,12 @@ static void assertHeader(const std::string &key, const std::string &value)
 
 static void assertBodyIsEmpty()
 {
-    ASSERT_EQUALS("", request.bodyNew.getMessage());
+    ASSERT_EQUALS("", request.body.getMessage());
 }
 
 static void assertBody(const std::string &body)
 {
-    ASSERT_EQUALS(body, request.bodyNew.getMessage());
+    ASSERT_EQUALS(body, request.body.getMessage());
 }
 
 static void assertRequestIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
