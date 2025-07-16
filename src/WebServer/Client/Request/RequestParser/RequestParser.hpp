@@ -29,5 +29,6 @@ public:
 
     Result<RequestLineParams_t> parseRequestLine();
     Result<HeaderCollection> parseHeaders();
+    Result<std::string> parseFullBody(const size_t contentLengthSize);
     Result<std::string> parseChunkedBody();
 };

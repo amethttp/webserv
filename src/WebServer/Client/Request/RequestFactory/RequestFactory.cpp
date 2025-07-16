@@ -76,10 +76,13 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
 
 Result<std::string> RequestFactory::buildFullBodyFromString(const size_t &contentLengthSize, const std::string &bodyString)
 {
-    if (contentLengthSize < bodyString.length())
-        return Result<std::string>::fail(BAD_REQUEST_ERR);
+    RequestParser requestParser = createParser(bodyString);
 
-    return Result<std::string>::ok(bodyString);
+    const Result<std::string> requestBodyResult = requestParser.parseFullBody(contentLengthSize);
+    if (requestBodyResult.isFailure())
+        return Result<std::string>::fail(requestBodyResult.getError());
+
+    return Result<std::string>::ok(requestBodyResult.getValue());
 }
 
 Result<std::string> RequestFactory::buildChunkedBodyFromString(const std::string &bodyString)

@@ -4,7 +4,7 @@
 #include <algorithm>
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)
-    : tokenizer_(tokenizer), currentToken_(tokenizer_.getNextToken())
+    : tokenizer_(tokenizer), currentToken_(UNKNOWN, "")
 {
 }
 
@@ -46,6 +46,8 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     int hasFailed = 0;
     RequestLineParams_t params;
 
+    this->currentToken_ = this->tokenizer_.getNextToken();
+
     params.method = getHttpMethodFromString(this->currentToken_.getValue());
     hasFailed |= eat(METHOD);
 
@@ -72,6 +74,8 @@ Result<HeaderCollection> RequestParser::parseHeaders()
     int hasFailed = 0;
     HeaderCollection headers;
 
+    this->currentToken_ = this->tokenizer_.getNextToken();
+
     do
     {
         headers.addHeader(this->currentToken_.getValue());
@@ -88,6 +92,16 @@ Result<HeaderCollection> RequestParser::parseHeaders()
         return Result<HeaderCollection>::fail(BAD_REQUEST_ERR);
 
     return Result<HeaderCollection>::ok(headers);
+}
+
+Result<std::string> RequestParser::parseFullBody(const size_t contentLengthSize)
+{
+    const std::string fullBody = eatOctetStreamToken(std::string::npos);
+
+    if (contentLengthSize < fullBody.length())
+        return Result<std::string>::fail(BAD_REQUEST_ERR);
+
+    return Result<std::string>::ok(fullBody);
 }
 
 static bool isNotHex(const char c)
@@ -109,6 +123,8 @@ Result<std::string> RequestParser::parseChunkedBody()
 {
     int hasFailed = 0;
     std::string chunkedBody;
+
+    this->currentToken_ = this->tokenizer_.getNextToken();
 
     while (this->currentToken_.getType() == CHUNK_SIZE)
     {
