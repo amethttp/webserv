@@ -25,6 +25,7 @@ public:
     std::string getTargetUri() const;
     std::string getHttpVersion() const;
 
+        void setMethod(method_t method);
     void setMethod(const std::string &methodString);
     void setTargetUri(const std::string &uriString);
     void setHttpVersion(const std::string &httpVersionString);
