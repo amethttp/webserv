@@ -34,7 +34,7 @@ static Body parseFromValidFullBody(const size_t contentLengthSize, const std::st
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
 
-    const Result<Body> result = sut.parseFullBodyNew(contentLengthSize);
+    const Result<Body> result = sut.parseFullBody(contentLengthSize);
 
     return result.getValue();
 }
@@ -44,7 +44,7 @@ static Body parseFromValidChunkedBody(const std::string &requestBodyString)
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
 
-    const Result<Body> result = sut.parseChunkedBodyNew();
+    const Result<Body> result = sut.parseChunkedBody();
 
     return result.getValue();
 }
@@ -83,7 +83,7 @@ static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
 
-    Result<Body> result = sut.parseFullBodyNew(contentLengthSize);
+    Result<Body> result = sut.parseFullBody(contentLengthSize);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
@@ -94,7 +94,7 @@ static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
 
-    Result<Body> result = sut.parseChunkedBodyNew();
+    Result<Body> result = sut.parseChunkedBody();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());

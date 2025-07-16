@@ -94,7 +94,7 @@ Result<HeaderCollection> RequestParser::parseHeaders()
     return Result<HeaderCollection>::ok(headers);
 }
 
-Result<Body> RequestParser::parseFullBodyNew(const size_t contentLengthSize)
+Result<Body> RequestParser::parseFullBody(const size_t contentLengthSize)
 {
     Body body;
     const std::string bodyMessage = eatOctetStreamToken(contentLengthSize);
@@ -107,17 +107,7 @@ Result<Body> RequestParser::parseFullBodyNew(const size_t contentLengthSize)
     return Result<Body>::ok(body);
 }
 
-Result<std::string> RequestParser::parseFullBody(const size_t contentLengthSize)
-{
-    const Result<Body> result = parseFullBodyNew(contentLengthSize);
-
-    if (result.isFailure())
-        return Result<std::string>::fail(result.getError());
-
-    return Result<std::string>::ok(result.getValue().getMessage());
-}
-
-Result<Body> RequestParser::parseChunkedBodyNew()
+Result<Body> RequestParser::parseChunkedBody()
 {
     int hasFailed = 0;
     Body body;
@@ -144,14 +134,4 @@ Result<Body> RequestParser::parseChunkedBodyNew()
         return Result<Body>::fail(BAD_REQUEST_ERR);
 
     return Result<Body>::ok(body);
-}
-
-Result<std::string> RequestParser::parseChunkedBody()
-{
-    Result<Body> result = parseChunkedBodyNew();
-
-    if (result.isFailure())
-        return Result<std::string>::fail(result.getError());
-
-    return Result<std::string>::ok(result.getValue().getMessage());
 }

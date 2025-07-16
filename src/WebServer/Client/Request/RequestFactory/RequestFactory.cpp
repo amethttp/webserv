@@ -78,7 +78,7 @@ Result<Body> RequestFactory::buildFullBodyFromString(const size_t &contentLength
 {
     RequestParser requestParser = createParser(bodyString);
 
-    const Result<Body> requestBodyResult = requestParser.parseFullBodyNew(contentLengthSize);
+    const Result<Body> requestBodyResult = requestParser.parseFullBody(contentLengthSize);
     if (requestBodyResult.isFailure())
         return Result<Body>::fail(requestBodyResult.getError());
 
@@ -89,7 +89,7 @@ Result<Body> RequestFactory::buildChunkedBodyFromString(const std::string &bodyS
 {
     RequestParser requestParser = createParser(bodyString);
 
-    const Result<Body> requestBodyResult = requestParser.parseChunkedBodyNew();
+    const Result<Body> requestBodyResult = requestParser.parseChunkedBody();
     if (requestBodyResult.isFailure())
         return Result<Body>::fail(requestBodyResult.getError());
 
