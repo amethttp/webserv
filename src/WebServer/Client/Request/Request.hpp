@@ -49,7 +49,7 @@ public:
 	bool tryParseFromBuffer();
 
 	t_method getMethod();
-	std::string getBuffer();
+	std::string getBuffer() const;
 	std::string getBody();
 	std::string getTarget();
 	std::string getHTTPVersion();

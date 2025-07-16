@@ -202,7 +202,7 @@ bool Request::tryParseBody(std::vector<std::string> &body)
 	return tryParseFullBody();
 }
 
-std::string Request::getBuffer()
+std::string Request::getBuffer() const
 {
 	return this->buffer_;
 }

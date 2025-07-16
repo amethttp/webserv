@@ -1,9 +1,9 @@
 #pragma once
 
 #include <string>
-#include "Server/Server.hpp"
-#include "Request/Request.hpp"
-#include "Location/Location.hpp"
+#include "WebServer/Server/Server.hpp"
+#include "WebServer/Server/Location/Location.hpp"
+#include "WebServer/Client/Request/Request.hpp"
 
 namespace LocationMatcher
 {

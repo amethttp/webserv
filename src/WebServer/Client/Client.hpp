@@ -4,13 +4,14 @@
 #include <string>
 #include <stdint.h>
 #include "utils/fd.hpp"
-#include "Request/Request.hpp"
 #include "Response/Response.hpp"
-#include "utils/Result/Result.hpp"
-#include "Result/HandlingResult.hpp"
-#include "RequestExecutor/RequestExecutor.hpp"
+#include "Request/Request.hpp"
+#include "Response/ResponseFactory/ResponseFactory.hpp"
+#include "RequestHandler/RequestHandler.hpp"
+#include "RequestHandler/RequestExecutor/RequestExecutor.hpp"
 #include "RouteMatchers/Server/ServerMatcher.hpp"
 #include "RouteMatchers/Location/LocationMatcher.hpp"
+#include "WebServer/Client/RequestHandler/Result/HandlingResult.hpp"
 
 #define DISCONNECTED "disconnected"
 #define TIMED_OUT "timed out"
@@ -23,7 +24,11 @@ private:
 	fd_t fd_;
 	time_t lastReceivedPacket_;
 	Request request_;
-	Response response_;
+	t_Response response_;
+	std::string responseBuffer_;
+
+	static std::map<t_httpCode, std::string> errorDict_;
+	static std::map<std::string, std::string> extensionTypesDict_;
 
 public:
 	Client();
@@ -31,14 +36,15 @@ public:
 
 	int getId();
 	fd_t getFd();
-	time_t getLastReceivedPacket();
+	time_t getLastReceivedPacket() const;
 	std::string getStringifiedResponse();
 	std::string getStringifiedRequest();
-	Request getRequest();
-	t_httpCode getResponseStatus();
+	Request getRequest() const;
+	t_httpCode getResponseStatus() const;
+	std::string getResponseBuffer() const;
 
 	void setFd(fd_t fd);
-	void setResponseBuffer(const std::string &stringResponse);
+	void updateResponse();
 
 	void updateLastReceivedPacket();
 	bool hasFullRequestHeaders();
@@ -49,7 +55,9 @@ public:
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	void executeRequest(std::vector<Server> &servers);
 	void buildResponse(std::vector<Server> &servers);
 	void buildResponse(t_httpCode code, t_connection mode);
+
+	static std::string getHttpErrorMsg(t_httpCode code);
+	static std::string getExtensionType(std::string extension);
 };

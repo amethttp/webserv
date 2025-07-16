@@ -3,22 +3,16 @@
 #include <string>
 #include <map>
 #include "utils/http.hpp"
-
-typedef std::map<std::string, std::string> t_headers;
-
-typedef struct s_body
-{
-	std::string content;
-	std::string type;
-} t_body;
+#include "WebServer/Client/Response/Response.hpp"
+#include "utils/HeaderCollection/HeaderCollection.hpp"
 
 class HandlingResult
 {
 public:
 	t_httpCode code_;
 	t_connection mode_;
-	t_headers tempHeaders_;
-	t_body tempBody_;
+	HeaderCollection tempHeaders_;
+	t_Body tempBody_;
 	bool isCGI_;
 
 public:

@@ -36,4 +36,13 @@ std::vector<std::string> split(const std::string &input, const std::string &del)
 	return result;
 }
 
+std::string trim(const std::string &input, const std::string &charsToTrim)
+{
+	size_t start = input.find_first_not_of(charsToTrim);
+	if (start == std::string::npos)
+		return "";
+
+	size_t end = input.find_last_not_of(charsToTrim);
+	return input.substr(start, end - start + 1);
+}
 

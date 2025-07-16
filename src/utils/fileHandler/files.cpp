@@ -1,5 +1,17 @@
 #include "files.hpp"
 
+std::string getMIME(std::string &target)
+{
+	int pos;
+	std::string res = "";
+
+	pos = target.rfind('.');
+	if (pos != std::string::npos)
+		res = Client::getExtensionType(target.substr(pos));
+	
+	return (res.empty() ? "text/plain" : res);
+}
+
 void normalizeTrailingSlash(std::string &path)
 {
 	if (*path.rbegin() != '/')
@@ -25,18 +37,18 @@ int checkPath(std::string &path)
 	return (st.st_mode & S_IFMT);
 }
 
-std::string readFileToString(const char *path)
+std::string readFileToString(const std::string &path)
 {
 	struct stat st;
 	std::string str;
-	std::ifstream file(path, std::ifstream::binary);
+	std::ifstream file(path.c_str(), std::ifstream::binary);
 
     if (!file.is_open())
 	{
 		file.close();
         throw (std::runtime_error("Couldn't open file"));
 	}
-	if (stat(path, &st))
+	if (stat(path.c_str(), &st))
 	{
 		file.close();
 		throw (std::runtime_error("Stat operation failed"));

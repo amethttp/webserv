@@ -41,7 +41,7 @@ std::string readOutput(int pipefd[2])
 	return output.str();
 }
 
-t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_body &body)
+t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_Body &body)
 {
 	int status = 0;
 

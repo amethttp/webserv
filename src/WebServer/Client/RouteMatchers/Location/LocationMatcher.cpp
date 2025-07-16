@@ -12,7 +12,6 @@ namespace
 	int countMatchingDepth(std::string base, std::string target)
 	{
 		size_t i = 0;
-		size_t len = 0;
 
 		if (base.length() > target.length())
 			return -1;

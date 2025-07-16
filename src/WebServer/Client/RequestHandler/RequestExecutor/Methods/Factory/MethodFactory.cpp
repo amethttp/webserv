@@ -1,5 +1,9 @@
 #include "MethodFactory.hpp"
 
+AMethod *createMethodGet() { return new mGet(); }
+AMethod *createMethodPost() { return new mPost(); }
+AMethod *createMethodDelete() { return new mDelete(); }
+
 MethodFactory::MethodFactory()
 {
 }

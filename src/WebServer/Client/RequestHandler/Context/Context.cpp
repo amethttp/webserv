@@ -35,7 +35,7 @@ void  Context::fitMethod()
 	if (allowedMethods.find(reqMethod) != allowedMethods.end())
 		this->method_ = reqMethod;
 	else
-		this->method_ = NULL;
+		this->method_ = M_NOT_ALLOWED;
 }
 
 std::string Context::getTargetPath() const

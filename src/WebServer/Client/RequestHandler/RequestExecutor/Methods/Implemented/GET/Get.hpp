@@ -1,9 +1,10 @@
 #pragma once
 
 #include <sstream>
+#include <stdlib.h>
 #include "utils/cgi/cgi.hpp"
-#include "Methods/AMethod.hpp"
 #include "utils/fileHandler/files.hpp"
+#include "WebServer/Client/RequestHandler/RequestExecutor/Methods/AMethod.hpp"
 
 #define INDEX_STYLE "src/utils/htmlTemplates/indexStyle.html"
 #define INDEX_FILE_LIST "src/utils/htmlTemplates/indexFileList.html"

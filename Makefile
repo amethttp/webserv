@@ -76,33 +76,60 @@ INCLUDES = -I$(SRC)
 
 #----VPATH----#
 vpath %.cpp $(SRC): \
-            $(SRC)utils: \
-            $(SRC)utils/string: \
-            $(SRC)utils/numeric: \
-            $(SRC)WebServer: \
-            $(SRC)WebServer/Client: \
-            $(SRC)WebServer/Client/Request: \
-            $(SRC)WebServer/Client/Response: \
-			$(SRC)WebServer/Client/Response/StatusLine: \
-			$(SRC)WebServer/Client/Response/Context: \
-            $(SRC)WebServer/Server: \
-            $(SRC)WebServer/Server/Location: \
-            $(SRC)WebServer/Server/Session: \
+            $(SRC)WebServer/Client/Request : \
+			$(SRC)WebServer/Client/Response/StatusLine : \
+			$(SRC)WebServer/Client/Response/ResponseFactory : \
+			$(SRC)WebServer/Client : \
+			$(SRC)WebServer/Client/RequestHandler/Context : \
+			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods : \
+			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Factory : \
+			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
+			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
+			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
+			$(SRC)WebServer/Client/RequestHandler/RequestExecutor : \
+			$(SRC)WebServer/Client/RequestHandler : \
+			$(SRC)WebServer/Client/RequestHandler/Result : \
+			$(SRC)WebServer/Client/RouteMatchers/Location : \
+			$(SRC)WebServer/Client/RouteMatchers/Server : \
+			$(SRC)WebServer/Server/Location : \
+			$(SRC)WebServer/Server/Session : \
+			$(SRC)WebServer/Server : \
+			$(SRC)WebServer : \
+			$(SRC)utils/numeric : \
+			$(SRC)utils/string : \
+			$(SRC)utils/cgi : \
+			$(SRC)utils/fileHandler : \
+			$(SRC)utils/HeaderCollection : \
+			$(SRC)utils/HeaderCollection/Header :
 
 
 #----SHARED----#
-SRCS = webserv.cpp \
-        WebServer.cpp \
-        Client.cpp \
-        Request.cpp \
-        Response.cpp \
+SRCS = Request.cpp \
 		StatusLine.cpp \
+		ResponseFactory.cpp \
+		Client.cpp \
 		Context.cpp \
-        Server.cpp \
-        Location.cpp \
-        Session.cpp \
-        string.cpp \
-        numeric.cpp \
+		AMethod.cpp \
+		MethodFactory.cpp \
+		Delete.cpp \
+		Get.cpp \
+		Post.cpp \
+		RequestExecutor.cpp \
+		RequestHandler.cpp \
+		HandlingResult.cpp \
+		LocationMatcher.cpp \
+		ServerMatcher.cpp \
+		Location.cpp \
+		Session.cpp \
+		Server.cpp \
+		WebServer.cpp \
+		numeric.cpp \
+		string.cpp \
+		cgi.cpp \
+		files.cpp \
+		HeaderCollection.cpp \
+		Header.cpp \
+		webserv.cpp
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)

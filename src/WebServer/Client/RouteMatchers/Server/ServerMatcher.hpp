@@ -2,8 +2,8 @@
 
 #include <string>
 #include <vector>
-#include "Server/Server.hpp"
-#include "Request/Request.hpp"
+#include "WebServer/Server/Server.hpp"
+#include "WebServer/Client/Request/Request.hpp"
 
 namespace ServerMatcher
 {

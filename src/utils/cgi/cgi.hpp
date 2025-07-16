@@ -6,9 +6,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "utils/http.hpp"
-#include "Context/Context.hpp"
-#include "Location/Location.hpp"
-#include "Result/HandlingResult.hpp"
+#include "WebServer/Client/RequestHandler/Result/HandlingResult.hpp"
+#include "WebServer/Server/Location/Location.hpp"
 
 typedef std::pair<std::string, std::string> t_cgi;
 
@@ -18,5 +17,5 @@ typedef std::pair<std::string, std::string> t_cgi;
 
 bool timedOut(time_t start);
 std::string readOutput(int pipefd[2]);
-t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_body &body);
+t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_Body &body);
 bool matchCGI(std::string &path, Location &location, t_cgi &cgi);

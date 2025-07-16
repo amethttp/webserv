@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Methods/AMethod.hpp"
 #include "utils/fileHandler/files.hpp"
+#include "WebServer/Client/RequestHandler/RequestExecutor/Methods/AMethod.hpp"
 
 class mPost : public AMethod
 {

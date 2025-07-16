@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vector>
-#include "Methods/AMethod.hpp"
-#include "Methods/Implemented/GET/Get.hpp"
-#include "Methods/Implemented/POST/Post.hpp"
-#include "Methods/Implemented/DELETE/Delete.hpp"
+#include "../AMethod.hpp"
+#include "../Implemented/GET/Get.hpp"
+#include "../Implemented/POST/Post.hpp"
+#include "../Implemented/DELETE/Delete.hpp"
 
 typedef AMethod* (*CreateFunc)();
 
@@ -21,6 +21,6 @@ public:
     AMethod *create(const t_method& type);
 };
 
-AMethod *createMethodGet() { return new mGet(); };
-AMethod *createMethodPost() { return new mPost(); };
-AMethod *createMethodDelete() { return new mDelete(); };
+AMethod *createMethodGet();
+AMethod *createMethodPost();
+AMethod *createMethodDelete();

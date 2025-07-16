@@ -148,6 +148,7 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 void WebServer::readySendResponse(Client *client, t_epoll &epoll)
 {
 	client->clearRequest();
+	client->updateResponse();
 	setEpollWrite(epoll, client);
 }
 
@@ -174,14 +175,13 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 
 void WebServer::sendResponse(Client *client, t_epoll &epoll)
 {
-	std::string stringifiedResponse = client->getStringifiedResponse();
-	ssize_t bytesSent = send(client->getFd(), stringifiedResponse.c_str(), stringifiedResponse.length(), 0);
+	ssize_t bytesSent = send(client->getFd(), client->getResponseBuffer().c_str(), client->getResponseBuffer().length(), 0);
 
 	if (bytesSent < 0)
 		throw std::runtime_error("Couldn't send response");
 
 	client->eraseResponse(bytesSent);
-	if (bytesSent < (ssize_t)stringifiedResponse.length())
+	if (bytesSent < (ssize_t)client->getResponseBuffer().length())
 		return;
 
 	if (client->shouldClose())

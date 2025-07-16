@@ -4,10 +4,10 @@ mGet::mGet()
 {
 }
 
-static t_httpCode getFile(std::string &target, t_body &body)
+static t_httpCode getFile(std::string &target, t_Body &body)
 {
 	body.content = readFileToString(target.c_str());
-	// body.type = getMIME(target);
+	body.type = getMIME(target);
 
 	return OK;
 }
@@ -61,7 +61,7 @@ static void setIndexNames(struct dirent *dir, std::string &anchorName, std::stri
 		displayName = anchorName.substr(0,22) + "..>";
 }
 
-static t_httpCode tryAutoIndex(Context &ctx, t_body &body)
+static t_httpCode tryAutoIndex(Context &ctx, t_Body &body)
 {
 	if (!ctx.location_.getAutoIndex())
 		return FORBIDDEN;
@@ -87,7 +87,7 @@ static t_httpCode tryAutoIndex(Context &ctx, t_body &body)
 		closedir(d);
 		closeHTML(html);
 		body.content = html.str();
-		// body.type = this->extensionTypesDict_[".html"];
+		body.type = Client::getExtensionType(".html");
 		return OK;
 	}
 
@@ -112,7 +112,7 @@ static bool findIndex(Context &ctx)
 	return false;
 }
 
-static t_httpCode tryIndex(Context &ctx, t_body &body)
+static t_httpCode tryIndex(Context &ctx, t_Body &body)
 {
 	// normalizeTrailingSlash(ctx.targetPath_);
 	if (findIndex(ctx))
@@ -145,7 +145,7 @@ static void run(Context &ctx, HandlingResult &res)
 
 }
 
-static t_httpCode handleCgiOutput(Context &ctx, t_cgi &cgi, t_body &body)
+static t_httpCode handleCgiOutput(Context &ctx, t_cgi &cgi, t_Body &body)
 {
 	int pipefd[2];
 	pid_t child;
