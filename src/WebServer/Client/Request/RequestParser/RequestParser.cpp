@@ -96,9 +96,9 @@ Result<HeaderCollection> RequestParser::parseHeaders()
 
 Result<std::string> RequestParser::parseFullBody(const size_t contentLengthSize)
 {
-    const std::string fullBody = eatOctetStreamToken(std::string::npos);
+    const std::string fullBody = eatOctetStreamToken(contentLengthSize);
 
-    if (contentLengthSize < fullBody.length())
+    if (eat(EOF) == FAIL)
         return Result<std::string>::fail(BAD_REQUEST_ERR);
 
     return Result<std::string>::ok(fullBody);
