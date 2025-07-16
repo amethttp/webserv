@@ -15,6 +15,7 @@ typedef enum tokenType_e
     CRLF,
     EOF,
     UNKNOWN,
+    EMPTY
 } tokenType_t;
 
 class RequestToken

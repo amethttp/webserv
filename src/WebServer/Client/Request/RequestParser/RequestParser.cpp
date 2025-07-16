@@ -4,7 +4,7 @@
 #include <algorithm>
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)
-    : tokenizer_(tokenizer), currentToken_(UNKNOWN, "")
+    : tokenizer_(tokenizer), currentToken_(EMPTY, "")
 {
 }
 
@@ -46,7 +46,7 @@ Result<RequestLineParams_t> RequestParser::parseRequestLine()
     int hasFailed = 0;
     RequestLineParams_t params;
 
-    this->currentToken_ = this->tokenizer_.getNextToken();
+    hasFailed |= eat(EMPTY);
 
     params.method = getHttpMethodFromString(this->currentToken_.getValue());
     hasFailed |= eat(METHOD);
@@ -74,7 +74,7 @@ Result<HeaderCollection> RequestParser::parseHeaders()
     int hasFailed = 0;
     HeaderCollection headers;
 
-    this->currentToken_ = this->tokenizer_.getNextToken();
+    hasFailed |= eat(EMPTY);
 
     do
     {
@@ -124,7 +124,7 @@ Result<std::string> RequestParser::parseChunkedBody()
     int hasFailed = 0;
     std::string chunkedBody;
 
-    this->currentToken_ = this->tokenizer_.getNextToken();
+    hasFailed |= eat(EMPTY);
 
     while (this->currentToken_.getType() == CHUNK_SIZE)
     {
