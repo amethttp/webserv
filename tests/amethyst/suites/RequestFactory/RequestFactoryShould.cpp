@@ -426,55 +426,11 @@ TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_clos
 
 
 /* REQUEST FULL BODY TESTS */
-TEST(recognize_a_request_with_an_empty_body)
-{
-    request = createRequestFromValidBody("Content-Length: 0", "");
-
-    assertBodyIsEmpty();
-}
-
-TEST(recognize_a_request_with_a_non_empty_body)
-{
-    request = createRequestFromValidBody("Content-Length: 10", "Valid body");
-
-    assertBody("Valid body");
-}
-
-TEST(recognize_a_request_with_a_body_with_all_octets)
-{
-    const std::string controlChars = "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F\x7f";
-    const std::string printableChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x00";
-    const std::string octets = controlChars + printableChars;
-
-    request = createRequestFromValidBody("Content-Length: 127", octets);
-
-    assertBody(octets);
-}
-
-TEST(recognize_a_request_with_a_body_with_crlfs_inside)
-{
-    request = createRequestFromValidBody("Content-Length: 12", "Valid\r\nbody");
-
-    assertBody("Valid\r\nbody");
-}
-
 TEST(recognize_a_request_with_an_empty_body_without_content_length_header)
 {
     request = createRequestFromValidBody("No-Header: no header", "");
 
     assertBodyIsEmpty();
-}
-
-TEST(take_as_failure_a_request_with_a_body_length_superior_than_content_length_header_size)
-{
-    assertRequestIsInvalidFromBody("Content-Length: 0", "Invalid body", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromBody("Content-Length: 10", "Invalid body", BAD_REQUEST_ERR);
-}
-
-TEST(take_as_failure_a_request_with_a_body_consisted_of_WS_and_with_length_superior_than_content_length_header_size)
-{
-    assertRequestIsInvalidFromBody("Content-Length: 0", "          ", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromBody("Content-Length: 0", "\t\t\t\t\t", BAD_REQUEST_ERR);
 }
 
 TEST(take_as_failure_a_request_with_body_without_content_length_nor_transfer_encoding_headers)

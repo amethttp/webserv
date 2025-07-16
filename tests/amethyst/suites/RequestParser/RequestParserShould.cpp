@@ -29,7 +29,17 @@ static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersS
     return result.getValue();
 }
 
-static std::string parseFromValidBody(const std::string &requestBodyString)
+static std::string parseFromValidFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
+{
+    const RequestTokenizer requestTokenizer(requestBodyString);
+    RequestParser sut(requestTokenizer);
+
+    const Result<std::string> result = sut.parseFullBody(contentLengthSize);
+
+    return result.getValue();
+}
+
+static std::string parseFromValidChunkedBody(const std::string &requestBodyString)
 {
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
@@ -63,6 +73,17 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
     RequestParser sut(requestTokenizer);
 
     const Result<HeaderCollection> result = sut.parseHeaders();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+}
+
+static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const std::string &invalidBody)
+{
+    const RequestTokenizer requestTokenizer(invalidBody);
+    RequestParser sut(requestTokenizer);
+
+    Result<std::string> result = sut.parseFullBody(contentLengthSize);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
@@ -1002,17 +1023,63 @@ TEST(take_as_failure_an_empty_header_line)
 }
 
 
+/* REQUEST FULL BODY CRITERIA */
+TEST(recognize_a_request_with_an_empty_body)
+{
+    body = parseFromValidFullBody(0, "");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_request_with_a_non_empty_body)
+{
+    body = parseFromValidFullBody(10, "Valid body");
+
+    assertBody("Valid body");
+}
+
+TEST(recognize_a_request_with_a_body_with_all_octets)
+{
+    const std::string controlChars = "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F\x7f";
+    const std::string printableChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x00";
+    const std::string octets = controlChars + printableChars;
+
+    body = parseFromValidFullBody(127, octets);
+
+    assertBody(octets);
+}
+
+TEST(recognize_a_request_with_a_body_with_crlfs_inside)
+{
+    body = parseFromValidFullBody(12, "Valid\r\nbody");
+
+    assertBody("Valid\r\nbody");
+}
+
+TEST(take_as_failure_a_request_with_a_body_length_superior_than_content_length_header_size)
+{
+    assertRequestFullBodyIsInvalid(0, "Invalid body");
+    assertRequestFullBodyIsInvalid(10, "Invalid body");
+}
+
+TEST(take_as_failure_a_request_with_a_body_consisted_of_WS_and_with_length_superior_than_content_length_header_size)
+{
+    assertRequestFullBodyIsInvalid(0, "          ");
+    assertRequestFullBodyIsInvalid(0, "\t\t\t\t\t");
+}
+
+
 /* REQUEST CHUNKED BODY CRITERIA */
 TEST(recognize_a_basic_chunked_body)
 {
-    body = parseFromValidBody("0\r\n\r\n");
+    body = parseFromValidChunkedBody("0\r\n\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_basic_chunked_body_with_a_last_chunk_whose_chunk_size_has_multiple_zeros)
 {
-    body = parseFromValidBody("0000000\r\n\r\n");
+    body = parseFromValidChunkedBody("0000000\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1065,7 +1132,7 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_contains_chunk_data)
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension)
 {
-    body = parseFromValidBody("0;extension\r\n\r\n");
+    body = parseFromValidChunkedBody("0;extension\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1074,7 +1141,7 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_consi
 {
     const std::string validChars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    body = parseFromValidBody("0;" + validChars + "\r\n\r\n");
+    body = parseFromValidChunkedBody("0;" + validChars + "\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1104,7 +1171,7 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_an_empty_chunk_ex
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_with_value)
 {
-    body = parseFromValidBody("0;ext=value\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=value\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1113,7 +1180,7 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose
 {
     const std::string validChars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    body = parseFromValidBody("0;ext=" + validChars + "\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=" + validChars + "\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1143,14 +1210,14 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_an_empty_quoted_string)
 {
-    body = parseFromValidBody("0;ext=\"\"\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=\"\"\r\n\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_non_empty_quoted_string)
 {
-    body = parseFromValidBody("0;ext=\"validBody\"\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=\"validBody\"\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1159,14 +1226,14 @@ TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose
 {
     const std::string validQdtext = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~ \t";
 
-    body = parseFromValidBody("0;ext=\"" + validQdtext + "\"\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=\"" + validQdtext + "\"\r\n\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_valid_quoted_pairs)
 {
-    body = parseFromValidBody("0;ext=\"\\\\ \\\" \\ \\\t\"\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=\"\\\\ \\\" \\ \\\t\"\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1204,28 +1271,28 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_mal_formed_chun
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions)
 {
-    body = parseFromValidBody("0;ext;ext\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext;ext\r\n\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_with_values)
 {
-    body = parseFromValidBody("0;ext=val;ext=val\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=val;ext=val\r\n\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_whose_values_have_valid_chars)
 {
-    body = parseFromValidBody("0;ext=val;!#$%&'*+-.^_`|~=!#$%&'*+-.^_`|~\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=val;!#$%&'*+-.^_`|~=!#$%&'*+-.^_`|~\r\n\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_whose_values_have_valid_chars_and_valid_quoted_pairs)
 {
-    body = parseFromValidBody("0;ext=val;!#$%&'*+-.^_`|~=\"{|}~\t \\\\ \\\"\"\r\n\r\n");
+    body = parseFromValidChunkedBody("0;ext=val;!#$%&'*+-.^_`|~=\"{|}~\t \\\\ \\\"\"\r\n\r\n");
 
     assertBodyIsEmpty();
 }
@@ -1263,28 +1330,28 @@ TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_ex
 
 TEST(recognize_a_chunked_body_with_a_basic_chunk)
 {
-    body = parseFromValidBody("5\r\nValid\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("5\r\nValid\r\n0\r\n\r\n");
 
     assertBody("Valid");
 }
 
 TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_leading_zeroes)
 {
-    body = parseFromValidBody("000000000000000005\r\nValid\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("000000000000000005\r\nValid\r\n0\r\n\r\n");
 
     assertBody("Valid");
 }
 
 TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_multiple_hexadecimal_digits)
 {
-    body = parseFromValidBody("0a\r\nValid body\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("0a\r\nValid body\r\n0\r\n\r\n");
 
     assertBody("Valid body");
 }
 
 TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_multiple_case_insensitive_hexadecimal_digits)
 {
-    body = parseFromValidBody("0A\r\nValid body\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("0A\r\nValid body\r\n0\r\n\r\n");
 
     assertBody("Valid body");
 }
@@ -1314,7 +1381,7 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_without_chunk_size)
 
 TEST(recognize_a_chunked_body_with_a_chunk_that_has_chunk_extensions)
 {
-    body = parseFromValidBody("0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n");
 
     assertBody("Valid body");
 }
@@ -1338,14 +1405,14 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_without_first_crlf_separator)
 
 TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_crlf_separators_as_plain_text)
 {
-    body = parseFromValidBody("0b\r\nValid\r\nbody\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("0b\r\nValid\r\nbody\r\n0\r\n\r\n");
 
     assertBody("Valid\r\nbody");
 }
 
 TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_control_chars_as_plain_text)
 {
-    body = parseFromValidBody("07\r\n\r\n\b\f\x01\x04\x07\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("07\r\n\r\n\b\f\x01\x04\x07\r\n0\r\n\r\n");
 
     assertBody("\r\n\b\f\x01\x04\x07");
 }
@@ -1356,7 +1423,7 @@ TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_all_octets_as_pla
     const std::string printableChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x00";
     const std::string octets = controlChars + printableChars;
 
-    body = parseFromValidBody("7f\r\n" + octets + "\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("7f\r\n" + octets + "\r\n0\r\n\r\n");
 
     assertBody(octets);
 }
@@ -1380,14 +1447,14 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_without_last_crlf_separator)
 
 TEST(recognize_a_chunked_body_with_multiple_chunks)
 {
-    body = parseFromValidBody("05\r\nValid\r\n01\r\n \r\n04\r\nbody\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("05\r\nValid\r\n01\r\n \r\n04\r\nbody\r\n0\r\n\r\n");
 
     assertBody("Valid body");
 }
 
 TEST(recognize_a_chunked_body_with_multiple_chunks_that_have_chunk_extensions)
 {
-    body = parseFromValidBody("05\r\nValid\r\n01;ext=value\r\n \r\n04;ext=\"value\"\r\nbody\r\n0\r\n\r\n");
+    body = parseFromValidChunkedBody("05\r\nValid\r\n01;ext=value\r\n \r\n04;ext=\"value\"\r\nbody\r\n0\r\n\r\n");
 
     assertBody("Valid body");
 }
@@ -1400,21 +1467,21 @@ TEST(take_as_failure_a_chunked_body_with_multiple_chunks_that_have_invalid_chars
 
 TEST(recognize_a_chunked_body_with_a_final_basic_trailer_field)
 {
-    body = parseFromValidBody("0\r\nTrailer: value\r\n");
+    body = parseFromValidChunkedBody("0\r\nTrailer: value\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_chunked_body_with_multiple_trailer_fields)
 {
-    body = parseFromValidBody("0\r\nTrailer: value\r\nTrailer2: value2\r\n");
+    body = parseFromValidChunkedBody("0\r\nTrailer: value\r\nTrailer2: value2\r\n");
 
     assertBodyIsEmpty();
 }
 
 TEST(recognize_a_chunked_body_with_multiple_chunks_and_multiple_trailer_fields)
 {
-    body = parseFromValidBody("5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n");
+    body = parseFromValidChunkedBody("5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n");
 
     assertBody("Valid body");
 }
