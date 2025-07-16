@@ -14,7 +14,7 @@ static RequestLine parseFromValidRequestLine(const std::string &requestLineStrin
     const RequestTokenizer requestTokenizer(requestLineString);
     RequestParser sut(requestTokenizer);
 
-    const Result<RequestLine> result = sut.parseRequestLineNew();
+    const Result<RequestLine> result = sut.parseRequestLine();
 
     return result.getValue();
 }
@@ -61,7 +61,7 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
     const RequestTokenizer requestTokenizer(invalidRequestString);
     RequestParser sut(requestTokenizer);
 
-    const Result<RequestLine> result = sut.parseRequestLineNew();
+    const Result<RequestLine> result = sut.parseRequestLine();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());

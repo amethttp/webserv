@@ -27,8 +27,7 @@ private:
 public:
     RequestParser(const RequestTokenizer &tokenizer);
 
-    Result<RequestLine> parseRequestLineNew();
-    Result<RequestLineParams_t> parseRequestLine();
+    Result<RequestLine> parseRequestLine();
     Result<HeaderCollection> parseHeaders();
     Result<Body> parseFullBody(size_t contentLengthSize);
     Result<Body> parseChunkedBody();

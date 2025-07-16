@@ -40,7 +40,7 @@ result_t RequestParser::eatTrailerFields()
     return hasFailed ? FAIL : SUCCESS;
 }
 
-Result<RequestLine> RequestParser::parseRequestLineNew()
+Result<RequestLine> RequestParser::parseRequestLine()
 {
     int hasFailed = 0;
     RequestLine requestLine;
@@ -66,21 +66,6 @@ Result<RequestLine> RequestParser::parseRequestLineNew()
         return Result<RequestLine>::fail(BAD_REQUEST_ERR);
 
     return Result<RequestLine>::ok(requestLine);
-}
-
-Result<RequestLineParams_t> RequestParser::parseRequestLine()
-{
-    RequestLineParams_t requestLineParams;
-
-    const Result<RequestLine> result = parseRequestLineNew();
-    if (result.isFailure())
-        return Result<RequestLineParams_t>::fail(result.getError());
-
-    requestLineParams.method = result.getValue().getMethod();
-    requestLineParams.target.uri = result.getValue().getTargetUri();
-    requestLineParams.httpVersion = result.getValue().getHttpVersion();
-
-    return Result<RequestLineParams_t>::ok(requestLineParams);
 }
 
 Result<HeaderCollection> RequestParser::parseHeaders()

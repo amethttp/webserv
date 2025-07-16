@@ -38,7 +38,7 @@ Result<RequestLine> RequestFactory::buildRequestLineFromString(const std::string
 {
     RequestParser requestParser = createParser(requestLineString);
 
-    const Result<RequestLine> requestLineResult = requestParser.parseRequestLineNew();
+    const Result<RequestLine> requestLineResult = requestParser.parseRequestLine();
     if (requestLineResult.isFailure())
         return Result<RequestLine>::fail(requestLineResult.getError());
     RequestLine requestLineParams = requestLineResult.getValue();
