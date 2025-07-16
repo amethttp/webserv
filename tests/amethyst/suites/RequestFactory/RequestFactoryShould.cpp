@@ -107,7 +107,7 @@ TEST(recognize_basic_HTTP_GET_request)
     assertTargetComponents("/", "");
     assertRequestLine(GET, "/", "HTTP/1.1");
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
     assertBodyIsEmpty();
 }
 
@@ -118,7 +118,7 @@ TEST(recognize_basic_HTTP_DELETE_request)
     assertTargetComponents("/", "");
     assertRequestLine(DELETE, "/", "HTTP/1.1");
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
     assertBodyIsEmpty();
 }
 
@@ -129,7 +129,7 @@ TEST(recognize_basic_HTTP_POST_request)
     assertTargetComponents("/", "");
     assertRequestLine(POST, "/", "HTTP/1.1");
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
     assertBodyIsEmpty();
 }
 
@@ -213,7 +213,7 @@ TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
     request = createRequestFromValidHeaders("Host: " + validCharacters);
 
     assertHeaderSize(1);
-    assertHeader("Host", validCharacters);
+    assertHeader(HOST, validCharacters);
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_containing_wrong_pct_encoded_chars)
@@ -235,7 +235,7 @@ TEST(recognize_a_request_with_a_host_header_with_port)
     request = createRequestFromValidHeaders("Host: localhost:8080");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost:8080");
+    assertHeader(HOST, "localhost:8080");
 }
 
 TEST(take_as_failure_a_host_header_with_only_port)
@@ -253,7 +253,7 @@ TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters_and_po
     request = createRequestFromValidHeaders("Host: " + validCharacters + ":8080");
 
     assertHeaderSize(1);
-    assertHeader("Host", hostFinalValue + ":8080");
+    assertHeader(HOST, hostFinalValue + ":8080");
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_with_a_non_numeric_port)
@@ -279,7 +279,7 @@ TEST(recognize_a_request_with_a_host_header_with_a_port_with_leading_zeros)
     request = createRequestFromValidHeaders("Host: localhost:0000000000008080");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost:0000000000008080");
+    assertHeader(HOST, "localhost:0000000000008080");
 }
 
 TEST(take_as_failure_a_request_with_multiple_host_headers)
@@ -292,9 +292,9 @@ TEST(recognize_a_request_with_case_insensitive_headers)
     request = createRequestFromValidHeaders("hOSt: localhost\r\nCoNNeCtIon: keep-alive\r\ncOntENT-leNGTH: 0");
 
     assertHeaderSize(3);
-    assertHeader("Host", "localhost");
-    assertHeader("Connection", "keep-alive");
-    assertHeader("Content-Length", "0");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONNECTION, "keep-alive");
+    assertHeader(CONTENT_LENGTH, "0");
 }
 
 TEST(recognize_a_request_with_valid_content_length_header_and_value_equal_to_zero)
@@ -302,8 +302,8 @@ TEST(recognize_a_request_with_valid_content_length_header_and_value_equal_to_zer
     request = createRequestFromValidHeaders("Host: localhost\r\nContent-Length: 0");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Content-Length", "0");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONTENT_LENGTH, "0");
 }
 
 TEST(recognize_a_request_with_valid_content_length_header_and_value_greater_than_zero)
@@ -311,8 +311,8 @@ TEST(recognize_a_request_with_valid_content_length_header_and_value_greater_than
     request = createRequestFromValidBody("Content-Length: 10", "Valid body");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Content-Length", "10");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONTENT_LENGTH, "10");
 }
 
 TEST(take_as_failure_a_request_with_a_content_length_header_with_non_numeric_value)
@@ -333,8 +333,8 @@ TEST(recognize_a_request_with_valid_transfer_encoding_header)
     request = createRequestFromValidBody("Transfer-Encoding: chunked", "0\r\n\r\n");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Transfer-Encoding", "chunked");
+    assertHeader(HOST, "localhost");
+    assertHeader(TRANSFER_ENCODING, "chunked");
 }
 
 TEST(take_as_failure_a_request_with_a_transfer_encoding_header_with_invalid_value)
@@ -358,8 +358,8 @@ TEST(recognize_a_request_with_valid_connection_header_with_keep_alive_value)
     request = createRequestFromValidHeaders("Host: localhost\r\nConnection: keep-alive");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Connection", "keep-alive");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONNECTION, "keep-alive");
 }
 
 TEST(recognize_a_request_with_valid_connection_header_with_close_value)
@@ -367,8 +367,8 @@ TEST(recognize_a_request_with_valid_connection_header_with_close_value)
     request = createRequestFromValidHeaders("Host: localhost\r\nConnection: close");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Connection", "close");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONNECTION, "close");
 }
 
 TEST(take_as_failure_a_request_with_a_connection_header_with_invalid_value)
@@ -389,7 +389,7 @@ TEST(recognize_and_decode_a_request_with_a_host_header_containing_valid_pct_enco
     request = createRequestFromValidHeaders("Host: localhost_%20_%5b_%7b");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost_ _[_{");
+    assertHeader(HOST, "localhost_ _[_{");
 }
 
 TEST(take_as_failure_a_host_name_with_pct_encoded_control_characters)
@@ -402,8 +402,8 @@ TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
     request = createRequestFromValidBody("Transfer-Encoding: cHUnKeD", "0\r\n\r\n");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Transfer-Encoding", "chunked");
+    assertHeader(HOST, "localhost");
+    assertHeader(TRANSFER_ENCODING, "chunked");
 }
 
 TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_keep_alive_value)
@@ -411,8 +411,8 @@ TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_keep
     request = createRequestFromValidHeaders("Host: localhost\r\nConnection: KeEP-ALivE");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Connection", "keep-alive");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONNECTION, "keep-alive");
 }
 
 TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_close_value)
@@ -420,8 +420,8 @@ TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_clos
     request = createRequestFromValidHeaders("Host: localhost\r\nConnection: cLOSe");
 
     assertHeaderSize(2);
-    assertHeader("Host", "localhost");
-    assertHeader("Connection", "close");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONNECTION, "close");
 }
 
 

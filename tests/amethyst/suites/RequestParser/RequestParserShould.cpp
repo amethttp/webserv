@@ -730,7 +730,7 @@ TEST(recognize_a_simple_header)
     headers = parseFromValidHeaders("Host: localhost");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_complex_header)
@@ -738,7 +738,7 @@ TEST(recognize_a_complex_header)
     headers = parseFromValidHeaders("Content-Length: 1312");
 
     assertHeaderSize(1);
-    assertHeader("Content-Length", "1312");
+    assertHeader(CONTENT_LENGTH, "1312");
 }
 
 TEST(recognize_a_case_insensitive_header)
@@ -746,7 +746,7 @@ TEST(recognize_a_case_insensitive_header)
     headers = parseFromValidHeaders("hOST: localhost");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_header_whose_key_is_consisted_of_tchars)
@@ -823,7 +823,7 @@ TEST(recognize_a_header_with_repeated_colon_separator)
     headers = parseFromValidHeaders("Host:: localhost");
 
     assertHeaderSize(1);
-    assertHeader("Host", ": localhost");
+    assertHeader(HOST, ": localhost");
 }
 
 TEST(recognize_a_header_without_the_first_OWS)
@@ -831,7 +831,7 @@ TEST(recognize_a_header_without_the_first_OWS)
     headers = parseFromValidHeaders("Host:localhost");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_header_with_a_single_SP_as_first_OWS)
@@ -839,7 +839,7 @@ TEST(recognize_a_header_with_a_single_SP_as_first_OWS)
     headers = parseFromValidHeaders("Host: localhost");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_header_with_a_single_HTAB_as_first_OWS)
@@ -847,7 +847,7 @@ TEST(recognize_a_header_with_a_single_HTAB_as_first_OWS)
     headers = parseFromValidHeaders("Host:\tlocalhost");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_header_with_a_combination_of_first_OWS)
@@ -855,7 +855,7 @@ TEST(recognize_a_header_with_a_combination_of_first_OWS)
     headers = parseFromValidHeaders("Host: \t   \t\t  \t\tlocalhost");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_header_whose_value_has_valid_printable_characters_and_HTAB)
@@ -865,7 +865,7 @@ TEST(recognize_a_header_whose_value_has_valid_printable_characters_and_HTAB)
     headers = parseFromValidHeaders("Host: " + validValue);
 
     assertHeaderSize(1);
-    assertHeader("Host", validValue);
+    assertHeader(HOST, validValue);
 }
 
 TEST(recognize_a_header_whose_value_has_multiple_words_using_SP_as_separator)
@@ -873,7 +873,7 @@ TEST(recognize_a_header_whose_value_has_multiple_words_using_SP_as_separator)
     headers = parseFromValidHeaders("Host: localhost and something else");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost and something else");
+    assertHeader(HOST, "localhost and something else");
 }
 
 TEST(recognize_a_header_whose_value_has_multiple_words_using_HTAB_as_separator)
@@ -881,7 +881,7 @@ TEST(recognize_a_header_whose_value_has_multiple_words_using_HTAB_as_separator)
     headers = parseFromValidHeaders("Host: localhost\tand\tsomething\telse");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost\tand\tsomething\telse");
+    assertHeader(HOST, "localhost\tand\tsomething\telse");
 }
 
 TEST(recognize_a_header_whose_value_has_multiple_words_using_multiple_OWS_as_separator)
@@ -889,7 +889,7 @@ TEST(recognize_a_header_whose_value_has_multiple_words_using_multiple_OWS_as_sep
     headers = parseFromValidHeaders("Host: localhost\t \tand   \tsomething\t   \t\telse");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost\t \tand   \tsomething\t   \t\telse");
+    assertHeader(HOST, "localhost\t \tand   \tsomething\t   \t\telse");
 }
 
 TEST(take_as_failure_a_header_whose_value_contains_invalid_characters)
@@ -902,7 +902,7 @@ TEST(recognize_a_header_whose_value_is_a_single_SP)
     headers = parseFromValidHeaders("Host: ");
 
     assertHeaderSize(1);
-    assertHeader("Host", "");
+    assertHeader(HOST, "");
 }
 
 TEST(recognize_a_header_whose_value_is_a_single_HTAB)
@@ -910,7 +910,7 @@ TEST(recognize_a_header_whose_value_is_a_single_HTAB)
     headers = parseFromValidHeaders("Host:\t");
 
     assertHeaderSize(1);
-    assertHeader("Host", "");
+    assertHeader(HOST, "");
 }
 
 TEST(recognize_a_header_whose_value_is_multiple_OWS)
@@ -918,7 +918,7 @@ TEST(recognize_a_header_whose_value_is_multiple_OWS)
     headers = parseFromValidHeaders("Host:\t \t\t   \t \t");
 
     assertHeaderSize(1);
-    assertHeader("Host", "");
+    assertHeader(HOST, "");
 }
 
 TEST(recognize_a_header_whose_value_is_empty)
@@ -926,7 +926,7 @@ TEST(recognize_a_header_whose_value_is_empty)
     headers = parseFromValidHeaders("Host:");
 
     assertHeaderSize(1);
-    assertHeader("Host", "");
+    assertHeader(HOST, "");
 }
 
 TEST(recognize_a_header_with_a_single_SP_as_last_OWS)
@@ -934,7 +934,7 @@ TEST(recognize_a_header_with_a_single_SP_as_last_OWS)
     headers = parseFromValidHeaders("Host: localhost ");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_header_with_a_single_HTAB_as_last_OWS)
@@ -942,7 +942,7 @@ TEST(recognize_a_header_with_a_single_HTAB_as_last_OWS)
     headers = parseFromValidHeaders("Host: localhost\t");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_a_header_with_a_combination_of_last_OWS)
@@ -950,7 +950,7 @@ TEST(recognize_a_header_with_a_combination_of_last_OWS)
     headers = parseFromValidHeaders("Host: localhost \t   \t\t  \t\t");
 
     assertHeaderSize(1);
-    assertHeader("Host", "localhost");
+    assertHeader(HOST, "localhost");
 }
 
 TEST(recognize_multiple_headers_separated_with_CRLF)
@@ -958,9 +958,9 @@ TEST(recognize_multiple_headers_separated_with_CRLF)
     headers = parseFromValidHeaders("Host: localhost\r\nContent-Length:0\r\nConnection:\tclose");
 
     assertHeaderSize(3);
-    assertHeader("Host", "localhost");
-    assertHeader("Content-Length", "0");
-    assertHeader("Connection", "close");
+    assertHeader(HOST, "localhost");
+    assertHeader(CONTENT_LENGTH, "0");
+    assertHeader(CONNECTION, "close");
 }
 
 TEST(take_as_failure_multiple_headers_with_OWS_as_separator)

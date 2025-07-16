@@ -495,21 +495,21 @@ TEST(normalize_a_resource_outside_the_document_root)
 /* REQUEST HEADERS TESTS */
 TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
 {
-    processValidHeader("Transfer-Encoding", "cHUnKeD");
+    processValidHeader(TRANSFER_ENCODING, "cHUnKeD");
 
-    assertHeader("Transfer-Encoding", "chunked");
+    assertHeader(TRANSFER_ENCODING, "chunked");
 }
 
 TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_keep_alive_value)
 {
-    processValidHeader("Connection", "KeEP-ALivE");
+    processValidHeader(CONNECTION, "KeEP-ALivE");
 
-    assertHeader("Connection", "keep-alive");
+    assertHeader(CONNECTION, "keep-alive");
 }
 
 TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_close_value)
 {
-    processValidHeader("Connection", "cLOSe");
+    processValidHeader(CONNECTION, "cLOSe");
 
-    assertHeader("Connection", "close");
+    assertHeader(CONNECTION, "close");
 }

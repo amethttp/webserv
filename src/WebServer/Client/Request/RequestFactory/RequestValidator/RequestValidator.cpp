@@ -22,24 +22,24 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &re
 
 SimpleResult RequestValidator::validateRequestHeaders(const HeaderCollection &requestHeaders)
 {
-    if (!requestHeaders.contains("Host")
-    || !HostHeaderValidator::isValid(requestHeaders.getHeader("Host")))
+    if (!requestHeaders.contains(HOST)
+    || !HostHeaderValidator::isValid(requestHeaders.getHeader(HOST)))
         return SimpleResult::fail("400 Bad Request");
 
-    if (requestHeaders.contains("Content-Length")
-        && requestHeaders.contains("Transfer-Encoding"))
+    if (requestHeaders.contains(CONTENT_LENGTH)
+        && requestHeaders.contains(TRANSFER_ENCODING))
         return SimpleResult::fail("400 Bad Request");
 
-    if (requestHeaders.contains("Content-Length")
-        && !ContentLengthHeaderValidator::isValid(requestHeaders.getHeader("Content-Length")))
+    if (requestHeaders.contains(CONTENT_LENGTH)
+        && !ContentLengthHeaderValidator::isValid(requestHeaders.getHeader(CONTENT_LENGTH)))
         return SimpleResult::fail("400 Bad Request");
 
-    if (requestHeaders.contains("Transfer-Encoding")
-        && !TransferEncodingHeaderValidator::isValid(requestHeaders.getHeader("Transfer-Encoding")))
+    if (requestHeaders.contains(TRANSFER_ENCODING)
+        && !TransferEncodingHeaderValidator::isValid(requestHeaders.getHeader(TRANSFER_ENCODING)))
         return SimpleResult::fail("400 Bad Request");
 
-    if (requestHeaders.contains("Connection")
-        && !ConnectionHeaderValidator::isValid(requestHeaders.getHeader("Connection")))
+    if (requestHeaders.contains(CONNECTION)
+        && !ConnectionHeaderValidator::isValid(requestHeaders.getHeader(CONNECTION)))
         return SimpleResult::fail("400 Bad Request");
 
     return SimpleResult::ok();

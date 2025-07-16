@@ -95,13 +95,13 @@ Result<std::string> RequestFactory::buildChunkedBodyFromString(const std::string
 
 Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
-    if (headers.contains("Content-Length"))
+    if (headers.contains(CONTENT_LENGTH))
     {
-        const size_t contentLengthSize = strToUlong(headers.getHeaderValue("Content-Length"));
+        const size_t contentLengthSize = strToUlong(headers.getHeaderValue(CONTENT_LENGTH));
         return buildFullBodyFromString(contentLengthSize, bodyString);
     }
 
-    if (headers.contains("Transfer-Encoding"))
+    if (headers.contains(TRANSFER_ENCODING))
     {
         return buildChunkedBodyFromString(bodyString);
     }

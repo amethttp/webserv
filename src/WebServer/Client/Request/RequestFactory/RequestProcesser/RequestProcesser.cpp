@@ -19,12 +19,12 @@ SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
 
 SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &headers)
 {
-    const std::string hostValue = headers.getHeaderValue("Host");
+    const std::string hostValue = headers.getHeaderValue(HOST);
     const Result<std::string> decodingResult = RequestPctDecoder::decode(hostValue);
     if (decodingResult.isFailure())
         return SimpleResult::fail(decodingResult.getError());
 
-    headers.updateHeader("Host", decodingResult.getValue());
+    headers.updateHeader(HOST, decodingResult.getValue());
     return SimpleResult::ok();
 }
 
@@ -47,16 +47,16 @@ SimpleResult RequestProcesser::processHeaders(HeaderCollection &headers)
     if (headerDecodingResult.isFailure())
         return SimpleResult::fail(headerDecodingResult.getError());
 
-    if (headers.contains("Transfer-Encoding"))
+    if (headers.contains(TRANSFER_ENCODING))
     {
-        const std::string transferEncodingNewValue = toLower(headers.getHeaderValue("Transfer-Encoding"));
-        headers.updateHeader("Transfer-Encoding", transferEncodingNewValue);
+        const std::string transferEncodingNewValue = toLower(headers.getHeaderValue(TRANSFER_ENCODING));
+        headers.updateHeader(TRANSFER_ENCODING, transferEncodingNewValue);
     }
 
-    if (headers.contains("Connection"))
+    if (headers.contains(CONNECTION))
     {
-        const std::string connectionNewValue = toLower(headers.getHeaderValue("Connection"));
-        headers.updateHeader("Connection", connectionNewValue);
+        const std::string connectionNewValue = toLower(headers.getHeaderValue(CONNECTION));
+        headers.updateHeader(CONNECTION, connectionNewValue);
     }
 
     return SimpleResult::ok();
