@@ -10,7 +10,6 @@ private:
     RequestValidator();
 
 public:
-    static SimpleResult validateRequestLineNew(const RequestLine &requestLine);
-    static SimpleResult validateRequestLine(const RequestLineParams_t &requestLine);
+    static SimpleResult validateRequestLine(const RequestLine &requestLine);
     static SimpleResult validateRequestHeaders(const HeaderCollection &requestHeaders);
 };

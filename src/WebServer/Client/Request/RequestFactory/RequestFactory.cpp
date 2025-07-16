@@ -41,17 +41,17 @@ Result<RequestLine> RequestFactory::buildRequestLineFromString(const std::string
     const Result<RequestLine> requestLineResult = requestParser.parseRequestLine();
     if (requestLineResult.isFailure())
         return Result<RequestLine>::fail(requestLineResult.getError());
-    RequestLine requestLineParams = requestLineResult.getValue();
+    RequestLine requestLine = requestLineResult.getValue();
 
-    const SimpleResult requestLineValidationResult = RequestValidator::validateRequestLineNew(requestLineParams);
+    const SimpleResult requestLineValidationResult = RequestValidator::validateRequestLine(requestLine);
     if (requestLineValidationResult.isFailure())
         return Result<RequestLine>::fail(requestLineValidationResult.getError());
 
-    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestTarget(requestLineParams.getTargetRef());
+    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestTarget(requestLine.getTargetRef());
     if (requestTargetProcessResult.isFailure())
         return Result<RequestLine>::fail(requestTargetProcessResult.getError());
 
-    return Result<RequestLine>::ok(requestLineParams);
+    return Result<RequestLine>::ok(requestLine);
 }
 
 Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std::string &headersString)

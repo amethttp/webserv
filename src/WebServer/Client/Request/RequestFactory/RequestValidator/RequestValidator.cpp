@@ -6,7 +6,7 @@
 #include "ContentLengthHeaderValidator/ContentLengthHeaderValidator.hpp"
 #include "TransferEncodingHeaderValidator/TransferEncodingHeaderValidator.hpp"
 
-SimpleResult RequestValidator::validateRequestLineNew(const RequestLine &requestLine)
+SimpleResult RequestValidator::validateRequestLine(const RequestLine &requestLine)
 {
     if (requestLine.getMethod() == NOT_IMPLEMENTED)
         return SimpleResult::fail(NOT_IMPLEMENTED_ERR);
@@ -18,17 +18,6 @@ SimpleResult RequestValidator::validateRequestLineNew(const RequestLine &request
         return SimpleResult::fail(HTTP_VERSION_NOT_SUPPORTED_ERR);
 
     return SimpleResult::ok();
-}
-
-SimpleResult RequestValidator::validateRequestLine(const RequestLineParams_t &requestLine)
-{
-    RequestLine rql;
-
-    rql.setMethod(requestLine.method);
-    rql.setTargetUri(requestLine.target.uri);
-    rql.setHttpVersion(requestLine.httpVersion);
-
-    return validateRequestLineNew(rql);
 }
 
 SimpleResult RequestValidator::validateRequestHeaders(const HeaderCollection &requestHeaders)
