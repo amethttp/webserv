@@ -19,7 +19,7 @@ SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
 
 SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &headers)
 {
-    const std::string hostValue = headers.getHeader("Host").getValue();
+    const std::string hostValue = headers.getHeaderValue("Host");
     const Result<std::string> decodingResult = RequestPctDecoder::decode(hostValue);
     if (decodingResult.isFailure())
         return SimpleResult::fail(decodingResult.getError());
@@ -49,13 +49,13 @@ SimpleResult RequestProcesser::processHeaders(HeaderCollection &headers)
 
     if (headers.contains("Transfer-Encoding"))
     {
-        const std::string transferEncodingNewValue = toLower(headers.getHeader("Transfer-Encoding").getValue());
+        const std::string transferEncodingNewValue = toLower(headers.getHeaderValue("Transfer-Encoding"));
         headers.updateHeader("Transfer-Encoding", transferEncodingNewValue);
     }
 
     if (headers.contains("Connection"))
     {
-        const std::string connectionNewValue = toLower(headers.getHeader("Connection").getValue());
+        const std::string connectionNewValue = toLower(headers.getHeaderValue("Connection"));
         headers.updateHeader("Connection", connectionNewValue);
     }
 

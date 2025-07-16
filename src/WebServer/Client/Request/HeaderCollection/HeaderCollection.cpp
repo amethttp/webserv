@@ -26,6 +26,11 @@ Header HeaderCollection::getHeader(const std::string &headerKey) const
     throw std::invalid_argument("Header with key '" + headerKey + "' does not exist inside the collection");
 }
 
+std::string HeaderCollection::getHeaderValue(const std::string &headerKey) const
+{
+    return this->getHeader(headerKey).getValue();
+}
+
 size_t HeaderCollection::getAmountOfHeaders() const
 {
     return this->headers_.size();

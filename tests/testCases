@@ -1478,23 +1478,10 @@
 
 
 #
-# REFACTOR:
-# 1.  buildRequestBodyFromString
-# 2.  parseChunkedBody
-# 3.  isLastChunk
-# 4.  isChunkSize
-# 5.  chunkSize
-# 6.  skipChunkExtensionsAtDistance
-# 7.  getOctetStreamToken
-# 8.  isQdText
-# 9.  isQuotedPairAtDistance
-# 10. isCrlfAtDistance
-
-#
 # FINAL REFACTORS: 
-# 0. GET_HEADER(X).GET_VALUE() -> GET_HEADER_VALUE(X) ?
-# 1. MACROS? FOR ERRORS AND HEADERS ("TRANSFER-ENCODING" and "400 BAD REQUEST")
+# 1. MACROS? FOR ERRORS AND HEADERS ("TRANSFER-ENCODING" and "400 BAD REQUEST") AND USE STD::MIN OR FIND_IF IN SOMEWHERE? FIND WHERE
 # 1.1 CREATE PARSE_FULL_BODY FUNCTION IN PARSER AND USE GET_OCTECT_STREAM_TOKEN
+# 1.1.1 MOVE FULL_BODY TESTS TO PARSER
 # 1.2 CHECK THAT IN TOKENIZER FUNCTIONS WE ARE USING "THE SAME" CONDITIONS IN IS... AND ... (example: isMethod and method() are using the same while conditions?)
 # 1.5 REMOVE IS... METHODS FROM TOKENIZER
 # 1.8 SHOULD CREATE BODY CLASS

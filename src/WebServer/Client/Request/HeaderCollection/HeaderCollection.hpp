@@ -15,6 +15,7 @@ public:
     ~HeaderCollection();
 
     Header getHeader(const std::string &headerKey) const;
+    std::string getHeaderValue(const std::string &headerKey) const;
     size_t getAmountOfHeaders() const;
 
     bool contains(const std::string &headerKey) const;

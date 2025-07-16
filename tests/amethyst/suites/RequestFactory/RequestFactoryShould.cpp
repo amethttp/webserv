@@ -56,7 +56,7 @@ static void assertHeaderSize(const size_t size)
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, request.headers.getHeader(key).getValue());
+    ASSERT_EQUALS(value, request.headers.getHeaderValue(key));
 }
 
 static void assertBodyIsEmpty()

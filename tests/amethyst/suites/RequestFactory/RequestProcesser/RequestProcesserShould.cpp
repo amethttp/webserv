@@ -36,7 +36,7 @@ static void assertTargetComponents(const std::string &path, const std::string &q
 
 static void assertHeader(const std::string &key, const std::string &value)
 {
-    ASSERT_EQUALS(value, headers.getHeader(key).getValue());
+    ASSERT_EQUALS(value, headers.getHeaderValue(key));
 }
 
 static void assertRequestIsInvalidFromTargetUri(const std::string &invalidRequestTargetUri)

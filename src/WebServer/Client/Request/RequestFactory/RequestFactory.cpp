@@ -97,7 +97,7 @@ Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderColle
 {
     if (headers.contains("Content-Length"))
     {
-        const size_t contentLengthSize = strToUlong(headers.getHeader("Content-Length").getValue());
+        const size_t contentLengthSize = strToUlong(headers.getHeaderValue("Content-Length"));
         return buildFullBodyFromString(contentLengthSize, bodyString);
     }
 
