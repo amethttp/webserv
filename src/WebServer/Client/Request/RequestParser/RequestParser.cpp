@@ -40,32 +40,47 @@ result_t RequestParser::eatTrailerFields()
     return hasFailed ? FAIL : SUCCESS;
 }
 
-Result<RequestLineParams_t> RequestParser::parseRequestLine()
+Result<RequestLine> RequestParser::parseRequestLineNew()
 {
     int hasFailed = 0;
-    RequestLineParams_t params;
+    RequestLine requestLine;
 
     hasFailed |= eat(EMPTY);
 
-    params.method = getHttpMethodFromString(this->currentToken_.getValue());
+    requestLine.setMethod(this->currentToken_.getValue());
     hasFailed |= eat(METHOD);
 
     hasFailed |= eat(SP);
 
-    params.target.uri = this->currentToken_.getValue();
+    requestLine.setTargetUri(this->currentToken_.getValue());
     hasFailed |= eat(TARGET);
 
     hasFailed |= eat(SP);
 
-    params.httpVersion = this->currentToken_.getValue();
+    requestLine.setHttpVersion(this->currentToken_.getValue());
     hasFailed |= eat(HTTP_VERSION);
 
     hasFailed |= eat(EOF);
 
     if (hasFailed)
-        return Result<RequestLineParams_t>::fail(BAD_REQUEST_ERR);
+        return Result<RequestLine>::fail(BAD_REQUEST_ERR);
 
-    return Result<RequestLineParams_t>::ok(params);
+    return Result<RequestLine>::ok(requestLine);
+}
+
+Result<RequestLineParams_t> RequestParser::parseRequestLine()
+{
+    RequestLineParams_t requestLineParams;
+
+    const Result<RequestLine> result = parseRequestLineNew();
+    if (result.isFailure())
+        return Result<RequestLineParams_t>::fail(result.getError());
+
+    requestLineParams.method = result.getValue().getMethod();
+    requestLineParams.target.uri = result.getValue().getTargetUri();
+    requestLineParams.httpVersion = result.getValue().getHttpVersion();
+
+    return Result<RequestLineParams_t>::ok(requestLineParams);
 }
 
 Result<HeaderCollection> RequestParser::parseHeaders()

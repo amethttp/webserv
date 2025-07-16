@@ -13,13 +13,21 @@ typedef struct Target_s
 class RequestLine
 {
 private:
-    method_t method;
-    Target_t target;
-    std::string httpVersion;
+    method_t method_;
+    Target_t target_;
+    std::string httpVersion_;
 
 public:
     RequestLine();
     ~RequestLine();
+
+    method_t getMethod() const;
+    std::string getTargetUri() const;
+    std::string getHttpVersion() const;
+
+    void setMethod(const std::string &methodString);
+    void setTargetUri(const std::string &uriString);
+    void setHttpVersion(const std::string &httpVersionString);
 };
 
 typedef struct RequestLineParams_s
