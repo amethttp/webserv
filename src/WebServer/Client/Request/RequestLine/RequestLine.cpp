@@ -12,9 +12,24 @@ method_t RequestLine::getMethod() const
     return this->method_;
 }
 
+Target_t & RequestLine::getTargetRef()
+{
+    return this->target_;
+}
+
 std::string RequestLine::getTargetUri() const
 {
     return this->target_.uri;
+}
+
+std::string RequestLine::getTargetPath() const
+{
+    return this->target_.path;
+}
+
+std::string RequestLine::getTargetQuery() const
+{
+    return this->target_.query;
 }
 
 std::string RequestLine::getHttpVersion() const

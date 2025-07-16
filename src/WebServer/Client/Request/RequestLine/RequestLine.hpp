@@ -22,7 +22,10 @@ public:
     ~RequestLine();
 
     method_t getMethod() const;
+    Target_t &getTargetRef();
     std::string getTargetUri() const;
+    std::string getTargetPath() const;
+    std::string getTargetQuery() const;
     std::string getHttpVersion() const;
 
         void setMethod(method_t method);

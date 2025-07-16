@@ -34,24 +34,24 @@ RequestParser RequestFactory::createParser(const std::string &text)
     return RequestParser(tokenizer);
 }
 
-Result<RequestLineParams_t> RequestFactory::buildRequestLineFromString(const std::string &requestLineString)
+Result<RequestLine> RequestFactory::buildRequestLineFromString(const std::string &requestLineString)
 {
     RequestParser requestParser = createParser(requestLineString);
 
-    const Result<RequestLineParams_t> requestLineResult = requestParser.parseRequestLine();
+    const Result<RequestLine> requestLineResult = requestParser.parseRequestLineNew();
     if (requestLineResult.isFailure())
-        return Result<RequestLineParams_t>::fail(requestLineResult.getError());
-    RequestLineParams_t requestLineParams = requestLineResult.getValue();
+        return Result<RequestLine>::fail(requestLineResult.getError());
+    RequestLine requestLineParams = requestLineResult.getValue();
 
-    const SimpleResult requestLineValidationResult = RequestValidator::validateRequestLine(requestLineParams);
+    const SimpleResult requestLineValidationResult = RequestValidator::validateRequestLineNew(requestLineParams);
     if (requestLineValidationResult.isFailure())
-        return Result<RequestLineParams_t>::fail(requestLineValidationResult.getError());
+        return Result<RequestLine>::fail(requestLineValidationResult.getError());
 
-    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestTarget(requestLineParams.target);
+    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestTarget(requestLineParams.getTargetRef());
     if (requestTargetProcessResult.isFailure())
-        return Result<RequestLineParams_t>::fail(requestTargetProcessResult.getError());
+        return Result<RequestLine>::fail(requestTargetProcessResult.getError());
 
-    return Result<RequestLineParams_t>::ok(requestLineParams);
+    return Result<RequestLine>::ok(requestLineParams);
 }
 
 Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std::string &headersString)
@@ -124,10 +124,10 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     const std::string requestHeadersString = getRequestHeadersString(requestBuffer);
     const std::string requestBodyString = getRequestBodyString(requestBuffer);
 
-    const Result<RequestLineParams_t> requestLineResult = buildRequestLineFromString(requestLineString);
+    const Result<RequestLine> requestLineResult = buildRequestLineFromString(requestLineString);
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
-    request.requestLine = requestLineResult.getValue();
+    request.requestLineNew = requestLineResult.getValue();
 
     const Result<HeaderCollection> requestHeadersResult = buildRequestHeadersFromString(requestHeadersString);
     if (requestHeadersResult.isFailure())

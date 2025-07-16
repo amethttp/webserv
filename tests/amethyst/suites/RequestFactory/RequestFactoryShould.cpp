@@ -10,7 +10,7 @@ namespace
 
 static Request_t createFromValidRequest(const std::string &requestString)
 {
-    Result<Request_t> result = RequestFactory::create(requestString);
+    const Result<Request_t> result = RequestFactory::create(requestString);
 
     return result.getValue();
 }
@@ -38,15 +38,15 @@ static Request_t createRequestFromValidBody(const std::string &bodyTypeHeader, c
 
 static void assertTargetComponents(const std::string &path, const std::string &query)
 {
-    ASSERT_EQUALS(path, request.requestLine.target.path);
-    ASSERT_EQUALS(query, request.requestLine.target.query);
+    ASSERT_EQUALS(path, request.requestLineNew.getTargetPath());
+    ASSERT_EQUALS(query, request.requestLineNew.getTargetQuery());
 }
 
 static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
 {
-    ASSERT_EQUALS(method, request.requestLine.method);
-    ASSERT_EQUALS(targetUri, request.requestLine.target.uri);
-    ASSERT_EQUALS(version, request.requestLine.httpVersion);
+    ASSERT_EQUALS(method, request.requestLineNew.getMethod());
+    ASSERT_EQUALS(targetUri, request.requestLineNew.getTargetUri());
+    ASSERT_EQUALS(version, request.requestLineNew.getHttpVersion());
 }
 
 static void assertHeaderSize(const size_t size)
