@@ -28,15 +28,7 @@ public:
     std::string getTargetQuery() const;
     std::string getHttpVersion() const;
 
-        void setMethod(method_t method);
     void setMethod(const std::string &methodString);
     void setTargetUri(const std::string &uriString);
     void setHttpVersion(const std::string &httpVersionString);
 };
-
-typedef struct RequestLineParams_s
-{
-    method_t method;
-    Target_t target;
-    std::string httpVersion;
-} RequestLineParams_t;

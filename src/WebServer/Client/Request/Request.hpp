@@ -6,8 +6,7 @@
 
 typedef struct Request_s
 {
-	RequestLine requestLineNew;
-	RequestLineParams_t requestLine;
+	RequestLine requestLine;
 	HeaderCollection headers;
 	Body body;
 } Request_t;

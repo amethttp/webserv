@@ -37,11 +37,6 @@ std::string RequestLine::getHttpVersion() const
     return this->httpVersion_;
 }
 
-void RequestLine::setMethod(const method_t method)
-{
-    this->method_ = method;
-}
-
 void RequestLine::setMethod(const std::string &methodString)
 {
     if (methodString == "GET")

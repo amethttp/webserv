@@ -38,15 +38,15 @@ static Request_t createRequestFromValidBody(const std::string &bodyTypeHeader, c
 
 static void assertTargetComponents(const std::string &path, const std::string &query)
 {
-    ASSERT_EQUALS(path, request.requestLineNew.getTargetPath());
-    ASSERT_EQUALS(query, request.requestLineNew.getTargetQuery());
+    ASSERT_EQUALS(path, request.requestLine.getTargetPath());
+    ASSERT_EQUALS(query, request.requestLine.getTargetQuery());
 }
 
 static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
 {
-    ASSERT_EQUALS(method, request.requestLineNew.getMethod());
-    ASSERT_EQUALS(targetUri, request.requestLineNew.getTargetUri());
-    ASSERT_EQUALS(version, request.requestLineNew.getHttpVersion());
+    ASSERT_EQUALS(method, request.requestLine.getMethod());
+    ASSERT_EQUALS(targetUri, request.requestLine.getTargetUri());
+    ASSERT_EQUALS(version, request.requestLine.getHttpVersion());
 }
 
 static void assertHeaderSize(const size_t size)

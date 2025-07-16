@@ -127,7 +127,7 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     const Result<RequestLine> requestLineResult = buildRequestLineFromString(requestLineString);
     if (requestLineResult.isFailure())
         return Result<Request_t>::fail(requestLineResult.getError());
-    request.requestLineNew = requestLineResult.getValue();
+    request.requestLine = requestLineResult.getValue();
 
     const Result<HeaderCollection> requestHeadersResult = buildRequestHeadersFromString(requestHeadersString);
     if (requestHeadersResult.isFailure())
