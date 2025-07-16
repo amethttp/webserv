@@ -497,7 +497,7 @@ TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
 {
     processValidHeader("Transfer-Encoding", "cHUnKeD");
 
-    assertHeader("Host", "localhost");
+    assertHeader("Transfer-Encoding", "chunked");
 }
 
 TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_keep_alive_value)
