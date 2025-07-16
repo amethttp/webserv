@@ -137,10 +137,9 @@ TEST(recognize_basic_HTTP_POST_request)
 /* REQUEST LINE TESTS */
 TEST(recognize_a_request_with_valid_request_line)
 {
-    request = createRequestFromValidRequestLine("GET /index.html?param=value HTTP/1.1");
+    request = createRequestFromValidRequestLine("GET /about/index/-._~%50%2c!$&().html?param=value?*+,;=%3c HTTP/1.1");
 
-    assertTargetComponents("/index.html", "param=value");
-    assertRequestLine(GET, "/index.html?param=value", "HTTP/1.1");
+    assertRequestLine(GET, "/about/index/-._~%50%2c!$&().html?param=value?*+,;=%3c", "HTTP/1.1");
 }
 
 TEST(take_as_failure_an_invalid_request_line)
@@ -249,8 +248,12 @@ TEST(take_as_failure_a_host_header_with_only_port)
 TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters_and_port)
 {
     const std::string validCharacters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=";
+    const std::string hostFinalValue = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz -._~!$&'()*+,;=";
 
     request = createRequestFromValidHeaders("Host: " + validCharacters + ":8080");
+
+    assertHeaderSize(1);
+    assertHeader("Host", hostFinalValue + ":8080");
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_with_a_non_numeric_port)
