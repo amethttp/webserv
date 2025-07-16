@@ -73,6 +73,7 @@ vpath %.cpp $(SRC):\
             $(SUITES_DIRECTORIES)\
             $(PROJ_SRC)WebServer/Client/Request/HeaderCollection/\
             $(PROJ_SRC)WebServer/Client/Request/HeaderCollection/Header\
+            $(PROJ_SRC)WebServer/Client/Request/Body/\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/HostHeaderValidator\
@@ -99,6 +100,7 @@ SRCS = main.cpp \
        $(SUITES_FILES) \
        HeaderCollection.cpp \
        Header.cpp \
+       Body.cpp \
        RequestFactory.cpp \
        RequestValidator.cpp \
        HostHeaderValidator.cpp \
