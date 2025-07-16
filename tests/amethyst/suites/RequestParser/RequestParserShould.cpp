@@ -4,17 +4,17 @@
 
 namespace
 {
-    RequestLineParams_t requestLine;
+    RequestLine requestLine;
     HeaderCollection headers;
     Body body;
 }
 
-static RequestLineParams_t parseFromValidRequestLine(const std::string &requestLineString)
+static RequestLine parseFromValidRequestLine(const std::string &requestLineString)
 {
     const RequestTokenizer requestTokenizer(requestLineString);
     RequestParser sut(requestTokenizer);
 
-    const Result<RequestLineParams_t> result = sut.parseRequestLine();
+    const Result<RequestLine> result = sut.parseRequestLineNew();
 
     return result.getValue();
 }
@@ -51,9 +51,9 @@ static Body parseFromValidChunkedBody(const std::string &requestBodyString)
 
 static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
 {
-    ASSERT_EQUALS(method, requestLine.method);
-    ASSERT_EQUALS(targetUri, requestLine.target.uri);
-    ASSERT_EQUALS(version, requestLine.httpVersion);
+    ASSERT_EQUALS(method, requestLine.getMethod());
+    ASSERT_EQUALS(targetUri, requestLine.getTargetUri());
+    ASSERT_EQUALS(version, requestLine.getHttpVersion());
 }
 
 static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
@@ -61,7 +61,7 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
     const RequestTokenizer requestTokenizer(invalidRequestString);
     RequestParser sut(requestTokenizer);
 
-    const Result<RequestLineParams_t> result = sut.parseRequestLine();
+    const Result<RequestLine> result = sut.parseRequestLineNew();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
