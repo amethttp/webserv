@@ -2,7 +2,6 @@
 #include "utils/numeric/numeric.hpp"
 #include "WebServer/Client/Request/Body/Body.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
-#include <algorithm>
 
 RequestParser::RequestParser(const RequestTokenizer &tokenizer)
     : tokenizer_(tokenizer), currentToken_(EMPTY, "")
@@ -118,33 +117,20 @@ Result<std::string> RequestParser::parseFullBody(const size_t contentLengthSize)
     return Result<std::string>::ok(result.getValue().getMessage());
 }
 
-static bool isNotHex(const char c)
-{
-    return !std::isxdigit(c);
-}
-
-static size_t getChunkSize(const std::string &chunkSize)
-{
-    const std::string::const_iterator chunkSizeBegin = chunkSize.begin();
-    const std::string::const_iterator chunkSizeEnd = chunkSize.end();
-    const std::string::const_iterator chunkSizeValueEnd = std::find_if(chunkSizeBegin, chunkSizeEnd, isNotHex);
-    const std::string chunkSizeValue = std::string(chunkSizeBegin, chunkSizeValueEnd);
-
-    return hexToDec(chunkSizeValue);
-}
-
-Result<std::string> RequestParser::parseChunkedBody()
+Result<Body> RequestParser::parseChunkedBodyNew()
 {
     int hasFailed = 0;
-    std::string chunkedBody;
+    Body body;
 
     hasFailed |= eat(EMPTY);
 
     while (this->currentToken_.getType() == CHUNK_SIZE)
     {
-        const size_t chunkSize = getChunkSize(this->currentToken_.getValue());
+        const size_t chunkSize = Body::getChunkSize(this->currentToken_.getValue());
+        const std::string chunkData = eatOctetStreamToken(chunkSize);
 
-        chunkedBody += eatOctetStreamToken(chunkSize);
+        body.addFragment(chunkData);
+
         hasFailed |= eat(CRLF);
     }
 
@@ -155,7 +141,17 @@ Result<std::string> RequestParser::parseChunkedBody()
     hasFailed |= eat(EOF);
 
     if (hasFailed)
-        return Result<std::string>::fail(BAD_REQUEST_ERR);
+        return Result<Body>::fail(BAD_REQUEST_ERR);
 
-    return Result<std::string>::ok(chunkedBody);
+    return Result<Body>::ok(body);
+}
+
+Result<std::string> RequestParser::parseChunkedBody()
+{
+    Result<Body> result = parseChunkedBodyNew();
+
+    if (result.isFailure())
+        return Result<std::string>::fail(result.getError());
+
+    return Result<std::string>::ok(result.getValue().getMessage());
 }
