@@ -1,28 +1,23 @@
 #include "RequestPctDecoder.hpp"
 #include "utils/numeric/numeric.hpp"
 
-Result<std::string> RequestPctDecoder::decode(const std::string &string)
+std::string RequestPctDecoder::decode(const std::string &string)
 {
-    std::string decodedPath;
+    std::string decodedString;
 
     for (size_t i = 0; i < string.length(); i++)
     {
         if (string[i] != '%')
         {
-            decodedPath += string[i];
+            decodedString += string[i];
             continue ;
         }
 
-        const char decodedChar = hexToChar(string[i + 1], string[i + 2]);
-
-        if (std::iscntrl(decodedChar))
-            return Result<std::string>::fail(BAD_REQUEST_ERR);
-
-        decodedPath += decodedChar;
+        decodedString += hexToChar(string[i + 1], string[i + 2]);
         i += 2;
     }
 
-    return Result<std::string>::ok(decodedPath);
+    return decodedString;
 }
 
 bool RequestPctDecoder::isWellEncoded(const std::string &string)

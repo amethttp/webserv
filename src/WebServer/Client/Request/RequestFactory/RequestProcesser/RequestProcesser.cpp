@@ -6,25 +6,23 @@
 
 SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
 {
-    const Result<std::string> decodingPathResult = RequestPctDecoder::decode(target.path);
-
-    if (decodingPathResult.isFailure())
-        return SimpleResult::fail(decodingPathResult.getError());
+    if (!RequestPctDecoder::isWellEncoded(target.path))
+        return SimpleResult::fail(BAD_REQUEST_ERR);
     if (!RequestPctDecoder::isWellEncoded(target.query))
         return SimpleResult::fail(BAD_REQUEST_ERR);
 
-    target.path = decodingPathResult.getValue();
+    target.path = RequestPctDecoder::decode(target.path);
     return SimpleResult::ok();
 }
 
 SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &headers)
 {
     const std::string hostValue = headers.getHeaderValue(HOST);
-    const Result<std::string> decodingResult = RequestPctDecoder::decode(hostValue);
-    if (decodingResult.isFailure())
-        return SimpleResult::fail(decodingResult.getError());
 
-    headers.updateHeader(HOST, decodingResult.getValue());
+    if (!RequestPctDecoder::isWellEncoded(hostValue))
+        return SimpleResult::fail(BAD_REQUEST_ERR);
+
+    headers.updateHeader(HOST, RequestPctDecoder::decode(hostValue));
     return SimpleResult::ok();
 }
 
