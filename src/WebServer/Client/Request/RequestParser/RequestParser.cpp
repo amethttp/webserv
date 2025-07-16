@@ -1,5 +1,6 @@
 #include "RequestParser.hpp"
 #include "utils/numeric/numeric.hpp"
+#include "WebServer/Client/Request/Body/Body.hpp"
 #include "WebServer/Client/Request/RequestTokenizer/RequestTokenizer.hpp"
 #include <algorithm>
 
@@ -94,14 +95,27 @@ Result<HeaderCollection> RequestParser::parseHeaders()
     return Result<HeaderCollection>::ok(headers);
 }
 
-Result<std::string> RequestParser::parseFullBody(const size_t contentLengthSize)
+Result<Body> RequestParser::parseFullBodyNew(const size_t contentLengthSize)
 {
-    const std::string fullBody = eatOctetStreamToken(contentLengthSize);
+    Body body;
+    const std::string bodyMessage = eatOctetStreamToken(contentLengthSize);
 
     if (eat(EOF) == FAIL)
-        return Result<std::string>::fail(BAD_REQUEST_ERR);
+        return Result<Body>::fail(BAD_REQUEST_ERR);
 
-    return Result<std::string>::ok(fullBody);
+    body.addFragment(bodyMessage);
+
+    return Result<Body>::ok(body);
+}
+
+Result<std::string> RequestParser::parseFullBody(const size_t contentLengthSize)
+{
+    const Result<Body> result = parseFullBodyNew(contentLengthSize);
+
+    if (result.isFailure())
+        return Result<std::string>::fail(result.getError());
+
+    return Result<std::string>::ok(result.getValue().getMessage());
 }
 
 static bool isNotHex(const char c)
