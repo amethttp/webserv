@@ -6,7 +6,7 @@ namespace
 {
     RequestLineParams_t requestLine;
     HeaderCollection headers;
-    std::string body;
+    Body body;
 }
 
 static RequestLineParams_t parseFromValidRequestLine(const std::string &requestLineString)
@@ -29,22 +29,22 @@ static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersS
     return result.getValue();
 }
 
-static std::string parseFromValidFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
+static Body parseFromValidFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
 {
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
 
-    const Result<std::string> result = sut.parseFullBody(contentLengthSize);
+    const Result<Body> result = sut.parseFullBodyNew(contentLengthSize);
 
     return result.getValue();
 }
 
-static std::string parseFromValidChunkedBody(const std::string &requestBodyString)
+static Body parseFromValidChunkedBody(const std::string &requestBodyString)
 {
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
 
-    const Result<std::string> result = sut.parseChunkedBody();
+    const Result<Body> result = sut.parseChunkedBodyNew();
 
     return result.getValue();
 }
@@ -83,7 +83,7 @@ static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
 
-    Result<std::string> result = sut.parseFullBody(contentLengthSize);
+    Result<Body> result = sut.parseFullBodyNew(contentLengthSize);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
@@ -94,7 +94,7 @@ static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
 
-    Result<std::string> result = sut.parseChunkedBody();
+    Result<Body> result = sut.parseChunkedBodyNew();
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
@@ -112,12 +112,12 @@ static void assertHeader(const std::string &key, const std::string &value)
 
 static void assertBodyIsEmpty()
 {
-    ASSERT_EQUALS("", body);
+    ASSERT_EQUALS("", body.getMessage());
 }
 
 static void assertBody(const std::string &expectedBody)
 {
-    ASSERT_EQUALS(expectedBody, body);
+    ASSERT_EQUALS(expectedBody, body.getMessage());
 }
 
 
