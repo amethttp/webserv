@@ -743,7 +743,7 @@ TEST(recognize_a_complex_header)
 
 TEST(recognize_a_case_insensitive_header)
 {
-    headers = parseFromValidHeaders("Host: localhost");
+    headers = parseFromValidHeaders("hOST: localhost");
 
     assertHeaderSize(1);
     assertHeader("Host", "localhost");
