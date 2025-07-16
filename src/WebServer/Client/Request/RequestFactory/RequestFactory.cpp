@@ -74,29 +74,29 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
     return Result<HeaderCollection>::ok(requestHeaders);
 }
 
-Result<std::string> RequestFactory::buildFullBodyFromString(const size_t &contentLengthSize, const std::string &bodyString)
+Result<Body> RequestFactory::buildFullBodyFromString(const size_t &contentLengthSize, const std::string &bodyString)
 {
     RequestParser requestParser = createParser(bodyString);
 
-    const Result<std::string> requestBodyResult = requestParser.parseFullBody(contentLengthSize);
+    const Result<Body> requestBodyResult = requestParser.parseFullBodyNew(contentLengthSize);
     if (requestBodyResult.isFailure())
-        return Result<std::string>::fail(requestBodyResult.getError());
+        return Result<Body>::fail(requestBodyResult.getError());
 
-    return Result<std::string>::ok(requestBodyResult.getValue());
+    return Result<Body>::ok(requestBodyResult.getValue());
 }
 
-Result<std::string> RequestFactory::buildChunkedBodyFromString(const std::string &bodyString)
+Result<Body> RequestFactory::buildChunkedBodyFromString(const std::string &bodyString)
 {
     RequestParser requestParser = createParser(bodyString);
 
-    const Result<std::string> requestBodyResult = requestParser.parseChunkedBody();
+    const Result<Body> requestBodyResult = requestParser.parseChunkedBodyNew();
     if (requestBodyResult.isFailure())
-        return Result<std::string>::fail(requestBodyResult.getError());
+        return Result<Body>::fail(requestBodyResult.getError());
 
-    return Result<std::string>::ok(requestBodyResult.getValue());
+    return Result<Body>::ok(requestBodyResult.getValue());
 }
 
-Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
+Result<Body> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
     if (headers.contains(CONTENT_LENGTH))
     {
@@ -111,10 +111,10 @@ Result<std::string> RequestFactory::buildRequestBodyFromString(const HeaderColle
 
     if (!bodyString.empty())
     {
-        return Result<std::string>::fail(LENGTH_REQUIRED_ERR);
+        return Result<Body>::fail(LENGTH_REQUIRED_ERR);
     }
 
-    return Result<std::string>::ok(bodyString);
+    return Result<Body>::ok(Body());
 }
 
 Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
@@ -134,10 +134,11 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
         return Result<Request_t>::fail(requestHeadersResult.getError());
     request.headers = requestHeadersResult.getValue();
 
-    const Result<std::string> requestBodyResult = buildRequestBodyFromString(request.headers, requestBodyString);
+    const Result<Body> requestBodyResult = buildRequestBodyFromString(request.headers, requestBodyString);
     if (requestBodyResult.isFailure())
         return Result<Request_t>::fail(requestBodyResult.getError());
-    request.body = requestBodyResult.getValue();
+    request.bodyNew = requestBodyResult.getValue();
+    request.body = request.bodyNew.getMessage();
 
     return Result<Request_t>::ok(request);
 }
