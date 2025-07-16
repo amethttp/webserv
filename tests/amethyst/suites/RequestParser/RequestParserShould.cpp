@@ -1051,7 +1051,7 @@ TEST(recognize_a_request_with_a_body_with_all_octets)
 
 TEST(recognize_a_request_with_a_body_with_crlfs_inside)
 {
-    body = parseFromValidFullBody(12, "Valid\r\nbody");
+    body = parseFromValidFullBody(11, "Valid\r\nbody");
 
     assertBody("Valid\r\nbody");
 }

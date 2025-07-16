@@ -426,11 +426,25 @@ TEST(recognize_a_request_with_valid_connection_header_with_case_insensitive_clos
 
 
 /* REQUEST FULL BODY TESTS */
+TEST(recognize_a_request_with_a_full_body)
+{
+    request = createRequestFromValidBody("Content-Length: 11", "Valid\r\nBody");
+
+    assertBody("Valid\r\nBody");
+}
+
 TEST(recognize_a_request_with_an_empty_body_without_content_length_header)
 {
     request = createRequestFromValidBody("No-Header: no header", "");
 
     assertBodyIsEmpty();
+}
+
+TEST(take_as_failure_a_request_with_a_body_length_superior_than_content_length_header_size)
+{
+    assertRequestIsInvalidFromBody("Content-Length: 0", "Invalid body", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromBody("Content-Length: 10", "Invalid body", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromBody("Content-Length: 0", " \t \t \t", BAD_REQUEST_ERR);
 }
 
 TEST(take_as_failure_a_request_with_body_without_content_length_nor_transfer_encoding_headers)
