@@ -22,5 +22,5 @@ private:
     static std::string buildNormalizedPath(const pathSegments_t &normalizedPathSegments);
 
 public:
-    static void normalizePath(std::string &path);
+    static std::string normalizePath(const std::string &path);
 };

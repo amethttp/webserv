@@ -74,12 +74,14 @@ std::string RequestTargetNormalizer::buildNormalizedPath(const pathSegments_t &n
     return normalizedPath;
 }
 
-void RequestTargetNormalizer::normalizePath(std::string &path)
+std::string RequestTargetNormalizer::normalizePath(const std::string &path)
 {
-    if (hasTrailingDotSegment(path))
-        path += '/';
+    std::string tempPath = path;
 
-    const pathSegments_t pathSegments = getPathSegments(path);
+    if (hasTrailingDotSegment(path))
+        tempPath += '/';
+
+    const pathSegments_t pathSegments = getPathSegments(tempPath);
     const pathSegments_t normalizedPathSegments = normalizePathSegments(pathSegments);
-    path = buildNormalizedPath(normalizedPathSegments);
+    return buildNormalizedPath(normalizedPathSegments);
 }

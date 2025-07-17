@@ -33,9 +33,8 @@ SimpleResult RequestProcesser::processRequestLine(RequestLine &requestLine)
     if (targetDecodingResult.isFailure())
         return SimpleResult::fail(targetDecodingResult.getError());
 
-    std::string newPath = requestLine.getTargetPath();
-    RequestTargetNormalizer::normalizePath(newPath);
-    requestLine.setTargetPath(newPath);
+    const std::string normalizedPath = RequestTargetNormalizer::normalizePath(requestLine.getTargetPath());
+    requestLine.setTargetPath(normalizedPath);
 
     return SimpleResult::ok();
 }
