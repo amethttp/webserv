@@ -39,3 +39,8 @@ void Target::setUri(const std::string &uri)
 
     separateUriComponents();
 }
+
+void Target::setPath(const std::string &path)
+{
+    this->path_ = path;
+}

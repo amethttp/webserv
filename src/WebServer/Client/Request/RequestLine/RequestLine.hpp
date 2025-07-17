@@ -23,15 +23,6 @@ public:
 
     void setMethod(const std::string &methodString);
     void setTargetUri(const std::string &uriString);
+    void setTargetPath(const std::string &pathString);
     void setHttpVersion(const std::string &httpVersionString);
-
-        void setTargetPath(const std::string &path)
-        {
-            target_.setPath(path);
-        }
-
-        void setTargetQuery(const std::string &query)
-        {
-            target_.setQuery(query);
-        }
 };

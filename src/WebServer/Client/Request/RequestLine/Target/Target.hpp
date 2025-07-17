@@ -20,14 +20,5 @@ public:
     std::string getUriQuery() const;
 
     void setUri(const std::string &uri);
-
-        void setPath(const std::string &path)
-        {
-            this->path_ = path;
-        }
-
-        void setQuery(const std::string &query)
-        {
-            this->query_ = query;
-        }
+    void setPath(const std::string &path);
 };
