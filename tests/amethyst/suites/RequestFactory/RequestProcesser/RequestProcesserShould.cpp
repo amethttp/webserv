@@ -13,7 +13,7 @@ static void processFromValidTargetUri(const std::string &requestTargetUri)
 {
     requestLine.setTargetUri(requestTargetUri);
 
-    RequestProcesser::processRequestTargetNew(requestLine);
+    RequestProcesser::processRequestLine(requestLine);
 }
 
 static void processValidHeader(const std::string &headerKey, const std::string &headerValue)
@@ -40,7 +40,7 @@ static void assertRequestIsInvalidFromTargetUri(const std::string &invalidReques
 {
     requestLine.setTargetUri(invalidRequestTargetUri);
 
-    const SimpleResult result = RequestProcesser::processRequestTargetNew(requestLine);
+    const SimpleResult result = RequestProcesser::processRequestLine(requestLine);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());

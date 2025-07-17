@@ -25,7 +25,7 @@ SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &he
     return SimpleResult::ok();
 }
 
-SimpleResult RequestProcesser::processRequestTargetNew(RequestLine &requestLine)
+SimpleResult RequestProcesser::processRequestLine(RequestLine &requestLine)
 {
     const SimpleResult targetDecodingResult = processRequestLinePctDecoding(requestLine);
     if (targetDecodingResult.isFailure())
@@ -34,23 +34,6 @@ SimpleResult RequestProcesser::processRequestTargetNew(RequestLine &requestLine)
     std::string newPath = requestLine.getTargetPath();
     RequestTargetNormalizer::normalizePath(newPath);
     requestLine.setTargetPath(newPath);
-
-    return SimpleResult::ok();
-}
-
-SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
-{
-    RequestLine rql;
-
-    rql.setTargetUri(target.uri);
-
-    const SimpleResult result = processRequestTargetNew(rql);
-    if (result.isFailure())
-        return result;
-
-    target.uri = rql.getTargetUri();
-    target.path = rql.getTargetPath();
-    target.query = rql.getTargetQuery();
 
     return SimpleResult::ok();
 }

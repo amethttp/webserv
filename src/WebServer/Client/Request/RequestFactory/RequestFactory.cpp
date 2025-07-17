@@ -47,12 +47,9 @@ Result<RequestLine> RequestFactory::buildRequestLineFromString(const std::string
     if (requestLineValidationResult.isFailure())
         return Result<RequestLine>::fail(requestLineValidationResult.getError());
 
-    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestTarget(requestLine.getTargetRef());
+    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestLine(requestLine);
     if (requestTargetProcessResult.isFailure())
         return Result<RequestLine>::fail(requestTargetProcessResult.getError());
-
-    requestLine.setTargetPath(requestLine.getTargetRef().path);
-    requestLine.setTargetQuery(requestLine.getTargetRef().query);
 
     return Result<RequestLine>::ok(requestLine);
 }
