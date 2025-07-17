@@ -26,7 +26,7 @@ std::string Target::getUriPath() const
     return this->path_;
 }
 
-std::string Target::getQueryPath() const
+std::string Target::getUriQuery() const
 {
     return this->query_;
 }

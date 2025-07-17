@@ -12,24 +12,19 @@ method_t RequestLine::getMethod() const
     return this->method_;
 }
 
-Target_t & RequestLine::getTargetRef()
-{
-    return this->target_;
-}
-
 std::string RequestLine::getTargetUri() const
 {
-    return this->targetNew_.getUri();
+    return this->target_.getUri();
 }
 
 std::string RequestLine::getTargetPath() const
 {
-    return this->targetNew_.getUriPath();
+    return this->target_.getUriPath();
 }
 
 std::string RequestLine::getTargetQuery() const
 {
-    return this->targetNew_.getQueryPath();
+    return this->target_.getUriQuery();
 }
 
 std::string RequestLine::getHttpVersion() const
@@ -51,8 +46,7 @@ void RequestLine::setMethod(const std::string &methodString)
 
 void RequestLine::setTargetUri(const std::string &uriString)
 {
-    this->target_.uri = uriString;
-    this->targetNew_.setUri(uriString);
+    this->target_.setUri(uriString);
 }
 
 void RequestLine::setHttpVersion(const std::string &httpVersionString)

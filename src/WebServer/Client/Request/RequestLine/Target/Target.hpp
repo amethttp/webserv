@@ -17,7 +17,7 @@ public:
 
     std::string getUri() const;
     std::string getUriPath() const;
-    std::string getQueryPath() const;
+    std::string getUriQuery() const;
 
     void setUri(const std::string &uri);
 

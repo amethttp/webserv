@@ -4,19 +4,11 @@
 #include "utils/HTTP/http.hpp"
 #include <string>
 
-typedef struct Target_s
-{
-    std::string uri;
-    std::string path;
-    std::string query;
-} Target_t;
-
 class RequestLine
 {
 private:
     method_t method_;
-    Target_t target_;
-    Target targetNew_;
+    Target target_;
     std::string httpVersion_;
 
 public:
@@ -24,7 +16,6 @@ public:
     ~RequestLine();
 
     method_t getMethod() const;
-        Target_t &getTargetRef();
     std::string getTargetUri() const;
     std::string getTargetPath() const;
     std::string getTargetQuery() const;
@@ -36,13 +27,11 @@ public:
 
         void setTargetPath(const std::string &path)
         {
-            target_.path = path;
-            targetNew_.setPath(path);
+            target_.setPath(path);
         }
 
         void setTargetQuery(const std::string &query)
         {
-            target_.query = query;
-            targetNew_.setQuery(query);
+            target_.setQuery(query);
         }
 };
