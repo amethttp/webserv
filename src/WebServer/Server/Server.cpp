@@ -6,6 +6,9 @@ Server::Server()
 
 Server::~Server()
 {
+	for (std::vector<Location*>::iterator it = locations_.begin(); it != locations_.end(); ++it) 
+		delete *it;
+	this->locations_.clear();
 }
 
 bool Server::matchesName(std::string &match)

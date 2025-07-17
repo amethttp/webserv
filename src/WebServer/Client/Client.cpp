@@ -271,7 +271,10 @@ void Client::buildResponse(std::vector<Server *> &servers)
 	location = LocationMatcher::matchLocation(request_, *server);
 
 	res = RequestHandler::handleRequest(request_, *location, *server);
-	response_ = ResponseFactory::create(res);
+	if (res.isCGI_)
+		this->responseBuffer_ = res.tempBody_.content;
+	else
+		response_ = ResponseFactory::create(res);
 }
 
 void Client::buildResponse(t_httpCode code, t_connection mode)

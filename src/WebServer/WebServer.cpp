@@ -20,7 +20,7 @@ WebServer::~WebServer()
 		delete *it;
 	this->clients_.clear();
 
-		for (std::vector<Server*>::iterator it = servers_.begin(); it != servers_.end(); ++it) 
+	for (std::vector<Server*>::iterator it = servers_.begin(); it != servers_.end(); ++it) 
 		delete *it;
 	this->servers_.clear();
 }
