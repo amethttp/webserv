@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Target/Target.hpp"
 #include "utils/HTTP/http.hpp"
 #include <string>
 
@@ -15,6 +16,7 @@ class RequestLine
 private:
     method_t method_;
     Target_t target_;
+    Target targetNew_;
     std::string httpVersion_;
 
 public:

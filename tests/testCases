@@ -1474,7 +1474,8 @@
 # 14. RequestFactory::canCreateResponse() criteria                                      
 # 15. RequestFactory::canCreateResponse()                                               
 # 16. Final refactors and code checking                                                 
-# 17. Refactor code in webserv.cpp to work with RequestFactory::create()                
+# 17. Test canCreateResponse in every assert of all suites                              
+# 18. Refactor code in webserv.cpp to work with RequestFactory::create()                
 
 
 #
