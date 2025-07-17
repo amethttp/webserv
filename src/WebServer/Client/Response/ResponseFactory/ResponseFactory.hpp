@@ -11,7 +11,7 @@ private:
 	static void setStatusLine(t_httpCode code, t_Response &response);
 	static void setResponseBody(t_Body &body, t_Response &response);
 	static void setDefaultHeaders(t_connection mode, t_Response &response);
-	static void addResultHeaders(HeaderCollection &resultHeaders, HeaderCollection &responseHeaders);
+	static void addResultHeaders(HeaderCollection &resultHeaders, t_Response &response);
 
 public:
 	static t_Response create(HandlingResult &res);

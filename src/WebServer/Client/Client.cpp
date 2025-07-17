@@ -202,7 +202,7 @@ void Client::clearRequest()
 
 void Client::eraseResponse(size_t bytesToErase)
 {
-	this->responseBuffer_.erase(bytesToErase);
+	this->responseBuffer_.erase(0, bytesToErase);
 }
 
 bool Client::shouldClose()
@@ -265,6 +265,7 @@ void Client::buildResponse(std::vector<Server *> &servers)
 	Location *location;
 	HandlingResult res;
 
+	this->responseBuffer_.clear();
 	server = ServerMatcher::matchServer(request_, servers);
 	setLocationsPH(*server);
 	location = LocationMatcher::matchLocation(request_, *server);
@@ -275,5 +276,6 @@ void Client::buildResponse(std::vector<Server *> &servers)
 
 void Client::buildResponse(t_httpCode code, t_connection mode)
 {
+	this->responseBuffer_.clear();
 	this->response_ = ResponseFactory::create(code, mode);
 }

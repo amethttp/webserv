@@ -183,7 +183,7 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 		throw std::runtime_error("Couldn't send response");
 
 	client->eraseResponse(bytesSent);
-	if (bytesSent < (ssize_t)client->getResponseBuffer().length())
+	if ((ssize_t)client->getResponseBuffer().length())
 		return;
 
 	if (client->shouldClose())

@@ -1,5 +1,6 @@
 #include "Header.hpp"
 #include "utils/string/string.hpp"
+#include <sstream>
 
 std::string Header::toHeaderCase(const std::string &string)
 {
@@ -69,7 +70,7 @@ std::string Header::getHeaderValue(const std::string &headerString)
 
 std::ostream &operator<<(std::ostream &stream, const Header &header)
 {
-	stream << header.getKey() << static_cast<std::string>(": ") << header.getValue();
+	stream << header.getKey() << ": " << header.getValue();
 
 	return stream;
 }

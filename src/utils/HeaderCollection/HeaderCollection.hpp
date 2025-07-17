@@ -14,6 +14,7 @@ public:
     HeaderCollection();
     ~HeaderCollection();
 
+    const std::vector<Header> &getHeaders() const;
     Header getHeader(const std::string &headerKey) const;
     size_t getAmountOfHeaders() const;
 
@@ -24,5 +25,5 @@ public:
     void updateHeader(const std::string &headerKey, const std::string &newHeaderValue);
     void removeHeaders();
 
-	friend std::ostream &operator<<(std::ostream &stream, HeaderCollection &headers);
+	friend std::ostream &operator<<(std::ostream &stream, const HeaderCollection &headers);
 };

@@ -24,7 +24,17 @@ t_httpCode StatusLine::getCode() const
     return this->code_;
 }
 
-std::string &operator+=(std::string &string, StatusLine &sl)
+const std::string &StatusLine::getHttpVersion() const
+{
+    return this->httpVersion_;
+}
+
+const std::string &StatusLine::getStatusMessage() const
+{
+    return this->statusMessage_;
+}
+
+std::string &operator+=(std::string &string, const StatusLine &sl)
 {
 	std::ostringstream res;
 
@@ -41,7 +51,7 @@ std::string &operator+=(std::string &string, StatusLine &sl)
 	return string;
 }
 
-std::ostream &operator<<(std::ostream &stream, StatusLine &sl)
+std::ostream &operator<<(std::ostream &stream, const StatusLine &sl)
 {
 	if (sl.code_ == 0)
 		return stream;
@@ -51,7 +61,7 @@ std::ostream &operator<<(std::ostream &stream, StatusLine &sl)
 		<< sl.code_ << " "
 		<< sl.statusMessage_
 	<< "\r\n";
-	
+
 	return stream;
 }
 

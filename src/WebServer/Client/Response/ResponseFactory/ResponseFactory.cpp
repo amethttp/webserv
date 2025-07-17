@@ -2,9 +2,12 @@
 #include <sstream>
 #include "WebServer/Client/Client.hpp"
 
-void ResponseFactory::addResultHeaders(HeaderCollection &resultHeaders, HeaderCollection &responseHeaders)
+void ResponseFactory::addResultHeaders(HeaderCollection &resultHeaders, t_Response &r)
 {
-	responseHeaders = resultHeaders;
+	const std::vector<Header> &resHeaders = resultHeaders.getHeaders();
+
+	for (size_t i = 0; i < resHeaders.size(); ++i)
+		r.headers_.addHeader(resHeaders[i].getKey(), resHeaders[i].getValue());
 }
 
 static std::string getImfFixdate()
@@ -48,7 +51,8 @@ void ResponseFactory::setDefaultHeaders(t_connection mode, t_Response &response)
 
 void ResponseFactory::setResponseBody(t_Body &body, t_Response &response)
 {
-	response.body_ = body;
+	response.body_.type = body.type;
+	response.body_.content = body.content;
 }
 
 void ResponseFactory::setStatusLine(t_httpCode code, t_Response &response)
@@ -75,22 +79,19 @@ void ResponseFactory::setStatusLine(t_httpCode code, t_Response &response)
 
 t_Response ResponseFactory::create(HandlingResult &res)
 {
-	// body and stuff
-	t_Response response;
-	bzero(&response, sizeof(response));
+	t_Response response; // check bzero etc...
 
 	setStatusLine(res.code_, response); // handling res private/public...
 	setResponseBody(res.tempBody_, response);
 	setDefaultHeaders(res.mode_, response);
-	addResultHeaders(res.tempHeaders_, response.headers_);
+	addResultHeaders(res.tempHeaders_, response);
 
     return response;
 }
 
 t_Response ResponseFactory::create(t_httpCode code, t_connection mode)
 {
-	t_Response response;
-	bzero(&response, sizeof(response));
+	t_Response response; // check bzero etc...
 
 	setStatusLine(code, response);
 	setDefaultHeaders(mode, response);

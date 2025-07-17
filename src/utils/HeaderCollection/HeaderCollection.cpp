@@ -1,5 +1,6 @@
 #include "HeaderCollection.hpp"
 #include "utils/string/string.hpp"
+#include <sstream>
 #include <stdexcept>
 
 void HeaderCollection::addToExistingHeader(const std::string &headerKey, const std::string &headerValue)
@@ -14,6 +15,11 @@ void HeaderCollection::addToExistingHeader(const std::string &headerKey, const s
 HeaderCollection::HeaderCollection() {}
 
 HeaderCollection::~HeaderCollection() {}
+
+const std::vector<Header> &HeaderCollection::getHeaders() const
+{
+    return this->headers_;
+}
 
 Header HeaderCollection::getHeader(const std::string &headerKey) const
 {
@@ -83,11 +89,11 @@ void HeaderCollection::removeHeaders()
     this->headers_.clear();
 }
 
-std::ostream &operator<<(std::ostream &stream, HeaderCollection &hc)
+std::ostream &operator<<(std::ostream &stream, const HeaderCollection &hc)
 {
-	for (std::vector<Header>::iterator it = hc.headers_.begin(); it != hc.headers_.end(); ++it)
-		stream << *it << static_cast<std::string>("\r\n");
-	stream << static_cast<std::string>("\r\n");
+	for (std::vector<Header>::const_iterator it = hc.getHeaders().begin(); it != hc.getHeaders().end(); ++it)
+		stream << *it << "\r\n";
+	stream << "\r\n";
 
 	return stream;
 }
