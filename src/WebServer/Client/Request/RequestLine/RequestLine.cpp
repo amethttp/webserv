@@ -24,12 +24,12 @@ std::string RequestLine::getTargetUri() const
 
 std::string RequestLine::getTargetPath() const
 {
-    return this->target_.path;
+    return this->targetNew_.getUriPath();
 }
 
 std::string RequestLine::getTargetQuery() const
 {
-    return this->target_.query;
+    return this->targetNew_.getQueryPath();
 }
 
 std::string RequestLine::getHttpVersion() const

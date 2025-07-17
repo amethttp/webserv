@@ -9,7 +9,7 @@ class RequestProcesser
 private:
     RequestProcesser();
 
-    static SimpleResult processTargetPctDecoding(Target_t &target);
+    static SimpleResult processRequestLinePctDecoding(RequestLine &requestLine);
     static SimpleResult processHostHeaderPctDecoding(HeaderCollection &headers);
 
 public:

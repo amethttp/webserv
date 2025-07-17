@@ -51,6 +51,9 @@ Result<RequestLine> RequestFactory::buildRequestLineFromString(const std::string
     if (requestTargetProcessResult.isFailure())
         return Result<RequestLine>::fail(requestTargetProcessResult.getError());
 
+    requestLine.setTargetPath(requestLine.getTargetRef().path);
+    requestLine.setTargetQuery(requestLine.getTargetRef().query);
+
     return Result<RequestLine>::ok(requestLine);
 }
 

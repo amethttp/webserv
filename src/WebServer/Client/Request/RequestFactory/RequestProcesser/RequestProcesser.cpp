@@ -1,17 +1,16 @@
 #include "RequestProcesser.hpp"
 #include "utils/string/string.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
-#include "WebServer/Client/Request/RequestFactory/RequestTargetSeparator/RequestTargetSeparator.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 
-SimpleResult RequestProcesser::processTargetPctDecoding(Target_t &target)
+SimpleResult RequestProcesser::processRequestLinePctDecoding(RequestLine &requestLine)
 {
-    if (!RequestPctDecoder::isWellEncoded(target.path))
+    if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetPath()))
         return SimpleResult::fail(BAD_REQUEST_ERR);
-    if (!RequestPctDecoder::isWellEncoded(target.query))
+    if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetQuery()))
         return SimpleResult::fail(BAD_REQUEST_ERR);
 
-    target.path = RequestPctDecoder::decode(target.path);
+    requestLine.setTargetPath(RequestPctDecoder::decode(requestLine.getTargetPath()));
     return SimpleResult::ok();
 }
 
@@ -28,9 +27,7 @@ SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &he
 
 SimpleResult RequestProcesser::processRequestTargetNew(RequestLine &requestLine)
 {
-    RequestTargetSeparator::separateComponents(requestLine.getTargetRef());
-
-    const SimpleResult targetDecodingResult = processTargetPctDecoding(requestLine.getTargetRef());
+    const SimpleResult targetDecodingResult = processRequestLinePctDecoding(requestLine);
     if (targetDecodingResult.isFailure())
         return SimpleResult::fail(targetDecodingResult.getError());
 
@@ -46,8 +43,6 @@ SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
     RequestLine rql;
 
     rql.setTargetUri(target.uri);
-    rql.setTargetPath(target.path);
-    rql.setTargetQuery(target.query);
 
     const SimpleResult result = processRequestTargetNew(rql);
     if (result.isFailure())

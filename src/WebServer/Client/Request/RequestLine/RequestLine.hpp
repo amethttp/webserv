@@ -34,13 +34,15 @@ public:
     void setTargetUri(const std::string &uriString);
     void setHttpVersion(const std::string &httpVersionString);
 
-        void setTargetPath(const std::string & path)
+        void setTargetPath(const std::string &path)
         {
             target_.path = path;
+            targetNew_.setPath(path);
         }
 
-        void setTargetQuery(const std::string & query)
+        void setTargetQuery(const std::string &query)
         {
             target_.query = query;
+            targetNew_.setQuery(query);
         }
 };
