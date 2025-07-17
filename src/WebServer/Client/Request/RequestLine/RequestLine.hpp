@@ -24,7 +24,7 @@ public:
     ~RequestLine();
 
     method_t getMethod() const;
-    Target_t &getTargetRef();
+        Target_t &getTargetRef();
     std::string getTargetUri() const;
     std::string getTargetPath() const;
     std::string getTargetQuery() const;
@@ -33,4 +33,14 @@ public:
     void setMethod(const std::string &methodString);
     void setTargetUri(const std::string &uriString);
     void setHttpVersion(const std::string &httpVersionString);
+
+        void setTargetPath(const std::string & path)
+        {
+            target_.path = path;
+        }
+
+        void setTargetQuery(const std::string & query)
+        {
+            target_.query = query;
+        }
 };

@@ -26,15 +26,36 @@ SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &he
     return SimpleResult::ok();
 }
 
-SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
+SimpleResult RequestProcesser::processRequestTargetNew(RequestLine &requestLine)
 {
-    RequestTargetSeparator::separateComponents(target);
+    RequestTargetSeparator::separateComponents(requestLine.getTargetRef());
 
-    const SimpleResult targetDecodingResult = processTargetPctDecoding(target);
+    const SimpleResult targetDecodingResult = processTargetPctDecoding(requestLine.getTargetRef());
     if (targetDecodingResult.isFailure())
         return SimpleResult::fail(targetDecodingResult.getError());
 
-    RequestTargetNormalizer::normalizePath(target.path);
+    std::string newPath = requestLine.getTargetPath();
+    RequestTargetNormalizer::normalizePath(newPath);
+    requestLine.setTargetPath(newPath);
+
+    return SimpleResult::ok();
+}
+
+SimpleResult RequestProcesser::processRequestTarget(Target_t &target)
+{
+    RequestLine rql;
+
+    rql.setTargetUri(target.uri);
+    rql.setTargetPath(target.path);
+    rql.setTargetQuery(target.query);
+
+    const SimpleResult result = processRequestTargetNew(rql);
+    if (result.isFailure())
+        return result;
+
+    target.uri = rql.getTargetUri();
+    target.path = rql.getTargetPath();
+    target.query = rql.getTargetQuery();
 
     return SimpleResult::ok();
 }

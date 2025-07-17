@@ -13,6 +13,7 @@ private:
     static SimpleResult processHostHeaderPctDecoding(HeaderCollection &headers);
 
 public:
+    static SimpleResult processRequestTargetNew(RequestLine &requestLine);
     static SimpleResult processRequestTarget(Target_t &target);
     static SimpleResult processHeaders(HeaderCollection &headers);
 };
