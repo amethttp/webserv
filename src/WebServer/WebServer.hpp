@@ -12,7 +12,7 @@
 class WebServer
 {
 private:
-	std::vector<Server> servers_;
+	std::vector<Server *> servers_;
 	std::vector<Client *> clients_;
 
 	std::vector<fd_t> createServerFds();
@@ -35,7 +35,7 @@ public:
 	WebServer();
 	~WebServer();
 
-	void setServers(std::vector<Server> &servers);
+	void setServers(std::vector<Server *> &servers);
 
 	void serve();
 };

@@ -7,5 +7,5 @@
 
 namespace ServerMatcher
 {
-    Server matchServer(Request &request, std::vector<Server> &serverList);
+    Server *matchServer(Request &request, std::vector<Server *> &serverList);
 }

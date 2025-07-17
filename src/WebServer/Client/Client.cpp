@@ -257,17 +257,17 @@ static void setLocationsPH(Server &server)
 	server.setUploadPath("tests/www/uploads/");
 }
 
-void Client::buildResponse(std::vector<Server> &servers)
+void Client::buildResponse(std::vector<Server *> &servers)
 {
-	Server server;
+	Server *server;
 	Location location;
 	HandlingResult res;
 
 	server = ServerMatcher::matchServer(request_, servers);
-	setLocationsPH(server);
-	location = LocationMatcher::matchLocation(request_, server);
+	setLocationsPH(*server);
+	location = LocationMatcher::matchLocation(request_, *server);
 
-	res = RequestHandler::handleRequest(request_, location, server);
+	res = RequestHandler::handleRequest(request_, location, *server);
 	response_ = ResponseFactory::create(res);
 }
 

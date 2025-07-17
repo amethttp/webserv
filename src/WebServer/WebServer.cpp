@@ -17,10 +17,12 @@ WebServer::WebServer()
 WebServer::~WebServer()
 {
 	for (std::vector<Client*>::iterator it = clients_.begin(); it != clients_.end(); ++it) 
-	{
-    	delete *it;
-	}
+		delete *it;
 	this->clients_.clear();
+
+		for (std::vector<Server*>::iterator it = servers_.begin(); it != servers_.end(); ++it) 
+		delete *it;
+	this->servers_.clear();
 }
 
 std::vector<fd_t> WebServer::createServerFds()
@@ -33,9 +35,9 @@ std::vector<fd_t> WebServer::createServerFds()
 	bzero(&serverAddress, sizeof(serverAddress));
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 	serverAddress.sin_family = AF_INET;
-	for (std::vector<Server>::iterator serversIt = servers_.begin(); serversIt != servers_.end(); ++serversIt)
+	for (std::vector<Server *>::iterator serversIt = servers_.begin(); serversIt != servers_.end(); ++serversIt)
 	{
-		std::vector<int> serverPorts = serversIt->getPorts();
+		std::vector<int> serverPorts = (*serversIt)->getPorts();
 		for (std::vector<int>::iterator portsIt = serverPorts.begin(); portsIt != serverPorts.end(); ++portsIt)
 		{
 			serverAddress.sin_port = htons(*portsIt);
@@ -273,7 +275,7 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 	}
 }
 
-void WebServer::setServers(std::vector<Server> &servers)
+void WebServer::setServers(std::vector<Server *> &servers)
 {
 	this->servers_ = servers;
 }
