@@ -219,8 +219,8 @@ bool Client::shouldClose()
 
 static void setLocationsPH(Server &server)
 {
-	Location location;
-	std::vector<Location> testLocations;
+	Location *location;
+	std::vector<Location *> testLocations;
 	std::vector<std::string> indexes;
 	std::set<t_method> allowedMethods;
 	t_return ret;
@@ -236,22 +236,24 @@ static void setLocationsPH(Server &server)
 	test[".py"] = "/usr/bin/python3";
 	test[".sh"] = "/bin/bash";
 
-	location.setCGIs(test);
-	location.setRoot("tests/www");
-	location.setPath("/");
-	location.setAutoIndex(true);
-	location.setIndexList(indexes);
-	location.setMethods(allowedMethods);
+	location = new Location();
+	location->setCGIs(test);
+	location->setRoot("tests/www");
+	location->setPath("/");
+	location->setAutoIndex(true);
+	location->setIndexList(indexes);
+	location->setMethods(allowedMethods);
 	testLocations.push_back(location);
 
-	location.setRoot("tests/www");
-	location.setPath("/test/index");
+	location = new Location();
+	location->setRoot("tests/www");
+	location->setPath("/test/index");
 	ret.code = MOVED_PERMANENTLY;
 	ret.path = "/test/index/";
-	location.setReturn(ret);
-	location.setAutoIndex(false);
-	location.setIndexList(indexes);
-	location.setMethods(allowedMethods);
+	location->setReturn(ret);
+	location->setAutoIndex(false);
+	location->setIndexList(indexes);
+	location->setMethods(allowedMethods);
 	testLocations.push_back(location);
 	server.setLocations(testLocations);
 	server.setUploadPath("tests/www/uploads/");
@@ -260,14 +262,14 @@ static void setLocationsPH(Server &server)
 void Client::buildResponse(std::vector<Server *> &servers)
 {
 	Server *server;
-	Location location;
+	Location *location;
 	HandlingResult res;
 
 	server = ServerMatcher::matchServer(request_, servers);
 	setLocationsPH(*server);
 	location = LocationMatcher::matchLocation(request_, *server);
 
-	res = RequestHandler::handleRequest(request_, location, *server);
+	res = RequestHandler::handleRequest(request_, *location, *server);
 	response_ = ResponseFactory::create(res);
 }
 

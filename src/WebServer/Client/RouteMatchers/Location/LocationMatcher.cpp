@@ -33,17 +33,17 @@ namespace
 }
 
 // Decide on no locations defined on server
-Location LocationMatcher::matchLocation(Request &request, Server &server)
+Location *LocationMatcher::matchLocation(Request &request, Server &server)
 {
     int matchIndex = 0;
     int matchLength = 0;
     int longestMatch = 0;
     std::string targetRoute = request.getTarget();
-    std::vector<Location> locations = server.getLocations();
+    std::vector<Location *> locations = server.getLocations();
 
     for (size_t i = 0; i < locations.size(); ++i)
     {
-        matchLength = countMatchingDepth(locations[i].getPath(), targetRoute);
+        matchLength = countMatchingDepth(locations[i]->getPath(), targetRoute);
         if (matchLength > longestMatch)
         {
             matchIndex = i;

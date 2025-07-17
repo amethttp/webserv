@@ -8,5 +8,5 @@
 namespace LocationMatcher
 {
 	// Decide on no locations defined on server
-	Location matchLocation(Request &request, Server &server);
+	Location *matchLocation(Request &request, Server &server);
 }
