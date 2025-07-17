@@ -19,7 +19,7 @@ Target_t & RequestLine::getTargetRef()
 
 std::string RequestLine::getTargetUri() const
 {
-    return this->target_.uri;
+    return this->targetNew_.getUri();
 }
 
 std::string RequestLine::getTargetPath() const
@@ -52,6 +52,7 @@ void RequestLine::setMethod(const std::string &methodString)
 void RequestLine::setTargetUri(const std::string &uriString)
 {
     this->target_.uri = uriString;
+    this->targetNew_.setUri(uriString);
 }
 
 void RequestLine::setHttpVersion(const std::string &httpVersionString)

@@ -12,4 +12,8 @@ private:
 public:
     Target();
     ~Target();
+
+    std::string getUri() const;
+
+    void setUri(const std::string &uri);
 };
