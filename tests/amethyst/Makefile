@@ -116,7 +116,6 @@ SRCS = main.cpp \
        RequestParser.cpp \
        RequestTokenizer.cpp \
        RequestToken.cpp \
-       http.cpp \
        string.cpp \
        numeric.cpp \
        SimpleResult.cpp \

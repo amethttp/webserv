@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #define BAD_REQUEST_ERR "400 Bad Request"
 #define NOT_IMPLEMENTED_ERR "501 Not Implemented"
 #define URI_TOO_LONG_ERR "414 URI Too Long"
@@ -15,5 +13,3 @@ typedef enum method_e
 	DELETE,
 	NOT_IMPLEMENTED
 } method_t;
-
-method_t getHttpMethodFromString(const std::string &requestMethodString);
