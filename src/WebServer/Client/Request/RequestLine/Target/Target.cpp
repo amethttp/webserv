@@ -34,6 +34,8 @@ std::string Target::getQueryPath() const
 void Target::setUri(const std::string &uri)
 {
     this->uri_ = uri;
+    this->path_ = "";
+    this->query_ = "";
 
     separateUriComponents();
 }

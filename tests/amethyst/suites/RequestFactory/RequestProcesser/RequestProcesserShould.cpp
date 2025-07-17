@@ -5,17 +5,15 @@
 
 namespace
 {
-    Target_t target;
+    RequestLine requestLine;
     HeaderCollection headers;
 }
 
 static void processFromValidTargetUri(const std::string &requestTargetUri)
 {
-    target.path = "";
-    target.query = "";
-    target.uri = requestTargetUri;
+    requestLine.setTargetUri(requestTargetUri);
 
-    RequestProcesser::processRequestTarget(target);
+    RequestProcesser::processRequestTargetNew(requestLine);
 }
 
 static void processValidHeader(const std::string &headerKey, const std::string &headerValue)
@@ -29,8 +27,8 @@ static void processValidHeader(const std::string &headerKey, const std::string &
 
 static void assertTargetComponents(const std::string &path, const std::string &query)
 {
-    ASSERT_EQUALS(path, target.path);
-    ASSERT_EQUALS(query, target.query);
+    ASSERT_EQUALS(path, requestLine.getTargetPath());
+    ASSERT_EQUALS(query, requestLine.getTargetQuery());
 }
 
 static void assertHeader(const std::string &key, const std::string &value)
@@ -40,9 +38,9 @@ static void assertHeader(const std::string &key, const std::string &value)
 
 static void assertRequestIsInvalidFromTargetUri(const std::string &invalidRequestTargetUri)
 {
-    target.uri = invalidRequestTargetUri;
+    requestLine.setTargetUri(invalidRequestTargetUri);
 
-    const SimpleResult result = RequestProcesser::processRequestTarget(target);
+    const SimpleResult result = RequestProcesser::processRequestTargetNew(requestLine);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
