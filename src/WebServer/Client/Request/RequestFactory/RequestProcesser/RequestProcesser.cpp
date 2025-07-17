@@ -10,7 +10,9 @@ SimpleResult RequestProcesser::processRequestLinePctDecoding(RequestLine &reques
     if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetQuery()))
         return SimpleResult::fail(BAD_REQUEST_ERR);
 
-    requestLine.setTargetPath(RequestPctDecoder::decode(requestLine.getTargetPath()));
+    const std::string decodedPath = RequestPctDecoder::decode(requestLine.getTargetPath());
+    requestLine.setTargetPath(decodedPath);
+
     return SimpleResult::ok();
 }
 
