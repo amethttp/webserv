@@ -481,3 +481,10 @@ TEST(return_true_to_a_valid_and_complete_request)
 
     ASSERT_TRUE(result);
 }
+
+TEST(return_true_to_a_complex_and_valid_and_complete_request)
+{
+    const bool result = RequestFactory::canCreateAResponse("POST /index.html%AA?%AA? HTTP/1.1\r\nHost: localhost_%FD\r\nConnection: close\r\n\r\n");
+
+    ASSERT_TRUE(result);
+}
