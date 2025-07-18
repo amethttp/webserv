@@ -150,7 +150,7 @@ bool RequestParser::isCompleteChunkedBody()
     if (lastChunkSize.empty() || lastChunkSize.find_first_not_of('0') != std::string::npos)
         hasLastChunk = false;
 
-    while (std::isprint(this->currentToken_.getValue()[0]))
+    while (this->currentToken_.getType() != EOF && this->currentToken_.getValue() != "\r")
     {
         this->currentToken_ = this->tokenizer_.getOctetStreamToken(1);
     }
