@@ -147,5 +147,20 @@ bool RequestFactory::canCreateAResponse(const std::string &requestString)
     if (requestString.find("\r\n\r\n") == std::string::npos)
         return false;
 
+    const std::string headersString = getRequestHeadersString(requestString);
+    const Result<HeaderCollection> headersResult = buildRequestHeadersFromString(headersString);
+    if (headersResult.isFailure())
+        return true;
+
+    const HeaderCollection headers = headersResult.getValue();
+
+    if (headers.contains("Content-Length"))
+    {
+        const std::string bodyString = getRequestBodyString(requestString);
+        const size_t contentLengthSize = strToUlong(headers.getHeaderValue(CONTENT_LENGTH));
+
+        return bodyString.length() >= contentLengthSize;
+    }
+
     return true;
 }

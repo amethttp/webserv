@@ -1569,6 +1569,11 @@
 ### 26. Return true for a complete chunked-body with trailers and extensions
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4;ext=value\r\nWiki\r\n5\r\npedia\r\n0\r\nX-Trailer: foo\r\n\r\n"
 
+### 27. Return true for a complete or incomplete request with invalid headers
+"GET / HTTP/1.1\r\nHost: localhost\r\INVALID\r\n\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r\INVALID\r\n\r\nIncomplete"
+
+
 
 
 
@@ -1585,7 +1590,7 @@
 # 11. Full body parsing                                                                 DONE
 # 12. Chunked body parsing criteria                                                     DONE
 # 13. Chunked body parsing                                                              DONE
-# 14. RequestFactory::canCreateResponse() criteria                                      
+# 14. RequestFactory::canCreateResponse() criteria                                      DONE
 # 15. RequestFactory::canCreateResponse()                                               
 # 16. Final refactors and code checking                                                 
 # 17. Test canCreateResponse in every assert of all suites                              
