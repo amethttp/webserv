@@ -503,3 +503,11 @@ TEST(return_false_to_a_request_without_the_double_CRLF_separator)
     assertCannotCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n");
     assertCannotCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r");
 }
+
+TEST(return_true_to_an_invalid_but_complete_request)
+{
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("DELETE /index.html HTTP/1.1\r\nINVALID\r\n\r\n"));
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("INVALID\r\n\r\n"));
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("\x01\x05\x07\b\r\v\r\n\r\n"));
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("\r\n\r\n"));
+}
