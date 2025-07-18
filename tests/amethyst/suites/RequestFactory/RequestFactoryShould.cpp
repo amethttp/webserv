@@ -98,6 +98,13 @@ static void assertRequestIsInvalidFromBody(const std::string &bodyTypeHeader, co
     assertRequestIsInvalid(invalidRequestString, errorMessage);
 }
 
+static void assertCannotCreateAResponse(const std::string &requestString)
+{
+    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
+
+    ASSERT_FALSE(canCreateAResponse);
+}
+
 
 /* BASIC REQUEST TESTS */
 TEST(recognize_basic_HTTP_GET_request)
@@ -491,8 +498,8 @@ TEST(return_true_to_a_complex_and_valid_and_complete_request)
 
 TEST(return_false_to_a_request_without_the_double_CRLF_separator)
 {
-    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\n"));
-    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r"));
-    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n"));
-    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r"));
+    assertCannotCreateAResponse("GET / HTTP/1.1\r\n");
+    assertCannotCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r");
+    assertCannotCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n");
+    assertCannotCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r");
 }
