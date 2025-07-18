@@ -217,57 +217,14 @@ bool Client::shouldClose()
 
 }
 
-static void setLocationsPH(Server &server)
-{
-	Location *location;
-	std::vector<Location *> testLocations;
-	std::vector<std::string> indexes;
-	std::set<t_method> allowedMethods;
-	t_return ret;
-
-	std::map<std::string, std::string> test;
-
-	indexes.push_back("index");
-	indexes.push_back("index.html");
-	indexes.push_back("test.html");
-	indexes.push_back("test2.html");
-	allowedMethods.insert(M_GET);
-	allowedMethods.insert(M_POST);
-	test[".py"] = "/usr/bin/python3";
-	test[".sh"] = "/bin/bash";
-
-	location = new Location();
-	location->setCGIs(test);
-	location->setRoot("tests/www");
-	location->setPath("/");
-	location->setAutoIndex(true);
-	location->setIndexList(indexes);
-	location->setMethods(allowedMethods);
-	testLocations.push_back(location);
-
-	location = new Location();
-	location->setRoot("tests/www");
-	location->setPath("/test/index");
-	ret.code = MOVED_PERMANENTLY;
-	ret.path = "/test/index/";
-	location->setReturn(ret);
-	location->setAutoIndex(false);
-	location->setIndexList(indexes);
-	location->setMethods(allowedMethods);
-	testLocations.push_back(location);
-	server.setLocations(testLocations);
-	server.setUploadPath("tests/www/uploads/");
-}
-
 void Client::buildResponse(std::vector<Server *> &servers)
 {
 	Server *server;
 	Location *location;
 	HandlingResult res;
-
 	this->responseBuffer_.clear();
+
 	server = ServerMatcher::matchServer(request_, servers);
-	setLocationsPH(*server);
 	location = LocationMatcher::matchLocation(request_, *server);
 
 	res = RequestHandler::handleRequest(request_, *location, *server);
