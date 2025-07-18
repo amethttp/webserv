@@ -1548,7 +1548,7 @@
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0f\r\nIncomplete body\r\nf\r\nIncomplete"
 
 ### 21. Return true for an inconsistent chunk-size request with an complete chunked body
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0f\r\nIncomplete bodyyyyyyy\r\n0F\r\nIncomplete\r\n0\r\n\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\nf\r\nIncomplete bodyyyyyyy\r\n0F\r\nIncomplete\r\n0\r\n\r\n"
 
 ### 22. Return false for a request with incomplete chunked-body trailer-fields
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0f\r\nIncomplete body\r\n0\r\nIncomplete"

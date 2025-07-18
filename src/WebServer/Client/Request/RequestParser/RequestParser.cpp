@@ -137,7 +137,17 @@ Result<Body> RequestParser::parseChunkedBody()
 
 bool RequestParser::isCompleteChunkedBody()
 {
-    if (this->tokenizer_.getOctetStreamToken(1).getValue() != "0")
+    do
+    {
+        this->currentToken_ = this->tokenizer_.getOctetStreamToken(1);
+    }
+    while (this->currentToken_.getValue() == "0");
+
+    std::string crlf = this->currentToken_.getValue();
+    this->currentToken_ = this->tokenizer_.getOctetStreamToken(1);
+    crlf += this->currentToken_.getValue();
+
+    if (crlf != "\r\n")
         return false;
 
     return true;
