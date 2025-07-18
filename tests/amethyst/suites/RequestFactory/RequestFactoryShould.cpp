@@ -525,3 +525,9 @@ TEST(return_true_to_a_complete_request_with_a_valid_full_body)
     assertCanCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
     assertCanCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nValid body");
 }
+
+TEST(return_true_to_a_complete_request_with_an_invalid_full_body)
+{
+    assertCanCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\nInvalid body");
+    assertCanCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nInvalid body");
+}
