@@ -555,6 +555,7 @@ TEST(return_false_to_a_request_with_an_incomplete_full_body)
 TEST(return_true_to_a_request_with_a_complete_chunked_body)
 {
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "00000000\r\n\r\n");
 }
 
 TEST(return_false_to_a_request_with_a_chunked_body_whose_last_chunk_has_invalid_chunk_size)

@@ -1493,6 +1493,7 @@
 
 ### 9. Return true for a complete request with a complete chunked body
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n00000000\r\n\r\n"
 
 ### 10. Return false for an invalid request with a chunked body with an invalid last chunk
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\ninvalid\r\n\r\n"
