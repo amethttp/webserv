@@ -112,6 +112,20 @@ static void assertCanCreateAResponseIsFalse(const std::string &requestString)
     ASSERT_FALSE(canCreateAResponse);
 }
 
+static void assertCanCreateAResponseIsTrueFromBody(const std::string &bodyTypeHeader, const std::string &body)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static void assertCanCreateAResponseIsFalseFromBody(const std::string &bodyTypeHeader, const std::string &body)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
+
+    assertCanCreateAResponseIsFalse(requestString);
+}
+
 
 /* BASIC REQUEST TESTS */
 TEST(recognize_basic_HTTP_GET_request)
@@ -517,35 +531,35 @@ TEST(return_true_to_an_invalid_but_complete_request)
 
 TEST(return_true_to_a_complete_request_with_an_invalid_body)
 {
-    assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\n\r\nInvalid But Complete Body");
+    assertCanCreateAResponseIsTrueFromBody("No-Header: no header", "Invalid But Complete Body");
 }
 
 TEST(return_true_to_a_complete_request_with_a_valid_full_body)
 {
-    assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n");
-    assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nValid body");
+    assertCanCreateAResponseIsTrueFromBody("Content-Length: 0", "");
+    assertCanCreateAResponseIsTrueFromBody("Content-Length: 10", "Valid body");
 }
 
 TEST(return_true_to_a_complete_request_with_an_invalid_full_body)
 {
-    assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\nInvalid body");
-    assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nInvalid body");
+    assertCanCreateAResponseIsTrueFromBody("Content-Length: 0", "Invalid body");
+    assertCanCreateAResponseIsTrueFromBody("Content-Length: 10", "Invalid body");
 }
 
 TEST(return_false_to_a_request_with_an_incomplete_full_body)
 {
-    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\n");
-    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 15\r\n\r\nIncomplete");
+    assertCanCreateAResponseIsFalseFromBody("Content-Length: 10", "");
+    assertCanCreateAResponseIsFalseFromBody("Content-Length: 15", "Incomplete");
 }
 
 TEST(return_true_to_a_request_with_a_complete_chunked_body)
 {
-    assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\n\r\n");
 }
 
 TEST(return_false_to_a_request_with_a_chunked_body_whose_last_chunk_has_invalid_chunk_size)
 {
-    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\ninvalid\r\n\r\n");
-    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\b\v\r\n\r\n");
-    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\nxx\r\n\r\n");
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "invalid\r\n\r\n");
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "\b\v\r\n\r\n");
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "xx\r\n\r\n");
 }
