@@ -560,6 +560,8 @@ TEST(return_true_to_a_request_with_a_complete_chunked_body)
 
 TEST(return_false_to_a_request_with_a_chunked_body_whose_last_chunk_has_invalid_chunk_size)
 {
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "");
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "\r\n\r\n");
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "invalid\r\n\r\n");
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "\b\v\r\n\r\n");
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "xx\r\n\r\n");

@@ -1496,6 +1496,8 @@
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n00000000\r\n\r\n"
 
 ### 10. Return false for an invalid request with a chunked body with an invalid last chunk
+"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\r\n\r\n"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\ninvalid\r\n\r\n"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\b\v\r\n\r\n"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\nxx\r\n\r\n"
@@ -1507,7 +1509,8 @@
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;ext\r"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;ext\r\n"
 
-### 12. Return true for an invalid request with a chunked body with a complete last chunk
+### 12. Return true for a request with a chunked body with a complete last chunk
+"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext=value;ext=\"\"\r\n\r\n"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\v\b\f\r\n\r\n"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;\v\b\f\r\n\r\n"
 
@@ -1564,13 +1567,10 @@
 ### 24. Return true for a request with complete chunked-body
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0f\r\nComplete body\r\n0\r\nComplete: trailer\r\n\r\n"
 
-### 25. Return false for a request with an empty chunked body
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n"
-
-### 26. Return true for a complete chunked-body with trailers and extensions
+### 25. Return true for a complete chunked-body with trailers and extensions
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4;ext=value\r\nWiki\r\n5\r\npedia\r\n0\r\nX-Trailer: foo\r\n\r\n"
 
-### 27. Return true for a complete or incomplete request with invalid headers
+### 26. Return true for a complete or incomplete request with invalid headers
 "GET / HTTP/1.1\r\nHost: localhost\r\INVALID\r\n\r\n"
 "GET / HTTP/1.1\r\nHost: localhost\r\INVALID\r\n\r\nIncomplete"
 
