@@ -514,3 +514,8 @@ TEST(return_true_to_an_invalid_but_complete_request)
     assertCanCreateAResponse("\x01\x05\x07\b\r\v\r\n\r\n");
     assertCanCreateAResponse("\r\n\r\n");
 }
+
+TEST(return_true_to_a_complete_request_with_an_invalid_body)
+{
+    assertCanCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r\nInvalid But Complete Body");
+}
