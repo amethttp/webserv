@@ -472,3 +472,12 @@ TEST(take_as_failure_a_request_with_an_invalid_body)
 {
     assertRequestIsInvalidFromBody("Transfer-Encoding: chunked", "INVALID BODY", BAD_REQUEST_ERR);
 }
+
+
+/* CAN CREATE A RESPONSE TESTS*/
+TEST(return_true_to_a_valid_and_complete_request)
+{
+    const bool result = RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+
+    ASSERT_TRUE(result);
+}

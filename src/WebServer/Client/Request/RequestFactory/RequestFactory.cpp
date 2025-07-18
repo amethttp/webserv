@@ -5,27 +5,27 @@
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestProcesser/RequestProcesser.hpp"
 
-std::string RequestFactory::getRequestLineString(const std::string &requestBuffer)
+std::string RequestFactory::getRequestLineString(const std::string &requestString)
 {
-    const size_t requestLineEnd = requestBuffer.find("\r\n");
+    const size_t requestLineEnd = requestString.find("\r\n");
 
-    return requestBuffer.substr(0, requestLineEnd);
+    return requestString.substr(0, requestLineEnd);
 }
 
-std::string RequestFactory::getRequestHeadersString(const std::string &requestBuffer)
+std::string RequestFactory::getRequestHeadersString(const std::string &requestString)
 {
-    const size_t requestLineEnd = requestBuffer.find("\r\n");
-    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
+    const size_t requestLineEnd = requestString.find("\r\n");
+    const size_t headersEnd = requestString.find("\r\n\r\n");
     const size_t headersSize = headersEnd - requestLineEnd - 2;
 
-    return requestBuffer.substr(requestLineEnd + 2, headersSize);
+    return requestString.substr(requestLineEnd + 2, headersSize);
 }
 
-std::string RequestFactory::getRequestBodyString(const std::string &requestBuffer)
+std::string RequestFactory::getRequestBodyString(const std::string &requestString)
 {
-    const size_t headersEnd = requestBuffer.find("\r\n\r\n");
+    const size_t headersEnd = requestString.find("\r\n\r\n");
 
-    return requestBuffer.substr(headersEnd + 4);
+    return requestString.substr(headersEnd + 4);
 }
 
 RequestParser RequestFactory::createParser(const std::string &text)
@@ -117,12 +117,12 @@ Result<Body> RequestFactory::buildRequestBodyFromString(const HeaderCollection &
     return Result<Body>::ok(Body());
 }
 
-Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
+Result<Request_t> RequestFactory::create(const std::string &requestString)
 {
     Request_t request;
-    const std::string requestLineString = getRequestLineString(requestBuffer);
-    const std::string requestHeadersString = getRequestHeadersString(requestBuffer);
-    const std::string requestBodyString = getRequestBodyString(requestBuffer);
+    const std::string requestLineString = getRequestLineString(requestString);
+    const std::string requestHeadersString = getRequestHeadersString(requestString);
+    const std::string requestBodyString = getRequestBodyString(requestString);
 
     const Result<RequestLine> requestLineResult = buildRequestLineFromString(requestLineString);
     if (requestLineResult.isFailure())
@@ -140,4 +140,10 @@ Result<Request_t> RequestFactory::create(const std::string &requestBuffer)
     request.body = requestBodyResult.getValue();
 
     return Result<Request_t>::ok(request);
+}
+
+bool RequestFactory::canCreateAResponse(const std::string &requestString)
+{
+    (void) requestString;
+    return true;
 }
