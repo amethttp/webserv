@@ -134,3 +134,11 @@ Result<Body> RequestParser::parseChunkedBody()
 
     return Result<Body>::ok(body);
 }
+
+bool RequestParser::isCompleteChunkedBody()
+{
+    if (this->tokenizer_.getOctetStreamToken(1).getValue() != "0")
+        return false;
+
+    return true;
+}

@@ -31,4 +31,6 @@ public:
     Result<HeaderCollection> parseHeaders();
     Result<Body> parseFullBody(size_t contentLengthSize);
     Result<Body> parseChunkedBody();
+
+    bool isCompleteChunkedBody();
 };

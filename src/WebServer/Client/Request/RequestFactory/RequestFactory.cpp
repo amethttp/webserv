@@ -162,5 +162,13 @@ bool RequestFactory::canCreateAResponse(const std::string &requestString)
         return bodyString.length() >= contentLengthSize;
     }
 
+    if (headers.contains("Transfer-Encoding"))
+    {
+        const std::string bodyString = getRequestBodyString(requestString);
+        RequestParser parser = createParser(bodyString);
+
+        return parser.isCompleteChunkedBody();
+    }
+
     return true;
 }

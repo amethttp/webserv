@@ -542,3 +542,10 @@ TEST(return_true_to_a_request_with_a_complete_chunked_body)
 {
     assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n");
 }
+
+TEST(return_false_to_a_request_with_a_chunked_body_whose_last_chunk_has_invalid_chunk_size)
+{
+    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\ninvalid\r\n\r\n");
+    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\b\v\r\n\r\n");
+    assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\nxx\r\n\r\n");
+}
