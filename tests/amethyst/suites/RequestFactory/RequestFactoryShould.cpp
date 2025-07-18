@@ -98,6 +98,13 @@ static void assertRequestIsInvalidFromBody(const std::string &bodyTypeHeader, co
     assertRequestIsInvalid(invalidRequestString, errorMessage);
 }
 
+static void assertCanCreateAResponse(const std::string &requestString)
+{
+    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
+
+    ASSERT_TRUE(canCreateAResponse);
+}
+
 static void assertCannotCreateAResponse(const std::string &requestString)
 {
     const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
@@ -484,16 +491,12 @@ TEST(take_as_failure_a_request_with_an_invalid_body)
 /* CAN CREATE A RESPONSE TESTS*/
 TEST(return_true_to_a_valid_and_complete_request)
 {
-    const bool result = RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-
-    ASSERT_TRUE(result);
+    assertCanCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 }
 
 TEST(return_true_to_a_complex_and_valid_and_complete_request)
 {
-    const bool result = RequestFactory::canCreateAResponse("POST /index.html%AA?%AA? HTTP/1.1\r\nHost: localhost_%FD\r\nConnection: close\r\n\r\n");
-
-    ASSERT_TRUE(result);
+    assertCanCreateAResponse("POST /index.html%AA?%AA? HTTP/1.1\r\nHost: localhost_%FD\r\nConnection: close\r\n\r\n");
 }
 
 TEST(return_false_to_a_request_without_the_double_CRLF_separator)
@@ -506,8 +509,8 @@ TEST(return_false_to_a_request_without_the_double_CRLF_separator)
 
 TEST(return_true_to_an_invalid_but_complete_request)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("DELETE /index.html HTTP/1.1\r\nINVALID\r\n\r\n"));
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("INVALID\r\n\r\n"));
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("\x01\x05\x07\b\r\v\r\n\r\n"));
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("\r\n\r\n"));
+    assertCanCreateAResponse("DELETE /index.html HTTP/1.1\r\nINVALID\r\n\r\n");
+    assertCanCreateAResponse("INVALID\r\n\r\n");
+    assertCanCreateAResponse("\x01\x05\x07\b\r\v\r\n\r\n");
+    assertCanCreateAResponse("\r\n\r\n");
 }
