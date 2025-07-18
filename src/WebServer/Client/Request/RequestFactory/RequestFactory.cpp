@@ -144,6 +144,8 @@ Result<Request_t> RequestFactory::create(const std::string &requestString)
 
 bool RequestFactory::canCreateAResponse(const std::string &requestString)
 {
-    (void) requestString;
+    if (requestString.find("\r\n\r\n") == std::string::npos)
+        return false;
+
     return true;
 }

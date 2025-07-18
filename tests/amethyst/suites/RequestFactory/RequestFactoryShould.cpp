@@ -488,3 +488,11 @@ TEST(return_true_to_a_complex_and_valid_and_complete_request)
 
     ASSERT_TRUE(result);
 }
+
+TEST(return_false_to_a_request_without_the_double_CRLF_separator)
+{
+    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\n"));
+    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r"));
+    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n"));
+    ASSERT_FALSE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\n\r"));
+}
