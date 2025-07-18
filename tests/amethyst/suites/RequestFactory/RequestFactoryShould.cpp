@@ -537,3 +537,8 @@ TEST(return_false_to_a_request_with_an_incomplete_full_body)
     assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\n");
     assertCanCreateAResponseIsFalse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 15\r\n\r\nIncomplete");
 }
+
+TEST(return_true_to_a_request_with_a_complete_chunked_body)
+{
+    assertCanCreateAResponseIsTrue("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n");
+}
