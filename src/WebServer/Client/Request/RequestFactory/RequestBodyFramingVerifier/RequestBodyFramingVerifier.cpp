@@ -1,5 +1,10 @@
 #include "RequestBodyFramingVerifier.hpp"
 
+bool RequestBodyFramingVerifier::hasFinishedText() const
+{
+    return this->pos_ >= this->text_.length();
+}
+
 RequestBodyFramingVerifier::RequestBodyFramingVerifier(const std::string &bodyString)
 {
     this->text_ = bodyString;
@@ -19,10 +24,10 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
     if (this->currentChar_ != '0')
         return false;
 
-    while (this->pos_ < this->text_.length() && this->currentChar_ == '0')
+    while (!hasFinishedText() && this->currentChar_ == '0')
     {
         this->pos_++;
-        if (this->pos_ < this->text_.length())
+        if (!hasFinishedText())
             this->currentChar_ = this->text_[this->pos_];
     }
 

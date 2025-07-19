@@ -9,6 +9,8 @@ private:
     size_t pos_;
     char currentChar_;
 
+    bool hasFinishedText() const;
+
 public:
     RequestBodyFramingVerifier(const std::string &bodyString);
     ~RequestBodyFramingVerifier();
