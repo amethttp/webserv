@@ -1,8 +1,8 @@
 #include "RequestBodyFramingVerifier.hpp"
 
-void RequestBodyFramingVerifier::advance()
+void RequestBodyFramingVerifier::advance(const size_t amount)
 {
-    this->pos_++;
+    this->pos_ += amount;
 
     if (!hasFinishedText())
         this->currentChar_ = this->text_[this->pos_];
@@ -56,8 +56,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
             advance();
         }
 
-        advance();
-        advance();
+        advance(2);
     }
 
     if (this->currentChar_ != '\r' || peek() != '\n')

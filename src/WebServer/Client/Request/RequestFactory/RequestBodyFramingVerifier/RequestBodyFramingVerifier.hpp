@@ -9,7 +9,7 @@ private:
     size_t pos_;
     char currentChar_;
 
-    void advance();
+    void advance(size_t amount = 1);
     char peek() const;
 
     bool hasFinishedText() const;
