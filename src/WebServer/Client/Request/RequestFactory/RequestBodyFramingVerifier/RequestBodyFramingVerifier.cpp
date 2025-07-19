@@ -39,6 +39,16 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         advance();
     }
 
+    if (this->currentChar_ == ';')
+    {
+        advance();
+
+        while (!hasFinishedText() && this->currentChar_ != '\r')
+        {
+            advance();
+        }
+    }
+
     if (this->currentChar_ != '\r')
         return false;
 
