@@ -13,4 +13,5 @@ public:
     ~RequestBodyFramingVerifier();
 
     bool isFullBodyComplete(const size_t &contentLengthSize) const;
+    bool isChunkedBodyComplete();
 };

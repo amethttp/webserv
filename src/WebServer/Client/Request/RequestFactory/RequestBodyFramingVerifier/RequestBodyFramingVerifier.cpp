@@ -12,3 +12,8 @@ bool RequestBodyFramingVerifier::isFullBodyComplete(const size_t &contentLengthS
 {
     return this->text.length() >= contentLengthSize;
 }
+
+bool RequestBodyFramingVerifier::isChunkedBodyComplete()
+{
+    return true;
+}

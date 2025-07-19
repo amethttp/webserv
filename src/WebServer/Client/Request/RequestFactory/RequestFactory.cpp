@@ -166,7 +166,10 @@ bool RequestFactory::canCreateAResponse(const std::string &requestString)
 
     if (headers.contains("Transfer-Encoding"))
     {
-        return true;
+        const std::string bodyString = getRequestBodyString(requestString);
+        RequestBodyFramingVerifier requestBodyFramingVerifier = RequestBodyFramingVerifier(bodyString);
+
+        return requestBodyFramingVerifier.isChunkedBodyComplete();
     }
 
     return true;
