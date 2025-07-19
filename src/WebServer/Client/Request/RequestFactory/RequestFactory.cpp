@@ -149,26 +149,23 @@ bool RequestFactory::canCreateAResponse(const std::string &requestString)
         return false;
 
     const std::string headersString = getRequestHeadersString(requestString);
+    const std::string bodyString = getRequestBodyString(requestString);
+
     const Result<HeaderCollection> headersResult = buildRequestHeadersFromString(headersString);
     if (headersResult.isFailure())
         return true;
 
     const HeaderCollection headers = headersResult.getValue();
+    RequestBodyFramingVerifier requestBodyFramingVerifier(bodyString);
 
     if (headers.contains("Content-Length"))
     {
-        const std::string bodyString = getRequestBodyString(requestString);
         const size_t contentLengthSize = strToUlong(headers.getHeaderValue(CONTENT_LENGTH));
-        const RequestBodyFramingVerifier requestBodyFramingVerifier = RequestBodyFramingVerifier(bodyString);
-
         return requestBodyFramingVerifier.isFullBodyComplete(contentLengthSize);
     }
 
     if (headers.contains("Transfer-Encoding"))
     {
-        const std::string bodyString = getRequestBodyString(requestString);
-        RequestBodyFramingVerifier requestBodyFramingVerifier = RequestBodyFramingVerifier(bodyString);
-
         return requestBodyFramingVerifier.isChunkedBodyComplete();
     }
 
