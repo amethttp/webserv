@@ -13,6 +13,7 @@ private:
     char peek() const;
 
     bool hasFinishedText() const;
+    bool isCrlf() const;
 
 public:
     RequestBodyFramingVerifier(const std::string &bodyString);

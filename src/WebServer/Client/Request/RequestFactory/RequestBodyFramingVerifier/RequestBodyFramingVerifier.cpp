@@ -23,6 +23,11 @@ bool RequestBodyFramingVerifier::hasFinishedText() const
     return this->pos_ >= this->text_.length();
 }
 
+bool RequestBodyFramingVerifier::isCrlf() const
+{
+    return this->currentChar_ == '\r' && peek() == '\n';
+}
+
 RequestBodyFramingVerifier::RequestBodyFramingVerifier(const std::string &bodyString)
 {
     this->text_ = bodyString;
@@ -51,7 +56,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
     {
         advance();
 
-        while (!hasFinishedText() && (this->currentChar_ != '\r' || peek() != '\n'))
+        while (!hasFinishedText() && !isCrlf())
         {
             advance();
         }
@@ -59,8 +64,5 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         advance(2);
     }
 
-    if (this->currentChar_ != '\r' || peek() != '\n')
-        return false;
-
-    return true;
+    return isCrlf();
 }
