@@ -9,6 +9,8 @@ private:
     size_t pos_;
     char currentChar_;
 
+    void advance();
+
     bool hasFinishedText() const;
 
 public:

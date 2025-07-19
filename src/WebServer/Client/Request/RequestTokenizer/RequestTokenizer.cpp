@@ -20,6 +20,8 @@ void RequestTokenizer::advance(const size_t amount)
 
     if (!hasFinishedText())
         this->currentChar_ = this->text_[this->pos_];
+    else
+        this->currentChar_ = '\0';
 }
 
 char RequestTokenizer::peek(const size_t distance) const
