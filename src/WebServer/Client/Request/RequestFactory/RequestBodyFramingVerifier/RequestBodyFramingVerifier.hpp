@@ -7,6 +7,7 @@ class RequestBodyFramingVerifier
 private:
     std::string text_;
     size_t pos_;
+    char currentChar_;
 
 public:
     RequestBodyFramingVerifier(const std::string &bodyString);
