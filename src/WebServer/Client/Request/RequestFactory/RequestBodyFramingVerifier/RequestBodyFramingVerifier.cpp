@@ -15,5 +15,8 @@ bool RequestBodyFramingVerifier::isFullBodyComplete(const size_t &contentLengthS
 
 bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 {
+    if (this->text[this->pos] != '0')
+        return false;
+
     return true;
 }
