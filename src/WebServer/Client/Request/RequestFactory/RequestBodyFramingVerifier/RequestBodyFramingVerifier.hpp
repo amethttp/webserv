@@ -10,6 +10,7 @@ private:
     char currentChar_;
 
     void advance();
+    char peek() const;
 
     bool hasFinishedText() const;
 

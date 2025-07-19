@@ -576,3 +576,11 @@ TEST(return_true_to_a_request_with_a_chunked_body_whose_last_chunk_is_complete_a
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\n\r\n");
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0;ext;;;\b\v;;;ext=\"\f\";ext=\r\r\n\r\n");
 }
+
+TEST(return_false_to_a_request_with_a_chunked_body_whose_last_chunk_has_malformed_CRLF_separator)
+{
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0\r\r\n");
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0\n\r\n");
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0;ext;ext=val\r\r\n");
+    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0;;\f;;\b\v\n\r\n");
+}

@@ -10,6 +10,14 @@ void RequestBodyFramingVerifier::advance()
         this->currentChar_ = '\0';
 }
 
+char RequestBodyFramingVerifier::peek() const
+{
+    if (this->pos_ + 1 >= this->text_.length())
+        return '\0';
+
+    return this->text_[this->pos_ + 1];
+}
+
 bool RequestBodyFramingVerifier::hasFinishedText() const
 {
     return this->pos_ >= this->text_.length();
@@ -43,13 +51,16 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
     {
         advance();
 
-        while (!hasFinishedText() && this->currentChar_ != '\r')
+        while (!hasFinishedText() && (this->currentChar_ != '\r' || peek() != '\n'))
         {
             advance();
         }
+
+        advance();
+        advance();
     }
 
-    if (this->currentChar_ != '\r')
+    if (this->currentChar_ != '\r' || peek() != '\n')
         return false;
 
     return true;
