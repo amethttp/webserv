@@ -77,6 +77,7 @@ vpath %.cpp $(SRC):\
             $(PROJ_SRC)WebServer/Client/Request/HeaderCollection/Header\
             $(PROJ_SRC)WebServer/Client/Request/Body/\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/\
+            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestBodyFramingVerifier\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/HostHeaderValidator\
             $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator\
@@ -105,6 +106,7 @@ SRCS = main.cpp \
        Header.cpp \
        Body.cpp \
        RequestFactory.cpp \
+       RequestBodyFramingVerifier.cpp \
        RequestValidator.cpp \
        HostHeaderValidator.cpp \
        ContentLengthHeaderValidator.cpp \

@@ -4,6 +4,7 @@
 #include "../RequestParser/RequestParser.hpp"
 #include "RequestValidator/RequestValidator.hpp"
 #include "RequestProcesser/RequestProcesser.hpp"
+#include "RequestBodyFramingVerifier/RequestBodyFramingVerifier.hpp"
 
 std::string RequestFactory::getRequestLineString(const std::string &requestString)
 {
@@ -158,8 +159,9 @@ bool RequestFactory::canCreateAResponse(const std::string &requestString)
     {
         const std::string bodyString = getRequestBodyString(requestString);
         const size_t contentLengthSize = strToUlong(headers.getHeaderValue(CONTENT_LENGTH));
+        const RequestBodyFramingVerifier requestBodyFramingVerifier = RequestBodyFramingVerifier(bodyString);
 
-        return bodyString.length() >= contentLengthSize;
+        return requestBodyFramingVerifier.isFullBodyComplete(contentLengthSize);
     }
 
     if (headers.contains("Transfer-Encoding"))
