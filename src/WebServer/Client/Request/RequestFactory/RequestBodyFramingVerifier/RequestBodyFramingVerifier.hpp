@@ -5,8 +5,8 @@
 class RequestBodyFramingVerifier
 {
 private:
-    std::string text;
-    size_t pos;
+    std::string text_;
+    size_t pos_;
 
 public:
     RequestBodyFramingVerifier(const std::string &bodyString);
