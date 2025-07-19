@@ -557,28 +557,3 @@ TEST(return_true_to_a_request_with_a_complete_chunked_body)
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\n\r\n");
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "00000000\r\n\r\n");
 }
-
-TEST(return_false_to_a_request_with_a_chunked_body_whose_last_chunk_has_invalid_chunk_size)
-{
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "\r\n\r\n");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "invalid\r\n\r\n");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "\b\v\r\n\r\n");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "xx\r\n\r\n");
-}
-
-TEST(return_false_to_a_request_with_a_chunked_body_whose_last_chunk_has_an_incomplete_chunk_extension)
-{
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0;");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0;ext=;ex2");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0;ext=\"");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0;ext;ext\r");
-    assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0;ext;ext\r\n");
-}
-
-TEST(return_true_to_a_request_with_a_chunked_body_whose_last_chunk_is_complete)
-{
-    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0;ext=value;ext=\"\"\r\n\r\n");
-    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\v\b\f\r\n\r\n");
-    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0;ext\v\b\f\r\n\r\n");
-}

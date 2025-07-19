@@ -134,36 +134,3 @@ Result<Body> RequestParser::parseChunkedBody()
 
     return Result<Body>::ok(body);
 }
-
-bool RequestParser::isCompleteChunkedBody()
-{
-    bool hasLastChunk = true;
-    std::string lastChunkSize;
-
-    do
-    {
-        lastChunkSize += this->currentToken_.getValue();
-        this->currentToken_ = this->tokenizer_.getOctetStreamToken(1);
-    }
-    while (std::isxdigit(this->currentToken_.getValue()[0]));
-
-    if (lastChunkSize.empty() || lastChunkSize.find_first_not_of('0') != std::string::npos)
-        hasLastChunk = false;
-
-    while (this->currentToken_.getType() != EOF && this->currentToken_.getValue() != "\r")
-    {
-        this->currentToken_ = this->tokenizer_.getOctetStreamToken(1);
-    }
-
-    std::string crlf = this->currentToken_.getValue();
-    this->currentToken_ = this->tokenizer_.getOctetStreamToken(1);
-    crlf += this->currentToken_.getValue();
-
-    if (!hasLastChunk || crlf != "\r\n")
-        return false;
-
-    if (this->tokenizer_.getOctetStreamToken(2).getValue() != "\r\n")
-        return false;
-
-    return true;
-}
