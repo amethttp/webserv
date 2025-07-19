@@ -1521,7 +1521,7 @@
 ### 15. Return false for a last chunk with extensions without CRLF separator
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;ext="
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;;\b;e"
+"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;;;;\f\v;;\b;e"
 "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;;;;;\r"
 
 ### 16. Return true for a request with a chunked body with a complete chunk
