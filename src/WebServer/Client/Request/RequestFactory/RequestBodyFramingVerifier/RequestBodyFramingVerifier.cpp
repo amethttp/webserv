@@ -29,6 +29,9 @@ bool RequestBodyFramingVerifier::isLastChunk() const
 {
     int distance = 0;
 
+    if (peek(distance) != '0')
+        return false;
+
     while (peek(distance) == '0')
     {
         distance++;
@@ -60,6 +63,9 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 {
     if (!isLastChunk())
     {
+        if (!std::isxdigit(this->currentChar_))
+            return false;
+
         while (!hasFinishedText() && std::isxdigit(this->currentChar_))
         {
             advance();
