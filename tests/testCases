@@ -1570,6 +1570,7 @@
 
 ### 25. Return false for a chunk with chunk size bigger than chunk data
 "0b\r\ntoo\r\nSmall\r\n0\r\n\r\n"
+"0b;ext\r\ntoo\r\nSmall\r\n0\r\n\r\n"
 
 ### 26. Return false for a chunked body without last CRLF
 "0\r\n"
