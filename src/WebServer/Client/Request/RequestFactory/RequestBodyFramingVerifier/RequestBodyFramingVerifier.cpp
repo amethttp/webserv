@@ -61,7 +61,7 @@ bool RequestBodyFramingVerifier::isFullBodyComplete(const size_t &contentLengthS
 
 bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 {
-    if (!isLastChunk())
+    while (!isLastChunk())
     {
         if (!std::isxdigit(this->currentChar_))
             return false;

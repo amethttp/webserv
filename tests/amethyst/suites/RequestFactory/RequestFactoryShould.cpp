@@ -646,3 +646,12 @@ TEST(return_false_to_a_request_with_a_chunked_body_that_contains_a_chunk_with_ch
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0a;ext;;\b;e");
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0a;;;;;\r");
 }
+
+TEST(return_true_to_a_request_with_a_chunked_body_that_contains_multiple_complete_chunks)
+{
+    const std::string completeAndValidBody = "0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\n\r\n";
+    const std::string completeAndInvalidBody = "0000A;;;;;;ext=\";ext=\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;\b\t\v\r\nCompleted\r\n0;ext=\"\r\r\n\r\n";
+
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", completeAndValidBody);
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", completeAndInvalidBody);
+}
