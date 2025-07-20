@@ -682,3 +682,12 @@ TEST(return_false_to_a_request_with_a_chunked_body_without_last_chunk)
 {
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "0a\r\nvalid body\r\n");
 }
+
+TEST(return_true_to_a_request_with_a_chunked_body_with_complete_trailer_fields)
+{
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\ntrailer: field\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\ninvalid\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\ntrailer: \b\f\\\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\ntrailer:field\r\nTrailer:field\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\ninvalid\r\ninvalid\r\n\r\n");
+}
