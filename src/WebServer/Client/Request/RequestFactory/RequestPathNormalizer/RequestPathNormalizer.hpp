@@ -5,10 +5,10 @@
 
 typedef std::vector<std::string> pathSegments_t;
 
-class RequestTargetNormalizer
+class RequestPathNormalizer
 {
 private:
-    RequestTargetNormalizer();
+    RequestPathNormalizer();
 
     static bool isLastElement(const pathSegments_t &pathSegments, pathSegments_t::const_iterator it);
     static bool isCurrentDirectory(const std::string &str);

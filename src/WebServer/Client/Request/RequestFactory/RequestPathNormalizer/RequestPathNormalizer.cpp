@@ -1,28 +1,28 @@
-#include "RequestTargetNormalizer.hpp"
+#include "RequestPathNormalizer.hpp"
 #include "utils/string/string.hpp"
 #include <vector>
 
-bool RequestTargetNormalizer::isLastElement(const pathSegments_t &pathSegments, const pathSegments_t::const_iterator it)
+bool RequestPathNormalizer::isLastElement(const pathSegments_t &pathSegments, const pathSegments_t::const_iterator it)
 {
     return it == pathSegments.end() - 1;
 }
 
-bool RequestTargetNormalizer::isCurrentDirectory(const std::string &str)
+bool RequestPathNormalizer::isCurrentDirectory(const std::string &str)
 {
     return str == ".";
 }
 
-bool RequestTargetNormalizer::isEmptySegment(const pathSegments_t &pathSegments, const pathSegments_t::const_iterator it)
+bool RequestPathNormalizer::isEmptySegment(const pathSegments_t &pathSegments, const pathSegments_t::const_iterator it)
 {
     return (!isLastElement(pathSegments, it) && *it == "");
 }
 
-bool RequestTargetNormalizer::isParentDirectory(const std::string &str)
+bool RequestPathNormalizer::isParentDirectory(const std::string &str)
 {
     return str == "..";
 }
 
-void RequestTargetNormalizer::removeLastElement(pathSegments_t &pathSegments)
+void RequestPathNormalizer::removeLastElement(pathSegments_t &pathSegments)
 {
     if (pathSegments.empty())
         return;
@@ -30,12 +30,12 @@ void RequestTargetNormalizer::removeLastElement(pathSegments_t &pathSegments)
     pathSegments.pop_back();
 }
 
-bool RequestTargetNormalizer::hasTrailingDotSegment(const std::string &path)
+bool RequestPathNormalizer::hasTrailingDotSegment(const std::string &path)
 {
     return endsWith(path, "/.");
 }
 
-pathSegments_t RequestTargetNormalizer::getPathSegments(const std::string &path)
+pathSegments_t RequestPathNormalizer::getPathSegments(const std::string &path)
 {
     pathSegments_t pathSegments = split(path, "/");
     pathSegments.erase(pathSegments.begin());
@@ -43,7 +43,7 @@ pathSegments_t RequestTargetNormalizer::getPathSegments(const std::string &path)
     return pathSegments;
 }
 
-pathSegments_t RequestTargetNormalizer::normalizePathSegments(const pathSegments_t &pathSegments)
+pathSegments_t RequestPathNormalizer::normalizePathSegments(const pathSegments_t &pathSegments)
 {
     pathSegments_t normalizedPathSegments;
 
@@ -60,7 +60,7 @@ pathSegments_t RequestTargetNormalizer::normalizePathSegments(const pathSegments
     return normalizedPathSegments;
 }
 
-std::string RequestTargetNormalizer::buildNormalizedPath(const pathSegments_t &normalizedPathSegments)
+std::string RequestPathNormalizer::buildNormalizedPath(const pathSegments_t &normalizedPathSegments)
 {
     std::string normalizedPath = "/";
 
@@ -74,7 +74,7 @@ std::string RequestTargetNormalizer::buildNormalizedPath(const pathSegments_t &n
     return normalizedPath;
 }
 
-std::string RequestTargetNormalizer::normalizePath(const std::string &path)
+std::string RequestPathNormalizer::normalizePath(const std::string &path)
 {
     std::string tempPath = path;
 
