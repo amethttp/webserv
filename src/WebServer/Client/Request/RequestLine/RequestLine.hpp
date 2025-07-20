@@ -23,6 +23,5 @@ public:
 
     void setMethod(const std::string &methodString);
     void setTargetUri(const std::string &uriString);
-    void setTargetPath(const std::string &pathString);
     void setHttpVersion(const std::string &httpVersionString);
 };

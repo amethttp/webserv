@@ -20,5 +20,4 @@ public:
     std::string getUriQuery() const;
 
     void setUri(const std::string &uri);
-    void setPath(const std::string &path);
 };

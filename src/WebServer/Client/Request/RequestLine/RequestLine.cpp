@@ -49,11 +49,6 @@ void RequestLine::setTargetUri(const std::string &uriString)
     this->target_.setUri(uriString);
 }
 
-void RequestLine::setTargetPath(const std::string &pathString)
-{
-    this->target_.setPath(pathString);
-}
-
 void RequestLine::setHttpVersion(const std::string &httpVersionString)
 {
     this->httpVersion_ = httpVersionString;
