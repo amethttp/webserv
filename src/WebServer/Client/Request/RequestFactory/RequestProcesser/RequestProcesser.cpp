@@ -19,9 +19,6 @@ SimpleResult RequestProcesser::processRequestLine(RequestLine &requestLine)
     if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetUri()))
         return SimpleResult::fail(BAD_REQUEST_ERR);
 
-    const std::string normalizedPath = RequestTargetNormalizer::normalizePath(requestLine.getTargetPath());
-    requestLine.setTargetPath(normalizedPath);
-
     return SimpleResult::ok();
 }
 

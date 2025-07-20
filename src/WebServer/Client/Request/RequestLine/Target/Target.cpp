@@ -1,5 +1,6 @@
 #include "Target.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 #include <algorithm>
 
 void Target::separateUriComponents()
@@ -40,6 +41,7 @@ void Target::setUri(const std::string &uri)
 
     separateUriComponents();
     this->path_ = RequestPctDecoder::decode(this->path_);
+    this->path_ = RequestTargetNormalizer::normalizePath(this->path_);
 }
 
 void Target::setPath(const std::string &path)
