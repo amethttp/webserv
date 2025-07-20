@@ -115,9 +115,12 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         {
             advance();
         }
-
-        advance(2);
     }
+
+    if (!isCrlf())
+        return false;
+
+    advance(2);
 
     return isCrlf();
 }
