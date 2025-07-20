@@ -552,7 +552,7 @@ TEST(return_false_to_a_request_with_an_incomplete_full_body)
     assertCanCreateAResponseIsFalseFromBody("Content-Length: 15", "Incomplete");
 }
 
-TEST(return_true_to_a_request_with_a_complete_chunked_body)
+TEST(return_true_to_a_request_with_a_complete_chunked_body_with_only_last_chunk)
 {
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0\r\n\r\n");
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "00000000\r\n\r\n");
@@ -720,4 +720,13 @@ TEST(return_false_to_a_request_with_an_incomplete_chunked_body)
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "00");
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "\r\n");
     assertCanCreateAResponseIsFalseFromBody("Transfer-Encoding: chunked", "");
+}
+
+TEST(return_true_to_a_request_with_a_complete_chunked_body)
+{
+    const std::string completeAndValidChunkedBody = "0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;ext\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\nTrailer: section\r\nCompleted: foo\r\n\r\n";
+    const std::string completeAndInvalidChunkedBody = "0000A;;ext\"\";ext=\r\nToo much body for this chunk size\r\n1;\b\v\fext=\r;ext\r\n \r\n09;ext\r\nCompleted!!!!\r\n0;ext=\"\\\\ \t\b\v\f \\\t\"\r\ninvalid\r\nCompleted: \b\r\n\r\n";
+
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", completeAndValidChunkedBody);
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", completeAndInvalidChunkedBody);
 }
