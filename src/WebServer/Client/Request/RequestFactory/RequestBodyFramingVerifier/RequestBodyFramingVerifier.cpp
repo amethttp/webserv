@@ -46,6 +46,25 @@ void RequestBodyFramingVerifier::skipTrailerFields()
     }
 }
 
+bool RequestBodyFramingVerifier::consumeLastChunkIfComplete()
+{
+    if (this->currentChar_ != '0')
+        return false;
+
+    while (!hasFinishedText() && this->currentChar_ == '0')
+    {
+        advance();
+    }
+
+    skipChunkExtension();
+
+    if (!isCrlf())
+        return false;
+    advance(2);
+
+    return true;
+}
+
 bool RequestBodyFramingVerifier::hasFinishedText() const
 {
     return this->pos_ >= this->text_.length();
@@ -113,20 +132,8 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         advance(2);
     }
 
-    if (this->currentChar_ != '0')
+    if (!consumeLastChunkIfComplete())
         return false;
-
-    while (!hasFinishedText() && this->currentChar_ == '0')
-    {
-        advance();
-    }
-
-    skipChunkExtension();
-
-    if (!isCrlf())
-        return false;
-
-    advance(2);
 
     skipTrailerFields();
 
