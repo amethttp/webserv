@@ -41,7 +41,7 @@ void Target::setUri(const std::string &uri)
 
     separateUriComponents();
     this->path_ = RequestPctDecoder::decode(this->path_);
-    this->path_ = RequestPathNormalizer::normalizePath(this->path_);
+    RequestPathNormalizer::normalize(this->path_);
 }
 
 void Target::setPath(const std::string &path)
