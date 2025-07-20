@@ -90,6 +90,20 @@ bool RequestBodyFramingVerifier::isCrlf() const
     return this->currentChar_ == '\r' && peek() == '\n';
 }
 
+std::string RequestBodyFramingVerifier::getChunkSize() const
+{
+    size_t distance = 0;
+    std::string chunkSize;
+
+    while (std::isxdigit(peek(distance)))
+    {
+        chunkSize += peek(distance);
+        distance++;
+    }
+
+    return chunkSize;
+}
+
 RequestBodyFramingVerifier::RequestBodyFramingVerifier(const std::string &bodyString)
 {
     this->text_ = bodyString;
@@ -108,14 +122,13 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 {
     while (!isLastChunk())
     {
-        std::string chunkSize;
+        std::string chunkSize = getChunkSize();
 
         if (!std::isxdigit(this->currentChar_))
             return false;
 
         while (!hasFinishedText() && std::isxdigit(this->currentChar_))
         {
-            chunkSize += this->currentChar_;
             advance();
         }
 

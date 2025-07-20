@@ -22,6 +22,8 @@ private:
     bool isLastChunk() const;
     bool isCrlf() const;
 
+    std::string getChunkSize() const;
+
 public:
     RequestBodyFramingVerifier(const std::string &bodyString);
     ~RequestBodyFramingVerifier();
