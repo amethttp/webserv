@@ -1,6 +1,7 @@
 #include "HostHeaderValidator.hpp"
 #include "utils/numeric/numeric.hpp"
 #include "WebServer/Client/Request/Request.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
 #include <cstdlib>
 
 bool HostHeaderValidator::isUnreserved(const char c)
@@ -43,7 +44,7 @@ bool HostHeaderValidator::isValidHostName(const std::string &hostName)
             return false;
     }
 
-    return true;
+    return RequestPctDecoder::isWellEncoded(hostName);
 }
 
 bool HostHeaderValidator::isValidHostPort(const std::string &port)
@@ -83,8 +84,8 @@ bool HostHeaderValidator::isValid(const Header &hostHeader)
         return false;
 
     const std::string hostValue = hostHeader.getValue();
-
     const std::string hostName = getHostName(hostValue);
+
     if (!isValidHostName(hostName))
         return false;
 

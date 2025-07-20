@@ -6,9 +6,6 @@ SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &he
 {
     const std::string hostValue = headers.getHeaderValue(HOST);
 
-    if (!RequestPctDecoder::isWellEncoded(hostValue))
-        return SimpleResult::fail(BAD_REQUEST_ERR);
-
     headers.updateHeader(HOST, RequestPctDecoder::decode(hostValue));
     return SimpleResult::ok();
 }
