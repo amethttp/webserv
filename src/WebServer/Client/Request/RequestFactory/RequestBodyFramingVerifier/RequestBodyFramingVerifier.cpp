@@ -21,6 +21,19 @@ char RequestBodyFramingVerifier::peek(const size_t distance) const
     return this->text_[peekedCharPos];
 }
 
+void RequestBodyFramingVerifier::skipChunkExtension()
+{
+    if (this->currentChar_ == ';')
+    {
+        advance();
+
+        while (!hasFinishedText() && !isCrlf())
+        {
+            advance();
+        }
+    }
+}
+
 bool RequestBodyFramingVerifier::hasFinishedText() const
 {
     return this->pos_ >= this->text_.length();
@@ -75,15 +88,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
             advance();
         }
 
-        if (this->currentChar_ == ';')
-        {
-            advance();
-
-            while (!hasFinishedText() && !isCrlf())
-            {
-                advance();
-            }
-        }
+        skipChunkExtension();
 
         if (!isCrlf())
             return false;
@@ -107,15 +112,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         advance();
     }
 
-    if (this->currentChar_ == ';')
-    {
-        advance();
-
-        while (!hasFinishedText() && !isCrlf())
-        {
-            advance();
-        }
-    }
+    skipChunkExtension();
 
     if (!isCrlf())
         return false;

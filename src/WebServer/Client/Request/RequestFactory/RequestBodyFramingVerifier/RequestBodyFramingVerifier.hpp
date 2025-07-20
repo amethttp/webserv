@@ -12,6 +12,8 @@ private:
     void advance(size_t amount = 1);
     char peek(size_t distance = 1) const;
 
+    void skipChunkExtension();
+
     bool hasFinishedText() const;
     bool isLastChunk() const;
     bool isCrlf() const;
