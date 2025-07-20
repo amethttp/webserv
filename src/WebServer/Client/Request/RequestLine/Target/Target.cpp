@@ -1,4 +1,5 @@
 #include "Target.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
 #include <algorithm>
 
 void Target::separateUriComponents()
@@ -38,6 +39,7 @@ void Target::setUri(const std::string &uri)
     this->query_ = "";
 
     separateUriComponents();
+    this->path_ = RequestPctDecoder::decode(this->path_);
 }
 
 void Target::setPath(const std::string &path)

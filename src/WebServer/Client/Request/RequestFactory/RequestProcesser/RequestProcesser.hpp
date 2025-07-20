@@ -9,7 +9,7 @@ class RequestProcesser
 private:
     RequestProcesser();
 
-    static SimpleResult processRequestLinePctDecoding(RequestLine &requestLine);
+    static SimpleResult processRequestLinePctDecoding(const RequestLine &requestLine);
     static SimpleResult processHostHeaderPctDecoding(HeaderCollection &headers);
 
 public:
