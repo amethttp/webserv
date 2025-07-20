@@ -1492,113 +1492,114 @@
 "GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 15\r\n\r\nIncomplete"
 
 ### 9. Return true for a complete request with a complete chunked body
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n00000000\r\n\r\n"
+"0\r\n\r\n"
+"00000000\r\n\r\n"
 
 ### 10. Return false for a last chunk without chunk size
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\r\n\r\n"
+"\r\n\r\n"
 
 ### 11. Return false for complete last chunk with invalid chunk size
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\nx\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0000x\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n000\b\f\r\n\r\n"
+"x\r\n\r\n"
+"0000x\r\n\r\n"
+"000\b\f\r\n\r\n"
 
 ### 12. Return true for a complete last chunk with extensions
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;;;\b\v;;;ext=\"\f\";ext=\r\r\n\r\n"
+"0;\r\n\r\n"
+"0;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\n\r\n"
+"0;ext;;;\b\v;;;ext=\"\f\";ext=\r\r\n\r\n"
 
 ### 13. Return false for a last chunk with malformed CRLF separator
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;ext=val\r\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;;\f;;\b\v\n\r\n"
+"0\r\r\n"
+"0\n\r\n"
+"0;ext;ext=val\r\r\n"
+"0;;\f;;\b\v\n\r\n"
 
 ### 14. Return false for a last chunk without CRLF separator
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r"
+"0"
+"0\r"
 
 ### 15. Return false for a last chunk with extensions without CRLF separator
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;ext="
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;ext;;;;\f\v;;\b;e"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0;;;;;\r"
+"0;"
+"0;ext;ext="
+"0;ext;;;;\f\v;;\b;e"
+"0;;;;;\r"
 
 ### 16. Return true for a request with a chunked body with a complete chunk
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\na\r\nvalid body\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n000a\r\nvalid body\r\n0\r\n\r\n"
+"a\r\nvalid body\r\n0\r\n\r\n"
+"000a\r\nvalid body\r\n0\r\n\r\n"
 
 ### 17. Return false for a request with a chunked body with a chunk without chunk size
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\r\nvalid body\r\n0\r\n\r\n"
+"\r\nvalid body\r\n0\r\n\r\n"
 
 ### 18. Return false for a request with a chunked body with a chunk with invalid chunk size
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\ninvalid\r\ninvalid\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0007x\r\ninvalid\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0007\b\f\r\ninvalid\r\n0\r\n\r\n"
+"x\r\ninvalid\r\n0\r\n\r\n"
+"7x\r\ninvalid\r\n0\r\n\r\n"
+"0007x\r\ninvalid\r\n0\r\n\r\n"
+"0007\b\f\r\ninvalid\r\n0\r\n\r\n"
 
 ### 19. Return true for a request with a chunked body with an complete chunk with extensions
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a;\r\ninvalid\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0A;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\nvalid body\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a;ext;;;\b\v;;;ext=\"\f\";ext=\r\nvalid body\r\n0\r\n\r\n"
+"0a;\r\ninvalid\r\n0\r\n\r\n"
+"0A;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\nvalid body\r\n0\r\n\r\n"
+"0a;ext;;;\b\v;;;ext=\"\f\";ext=\r\nvalid body\r\n0\r\n\r\n"
 
 ### 20. Return false for a request with a chunked body with a chunk with malformed CRLF extension
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0A\rvalid body\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0A\nvalid body\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0A;\rvalid body\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a;\nvalid body\r\n0\r\n\r\n"
+"0A\rvalid body\r\n0\r\n\r\n"
+"0A\nvalid body\r\n0\r\n\r\n"
+"0A;\rvalid body\r\n0\r\n\r\n"
+"0a;\nvalid body\r\n0\r\n\r\n"
 
 ### 21. Return false for a request with a chunked body with chunk without CRLF separator
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0000A"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\na\r"
+"0000A"
+"a\r"
 
 ### 22. Return false for a request with a chunked body with chunk with extension without CRLF separator
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0A;"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0A;ext;ext="
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a;ext;;\b;e"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a;;;;;\r"
+"0A;"
+"0A;ext;ext="
+"0a;ext;;\b;e"
+"0a;;;;;\r"
 
 ### 23. Return true for a request with a chunked body with multiple complete chunk with extensions
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0000A;;;;;;ext=\";ext=\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;\b\t\v\r\nCompleted\r\n0;ext=\"\r\r\n\r\n"
+"0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\n\r\n"
+"0000A;;;;;;ext=\";ext=\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;\b\t\v\r\nCompleted\r\n0;ext=\"\r\r\n\r\n"
 
 ### 24. Return true for a chunk with chunk size equal or smaller than chunk data
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a\r\nValid body\r\n0\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a\r\nValid body with more content\r\n0\r\n\r\n"
+"0a\r\nValid body\r\n0\r\n\r\n"
+"0a\r\nValid body with more content\r\n0\r\n\r\n"
 
 ### 25. Return false for a chunk with chunk size bigger than chunk data
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a\r\tooSmall\r\n0\r\n\r\n"
+"0a\r\tooSmall\r\n0\r\n\r\n"
 
 ### 26. Return false for a chunked body without last CRLF
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a\r\nvalid body\r\n0\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a\r\nvalid body\r\n0\r\n\r"
+"0\r\n"
+"0\r\n\r"
+"0a\r\nvalid body\r\n0\r\n"
+"0a\r\nvalid body\r\n0\r\n\r"
 
 ### 27. Return false for a chunked body without last chunk 
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0a\r\nvalid body\r\n"
+"0a\r\nvalid body\r\n"
 
 ### 28. Return true for a chunked body with trailer fields 
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ntrailer: field\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ninvalid\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\trailer: \b\f\\\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ntrailer:field\r\nTrailer:field\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ninvalid\r\ninvalid\r\n\r\n"
+"0\r\ntrailer: field\r\n\r\n"
+"0\r\ninvalid\r\n\r\n"
+"0\r\trailer: \b\f\\\r\n\r\n"
+"0\r\ntrailer:field\r\nTrailer:field\r\n\r\n"
+"0\r\ninvalid\r\ninvalid\r\n\r\n"
 
 ### 29. Return false for a chunked body with trailer fields 
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ntrailer:field\r\nTrailer:field"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ntrailer:field\r\nTrailer:field\r"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ntrailer:field\r\nTrailer:field\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\ntrailer:field\r\nTrailer:field\r\n\r"
+"0\r\ntrailer:field\r\nTrailer:field"
+"0\r\ntrailer:field\r\nTrailer:field\r"
+"0\r\ntrailer:field\r\nTrailer:field\r\n"
+"0\r\ntrailer:field\r\nTrailer:field\r\n\r"
 
 ### 30. Return true for a chunked body with extra text at the end 
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\ninvalid: fields"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\ninvalid: fields\r\n\r\n"
+"0\r\n\r\ninvalid: fields"
+"0\r\n\r\ninvalid: fields\r\n\r\n"
 
 ### 31. Return false an incompleted chunked body 
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\ninvalid"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n00"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\r\n"
-"GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n"
+"invalid"
+"00"
+"\r\n"
+""
 
 ### 32. Return true for a completed chunked body 
 "0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;ext\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\nTrailer: section\r\nCompleted: foo\r\n\r\n"
