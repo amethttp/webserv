@@ -23,11 +23,10 @@ char RequestBodyFramingVerifier::peek(const size_t distance) const
 
 void RequestBodyFramingVerifier::skipChunkExtension()
 {
-    if (this->currentChar_ == ';')
-    {
-        advance();
-        skipUntilNextCrlf();
-    }
+    if (this->currentChar_ != ';')
+        return;
+
+    skipUntilNextCrlf();
 }
 
 void RequestBodyFramingVerifier::skipUntilNextCrlf()
