@@ -22,6 +22,8 @@ private:
     bool hasFinishedText() const;
     bool isLastChunk() const;
     bool isCrlf() const;
+    bool isCrlfAtDistance(size_t distance) const;
+    bool isChunkExtensionAtDistance(size_t distance) const;
 
     std::string getChunkSize() const;
 

@@ -89,12 +89,22 @@ bool RequestBodyFramingVerifier::isLastChunk() const
         distance++;
     }
 
-    return (peek(distance) == '\r' && peek(distance + 1) == '\n') || peek(distance) == ';';
+    return (isCrlfAtDistance(distance) || isChunkExtensionAtDistance(distance));
 }
 
 bool RequestBodyFramingVerifier::isCrlf() const
 {
     return this->currentChar_ == '\r' && peek() == '\n';
+}
+
+bool RequestBodyFramingVerifier::isCrlfAtDistance(const size_t distance) const
+{
+    return (peek(distance) == '\r' && peek(distance + 1) == '\n');
+}
+
+bool RequestBodyFramingVerifier::isChunkExtensionAtDistance(const size_t distance) const
+{
+    return peek(distance) == ';';
 }
 
 std::string RequestBodyFramingVerifier::getChunkSize() const
