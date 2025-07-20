@@ -2,19 +2,11 @@
 #include "utils/string/string.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
 
-SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &headers)
+SimpleResult RequestProcesser::processHeaders(HeaderCollection &headers)
 {
     const std::string hostValue = headers.getHeaderValue(HOST);
 
     headers.updateHeader(HOST, RequestPctDecoder::decode(hostValue));
-    return SimpleResult::ok();
-}
-
-SimpleResult RequestProcesser::processHeaders(HeaderCollection &headers)
-{
-    const SimpleResult headerDecodingResult = processHostHeaderPctDecoding(headers);
-    if (headerDecodingResult.isFailure())
-        return SimpleResult::fail(headerDecodingResult.getError());
 
     if (headers.contains(TRANSFER_ENCODING))
     {

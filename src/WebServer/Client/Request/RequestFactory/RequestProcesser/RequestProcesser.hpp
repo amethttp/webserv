@@ -8,8 +8,6 @@ class RequestProcesser
 private:
     RequestProcesser();
 
-    static SimpleResult processHostHeaderPctDecoding(HeaderCollection &headers);
-
 public:
     static SimpleResult processHeaders(HeaderCollection &headers);
 };
