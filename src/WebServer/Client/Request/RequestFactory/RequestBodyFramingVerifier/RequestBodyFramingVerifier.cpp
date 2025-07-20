@@ -10,17 +10,31 @@ void RequestBodyFramingVerifier::advance(const size_t amount)
         this->currentChar_ = '\0';
 }
 
-char RequestBodyFramingVerifier::peek() const
+char RequestBodyFramingVerifier::peek(const size_t distance) const
 {
-    if (this->pos_ + 1 >= this->text_.length())
+    const size_t peekedCharPos = this->pos_ + distance;
+
+    if (peekedCharPos >= this->text_.length())
         return '\0';
 
-    return this->text_[this->pos_ + 1];
+    return this->text_[peekedCharPos];
 }
 
 bool RequestBodyFramingVerifier::hasFinishedText() const
 {
     return this->pos_ >= this->text_.length();
+}
+
+bool RequestBodyFramingVerifier::isLastChunk() const
+{
+    int distance = 0;
+
+    while (peek(distance) == '0')
+    {
+        distance++;
+    }
+
+    return (peek(distance) == '\r' && peek(distance + 1) == '\n') || peek(distance) == ';';
 }
 
 bool RequestBodyFramingVerifier::isCrlf() const
@@ -44,6 +58,23 @@ bool RequestBodyFramingVerifier::isFullBodyComplete(const size_t &contentLengthS
 
 bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 {
+    if (!isLastChunk())
+    {
+        while (!hasFinishedText() && std::isxdigit(this->currentChar_))
+        {
+            advance();
+        }
+
+        advance(2);
+
+        while (!hasFinishedText() && !isCrlf())
+        {
+            advance();
+        }
+
+        advance(2);
+    }
+
     if (this->currentChar_ != '0')
         return false;
 

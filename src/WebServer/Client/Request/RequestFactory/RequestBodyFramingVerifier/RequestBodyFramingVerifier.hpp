@@ -10,9 +10,10 @@ private:
     char currentChar_;
 
     void advance(size_t amount = 1);
-    char peek() const;
+    char peek(size_t distance = 1) const;
 
     bool hasFinishedText() const;
+    bool isLastChunk() const;
     bool isCrlf() const;
 
 public:
