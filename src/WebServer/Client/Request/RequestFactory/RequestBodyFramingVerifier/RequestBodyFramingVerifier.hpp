@@ -17,6 +17,7 @@ private:
     void skipTrailerFields();
 
     bool consumeChunkSizeIfComplete();
+    void consumeChunkData(size_t chunkSize);
 
     bool hasFinishedText() const;
     bool isLastChunk() const;

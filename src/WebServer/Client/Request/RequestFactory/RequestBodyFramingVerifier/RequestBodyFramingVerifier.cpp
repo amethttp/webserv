@@ -65,6 +65,13 @@ bool RequestBodyFramingVerifier::consumeChunkSizeIfComplete()
     return true;
 }
 
+void RequestBodyFramingVerifier::consumeChunkData(const size_t chunkSize)
+{
+    advance(chunkSize);
+    skipUntilNextCrlf();
+    advance(2);
+}
+
 bool RequestBodyFramingVerifier::hasFinishedText() const
 {
     return this->pos_ >= this->text_.length();
@@ -127,11 +134,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         if (!consumeChunkSizeIfComplete())
             return false;
 
-        advance(hexToDec(chunkSize));
-
-        skipUntilNextCrlf();
-
-        advance(2);
+        consumeChunkData(hexToDec(chunkSize));
     }
 
     if (!consumeChunkSizeIfComplete())
