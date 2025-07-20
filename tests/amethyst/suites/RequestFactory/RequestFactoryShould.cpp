@@ -10,6 +10,8 @@ namespace
 
 static Request_t createFromValidRequest(const std::string &requestString)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse(requestString));
+
     const Result<Request_t> result = RequestFactory::create(requestString);
 
     return result.getValue();
@@ -71,6 +73,8 @@ static void assertBody(const std::string &body)
 
 static void assertRequestIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse(invalidRequestString));
+
     Result<Request_t> result = RequestFactory::create(invalidRequestString);
 
     ASSERT_TRUE(result.isFailure());
@@ -488,7 +492,7 @@ TEST(recognize_a_request_with_a_chunked_body)
     const std::string secondChunk = "0000000002;extension=!_~$#\r\n: \r\n";
     const std::string thirdChunk = "00b;!_~$#=!_~$#;a=b;ggg=\"\";lol=\"\t val \t\"\r\nCompleted!!\r\n";
     const std::string lastChunk = "0;lastExt=\"\t \\\" \\\\ \\\\ \t\"\r\n";
-    const std::string trailerFields = "Trailer: fields\r\nNew: header\r\nDynamic: values\r\n";
+    const std::string trailerFields = "Trailer: fields\r\nNew: header\r\nDynamic: values\r\n\r\n";
     const std::string validBody = firstChunk + secondChunk + thirdChunk + lastChunk + trailerFields;
 
     request = createRequestFromValidBody("Transfer-Encoding: chunked", validBody);
@@ -498,7 +502,7 @@ TEST(recognize_a_request_with_a_chunked_body)
 
 TEST(take_as_failure_a_request_with_an_invalid_body)
 {
-    assertRequestIsInvalidFromBody("Transfer-Encoding: chunked", "INVALID BODY", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromBody("Transfer-Encoding: chunked", "1\r\nINVALID BODY\r\n0\r\n\r\n", BAD_REQUEST_ERR);
 }
 
 

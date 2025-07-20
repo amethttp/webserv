@@ -1415,17 +1415,17 @@
 "05\r\nValid\r\n01\r\n \r\n04\r\n\bbody\r\n0\r\n\r\n"
 
 ### 60. Recognize a chunked-body with a basic trailer-field
-"0\r\nTrailer: value\r\n"
+"0\r\nTrailer: value\r\n\r\n"
 
 ### 61. Recognize a chunked-body with multiple trailer-field
-"0\r\nTrailer: value\r\nTrailer2: value2\r\n"
+"0\r\nTrailer: value\r\nTrailer2: value2\r\n\r\n"
 
 ### 62. Recognize a chunked-body with multiple trailer-field and chunks
-"5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n"
+"5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n\r\n"
 
 ### 63. Take as failure a chunked-body with invalid trailer-field
-"0\r\nTrailer: value\b\r\nTrailer2: value2\r\n"
-"0\r\nTrailer: value\r\nTrailer2\b: value2\r\n"
+"0\r\nTrailer: value\b\r\nTrailer2: value2\r\n\r\n"
+"0\r\nTrailer: value\r\nTrailer2\b: value2\r\n\r\n"
 
 ### 64. Take as failure a chunked-body without the last CRLF separator
 "0\r\nTrailer: value"

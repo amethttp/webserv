@@ -37,6 +37,8 @@ result_t RequestParser::eatTrailerFields()
         hasFailed |= eat(CRLF);
     }
 
+    hasFailed |= eat(CRLF);
+
     return hasFailed ? FAIL : SUCCESS;
 }
 
