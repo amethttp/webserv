@@ -124,7 +124,12 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 
     while (!hasFinishedText() && !isCrlf())
     {
-        advance();
+        while (!hasFinishedText() && !isCrlf())
+        {
+            advance();
+        }
+
+        advance(2);
     }
 
     return isCrlf();
