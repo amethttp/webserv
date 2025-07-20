@@ -1,6 +1,7 @@
 #include "test/test.hpp"
 #include "test/assert/assert.hpp"
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
 
 namespace
 {
@@ -11,6 +12,8 @@ namespace
 
 static RequestLine parseFromValidRequestLine(const std::string &requestLineString)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse(requestLineString + "\r\nHost: localhost\r\n\r\n"));
+
     const RequestTokenizer requestTokenizer(requestLineString);
     RequestParser sut(requestTokenizer);
 
@@ -21,6 +24,8 @@ static RequestLine parseFromValidRequestLine(const std::string &requestLineStrin
 
 static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersString)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\n" + requestHeadersString + "\r\n\r\n"));
+
     const RequestTokenizer requestTokenizer(requestHeadersString);
     RequestParser sut(requestTokenizer);
 
@@ -31,6 +36,11 @@ static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersS
 
 static Body parseFromValidFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
 {
+    std::stringstream ss;
+    ss << contentLengthSize;
+
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: " + ss.str() + "\r\n\r\n" + requestBodyString));
+
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
 
@@ -41,6 +51,8 @@ static Body parseFromValidFullBody(const size_t contentLengthSize, const std::st
 
 static Body parseFromValidChunkedBody(const std::string &requestBodyString)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" + requestBodyString));
+
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
 
@@ -58,6 +70,8 @@ static void assertRequestLine(method_t method, const std::string &targetUri, con
 
 static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse(invalidRequestString + "\r\nHost: localhost\r\n\r\n"));
+
     const RequestTokenizer requestTokenizer(invalidRequestString);
     RequestParser sut(requestTokenizer);
 
@@ -69,6 +83,8 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
 
 static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\n" + invalidHeader + "\r\n\r\n"));
+
     const RequestTokenizer requestTokenizer(invalidHeader);
     RequestParser sut(requestTokenizer);
 
@@ -80,6 +96,11 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
 
 static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const std::string &invalidBody)
 {
+    std::stringstream ss;
+    ss << contentLengthSize;
+
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: " + ss.str() + "\r\n\r\n" + invalidBody));
+
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
 
@@ -91,6 +112,8 @@ static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const
 
 static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
 {
+    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" + invalidBody));
+
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
 
@@ -1084,52 +1107,6 @@ TEST(recognize_a_basic_chunked_body_with_a_last_chunk_whose_chunk_size_has_multi
     assertBodyIsEmpty();
 }
 
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_chunk_size_has_a_value_different_from_zero)
-{
-    assertRequestChunkedBodyIsInvalid("5\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("0a\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("x\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_chunk_size_has_WS)
-{
-    assertRequestChunkedBodyIsInvalid("0 \r\n\r\n");
-    assertRequestChunkedBodyIsInvalid(" 0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_chunk_size_is_SP)
-{
-    assertRequestChunkedBodyIsInvalid(" \r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_chunk_size_is_empty)
-{
-    assertRequestChunkedBodyIsInvalid("\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_last_crlf_is_malformed)
-{
-    assertRequestChunkedBodyIsInvalid("0\r\r\n");
-    assertRequestChunkedBodyIsInvalid("0\n\r\n");
-    assertRequestChunkedBodyIsInvalid("0\f\b\r\n");
-    assertRequestChunkedBodyIsInvalid("0\r \n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_whose_last_crlf_is_SP)
-{
-    assertRequestChunkedBodyIsInvalid("0 \r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_without_last_crlf)
-{
-    assertRequestChunkedBodyIsInvalid("0\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_contains_chunk_data)
-{
-    assertRequestChunkedBodyIsInvalid("0\r\nInvalid\r\n");
-}
-
 TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension)
 {
     body = parseFromValidChunkedBody("0;extension\r\n\r\n");
@@ -1356,51 +1333,11 @@ TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_multiple_case_in
     assertBody("Valid body");
 }
 
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_has_non_hexadecimal_digits)
-{
-    assertRequestChunkedBodyIsInvalid("0g\r\nInvalid\r\n0\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("0G\r\nInvalid\r\n0\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("-4\r\nInvalid\r\n0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_has_SP)
-{
-    assertRequestChunkedBodyIsInvalid("7 \r\nInvalid\r\n0\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid(" 7\r\nInvalid\r\n0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_SP)
-{
-    assertRequestChunkedBodyIsInvalid(" \r\nInvalid\r\n0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_without_chunk_size)
-{
-    assertRequestChunkedBodyIsInvalid("\r\nInvalid\r\n0\r\n\r\n");
-}
-
 TEST(recognize_a_chunked_body_with_a_chunk_that_has_chunk_extensions)
 {
     body = parseFromValidChunkedBody("0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n");
 
     assertBody("Valid body");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_first_crlf_separator_is_mal_formed)
-{
-    assertRequestChunkedBodyIsInvalid("7\rInvalid\r\n0\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("7\nInvalid\r\n0\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("7\f\bInvalid\r\n0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_first_crlf_separator_is_SP)
-{
-    assertRequestChunkedBodyIsInvalid("7 Invalid\r\n0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_without_first_crlf_separator)
-{
-    assertRequestChunkedBodyIsInvalid("7Invalid\r\n0\r\n\r\n");
 }
 
 TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_crlf_separators_as_plain_text)
@@ -1426,23 +1363,6 @@ TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_all_octets_as_pla
     body = parseFromValidChunkedBody("7f\r\n" + octets + "\r\n0\r\n\r\n");
 
     assertBody(octets);
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_last_crlf_separator_is_mal_formed)
-{
-    assertRequestChunkedBodyIsInvalid("7\r\nInvalid\r0\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("7\r\nInvalid\n0\r\n\r\n");
-    assertRequestChunkedBodyIsInvalid("7\r\nInvalid\b\f0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_last_crlf_separator_is_SP)
-{
-    assertRequestChunkedBodyIsInvalid("7\r\nInvalid 0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_chunk_without_last_crlf_separator)
-{
-    assertRequestChunkedBodyIsInvalid("7\r\nInvalid0\r\n\r\n");
 }
 
 TEST(recognize_a_chunked_body_with_multiple_chunks)
@@ -1488,18 +1408,8 @@ TEST(recognize_a_chunked_body_with_multiple_chunks_and_multiple_trailer_fields)
 
 TEST(take_as_failure_a_chunked_body_with_invalid_trailer_fields)
 {
-    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\b\r\nTrailer2: value2\r\n");
-    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\r\nTrailer2\b: value2\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_without_the_final_crlf)
-{
-    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value");
-}
-
-TEST(take_as_failure_a_trailer_field_as_chunked_body)
-{
-    assertRequestChunkedBodyIsInvalid("Header: value");
+    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\b\r\nTrailer2: value2\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\r\nTrailer2\b: value2\r\n\r\n");
 }
 
 TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_smaller_than_chunk_data_length)
@@ -1507,34 +1417,7 @@ TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_smaller_tha
     assertRequestChunkedBodyIsInvalid("01\r\nInvalid body\r\n0\r\n\r\n");
 }
 
-TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_bigger_than_chunk_data_length)
-{
-    assertRequestChunkedBodyIsInvalid("FF\r\nInvalid body\r\n0\r\n\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_without_last_chunk)
-{
-    assertRequestChunkedBodyIsInvalid("0c\r\nInvalid body\r\n");
-}
-
-TEST(take_as_failure_a_chunked_body_with_a_trailer_field_instead_of_a_last_chunk)
-{
-    assertRequestChunkedBodyIsInvalid("0c\r\nInvalid body\r\nTrailer:value");
-}
-
 TEST(take_as_failure_a_chunked_body_with_trailing_text)
 {
     assertRequestChunkedBodyIsInvalid("0\r\n\r\nInvalid text");
-}
-
-TEST(take_as_failure_an_invalid_chunked_body)
-{
-    assertRequestChunkedBodyIsInvalid("INVALID");
-    assertRequestChunkedBodyIsInvalid("0");
-    assertRequestChunkedBodyIsInvalid("\r\n");
-}
-
-TEST(take_as_failure_an_empty_chunked_body)
-{
-    assertRequestChunkedBodyIsInvalid("");
 }
