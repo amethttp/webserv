@@ -8,9 +8,23 @@ namespace
     Request_t request;
 }
 
+static void assertCanCreateAResponseIsTrue(const std::string &requestString)
+{
+    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
+
+    ASSERT_TRUE(canCreateAResponse);
+}
+
+static void assertCanCreateAResponseIsFalse(const std::string &requestString)
+{
+    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
+
+    ASSERT_FALSE(canCreateAResponse);
+}
+
 static Request_t createFromValidRequest(const std::string &requestString)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse(requestString));
+    assertCanCreateAResponseIsTrue(requestString);
 
     const Result<Request_t> result = RequestFactory::create(requestString);
 
@@ -73,7 +87,7 @@ static void assertBody(const std::string &body)
 
 static void assertRequestIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse(invalidRequestString));
+    assertCanCreateAResponseIsTrue(invalidRequestString);
 
     Result<Request_t> result = RequestFactory::create(invalidRequestString);
 
@@ -100,20 +114,6 @@ static void assertRequestIsInvalidFromBody(const std::string &bodyTypeHeader, co
     const std::string invalidRequestString = "GET / HTTP/1.1\r\nHost:localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
 
     assertRequestIsInvalid(invalidRequestString, errorMessage);
-}
-
-static void assertCanCreateAResponseIsTrue(const std::string &requestString)
-{
-    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
-
-    ASSERT_TRUE(canCreateAResponse);
-}
-
-static void assertCanCreateAResponseIsFalse(const std::string &requestString)
-{
-    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
-
-    ASSERT_FALSE(canCreateAResponse);
 }
 
 static void assertCanCreateAResponseIsTrueFromBody(const std::string &bodyTypeHeader, const std::string &body)
