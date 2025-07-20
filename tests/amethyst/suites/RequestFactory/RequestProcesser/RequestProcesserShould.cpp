@@ -12,8 +12,6 @@ namespace
 static void processFromValidTargetUri(const std::string &requestTargetUri)
 {
     requestLine.setTargetUri(requestTargetUri);
-
-    RequestProcesser::processRequestLine(requestLine);
 }
 
 static void processValidHeader(const std::string &headerKey, const std::string &headerValue)
@@ -34,16 +32,6 @@ static void assertTargetComponents(const std::string &path, const std::string &q
 static void assertHeader(const std::string &key, const std::string &value)
 {
     ASSERT_EQUALS(value, headers.getHeaderValue(key));
-}
-
-static void assertRequestIsInvalidFromTargetUri(const std::string &invalidRequestTargetUri)
-{
-    requestLine.setTargetUri(invalidRequestTargetUri);
-
-    const SimpleResult result = RequestProcesser::processRequestLine(requestLine);
-
-    ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
 }
 
 
@@ -113,14 +101,6 @@ TEST(decode_valid_case_insensitive_pct_encoded_pchars)
     assertTargetComponents("/index/<_<_>_>_\\_\\_{_{", "");
 }
 
-TEST(take_as_failure_a_target_path_with_pct_encoded_control_chars)
-{
-    assertRequestIsInvalidFromTargetUri("/index/%0d");
-    assertRequestIsInvalidFromTargetUri("/index/%0A");
-    assertRequestIsInvalidFromTargetUri("/index/%00");
-    assertRequestIsInvalidFromTargetUri("/index/%7f");
-}
-
 TEST(leave_the_same_target_query_if_it_does_contain_valid_pct_encoded_pchars)
 {
     processFromValidTargetUri("/index/query?%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d");
@@ -133,14 +113,6 @@ TEST(leave_the_same_target_query_if_it_does_contain_valid_case_insensitive_pct_e
     processFromValidTargetUri("/index/query?%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B");
 
     assertTargetComponents("/index/query", "%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B");
-}
-
-TEST(take_as_failure_a_target_query_with_pct_encoded_control_chars)
-{
-    assertRequestIsInvalidFromTargetUri("/index/query?%0d");
-    assertRequestIsInvalidFromTargetUri("/index/query?%0A");
-    assertRequestIsInvalidFromTargetUri("/index/query?%00");
-    assertRequestIsInvalidFromTargetUri("/index/query?%7f");
 }
 
 TEST(decode_valid_pct_encoded_pchars_inside_absolute_path_and_leave_the_same_target_query)

@@ -2,7 +2,6 @@
 
 #include "utils/Result/Result.hpp"
 #include "WebServer/Client/Request/Request.hpp"
-#include "WebServer/Client/Request/RequestLine/RequestLine.hpp"
 
 class RequestProcesser
 {
@@ -12,6 +11,5 @@ private:
     static SimpleResult processHostHeaderPctDecoding(HeaderCollection &headers);
 
 public:
-    static SimpleResult processRequestLine(RequestLine &requestLine);
     static SimpleResult processHeaders(HeaderCollection &headers);
 };

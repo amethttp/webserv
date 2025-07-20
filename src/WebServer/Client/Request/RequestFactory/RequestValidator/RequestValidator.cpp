@@ -5,6 +5,7 @@
 #include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
 #include "ContentLengthHeaderValidator/ContentLengthHeaderValidator.hpp"
 #include "TransferEncodingHeaderValidator/TransferEncodingHeaderValidator.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
 
 SimpleResult RequestValidator::validateRequestLine(const RequestLine &requestLine)
 {
@@ -16,6 +17,9 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLine &requestLin
 
     if (requestLine.getHttpVersion() != "HTTP/1.1")
         return SimpleResult::fail(HTTP_VERSION_NOT_SUPPORTED_ERR);
+
+    if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetUri()))
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     return SimpleResult::ok();
 }

@@ -1,7 +1,6 @@
 #include "RequestProcesser.hpp"
 #include "utils/string/string.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
-#include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 
 SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &headers)
 {
@@ -11,14 +10,6 @@ SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &he
         return SimpleResult::fail(BAD_REQUEST_ERR);
 
     headers.updateHeader(HOST, RequestPctDecoder::decode(hostValue));
-    return SimpleResult::ok();
-}
-
-SimpleResult RequestProcesser::processRequestLine(RequestLine &requestLine)
-{
-    if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetUri()))
-        return SimpleResult::fail(BAD_REQUEST_ERR);
-
     return SimpleResult::ok();
 }
 

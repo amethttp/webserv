@@ -48,10 +48,6 @@ Result<RequestLine> RequestFactory::buildRequestLineFromString(const std::string
     if (requestLineValidationResult.isFailure())
         return Result<RequestLine>::fail(requestLineValidationResult.getError());
 
-    const SimpleResult requestTargetProcessResult = RequestProcesser::processRequestLine(requestLine);
-    if (requestTargetProcessResult.isFailure())
-        return Result<RequestLine>::fail(requestTargetProcessResult.getError());
-
     return Result<RequestLine>::ok(requestLine);
 }
 
