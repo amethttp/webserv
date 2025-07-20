@@ -37,6 +37,15 @@ void RequestBodyFramingVerifier::skipUntilNextCrlf()
     }
 }
 
+void RequestBodyFramingVerifier::skipTrailerFields()
+{
+    while (!hasFinishedText() && !isCrlf())
+    {
+        skipUntilNextCrlf();
+        advance(2);
+    }
+}
+
 bool RequestBodyFramingVerifier::hasFinishedText() const
 {
     return this->pos_ >= this->text_.length();
@@ -119,11 +128,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 
     advance(2);
 
-    while (!hasFinishedText() && !isCrlf())
-    {
-        skipUntilNextCrlf();
-        advance(2);
-    }
+    skipTrailerFields();
 
     return isCrlf();
 }
