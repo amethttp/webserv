@@ -16,7 +16,7 @@ private:
     void skipUntilNextCrlf();
     void skipTrailerFields();
 
-    bool consumeLastChunkIfComplete();
+    bool consumeChunkSizeIfComplete();
 
     bool hasFinishedText() const;
     bool isLastChunk() const;

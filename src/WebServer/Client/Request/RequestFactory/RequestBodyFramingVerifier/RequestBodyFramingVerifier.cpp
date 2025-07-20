@@ -46,12 +46,12 @@ void RequestBodyFramingVerifier::skipTrailerFields()
     }
 }
 
-bool RequestBodyFramingVerifier::consumeLastChunkIfComplete()
+bool RequestBodyFramingVerifier::consumeChunkSizeIfComplete()
 {
-    if (this->currentChar_ != '0')
+    if (!std::isxdigit(this->currentChar_))
         return false;
 
-    while (!hasFinishedText() && this->currentChar_ == '0')
+    while (!hasFinishedText() && std::isxdigit(this->currentChar_))
     {
         advance();
     }
@@ -124,20 +124,9 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
     {
         std::string chunkSize = getChunkSize();
 
-        if (!std::isxdigit(this->currentChar_))
+        if (!consumeChunkSizeIfComplete())
             return false;
 
-        while (!hasFinishedText() && std::isxdigit(this->currentChar_))
-        {
-            advance();
-        }
-
-        skipChunkExtension();
-
-        if (!isCrlf())
-            return false;
-
-        advance(2);
         advance(hexToDec(chunkSize));
 
         skipUntilNextCrlf();
@@ -145,7 +134,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         advance(2);
     }
 
-    if (!consumeLastChunkIfComplete())
+    if (!consumeChunkSizeIfComplete())
         return false;
 
     skipTrailerFields();
