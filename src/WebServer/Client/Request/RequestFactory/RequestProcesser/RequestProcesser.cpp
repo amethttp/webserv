@@ -3,14 +3,6 @@
 #include "WebServer/Client/Request/RequestFactory/RequestPctDecoder/RequestPctDecoder.hpp"
 #include "WebServer/Client/Request/RequestFactory/RequestTargetNormalizer/RequestTargetNormalizer.hpp"
 
-SimpleResult RequestProcesser::processRequestLinePctDecoding(const RequestLine &requestLine)
-{
-    if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetUri()))
-        return SimpleResult::fail(BAD_REQUEST_ERR);
-
-    return SimpleResult::ok();
-}
-
 SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &headers)
 {
     const std::string hostValue = headers.getHeaderValue(HOST);
@@ -24,9 +16,8 @@ SimpleResult RequestProcesser::processHostHeaderPctDecoding(HeaderCollection &he
 
 SimpleResult RequestProcesser::processRequestLine(RequestLine &requestLine)
 {
-    const SimpleResult targetDecodingResult = processRequestLinePctDecoding(requestLine);
-    if (targetDecodingResult.isFailure())
-        return SimpleResult::fail(targetDecodingResult.getError());
+    if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetUri()))
+        return SimpleResult::fail(BAD_REQUEST_ERR);
 
     const std::string normalizedPath = RequestTargetNormalizer::normalizePath(requestLine.getTargetPath());
     requestLine.setTargetPath(normalizedPath);
