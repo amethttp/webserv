@@ -13,6 +13,7 @@ private:
     char peek(size_t distance = 1) const;
 
     void skipChunkExtension();
+    void skipUntilNextCrlf();
 
     bool hasFinishedText() const;
     bool isLastChunk() const;

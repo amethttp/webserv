@@ -26,11 +26,15 @@ void RequestBodyFramingVerifier::skipChunkExtension()
     if (this->currentChar_ == ';')
     {
         advance();
+        skipUntilNextCrlf();
+    }
+}
 
-        while (!hasFinishedText() && !isCrlf())
-        {
-            advance();
-        }
+void RequestBodyFramingVerifier::skipUntilNextCrlf()
+{
+    while (!hasFinishedText() && !isCrlf())
+    {
+        advance();
     }
 }
 
@@ -96,10 +100,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
         advance(2);
         advance(hexToDec(chunkSize));
 
-        while (!hasFinishedText() && !isCrlf())
-        {
-            advance();
-        }
+        skipUntilNextCrlf();
 
         advance(2);
     }
@@ -121,11 +122,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 
     while (!hasFinishedText() && !isCrlf())
     {
-        while (!hasFinishedText() && !isCrlf())
-        {
-            advance();
-        }
-
+        skipUntilNextCrlf();
         advance(2);
     }
 
