@@ -9,5 +9,5 @@ private:
     RequestProcesser();
 
 public:
-    static SimpleResult processHeaders(HeaderCollection &headers);
+    static void processHeaders(HeaderCollection &headers);
 };

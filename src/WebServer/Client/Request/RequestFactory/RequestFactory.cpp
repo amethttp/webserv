@@ -64,10 +64,7 @@ Result<HeaderCollection> RequestFactory::buildRequestHeadersFromString(const std
     if (requestHeaderValidationResult.isFailure())
         return Result<HeaderCollection>::fail(requestHeaderValidationResult.getError());
 
-    const SimpleResult headerProcessingResult = RequestProcesser::processHeaders(requestHeaders);
-    if (headerProcessingResult.isFailure())
-        return Result<HeaderCollection>::fail(headerProcessingResult.getError());
-
+    RequestProcesser::processHeaders(requestHeaders);
     return Result<HeaderCollection>::ok(requestHeaders);
 }
 
