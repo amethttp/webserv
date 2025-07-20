@@ -1538,7 +1538,7 @@
 "0007\b\f\r\ninvalid\r\n0\r\n\r\n"
 
 ### 19. Return true for a request with a chunked body with an complete chunk with extensions
-"0a;\r\ninvalid\r\n0\r\n\r\n"
+"0a;\r\nvalid body\r\n0\r\n\r\n"
 "0A;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\nvalid body\r\n0\r\n\r\n"
 "0a;ext;;;\b\v;;;ext=\"\f\";ext=\r\nvalid body\r\n0\r\n\r\n"
 
@@ -1563,11 +1563,13 @@
 "0000A;;;;;;ext=\";ext=\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;\b\t\v\r\nCompleted\r\n0;ext=\"\r\r\n\r\n"
 
 ### 24. Return true for a chunk with chunk size equal or smaller than chunk data
-"0a\r\nValid body\r\n0\r\n\r\n"
-"0a\r\nValid body with more content\r\n0\r\n\r\n"
+"0b\r\nValid\r\nbody\r\n0\r\n\r\n"
+"0b;ext\r\nValid\r\nbody\r\n0\r\n\r\n"
+"0b\r\nValid\r\nbody with more content\r\n0\r\n\r\n"
+"0b;ext\r\nValid\r\nbody with more content\r\n0\r\n\r\n"
 
 ### 25. Return false for a chunk with chunk size bigger than chunk data
-"0a\r\tooSmall\r\n0\r\n\r\n"
+"0b\r\ntoo\r\nSmall\r\n0\r\n\r\n"
 
 ### 26. Return false for a chunked body without last CRLF
 "0\r\n"

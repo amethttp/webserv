@@ -1,3 +1,4 @@
+#include "utils/numeric/numeric.hpp"
 #include "RequestBodyFramingVerifier.hpp"
 
 void RequestBodyFramingVerifier::advance(const size_t amount)
@@ -63,11 +64,14 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
 {
     while (!isLastChunk())
     {
+        std::string chunkSize;
+
         if (!std::isxdigit(this->currentChar_))
             return false;
 
         while (!hasFinishedText() && std::isxdigit(this->currentChar_))
         {
+            chunkSize += this->currentChar_;
             advance();
         }
 
@@ -85,6 +89,7 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
             return false;
 
         advance(2);
+        advance(hexToDec(chunkSize));
 
         while (!hasFinishedText() && !isCrlf())
         {

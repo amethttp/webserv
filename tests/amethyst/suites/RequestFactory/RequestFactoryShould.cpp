@@ -620,7 +620,7 @@ TEST(return_false_to_a_request_with_a_chunked_body_that_contains_a_chunk_whose_c
 
 TEST(return_true_to_a_request_with_a_chunked_body_that_contains_a_complete_chunk_with_chunk_extensions)
 {
-    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0a;\r\ninvalid\r\n0\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0a;\r\nvalid body\r\n0\r\n\r\n");
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0A;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\nvalid body\r\n0\r\n\r\n");
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "a;ext;;;\b\v;;;ext=\"\f\";ext=\r\nvalid body\r\n0\r\n\r\n");
 }
@@ -654,4 +654,12 @@ TEST(return_true_to_a_request_with_a_chunked_body_that_contains_multiple_complet
 
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", completeAndValidBody);
     assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", completeAndInvalidBody);
+}
+
+TEST(return_true_to_a_request_with_a_chunked_body_that_contains_a_chunk_whose_chunk_size_equals_the_chunk_data_length)
+{
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0b\r\nValid\r\nbody\r\n0\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0b;ext\r\nValid\r\nbody\r\n0\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0b\r\nValid\r\nbody with more content\r\n0\r\n\r\n");
+    assertCanCreateAResponseIsTrueFromBody("Transfer-Encoding: chunked", "0b;ext\r\nValid\r\nbody with more content\r\n0\r\n\r\n");
 }
