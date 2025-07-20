@@ -71,6 +71,16 @@ bool RequestBodyFramingVerifier::isChunkedBodyComplete()
             advance();
         }
 
+        if (this->currentChar_ == ';')
+        {
+            advance();
+
+            while (!hasFinishedText() && !isCrlf())
+            {
+                advance();
+            }
+        }
+
         if (!isCrlf())
             return false;
 
