@@ -10,9 +10,47 @@ namespace
     Body body;
 }
 
+static void assertCanCreateAResponseIsTrue(const std::string &requestString)
+{
+    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
+
+    ASSERT_TRUE(canCreateAResponse);
+}
+
+static void assertCanCreateAResponseIsTrueFromRequestLine(const std::string &requestLineString)
+{
+    const std::string requestString = requestLineString + "\r\nHost: localhost\r\n\r\n";
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static void assertCanCreateAResponseIsTrueFromHeaders(const std::string &requestHeadersString)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\n" + requestHeadersString + "\r\n\r\n";
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static void assertCanCreateAResponseIsTrueFromFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
+{
+    std::stringstream clSs;
+    clSs << contentLengthSize;
+
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: " + clSs.str() + "\r\n\r\n" + requestBodyString;
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static void assertCanCreateAResponseIsTrueFromChunkedBody(const std::string &requestBodyString)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" + requestBodyString;
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
 static RequestLine parseFromValidRequestLine(const std::string &requestLineString)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse(requestLineString + "\r\nHost: localhost\r\n\r\n"));
+    assertCanCreateAResponseIsTrueFromRequestLine(requestLineString);
 
     const RequestTokenizer requestTokenizer(requestLineString);
     RequestParser sut(requestTokenizer);
@@ -24,7 +62,7 @@ static RequestLine parseFromValidRequestLine(const std::string &requestLineStrin
 
 static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersString)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\n" + requestHeadersString + "\r\n\r\n"));
+    assertCanCreateAResponseIsTrueFromHeaders(requestHeadersString);
 
     const RequestTokenizer requestTokenizer(requestHeadersString);
     RequestParser sut(requestTokenizer);
@@ -36,10 +74,7 @@ static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersS
 
 static Body parseFromValidFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
 {
-    std::stringstream ss;
-    ss << contentLengthSize;
-
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: " + ss.str() + "\r\n\r\n" + requestBodyString));
+    assertCanCreateAResponseIsTrueFromFullBody(contentLengthSize, requestBodyString);
 
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
@@ -51,7 +86,7 @@ static Body parseFromValidFullBody(const size_t contentLengthSize, const std::st
 
 static Body parseFromValidChunkedBody(const std::string &requestBodyString)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" + requestBodyString));
+    assertCanCreateAResponseIsTrueFromChunkedBody(requestBodyString);
 
     const RequestTokenizer requestTokenizer(requestBodyString);
     RequestParser sut(requestTokenizer);
@@ -70,7 +105,7 @@ static void assertRequestLine(method_t method, const std::string &targetUri, con
 
 static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse(invalidRequestString + "\r\nHost: localhost\r\n\r\n"));
+    assertCanCreateAResponseIsTrueFromRequestLine(invalidRequestString);
 
     const RequestTokenizer requestTokenizer(invalidRequestString);
     RequestParser sut(requestTokenizer);
@@ -83,7 +118,7 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
 
 static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\n" + invalidHeader + "\r\n\r\n"));
+    assertCanCreateAResponseIsTrueFromHeaders(invalidHeader);
 
     const RequestTokenizer requestTokenizer(invalidHeader);
     RequestParser sut(requestTokenizer);
@@ -96,10 +131,7 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
 
 static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const std::string &invalidBody)
 {
-    std::stringstream ss;
-    ss << contentLengthSize;
-
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: " + ss.str() + "\r\n\r\n" + invalidBody));
+    assertCanCreateAResponseIsTrueFromFullBody(contentLengthSize, invalidBody);
 
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
@@ -112,7 +144,7 @@ static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const
 
 static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
 {
-    ASSERT_TRUE(RequestFactory::canCreateAResponse("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" + invalidBody));
+    assertCanCreateAResponseIsTrueFromChunkedBody(invalidBody);
 
     const RequestTokenizer requestTokenizer(invalidBody);
     RequestParser sut(requestTokenizer);
