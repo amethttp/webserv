@@ -76,6 +76,7 @@ INCLUDES = -I$(SRC)
 
 #----VPATH----#
 vpath %.cpp $(SRC): \
+            $(SRC)WebServer/ConfigParser : \
             $(SRC)WebServer/Client/Request : \
 			$(SRC)WebServer/Client/Response/StatusLine : \
 			$(SRC)WebServer/Client/Response/ResponseFactory : \
@@ -129,7 +130,9 @@ SRCS = Request.cpp \
 		files.cpp \
 		HeaderCollection.cpp \
 		Header.cpp \
-		webserv.cpp
+		webserv.cpp \
+		ConfigParser.cpp
+
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
