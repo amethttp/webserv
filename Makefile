@@ -80,15 +80,15 @@ vpath %.cpp $(SRC): \
 			$(SRC)WebServer/Client/Response/StatusLine : \
 			$(SRC)WebServer/Client/Response/ResponseFactory : \
 			$(SRC)WebServer/Client : \
-			$(SRC)WebServer/Client/RequestHandler/Context : \
-			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods : \
-			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Factory : \
-			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
-			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
-			$(SRC)WebServer/Client/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
-			$(SRC)WebServer/Client/RequestHandler/RequestExecutor : \
-			$(SRC)WebServer/Client/RequestHandler : \
-			$(SRC)WebServer/Client/RequestHandler/Result : \
+			$(SRC)WebServer/Client/Response/RequestHandler/Context : \
+			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods : \
+			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Factory : \
+			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
+			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
+			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
+			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor : \
+			$(SRC)WebServer/Client/Response/RequestHandler : \
+			$(SRC)WebServer/Client/Response/RequestHandler/Result : \
 			$(SRC)WebServer/Client/RouteMatchers/Location : \
 			$(SRC)WebServer/Client/RouteMatchers/Server : \
 			$(SRC)WebServer/Server/Location : \

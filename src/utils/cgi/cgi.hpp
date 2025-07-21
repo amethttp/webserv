@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "utils/http.hpp"
-#include "WebServer/Client/RequestHandler/Result/HandlingResult.hpp"
+#include "WebServer/Client/Response/RequestHandler/Result/HandlingResult.hpp"
 #include "WebServer/Server/Location/Location.hpp"
 
 typedef std::pair<std::string, std::string> t_cgi;

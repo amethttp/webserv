@@ -3,7 +3,7 @@
 #include <string>
 #include <ctime>
 #include "WebServer/Client/Response/Response.hpp"
-#include "WebServer/Client/RequestHandler/Result/HandlingResult.hpp"
+#include "WebServer/Client/Response/RequestHandler/Result/HandlingResult.hpp"
 
 class ResponseFactory
 {

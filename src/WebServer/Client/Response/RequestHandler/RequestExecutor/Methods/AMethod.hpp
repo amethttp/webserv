@@ -2,8 +2,8 @@
 
 #include "utils/http.hpp"
 #include "utils/cgi/cgi.hpp"
-#include "WebServer/Client/RequestHandler/Context/Context.hpp"
-#include "WebServer/Client/RequestHandler/Result/HandlingResult.hpp"
+#include "WebServer/Client/Response/RequestHandler/Context/Context.hpp"
+#include "WebServer/Client/Response/RequestHandler/Result/HandlingResult.hpp"
 
 class AMethod
 {
