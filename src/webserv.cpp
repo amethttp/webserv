@@ -24,7 +24,7 @@ static void setLocationsPH(Server &server)
 
 	location = new Location();
 	location->setCGIs(test);
-	location->setRoot("tests/www");
+	location->setRoot("tests/");
 	location->setPath("/");
 	location->setAutoIndex(true);
 	location->setIndexList(indexes);
@@ -32,7 +32,7 @@ static void setLocationsPH(Server &server)
 	testLocations.push_back(location);
 
 	location = new Location();
-	location->setRoot("tests/www");
+	location->setRoot("tests/www/");
 	location->setPath("/test/index");
 	ret.code = MOVED_PERMANENTLY;
 	ret.path = "/test/index/";

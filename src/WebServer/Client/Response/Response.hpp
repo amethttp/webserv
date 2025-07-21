@@ -15,4 +15,6 @@ typedef struct s_Response
 	StatusLine statusLine_;
 	HeaderCollection headers_;
 	t_Body body_;
+
+	std::string buffer_;
 } t_Response;

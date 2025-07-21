@@ -25,7 +25,6 @@ private:
 	time_t lastReceivedPacket_;
 	Request request_;
 	t_Response response_;
-	std::string responseBuffer_;
 
 	static std::map<t_httpCode, std::string> errorDict_;
 	static std::map<std::string, std::string> extensionTypesDict_;
@@ -44,7 +43,6 @@ public:
 	std::string getResponseBuffer() const;
 
 	void setFd(fd_t fd);
-	void updateResponse();
 
 	void updateLastReceivedPacket();
 	bool hasFullRequestHeaders();

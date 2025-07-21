@@ -2,6 +2,17 @@
 #include <sstream>
 #include "WebServer/Client/Client.hpp"
 
+static void setResponseBuffer(t_Response &response)
+{
+	std::ostringstream res;
+
+	res << response.statusLine_;
+	res << response.headers_;
+	res << response.body_.content;
+
+	response.buffer_ = res.str();
+}
+
 void ResponseFactory::addResultHeaders(HeaderCollection &resultHeaders, t_Response &r)
 {
 	const std::vector<Header> &resHeaders = resultHeaders.getHeaders();
@@ -79,22 +90,27 @@ void ResponseFactory::setStatusLine(t_httpCode code, t_Response &response)
 
 t_Response ResponseFactory::create(HandlingResult &res)
 {
-	t_Response response; // check bzero etc...
+	t_Response response;
 
 	setStatusLine(res.code_, response); // handling res private/public...
 	setResponseBody(res.tempBody_, response);
 	setDefaultHeaders(res.mode_, response);
 	addResultHeaders(res.tempHeaders_, response);
+	if (res.isCGI_)
+		response.buffer_ = res.tempBody_.content;
+	else
+		setResponseBuffer(response);
 
     return response;
 }
 
 t_Response ResponseFactory::create(t_httpCode code, t_connection mode)
 {
-	t_Response response; // check bzero etc...
+	t_Response response;
 
 	setStatusLine(code, response);
 	setDefaultHeaders(mode, response);
+	setResponseBuffer(response);
 
     return response;
 }

@@ -125,23 +125,6 @@ time_t Client::getLastReceivedPacket() const
     return this->lastReceivedPacket_;
 }
 
-std::string Client::getStringifiedResponse()
-{
-	std::ostringstream res;
-
-	res << this->response_.statusLine_;
-	res << this->response_.headers_;
-	res << this->response_.body_.content;
-
-	return res.str();
-}
-
-void Client::updateResponse()
-{
-	if (this->responseBuffer_.empty())
-		this->responseBuffer_ = getStringifiedResponse();
-}
-
 std::string Client::getStringifiedRequest()
 {
 	return this->request_.getBuffer();
@@ -159,7 +142,7 @@ t_httpCode Client::getResponseStatus() const
 
 std::string Client::getResponseBuffer() const
 {
-	return this->responseBuffer_;
+	return this->response_.buffer_;
 }
 
 void Client::setFd(fd_t fd)
@@ -202,7 +185,7 @@ void Client::clearRequest()
 
 void Client::eraseResponse(size_t bytesToErase)
 {
-	this->responseBuffer_.erase(0, bytesToErase);
+	this->response_.buffer_.erase(0, bytesToErase);
 }
 
 bool Client::shouldClose()
@@ -214,7 +197,6 @@ bool Client::shouldClose()
 	}
 
 	return C_KEEP_ALIVE;
-
 }
 
 void Client::buildResponse(std::vector<Server *> &servers)
@@ -222,20 +204,15 @@ void Client::buildResponse(std::vector<Server *> &servers)
 	Server *server;
 	Location *location;
 	HandlingResult res;
-	this->responseBuffer_.clear();
 
 	server = ServerMatcher::matchServer(request_, servers);
 	location = LocationMatcher::matchLocation(request_, *server);
 
 	res = RequestHandler::handleRequest(request_, *location, *server);
-	if (res.isCGI_)
-		this->responseBuffer_ = res.tempBody_.content;
-	else
-		response_ = ResponseFactory::create(res);
+	response_ = ResponseFactory::create(res);
 }
 
 void Client::buildResponse(t_httpCode code, t_connection mode)
 {
-	this->responseBuffer_.clear();
 	this->response_ = ResponseFactory::create(code, mode);
 }

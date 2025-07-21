@@ -150,7 +150,6 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 void WebServer::readySendResponse(Client *client, t_epoll &epoll)
 {
 	client->clearRequest();
-	client->updateResponse();
 	setEpollWrite(epoll, client);
 }
 
