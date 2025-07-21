@@ -29,12 +29,16 @@ bin/
 
 # Executables
 webserv
+amethtdd
 *.exe
 *.out
 *.app
 
 # IDEs
 .vscode/
+.idea/
+CMakeLists.txt
+cmake-build-debug
 
 # Test files
 tests/

@@ -24,12 +24,12 @@ bool Server::matchesName(std::string &match)
 }
 
 // Decide on no locations defined on server
-Location *Server::matchLocation(Request request)
+Location *Server::matchLocation(t_Request request)
 {
     int matchIndex = 0;
     int matchLength = 0;
     int longestMatch = 0;
-    std::string targetRoute = request.getTarget();
+    std::string targetRoute = request.requestLine.getTargetPath();
     std::vector<Location *> locations = this->getLocations();
 
     for (size_t i = 0; i < locations.size(); ++i)

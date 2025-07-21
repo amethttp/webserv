@@ -1,6 +1,6 @@
 #include "Context.hpp"
 
-Context::Context(Request &req, Location &loc, Server &server) : request_(req), location_(loc)
+Context::Context(t_Request&req, Location &loc, Server &server) : request_(req), location_(loc)
 {
 	this->connectionMode_ = C_KEEP_ALIVE;
 
@@ -13,23 +13,21 @@ Context::Context(Request &req, Location &loc, Server &server) : request_(req), l
 
 void Context::checkRequestHeaders()
 {
-	std::map<std::string, std::string> reqHeaders = this->request_.getHeaders();
-
-	if (reqHeaders.find("Connection") != reqHeaders.end())
+	if (request_.headers.contains("Connection"))
 	{
-		if (reqHeaders["Connection"] == "close")
+		if (request_.headers.getHeader("Connection").getValue() == "close")
 			this->connectionMode_ = C_CLOSE;
 	}
 }
 
 void Context::routeTarget()
 {
-	this->targetPath_ = this->location_.getRoot() + this->request_.getTarget();
+	this->targetPath_ = this->location_.getRoot() + this->request_.requestLine.getTargetPath();
 }
 
 void  Context::fitMethod()
 {
-	t_method reqMethod = this->request_.getMethod();
+	t_method reqMethod = this->request_.requestLine.getMethod();
 	std::set<t_method> allowedMethods = this->location_.getMethods();
 
 	if (allowedMethods.find(reqMethod) != allowedMethods.end())

@@ -21,7 +21,7 @@ private:
 	uint32_t id_;
 	fd_t fd_;
 	time_t lastReceivedPacket_;
-	Request request_;
+	t_Request request_;
 	t_Response response_;
 
 	static std::map<t_httpCode, std::string> errorDict_;
@@ -34,22 +34,18 @@ public:
 	int getId();
 	fd_t getFd();
 	time_t getLastReceivedPacket() const;
-	std::string getStringifiedRequest();
-	Request getRequest() const;
 	t_httpCode getResponseStatus() const;
 	std::string getResponseBuffer() const;
+	t_Request getRequest() const;
 
 	void setFd(fd_t fd);
 
-	void updateLastReceivedPacket();
-	bool hasFullRequestHeaders();
-	void buildRequest();
-	void appendRequest(char *request);
 	bool hasPendingRequest();
-	void clearRequest();
+	void updateLastReceivedPacket();
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
+	void buildRequest(char *buffer);
 	void buildResponse(Server *server, Location *location);
 	void buildResponse(t_httpCode code, t_connection mode);
 

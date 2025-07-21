@@ -1,0 +1,1455 @@
+#include "test/test.hpp"
+#include "test/assert/assert.hpp"
+#include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
+#include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
+
+namespace
+{
+    RequestLine requestLine;
+    HeaderCollection headers;
+    Body body;
+}
+
+static void assertCanCreateAResponseIsTrue(const std::string &requestString)
+{
+    const bool canCreateAResponse = RequestFactory::canCreateAResponse(requestString);
+
+    ASSERT_TRUE(canCreateAResponse);
+}
+
+static void assertCanCreateAResponseIsTrueFromRequestLine(const std::string &requestLineString)
+{
+    const std::string requestString = requestLineString + "\r\nHost: localhost\r\n\r\n";
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static void assertCanCreateAResponseIsTrueFromHeaders(const std::string &requestHeadersString)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\n" + requestHeadersString + "\r\n\r\n";
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static void assertCanCreateAResponseIsTrueFromFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
+{
+    std::stringstream clSs;
+    clSs << contentLengthSize;
+
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: " + clSs.str() + "\r\n\r\n" + requestBodyString;
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static void assertCanCreateAResponseIsTrueFromChunkedBody(const std::string &requestBodyString)
+{
+    const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" + requestBodyString;
+
+    assertCanCreateAResponseIsTrue(requestString);
+}
+
+static RequestLine parseFromValidRequestLine(const std::string &requestLineString)
+{
+    assertCanCreateAResponseIsTrueFromRequestLine(requestLineString);
+
+    const RequestTokenizer requestTokenizer(requestLineString);
+    RequestParser sut(requestTokenizer);
+
+    const Result<RequestLine> result = sut.parseRequestLine();
+
+    return result.getValue();
+}
+
+static HeaderCollection parseFromValidHeaders(const std::string &requestHeadersString)
+{
+    assertCanCreateAResponseIsTrueFromHeaders(requestHeadersString);
+
+    const RequestTokenizer requestTokenizer(requestHeadersString);
+    RequestParser sut(requestTokenizer);
+
+    const Result<HeaderCollection> result = sut.parseHeaders();
+
+    return result.getValue();
+}
+
+static Body parseFromValidFullBody(const size_t contentLengthSize, const std::string &requestBodyString)
+{
+    assertCanCreateAResponseIsTrueFromFullBody(contentLengthSize, requestBodyString);
+
+    const RequestTokenizer requestTokenizer(requestBodyString);
+    RequestParser sut(requestTokenizer);
+
+    const Result<Body> result = sut.parseFullBody(contentLengthSize);
+
+    return result.getValue();
+}
+
+static Body parseFromValidChunkedBody(const std::string &requestBodyString)
+{
+    assertCanCreateAResponseIsTrueFromChunkedBody(requestBodyString);
+
+    const RequestTokenizer requestTokenizer(requestBodyString);
+    RequestParser sut(requestTokenizer);
+
+    const Result<Body> result = sut.parseChunkedBody();
+
+    return result.getValue();
+}
+
+static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
+{
+    ASSERT_EQUALS(method, requestLine.getMethod());
+    ASSERT_EQUALS(targetUri, requestLine.getTargetUri());
+    ASSERT_EQUALS(version, requestLine.getHttpVersion());
+}
+
+static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
+{
+    assertCanCreateAResponseIsTrueFromRequestLine(invalidRequestString);
+
+    const RequestTokenizer requestTokenizer(invalidRequestString);
+    RequestParser sut(requestTokenizer);
+
+    const Result<RequestLine> result = sut.parseRequestLine();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+}
+
+static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
+{
+    assertCanCreateAResponseIsTrueFromHeaders(invalidHeader);
+
+    const RequestTokenizer requestTokenizer(invalidHeader);
+    RequestParser sut(requestTokenizer);
+
+    const Result<HeaderCollection> result = sut.parseHeaders();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+}
+
+static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const std::string &invalidBody)
+{
+    assertCanCreateAResponseIsTrueFromFullBody(contentLengthSize, invalidBody);
+
+    const RequestTokenizer requestTokenizer(invalidBody);
+    RequestParser sut(requestTokenizer);
+
+    Result<Body> result = sut.parseFullBody(contentLengthSize);
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+}
+
+static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
+{
+    assertCanCreateAResponseIsTrueFromChunkedBody(invalidBody);
+
+    const RequestTokenizer requestTokenizer(invalidBody);
+    RequestParser sut(requestTokenizer);
+
+    Result<Body> result = sut.parseChunkedBody();
+
+    ASSERT_TRUE(result.isFailure());
+    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+}
+
+static void assertHeaderSize(const size_t size)
+{
+    ASSERT_EQUALS(size, headers.getAmountOfHeaders());
+}
+
+static void assertHeader(const std::string &key, const std::string &value)
+{
+    ASSERT_EQUALS(value, headers.getHeaderValue(key));
+}
+
+static void assertBodyIsEmpty()
+{
+    ASSERT_EQUALS("", body.getMessage());
+}
+
+static void assertBody(const std::string &expectedBody)
+{
+    ASSERT_EQUALS(expectedBody, body.getMessage());
+}
+
+
+/* BASIC REQUEST LINE */
+TEST(recognize_a_basic_GET_request_line)
+{
+    requestLine = parseFromValidRequestLine("GET / HTTP/1.1");
+
+    assertRequestLine(GET, "/", "HTTP/1.1");
+}
+
+TEST(recognize_a_basic_POST_request_line)
+{
+    requestLine = parseFromValidRequestLine("POST / HTTP/1.1");
+
+    assertRequestLine(POST, "/", "HTTP/1.1");
+}
+
+TEST(recognize_a_basic_DELETE_request_line)
+{
+    requestLine = parseFromValidRequestLine("DELETE / HTTP/1.1");
+
+    assertRequestLine(DELETE, "/", "HTTP/1.1");
+}
+
+
+/* REQUEST LINE METHOD CRITERIA */
+TEST(recognize_as_not_implemented_a_case_insensitive_method)
+{
+    requestLine = parseFromValidRequestLine("get / HTTP/1.1");
+
+    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
+}
+
+TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_only_of_alphabetic_characters)
+{
+    requestLine = parseFromValidRequestLine("NotImplemented / HTTP/1.1");
+
+    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
+}
+
+TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_of_tchars)
+{
+    const std::string tchars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const std::string nonImplementedRequestLineString = tchars + " / HTTP/1.1";
+
+    requestLine = parseFromValidRequestLine(nonImplementedRequestLineString);
+
+    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_method_consisted_of_invalid_characters)
+{
+    assertRequestLineIsInvalid("(),/:;\r<=>\b?@\f[\\]\t{}\n / HTTP/1.1");
+}
+
+TEST(take_as_failure_a_method_that_contains_invalid_characters)
+{
+    assertRequestLineIsInvalid("DEL(),/:;\r<=>\b?@\f[\\]\t{}\nTE / HTTP/1.1");
+}
+
+TEST(take_as_failure_an_empty_method)
+{
+    assertRequestLineIsInvalid(" / HTTP/1.1");
+}
+
+TEST(take_as_failure_a_non_existant_method)
+{
+    assertRequestLineIsInvalid("/ HTTP/1.1");
+}
+
+
+/* REQUEST LINE FIRST SP CRITERIA */
+TEST(take_as_failure_a_request_line_without_the_first_SP)
+{
+    assertRequestLineIsInvalid("GET/ HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_another_character_instead_of_the_first_SP)
+{
+    assertRequestLineIsInvalid("GET?/ HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_a_HTAB_instead_of_the_first_SP)
+{
+    assertRequestLineIsInvalid("GET\t/ HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_a_HTAB_and_SP_instead_of_a_single_first_SP)
+{
+    assertRequestLineIsInvalid("GET\t / HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_a_SP_and_HTAB_instead_of_a_single_first_SP)
+{
+    assertRequestLineIsInvalid("GET \t/ HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_multiple_first_SP)
+{
+    assertRequestLineIsInvalid("GET   / HTTP/1.1");
+}
+
+
+/* REQUEST LINE TARGET CRITERIA */
+TEST(recognize_a_simple_alphabetic_target)
+{
+    requestLine = parseFromValidRequestLine("GET /index HTTP/1.1");
+
+    assertRequestLine(GET, "/index", "HTTP/1.1");
+}
+
+TEST(recognize_a_target_with_extension)
+{
+    requestLine = parseFromValidRequestLine("GET /index.html HTTP/1.1");
+
+    assertRequestLine(GET, "/index.html", "HTTP/1.1");
+}
+
+TEST(recognize_a_target_with_one_directory_level)
+{
+    requestLine = parseFromValidRequestLine("GET /profile/contact.php HTTP/1.1");
+
+    assertRequestLine(GET, "/profile/contact.php", "HTTP/1.1");
+}
+
+TEST(recognize_a_target_with_multiple_directory_levels)
+{
+    requestLine = parseFromValidRequestLine("GET /courses/science/physics.py HTTP/1.1");
+
+    assertRequestLine(GET, "/courses/science/physics.py", "HTTP/1.1");
+}
+
+TEST(recognize_a_directory_target)
+{
+    requestLine = parseFromValidRequestLine("GET /about/ HTTP/1.1");
+
+    assertRequestLine(GET, "/about/", "HTTP/1.1");
+}
+
+TEST(recognize_a_multiple_directory_target)
+{
+    requestLine = parseFromValidRequestLine("GET /about/services/ HTTP/1.1");
+
+    assertRequestLine(GET, "/about/services/", "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_not_starting_with_slash)
+{
+    assertRequestLineIsInvalid("GET ./ HTTP/1.1");
+    assertRequestLineIsInvalid("GET INVALID HTTP/1.1");
+    assertRequestLineIsInvalid("GET INVALID/ HTTP/1.1");
+}
+
+TEST(recognize_a_target_consisted_of_pchars)
+{
+    const std::string pchars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%AA-._~!$&'()*+,;=:@";
+    const std::string target = "/" + pchars;
+    const std::string validRequestLine = "GET " + target + " HTTP/1.1";
+
+    requestLine = parseFromValidRequestLine(validRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_consisted_of_invalid_characters)
+{
+    assertRequestLineIsInvalid("GET /^{}[] HTTP/1.1");
+    assertRequestLineIsInvalid("GET /\b\"\n`\t HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_that_contains_invalid_characters)
+{
+    assertRequestLineIsInvalid("GET /INVALID^{}[] HTTP/1.1");
+    assertRequestLineIsInvalid("GET /^{}[]INVALID HTTP/1.1");
+    assertRequestLineIsInvalid("GET /INVA^\r{}\"[]\t\bLID HTTP/1.1");
+}
+
+TEST(recognize_a_target_with_valid_pct_encoded_pchars)
+{
+    const std::string target = "/%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF";
+    const std::string validRequestLine = "GET " + target + " HTTP/1.1";
+
+    requestLine = parseFromValidRequestLine(validRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_with_invalid_pct_encoded_pchars)
+{
+    assertRequestLineIsInvalid("GET /%gg HTTP/1.1");
+    assertRequestLineIsInvalid("GET /%GG HTTP/1.1");
+    assertRequestLineIsInvalid("GET /%-r HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_with_incomplete_pct_encoded_pchars)
+{
+    assertRequestLineIsInvalid("GET /%a HTTP/1.1");
+    assertRequestLineIsInvalid("GET /% HTTP/1.1");
+}
+
+TEST(recognize_a_target_with_an_empty_query)
+{
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/? HTTP/1.1");
+
+    assertRequestLine(GET, "/VALID/PATH/?", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_an_empty_parameter)
+{
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param HTTP/1.1");
+
+    assertRequestLine(GET, "/VALID/PATH/?param", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_a_full_parameter)
+{
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param=anyValue HTTP/1.1");
+
+    assertRequestLine(GET, "/VALID/PATH/?param=anyValue", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_multiple_parameters)
+{
+    requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param=anyValue&mode= HTTP/1.1");
+
+    assertRequestLine(GET, "/VALID/PATH/?param=anyValue&mode=", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_consisted_of_valid_characters)
+{
+    const std::string validChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%AA-._~!$&'()*+,;=:@/?";
+    const std::string target = "/VALID/PATH/?" + validChars;
+    const std::string validRequestLine = "GET " + target + " HTTP/1.1";
+
+    requestLine = parseFromValidRequestLine(validRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_query_consisted_of_invalid_characters)
+{
+    assertRequestLineIsInvalid("GET /VALID/PATH?^{}[] HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH?\b\"\n`\t HTTP/1.1");
+}
+
+TEST(take_as_failure_a_query_that_contains_invalid_characters)
+{
+    assertRequestLineIsInvalid("GET /VALID/PATH?INVALID^{}[] HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH?^{}[]INVALID HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH?INVA^\r{}\"[]\t\bLID HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_valid_pct_encoded_pchars)
+{
+    const std::string target = "/VALID/PATH/?%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF";
+    const std::string validRequestLine = "GET " + target + " HTTP/1.1";
+
+    requestLine = parseFromValidRequestLine(validRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_query_with_invalid_pct_encoded_pchars)
+{
+    assertRequestLineIsInvalid("GET /VALID/PATH/?%gg HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH/?%GG HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH/?%-r HTTP/1.1");
+}
+
+TEST(take_as_failure_a_query_with_incomplete_pct_encoded_pchars)
+{
+    assertRequestLineIsInvalid("GET /VALID/PATH/?%a HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH/?% HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH/%a? HTTP/1.1");
+    assertRequestLineIsInvalid("GET /VALID/PATH/%? HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_with_only_query)
+{
+    assertRequestLineIsInvalid("GET ?invalidQuery=anyValue HTTP/1.1");
+}
+
+TEST(recognize_a_target_longer_than_maximum_length)
+{
+    const char anyValidCharacter = 'A';
+    const std::string target = "/" + std::string(MAX_URI_LENGTH, anyValidCharacter);
+    const std::string targetTooLongRequestLine = "GET " + target + " HTTP/1.1";
+
+    requestLine = parseFromValidRequestLine(targetTooLongRequestLine);
+
+    assertRequestLine(GET, target, "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_mixed_with_HTTP_version)
+{
+    assertRequestLineIsInvalid("GET /index.html/HTTP/1.1");
+    assertRequestLineIsInvalid("GET /index.html?HTTP/1.1");
+}
+
+TEST(recognize_a_not_normalized_pct_encoded_target)
+{
+    requestLine = parseFromValidRequestLine("GET /%2e%2e/%2e%2e/%2e%2e/etc/passwd HTTP/1.1");
+
+    assertRequestLine(GET, "/%2e%2e/%2e%2e/%2e%2e/etc/passwd", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_a_single_question_mark)
+{
+    requestLine = parseFromValidRequestLine("GET /?? HTTP/1.1");
+
+    assertRequestLine(GET, "/??", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_a_single_equal)
+{
+    requestLine = parseFromValidRequestLine("GET /?= HTTP/1.1");
+
+    assertRequestLine(GET, "/?=", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_a_single_ampersand)
+{
+    requestLine = parseFromValidRequestLine("GET /?& HTTP/1.1");
+
+    assertRequestLine(GET, "/?&", "HTTP/1.1");
+}
+
+TEST(recognize_a_query_with_multiple_ampersands)
+{
+    requestLine = parseFromValidRequestLine("GET /?&&&&&& HTTP/1.1");
+
+    assertRequestLine(GET, "/?&&&&&&", "HTTP/1.1");
+}
+
+TEST(take_as_failure_a_target_with_a_fragment_section)
+{
+    assertRequestLineIsInvalid("GET /index.html# HTTP/1.1");
+    assertRequestLineIsInvalid("GET /index.html#section HTTP/1.1");
+    assertRequestLineIsInvalid("GET /index.html?param=anyValue#section HTTP/1.1");
+}
+
+TEST(take_as_failure_an_empty_target)
+{
+    assertRequestLineIsInvalid("GET  HTTP/1.1");
+}
+
+TEST(take_as_failure_a_non_existant_target)
+{
+    assertRequestLineIsInvalid("GET HTTP/1.1");
+}
+
+
+/* REQUEST LINE LAST SP CRITERIA */
+TEST(take_as_failure_a_request_line_without_the_last_SP)
+{
+    assertRequestLineIsInvalid("GET /HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_another_character_instead_of_the_last_SP)
+{
+    assertRequestLineIsInvalid("GET /?HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_a_HTAB_instead_of_the_last_SP)
+{
+    assertRequestLineIsInvalid("GET /\tHTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_a_HTAB_and_SP_instead_of_a_single_last_SP)
+{
+    assertRequestLineIsInvalid("GET /\t HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_a_SP_and_HTAB_instead_of_a_single_last_SP)
+{
+    assertRequestLineIsInvalid("GET / \tHTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_multiple_last_SP)
+{
+    assertRequestLineIsInvalid("GET /   HTTP/1.1");
+}
+
+
+/* REQUEST LINE HTTP-VERSION CRITERIA */
+TEST(take_as_failure_a_case_insensitive_HTTP_name)
+{
+    assertRequestLineIsInvalid("GET / Http/1.1");
+    assertRequestLineIsInvalid("GET / http/1.1");
+}
+
+TEST(take_as_failure_an_invalid_HTTP_name)
+{
+    assertRequestLineIsInvalid("GET / INVALID/1.1");
+    assertRequestLineIsInvalid("GET / HFDAJFK_INVALID/1.1");
+    assertRequestLineIsInvalid("GET / HTTPINVALID/1.1");
+}
+
+TEST(take_as_failure_a_repeated_HTTP_name)
+{
+    assertRequestLineIsInvalid("GET / HTTPHTTP/1.1");
+}
+
+TEST(take_as_failure_a_SP_instead_of_HTTP_name)
+{
+    assertRequestLineIsInvalid("GET /  /1.1");
+}
+
+TEST(take_as_failure_a_HTAB_instead_of_HTTP_name)
+{
+    assertRequestLineIsInvalid("GET / \t/1.1");
+}
+
+TEST(take_as_failure_an_empty_HTTP_name)
+{
+    assertRequestLineIsInvalid("GET / /1.1");
+}
+
+TEST(take_as_failure_an_invalid_HTTP_version_slash)
+{
+    assertRequestLineIsInvalid("GET / HTTP?1.1");
+    assertRequestLineIsInvalid("GET / HTTP$1.1");
+    assertRequestLineIsInvalid("GET / HTTPINVALID1.1");
+}
+
+TEST(take_as_failure_a_repeated_HTTP_version_slash)
+{
+    assertRequestLineIsInvalid("GET / HTTP//1.1");
+}
+
+TEST(take_as_failure_a_SP_instead_of_HTTP_version_slash)
+{
+    assertRequestLineIsInvalid("GET / HTTP 1.1");
+}
+
+TEST(take_as_failure_a_HTAB_instead_of_HTTP_version_slash)
+{
+    assertRequestLineIsInvalid("GET / HTTP\t1.1");
+}
+
+TEST(take_as_failure_an_empty_HTTP_version_slash)
+{
+    assertRequestLineIsInvalid("GET / HTTP1.1");
+}
+
+TEST(recognize_a_non_supported_major_version)
+{
+    requestLine = parseFromValidRequestLine("GET / HTTP/2.1");
+
+    assertRequestLine(GET, "/", "HTTP/2.1");
+}
+
+TEST(take_as_failure_an_invalid_major_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/?.1");
+    assertRequestLineIsInvalid("GET / HTTP/1fA($!.1");
+    assertRequestLineIsInvalid("GET / HTTP/fe\r\b1.1");
+}
+
+TEST(take_as_failure_a_major_version_with_more_than_one_digit)
+{
+    assertRequestLineIsInvalid("GET / HTTP/11.1");
+}
+
+TEST(take_as_failure_a_negative_major_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/-1.1");
+}
+
+TEST(take_as_failure_a_SP_instead_of_major_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/ .1");
+}
+
+TEST(take_as_failure_a_HTAB_instead_of_major_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/\t.1");
+}
+
+TEST(take_as_failure_an_empty_major_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/.1");
+}
+
+TEST(take_as_failure_an_invalid_HTTP_version_dot)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1(1");
+    assertRequestLineIsInvalid("GET / HTTP/1_1");
+    assertRequestLineIsInvalid("GET / HTTP/1INVALID1");
+}
+
+TEST(take_as_failure_a_repeated_HTTP_version_dot)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1..1");
+}
+
+TEST(take_as_failure_a_SP_instead_of_HTTP_version_dot)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1 1");
+}
+
+TEST(take_as_failure_a_HTAB_instead_of_HTTP_version_dot)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1\t1");
+}
+
+TEST(take_as_failure_an_empty_HTTP_version_dot)
+{
+    assertRequestLineIsInvalid("GET / HTTP/11");
+}
+
+TEST(recognize_a_non_supported_minor_version)
+{
+    requestLine = parseFromValidRequestLine("GET / HTTP/1.0");
+
+    assertRequestLine(GET, "/", "HTTP/1.0");
+}
+
+TEST(take_as_failure_an_invalid_minor_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.?");
+    assertRequestLineIsInvalid("GET / HTTP/1.1fA($!");
+    assertRequestLineIsInvalid("GET / HTTP/1.fe\r\b1");
+}
+
+TEST(take_as_failure_a_minor_version_with_more_than_one_digit)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.11");
+}
+
+TEST(take_as_failure_a_negative_minor_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.-1");
+}
+
+TEST(take_as_failure_a_SP_instead_of_minor_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1. ");
+}
+
+TEST(take_as_failure_a_HTAB_instead_of_minor_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.\t");
+}
+
+TEST(take_as_failure_an_empty_minor_version)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.");
+}
+
+TEST(take_as_failure_an_invalid_HTTP_version)
+{
+    assertRequestLineIsInvalid("GET / INVALID");
+}
+
+TEST(take_as_failure_an_incomplete_HTTP_version)
+{
+    assertRequestLineIsInvalid("GET / 1.1");
+    assertRequestLineIsInvalid("GET / HTTP");
+    assertRequestLineIsInvalid("GET / HTTP/");
+    assertRequestLineIsInvalid("GET / HTTP/1");
+}
+
+TEST(take_as_failure_an_HTTP_version_with_multiple_minor_versions)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.1.1");
+}
+
+TEST(take_as_failure_an_empty_HTTP_version)
+{
+    assertRequestLineIsInvalid("GET / ");
+}
+
+TEST(take_as_failure_a_non_existant_HTTP_version)
+{
+    assertRequestLineIsInvalid("GET /");
+}
+
+
+/* MISC. REQUEST LINE CRITERIA */
+TEST(take_as_failure_a_request_line_preceded_by_SP)
+{
+    assertRequestLineIsInvalid(" GET / HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_followed_by_SP)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.1 ");
+}
+
+TEST(take_as_failure_a_request_line_with_an_invalid_first_token_and_more_than_three_tokens)
+{
+    assertRequestLineIsInvalid("INVALID GET / HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_an_invalid_second_token_and_more_than_three_tokens)
+{
+    assertRequestLineIsInvalid("GET INVALID / HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_an_invalid_third_token_and_more_than_three_tokens)
+{
+    assertRequestLineIsInvalid("GET / INVALID HTTP/1.1");
+}
+
+TEST(take_as_failure_a_request_line_with_an_invalid_fourth_token_and_more_than_three_tokens)
+{
+    assertRequestLineIsInvalid("GET / HTTP/1.1 INVALID");
+}
+
+TEST(take_as_failure_an_invalid_request_line)
+{
+    assertRequestLineIsInvalid("INVALID");
+}
+
+TEST(take_as_failure_a_request_line_with_only_a_SP)
+{
+    assertRequestLineIsInvalid(" ");
+}
+
+TEST(take_as_failure_an_empty_request_line)
+{
+    assertRequestLineIsInvalid("");
+}
+
+
+/* REQUEST HEADERS CRITERIA */
+TEST(recognize_a_simple_header)
+{
+    headers = parseFromValidHeaders("Host: localhost");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_complex_header)
+{
+    headers = parseFromValidHeaders("Content-Length: 1312");
+
+    assertHeaderSize(1);
+    assertHeader(CONTENT_LENGTH, "1312");
+}
+
+TEST(recognize_a_case_insensitive_header)
+{
+    headers = parseFromValidHeaders("hOST: localhost");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_header_whose_key_is_consisted_of_tchars)
+{
+    const std::string validKey = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const std::string expectedKey = "!#$%&'*+-.^_`|~0123456789abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
+
+    headers = parseFromValidHeaders(validKey + ": localhost");
+
+    assertHeaderSize(1);
+    assertHeader(expectedKey, "localhost");
+}
+
+TEST(take_as_failure_a_header_whose_key_contains_non_tchars)
+{
+    assertRequestHeaderIsInvalid("(),/;\r<=>\b?@\f[\\]\t{}\n: localhost");
+    assertRequestHeaderIsInvalid("Ho(),/;\r<=>\b?@\f[\\]\t{}\nst: localhost");
+    assertRequestHeaderIsInvalid("Ho\x01\x14st: localhost");
+}
+
+TEST(take_as_failure_a_header_whose_key_contains_SP)
+{
+    assertRequestHeaderIsInvalid("Host : localhost");
+    assertRequestHeaderIsInvalid(" Host: localhost");
+    assertRequestHeaderIsInvalid("Ho st: localhost");
+}
+
+TEST(take_as_failure_a_header_whose_key_contains_HTAB)
+{
+    assertRequestHeaderIsInvalid("Host\t: localhost");
+    assertRequestHeaderIsInvalid("\tHost: localhost");
+    assertRequestHeaderIsInvalid("Ho\tst: localhost");
+}
+
+TEST(take_as_failure_a_header_whose_key_is_SP)
+{
+    assertRequestHeaderIsInvalid(" : localhost");
+}
+
+TEST(take_as_failure_a_header_whose_key_is_HTAB)
+{
+    assertRequestHeaderIsInvalid("\t: localhost");
+}
+
+TEST(take_as_failure_a_header_whose_key_is_empty)
+{
+    assertRequestHeaderIsInvalid(": localhost");
+}
+
+TEST(take_as_failure_a_header_missing_the_colon_separator)
+{
+    assertRequestHeaderIsInvalid("Host localhost");
+}
+
+TEST(take_as_failure_a_header_that_has_any_other_character_instead_of_the_colon_separator)
+{
+    assertRequestHeaderIsInvalid("Host? localhost");
+    assertRequestHeaderIsInvalid("Host! localhost");
+    assertRequestHeaderIsInvalid("Hosta localhost");
+}
+
+TEST(take_as_failure_a_header_that_has_SP_instead_of_the_colon_separator)
+{
+    assertRequestHeaderIsInvalid("Host  localhost");
+}
+
+TEST(take_as_failure_a_header_that_has_HTAB_instead_of_the_colon_separator)
+{
+    assertRequestHeaderIsInvalid("Host\t localhost");
+}
+
+TEST(recognize_a_header_with_repeated_colon_separator)
+{
+    headers = parseFromValidHeaders("Host:: localhost");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, ": localhost");
+}
+
+TEST(recognize_a_header_without_the_first_OWS)
+{
+    headers = parseFromValidHeaders("Host:localhost");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_header_with_a_single_SP_as_first_OWS)
+{
+    headers = parseFromValidHeaders("Host: localhost");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_header_with_a_single_HTAB_as_first_OWS)
+{
+    headers = parseFromValidHeaders("Host:\tlocalhost");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_header_with_a_combination_of_first_OWS)
+{
+    headers = parseFromValidHeaders("Host: \t   \t\t  \t\tlocalhost");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_header_whose_value_has_valid_printable_characters_and_HTAB)
+{
+    const std::string validValue = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ \t[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
+    headers = parseFromValidHeaders("Host: " + validValue);
+
+    assertHeaderSize(1);
+    assertHeader(HOST, validValue);
+}
+
+TEST(recognize_a_header_whose_value_has_multiple_words_using_SP_as_separator)
+{
+    headers = parseFromValidHeaders("Host: localhost and something else");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost and something else");
+}
+
+TEST(recognize_a_header_whose_value_has_multiple_words_using_HTAB_as_separator)
+{
+    headers = parseFromValidHeaders("Host: localhost\tand\tsomething\telse");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost\tand\tsomething\telse");
+}
+
+TEST(recognize_a_header_whose_value_has_multiple_words_using_multiple_OWS_as_separator)
+{
+    headers = parseFromValidHeaders("Host: localhost\t \tand   \tsomething\t   \t\telse");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost\t \tand   \tsomething\t   \t\telse");
+}
+
+TEST(take_as_failure_a_header_whose_value_contains_invalid_characters)
+{
+    assertRequestHeaderIsInvalid("Host: \r\b\n\n\r\x7f\x10");
+}
+
+TEST(recognize_a_header_whose_value_is_a_single_SP)
+{
+    headers = parseFromValidHeaders("Host: ");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "");
+}
+
+TEST(recognize_a_header_whose_value_is_a_single_HTAB)
+{
+    headers = parseFromValidHeaders("Host:\t");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "");
+}
+
+TEST(recognize_a_header_whose_value_is_multiple_OWS)
+{
+    headers = parseFromValidHeaders("Host:\t \t\t   \t \t");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "");
+}
+
+TEST(recognize_a_header_whose_value_is_empty)
+{
+    headers = parseFromValidHeaders("Host:");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "");
+}
+
+TEST(recognize_a_header_with_a_single_SP_as_last_OWS)
+{
+    headers = parseFromValidHeaders("Host: localhost ");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_header_with_a_single_HTAB_as_last_OWS)
+{
+    headers = parseFromValidHeaders("Host: localhost\t");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_a_header_with_a_combination_of_last_OWS)
+{
+    headers = parseFromValidHeaders("Host: localhost \t   \t\t  \t\t");
+
+    assertHeaderSize(1);
+    assertHeader(HOST, "localhost");
+}
+
+TEST(recognize_multiple_headers_separated_with_CRLF)
+{
+    headers = parseFromValidHeaders("Host: localhost\r\nContent-Length:0\r\nConnection:\tclose");
+
+    assertHeaderSize(3);
+    assertHeader(HOST, "localhost");
+    assertHeader(CONTENT_LENGTH, "0");
+    assertHeader(CONNECTION, "close");
+}
+
+TEST(take_as_failure_multiple_headers_with_OWS_as_separator)
+{
+    assertRequestHeaderIsInvalid("Host: localhost\r\n Content-Length: 0");
+    assertRequestHeaderIsInvalid("Host: localhost\r\n\tContent-Length: 0");
+}
+
+TEST(take_as_failure_multiple_headers_with_invalid_separator)
+{
+    assertRequestHeaderIsInvalid("Host: localhost\rContent-Length: 0");
+    assertRequestHeaderIsInvalid("Host: localhost\nContent-Length: 0");
+    assertRequestHeaderIsInvalid("Host: localhost\b\fContent-Length: 0");
+    assertRequestHeaderIsInvalid("Host: localhost\r \nContent-Length: 0");
+}
+
+TEST(take_as_failure_multiple_headers_with_an_invalid_middle_header)
+{
+    assertRequestHeaderIsInvalid("Host: localhost\r\nContent-Length: \b0\r\nConnection: close");
+}
+
+
+/* MISC. REQUEST HEADERS CRITERIA */
+TEST(take_as_failure_an_invalid_header_line)
+{
+    assertRequestHeaderIsInvalid("INVALID");
+}
+
+TEST(take_as_failure_a_header_line_consisted_of_OWS)
+{
+    assertRequestHeaderIsInvalid(" ");
+    assertRequestHeaderIsInvalid("\t");
+    assertRequestHeaderIsInvalid(" \t  \t    \t \t\t");
+}
+
+TEST(take_as_failure_an_empty_header_line)
+{
+    assertRequestHeaderIsInvalid("");
+}
+
+
+/* REQUEST FULL BODY CRITERIA */
+TEST(recognize_a_request_with_an_empty_body)
+{
+    body = parseFromValidFullBody(0, "");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_request_with_a_non_empty_body)
+{
+    body = parseFromValidFullBody(10, "Valid body");
+
+    assertBody("Valid body");
+}
+
+TEST(recognize_a_request_with_a_body_with_all_octets)
+{
+    const std::string controlChars = "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F\x7f";
+    const std::string printableChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x00";
+    const std::string octets = controlChars + printableChars;
+
+    body = parseFromValidFullBody(127, octets);
+
+    assertBody(octets);
+}
+
+TEST(recognize_a_request_with_a_body_with_crlfs_inside)
+{
+    body = parseFromValidFullBody(11, "Valid\r\nbody");
+
+    assertBody("Valid\r\nbody");
+}
+
+TEST(take_as_failure_a_request_with_a_body_length_superior_than_content_length_header_size)
+{
+    assertRequestFullBodyIsInvalid(0, "Invalid body");
+    assertRequestFullBodyIsInvalid(10, "Invalid body");
+}
+
+TEST(take_as_failure_a_request_with_a_body_consisted_of_WS_and_with_length_superior_than_content_length_header_size)
+{
+    assertRequestFullBodyIsInvalid(0, "          ");
+    assertRequestFullBodyIsInvalid(0, "\t\t\t\t\t");
+}
+
+
+/* REQUEST CHUNKED BODY CRITERIA */
+TEST(recognize_a_basic_chunked_body)
+{
+    body = parseFromValidChunkedBody("0\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_basic_chunked_body_with_a_last_chunk_whose_chunk_size_has_multiple_zeros)
+{
+    body = parseFromValidChunkedBody("0000000\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension)
+{
+    body = parseFromValidChunkedBody("0;extension\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_consisted_of_valid_chars)
+{
+    const std::string validChars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    body = parseFromValidChunkedBody("0;" + validChars + "\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_that_contains_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("0;(),/:;<=>?@[\\]{}\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;exten(),/:;<=>?@[\\]{}sion\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_that_contains_SP)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext en sion\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0; ext\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext \r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_that_is_SP)
+{
+    assertRequestChunkedBodyIsInvalid("0; \r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_an_empty_chunk_extension)
+{
+    assertRequestChunkedBodyIsInvalid("0;\r\n\r\n");
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_with_value)
+{
+    body = parseFromValidChunkedBody("0;ext=value\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_contains_valid_chars)
+{
+    const std::string validChars = "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    body = parseFromValidChunkedBody("0;ext=" + validChars + "\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_contains_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=(),/:;<=>?@[\\]{}\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val(),/:;<=>?@[\\]{}ue\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_contains_SP)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=va l ue\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext= value\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=value \r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_SP)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext= \r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_empty)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=\r\n\r\n");
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_an_empty_quoted_string)
+{
+    body = parseFromValidChunkedBody("0;ext=\"\"\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_non_empty_quoted_string)
+{
+    body = parseFromValidChunkedBody("0;ext=\"validBody\"\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_valid_qdtext)
+{
+    const std::string validQdtext = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~ \t";
+
+    body = parseFromValidChunkedBody("0;ext=\"" + validQdtext + "\"\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_valid_quoted_pairs)
+{
+    body = parseFromValidChunkedBody("0;ext=\"\\\\ \\\" \\ \\\t\"\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\r\f\b\x04\x01\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\\\r\\\b\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\\\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\"\"\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_quoted_string_with_surrounding_SP)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext= \"\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\" \r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_chunk_extension_whose_value_is_a_mal_formed_quoted_string)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=\"invalid\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=invalid\"\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=\"\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_a_mal_formed_chunk_extension)
+{
+    assertRequestChunkedBodyIsInvalid("0;=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;=\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;\"ext\"=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext===\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val=lue\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;===\r\n\r\n");
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions)
+{
+    body = parseFromValidChunkedBody("0;ext;ext\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_with_values)
+{
+    body = parseFromValidChunkedBody("0;ext=val;ext=val\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_whose_values_have_valid_chars)
+{
+    body = parseFromValidChunkedBody("0;ext=val;!#$%&'*+-.^_`|~=!#$%&'*+-.^_`|~\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_whose_values_have_valid_chars_and_valid_quoted_pairs)
+{
+    body = parseFromValidChunkedBody("0;ext=val;!#$%&'*+-.^_`|~=\"{|}~\t \\\\ \\\"\"\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_with_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=val;\r\b=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val;ext=\b\f\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val;ext=\"\\\b\"\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_mal_formed_chunk_extensions)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=val;ext=\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val;=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val;=\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extension_separators)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=val;;;ext=val\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_with_mal_formed_separator)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=val ;ext=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val; ext=val\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_last_chunk_that_has_multiple_chunk_extensions_whose_separator_is_another_character_different_than_colon)
+{
+    assertRequestChunkedBodyIsInvalid("0;ext=valXext=val\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0;ext=val\"ext=val\r\n\r\n");
+}
+
+TEST(recognize_a_chunked_body_with_a_basic_chunk)
+{
+    body = parseFromValidChunkedBody("5\r\nValid\r\n0\r\n\r\n");
+
+    assertBody("Valid");
+}
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_leading_zeroes)
+{
+    body = parseFromValidChunkedBody("000000000000000005\r\nValid\r\n0\r\n\r\n");
+
+    assertBody("Valid");
+}
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_multiple_hexadecimal_digits)
+{
+    body = parseFromValidChunkedBody("0a\r\nValid body\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_chunk_size_has_multiple_case_insensitive_hexadecimal_digits)
+{
+    body = parseFromValidChunkedBody("0A\r\nValid body\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
+
+TEST(recognize_a_chunked_body_with_a_chunk_that_has_chunk_extensions)
+{
+    body = parseFromValidChunkedBody("0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_crlf_separators_as_plain_text)
+{
+    body = parseFromValidChunkedBody("0b\r\nValid\r\nbody\r\n0\r\n\r\n");
+
+    assertBody("Valid\r\nbody");
+}
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_control_chars_as_plain_text)
+{
+    body = parseFromValidChunkedBody("07\r\n\r\n\b\f\x01\x04\x07\r\n0\r\n\r\n");
+
+    assertBody("\r\n\b\f\x01\x04\x07");
+}
+
+TEST(recognize_a_chunked_body_with_a_chunk_whose_data_contains_all_octets_as_plain_text)
+{
+    const std::string controlChars = "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F\x7f";
+    const std::string printableChars = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x00";
+    const std::string octets = controlChars + printableChars;
+
+    body = parseFromValidChunkedBody("7f\r\n" + octets + "\r\n0\r\n\r\n");
+
+    assertBody(octets);
+}
+
+TEST(recognize_a_chunked_body_with_multiple_chunks)
+{
+    body = parseFromValidChunkedBody("05\r\nValid\r\n01\r\n \r\n04\r\nbody\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
+
+TEST(recognize_a_chunked_body_with_multiple_chunks_that_have_chunk_extensions)
+{
+    body = parseFromValidChunkedBody("05\r\nValid\r\n01;ext=value\r\n \r\n04;ext=\"value\"\r\nbody\r\n0\r\n\r\n");
+
+    assertBody("Valid body");
+}
+
+TEST(take_as_failure_a_chunked_body_with_multiple_chunks_that_have_invalid_chars)
+{
+    assertRequestChunkedBodyIsInvalid("05\r\nValid\r\n01\r\n\b \r\n04\r\nbody\r\n0\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("05\r\nValid\r\n01\r\n \r\n04\r\n\bbody\r\n0\r\n\r\n");
+}
+
+TEST(recognize_a_chunked_body_with_a_final_basic_trailer_field)
+{
+    body = parseFromValidChunkedBody("0\r\nTrailer: value\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_multiple_trailer_fields)
+{
+    body = parseFromValidChunkedBody("0\r\nTrailer: value\r\nTrailer2: value2\r\n\r\n");
+
+    assertBodyIsEmpty();
+}
+
+TEST(recognize_a_chunked_body_with_multiple_chunks_and_multiple_trailer_fields)
+{
+    body = parseFromValidChunkedBody("5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n\r\n");
+
+    assertBody("Valid body");
+}
+
+TEST(take_as_failure_a_chunked_body_with_invalid_trailer_fields)
+{
+    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\b\r\nTrailer2: value2\r\n\r\n");
+    assertRequestChunkedBodyIsInvalid("0\r\nTrailer: value\r\nTrailer2\b: value2\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_a_chunk_whose_chunk_size_is_smaller_than_chunk_data_length)
+{
+    assertRequestChunkedBodyIsInvalid("01\r\nInvalid body\r\n0\r\n\r\n");
+}
+
+TEST(take_as_failure_a_chunked_body_with_trailing_text)
+{
+    assertRequestChunkedBodyIsInvalid("0\r\n\r\nInvalid text");
+}

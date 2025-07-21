@@ -58,24 +58,21 @@ BIN_DIR = bin/
 SRC = src/
 INCLUDES = -I$(SRC)
 
-
-#----LIBS----#
-
-#----MACROS----#
-# ifeq ($(UNAME_S), Darwin)
-# 	WINDOW_WIDTH := $(shell system_profiler -json SPDisplaysDataType 2>/dev/null | grep _spdisplays_resolution | awk 'NR==1{print substr($$3, 2, length($$3)) - 70}')
-# 	WINDOW_HEIGHT := $(shell system_profiler -json SPDisplaysDataType 2>/dev/null | grep _spdisplays_resolution | awk 'NR==1{print $$5 - 70}')
-# 	CCFLAGS += -D WINDOW_WIDTH=$(WINDOW_WIDTH) -D WINDOW_HEIGHT=$(WINDOW_HEIGHT)
-# endif
-# ifeq ($(UNAME_S), Linux)
-# 	WINDOW_WIDTH := $(shell xrandr | grep "*" | awk '{ print $1 }' | cut -d'x' -f 1 | xargs)
-# 	WINDOW_HEIGHT := $(shell xrandr | grep "*" | awk '{ print $1 }' | cut -d'x' -f 2 | cut -d' ' -f 1)
-# 	CCFLAGS += -D WINDOW_WIDTH=$(WINDOW_WIDTH) -D WINDOW_HEIGHT=$(WINDOW_HEIGHT)
-# endif
-
-
 #----VPATH----#
 vpath %.cpp $(SRC): \
+            $(SRC)utils: \
+            $(SRC)utils/string: \
+            $(SRC)utils/numeric: \
+            $(SRC)utils/Result: \
+            $(SRC)WebServer: \
+            $(SRC)WebServer/Client: \
+            $(SRC)WebServer/Client/Request: \
+            $(SRC)WebServer/Client/Request/RequestFactory: \
+            $(SRC)WebServer/Client/Request/RequestParser: \
+            $(SRC)WebServer/Client/Response: \
+            $(SRC)WebServer/Server: \
+            $(SRC)WebServer/Server/Location: \
+            $(SRC)WebServer/Server/Session: \
             $(SRC)WebServer/Client/Request : \
 			$(SRC)WebServer/Client/Response/StatusLine : \
 			$(SRC)WebServer/Client/Response/ResponseFactory : \
@@ -102,10 +99,21 @@ vpath %.cpp $(SRC): \
 
 
 #----SHARED----#
-SRCS = Request.cpp \
+SRCS = webserv.cpp \
+		WebServer.cpp \
+		Client.cpp \
+		Request.cpp \
+		Response.cpp \
+		Server.cpp \
+		Location.cpp \
+		Session.cpp \
+		string.cpp \
+		numeric.cpp \
+		SimpleResult.cpp \
+		RequestFactory.cpp\
+		RequestParser.cpp \
 		StatusLine.cpp \
 		ResponseFactory.cpp \
-		Client.cpp \
 		Context.cpp \
 		AMethod.cpp \
 		MethodFactory.cpp \
@@ -115,22 +123,15 @@ SRCS = Request.cpp \
 		RequestExecutor.cpp \
 		RequestHandler.cpp \
 		HandlingResult.cpp \
-		Location.cpp \
-		Session.cpp \
-		Server.cpp \
-		WebServer.cpp \
-		numeric.cpp \
-		string.cpp \
 		cgi.cpp \
 		files.cpp \
 		HeaderCollection.cpp \
-		Header.cpp \
-		webserv.cpp
+		Header.cpp
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
 
-
+AMETHTDD=./tests/amethyst/amethtdd
 
 #----- R U L E S -----#
 
@@ -169,11 +170,17 @@ bre: bonusre
 test:
 	cd tests/subject; ./ubuntu_tester "http://localhost:8080"
 
-# min-test:
-# 	cd tester && ./tester.sh -n
+tester:
+	$(MAKE) --no-print-directory -C tests/amethyst && $(AMETHTDD)
 
-# test_clean:
-# 	$(MAKE) --no-print-directory -C tester/main_test clean
+testercl:
+	$(MAKE) --no-print-directory -C tests/amethyst clean
+
+testerfcl:
+	$(MAKE) --no-print-directory -C tests/amethyst fclean
+
+testerre:
+	$(MAKE) --no-print-directory -C tests/amethyst re && $(AMETHTDD)
 
 .PHONY: all \
 		clean \

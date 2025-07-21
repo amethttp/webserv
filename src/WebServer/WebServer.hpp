@@ -33,7 +33,7 @@ private:
 	void receiveRequest(Client *client, t_epoll &epoll);
 	bool tryBuildRequest(Client *client, char *buffer);
 	
-	Server *matchServer(Request request);
+	Server *matchServer(t_Request request);
 	void buildResponse(Client *client);
 	void readySendResponse(Client *client, t_epoll &epoll);
 	void sendResponse(Client *client, t_epoll &epoll);

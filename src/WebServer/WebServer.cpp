@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include "WebServer.hpp"
 #include "Client/Client.hpp"
+#include "Request/RequestFactory/RequestFactory.hpp"
 
 WebServer::WebServer()
 {
@@ -139,17 +140,18 @@ std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_ep
 
 bool WebServer::tryBuildRequest(Client *client, char *buffer)
 {
-	client->appendRequest(buffer);
-	if (!client->hasFullRequestHeaders())
-		return false;
-	client->buildRequest();
+	if (RequestFactory::canCreateAResponse(buffer))
+	{
+		client->buildRequest(buffer);
+		return true;
+	}
 
-	return true;
+	return false;
 }
 
-Server *WebServer::matchServer(Request request)
+Server *WebServer::matchServer(t_Request request)
 {
-    std::string hostName = request.getHeaders()["Host"];
+    std::string hostName = request.headers.getHeader("Host").getValue();
 
     for (std::vector<Server *>::iterator serverIt = servers_.begin(); serverIt != servers_.end(); ++serverIt)
     {
@@ -173,7 +175,7 @@ void WebServer::buildResponse(Client *client)
 
 void WebServer::readySendResponse(Client *client, t_epoll &epoll)
 {
-	client->clearRequest();
+	// TO DO: Check if clear request needed
 	setEpollWrite(epoll, client);
 }
 
@@ -187,7 +189,7 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	if (bytesReceived > 0)
 	{
 		client->updateLastReceivedPacket();
-		if (!this->tryBuildRequest(client, buffer))
+		if (RequestFactory::canCreateAResponse(buffer) == false)
 			return ;
 		this->buildResponse(client);
 		this->readySendResponse(client, epoll);

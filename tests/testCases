@@ -1,0 +1,1741 @@
+###########################################################################################
+#
+# Prior knowledge to parse and build HTTP 1.1 messages:
+#
+# #########################
+# #     HTTP MESSAGES     #
+# #########################
+#
+# 1.  HTTP message consists of:
+#     - start-line CRLF -------------> start-line followed by CRLF
+#     - *( header section CRLF ) ----> zero or more headers followed by CRLF
+#     - CRLF ------------------------> empty line followed by CRLF
+#     - [ message-body ] ------------> optional message body
+#
+#
+# 2.  Messages are requests or responses, and syntactically differ only in the start-line
+#     and in the algorithm for determining the length of the message body:
+#     - request start-line ----> request-line
+#     - response start-line ---> status-line
+#
+#  
+# 3.  Normal procedure to parse an HTTP message:
+#     - 1. Read the start-line into a structure
+#     - 2. Read each header into a hash table / map until the empty line
+#     - 3. Determine if a body message is expected using the parsed data
+#        - If a message body has been indicated, it is read as a stream until the number of bytes read equals the body length, or the connection is closed
+#
+#
+# 4.  Before parsing request data to unicode, you MUST parse it, to prevent missing control characters
+#
+#
+# 5.  You MAY use only LF to separate headers instead of CRLF, but you MUST NOT use only CR to separate them
+#
+#
+# 6.  The user agent MUST NOT preface or follow a request with an extra CRLF. If terminating a request body
+#     with a CRLF is desired, the user agent MUST count the terminating CRLF bytes as part of the body
+#
+#
+# 7.  For robustness, a server SHOULD ignore at least one empty line received prior to the request-line
+#
+#
+# 8.  A sender MUST NOT send whitespaces between the start-line and the first header field. If this happens,
+#     the receiver should reject the message as invalid or ignore the line and any subsequent ones preceded
+#     with whitespaces until a properly formed header is received or the header section is terminated.
+#
+#
+# 9.  If a server receives a sequence of bytes that does not match the HTTP-message grammar described above
+#     (aside from the robustness exceptions), the server SHOULD respond with a 400 Bad Request response and
+#     close the connection
+#
+#
+# 10. The HTTP version used by a server or client is described as HTTP "/" DIGIT "." DIGIT (HTTP/1.1)
+#
+#
+#
+# #########################
+# #     REQUEST LINES     #
+# #########################
+#
+# 11. The request-line is composed as: method SP request-target SP HTTP-version (GET / HTTP/1.1). Although it's
+#     required that each of the component elements is separated by a single SP byte, receivers MAY parse multiple
+#     whitespaces (whitespace deilimited word boundaries), and, aside from CRLF terminator, treat any form of
+#     whitespaces as the SP separator, although this can lead to HTTP smuggling attacks
+#
+#
+# 12. The request-line has no length limit. However, a server SHOULD parse a received protocoll element defensively:
+#     - As a minimum, a server MUST parse at least the length used in the responses it builds. For example, if the server
+#       creates a response for a resource with a length of 1000 bytes, it MUST parse at least 1000 bytes of request line length
+#     - A server that receives a method longer than any that it implements (or a method it doesn't understand) SHOULD respond
+#       with a 501 Not Implemented
+#     - A server that receives a request-target longer than any URI it wishes to parse MUST respond with a 414 URI Too Long
+#     - It is RECOMMENDED that senders and receivers support, at a minimum, lengths of 8000 bytes
+#
+#
+# 13. The request-target identifies the target resource upon which to apply the request. No whitespace is allowed in the
+#     request-target (if this happen, it SHOULD respond with either a 400 Bad Request or a 301 Moved Permanently redirect with
+#     the request-target properly encoded).
+#
+#
+# 14. A client MUST send a Host header in all HTTP/1.1 request messages. The Host field MUST follow the next guidelines (in case
+#     of failure, the server MUST send a 400 Bad Request):
+#     - It SHOULD be the first field to appear (not strictly necessary)
+#     - The next composition: uri-host [ ":" port] (domain.com[:80]). The uri-host may be:
+#        - Valid domain name
+#        - IPv4 direction
+#        - IPv6 direction using [] ([::1])
+#     - MUST NOT be empty
+#     - MUST NOT contain prohibited characters (whitespace or non-printable characters)
+#     - MUST NOT contain non-numeric port
+#     - MUST NOT contain malformed ":" or multiple ports
+#     - MUST NOT be missing or duplicated
+#     - MUST NOT contain an IPv6 malformed (e.g., missing [])
+#
+#
+# 15. The request-target has four distinct formats. The origin-form is the only one necessary here. The origin-form consists of:
+#     absolute-path [ "?" query ] (/file.txt?param=value) --- this is the URL ---> http://my.domain.com/file.txt?param=value
+#
+#
+#
+# #########################
+# #     STATUS  LINES     #
+# #########################
+#
+# 16. The status-line consists of: HTTP-version SP status-code SP [ reason-phrase ] (HTTP/1.1 404 Not Found). The SP MAY be replaced
+#     the same way as in request-line. The status-code element is a 3-digit integer code. The reason-phrase SHOULD be ignored by the
+#     client, as its optional and can varie, therefore its not a reliable channel for information. Thus, the server MUST send the SP
+#     that separates the status-code from the reason-phrase, even if the latter is absent (i.e., the status-line would end with SP).
+#
+#
+#
+# #########################
+# #     HEADER SYNTAX     #
+# #########################
+#
+# 17. A header field (field line) consists of: case-insensitive field-name ":" OWS field-value OWS. For example:
+#     (Host:[ ]locahost[ ]). The OWS MUST be trimmed. Headers SHOULD follow:
+#     - Host and Connection headers SHOULD be recognized by all HTTP implementations. Connection MAY be:
+#       - close: Closes the connection after sending the response
+#       - keep-alive (default in HTTP/1.1): keeps the connection open after sending the response
+#     - Receivers SHOULD ignore unrecognized header and trailer fields
+#     - A server that receives a header larger that it wishes to parse MUST respond with a 4xx (Client error) response.
+#     - Header keys SHOULD contain only ALPHA, DIGIT and hyphens ('-'). But MUST NOT contain other characters that are not tchars:
+#       ALPHA DIGIT ! # $ % & ' * + - . ^ _ ` | ~
+#     - Header values MUST NOT contain control characters (except for HTAB)
+#     - Header values
+#
+#
+# 18. A server MUST reject with 400 Bad Request any received request message that contains whitespace between the header key and colon.
+#     (e.g., "Host :localhost")
+#
+#
+#
+# #########################
+# #     MESSAGES BODY     #
+# #########################
+#
+# 19. The rules to determine when a message body is present in an HTTP/1.1 differs for requests and responses:
+#     - Requests: Determined by the presence of Content-Length or Transfer-Encoding (independent of the request method)
+#     - Responses: Determined by the method to which it is responding to and the response status code
+#
+#
+# 20. A receiver MUST be able to parse the chunked transfer coding (Transfer-Encoding: chunked), as its crucial when bodies are not known
+#     in advance. A sender MUST NOT apply the chunked transfer coding more than once to a message body. If any transfer coding other than
+#     chunked is applied to a request's content, the sender MUST apply chunked as the final transfer coding. If any transfer coding other
+#     than chunked is applied to a response's content, the sender MUST either apply chunked as the final coding or close the connection.
+#     Example: Transfer-Encoding: gzip, chunked -------> First compressed with gzip coding and then sent in chunks.
+#
+#
+# 21. Transfer-Encoding MUST follow:
+#     - It MAY be sent in a 304 Not Modified response to a GET request
+#     - A server MUST NOT send Transfer-Encoding header in any response with status code of 1xx (Informational) or 204 No Content.
+#     - A server that receives a request message with a transfer coding it does not understand SHOULD respond with 501 Not Implemented
+#     - A client or server that receives an HTTP/1.0 (yes, 1.0) containing Transfer-Encoding MUST treat the message as faulty.
+#
+#
+# 22. A server MAY reject a request that contains both Content-Length and Transfer-Encoding or process such a request in acordance with the
+#     Transfer-Encoding alone. Regardless, the server MUST close the conection after responding to such a request to avoid attacks.
+#
+#
+# 23. Content-Length appears when Transfer-Encoding is not present. A sender MUST NOT send a Content-Length header in any message that
+#     contains a Transfer-Encoding field
+#
+#
+# 24. Message body length is determined by:
+#     - Any response with a 1xx (Informational), 204 No Content or 304 Not Modified status code is always terminated by the first empty line
+#       after the header fields, regardless of the headers present in the message, thus cannot contain a message body
+#     - If a message contains an invalid Content-Length, the receiver MUST treat it as an unrecoverable error. If this happens in a request,
+#       the server must respond with 400 Bad Request and close the connection.
+#     - If the body is larger than the stated Content-Length, the server MUST respond with 400 Bad Request
+#     - If the Content-Length is not fully received and the connection is closed, the message is invalid and MUST be discarded
+#     - A timeout MAY be used to wait for the full body, but once timed out, it MUST be treated as incomplete.
+#     - If a valid Content-Length is present, the decimal value represents the exact length. If the sender clsoes the connection or the receiver
+#       times out before the number of bytes are received, the recipient MUST consider the message to be incomplet and close the connection
+#     - If this is a request message and none of the above are true, then the message body length is zero, thus no message body is present
+#
+#
+# 25. A server SHOULD generate encoding or length-delimited messages whenever possible, as there is no way to distinguish a successfully completed
+#     close-delimited response message from a partially received message interrupted by a network failure
+#
+#
+# 26. Transfer-Encoding names (chunked) is case-insensitive
+#
+#
+# 27. A chunked body consists of:
+#     1. *chunk -------------------------> zero or multiple chunks (chunk-size [ chunk-ext ] CRLF)
+#                                                                  (chunk-value CRLF)
+#     2. last-chunk ---------------------> a chunk with 0 chunk-size
+#     3. trailer-section ----------------> dynamic metadata
+#     4. CRLF
+#
+#
+# 28. The chunk-size field is a string of hexadecimal digits indicating the size of the chunk-data in bytes. The chunked body is complete when a chunk
+#     with a chunk-size of zero is received, OPTIONALLY followed by a trailer section and finally terminated by an empty line (CRLF)
+#
+#
+# 29. Chunks MAY include chunk-ext or chunk extensions, metadata for each chunk. It consists of: ";" chunk-ext-name [ "=" chunk-ext-val ]. It is immediately
+#     following the chunk-size. Example: 5;ext-key=ext-value\r\n. A receiver MUST ignore unrecognized chunk extensions. It ought limit the extensions length.
+#
+#
+# 30. The trailer section is used to add dynamically generated metada. It consists of: *( field-line CRLF ). A receiver that builds the chunked body MAY discard
+#     the received trailer fields. 
+#
+#
+###########################################################################################
+###########################################################################################
+# 
+# REQUEST GRAMMAR
+# 
+#---# ABNF Core Rules: #---#
+# 
+#   ---
+#   - CR              =  %x0D                        ; Carriage return (\r)
+#   - LF              =  %x0A                        ; Linefeed (\n)
+#   - CRLF            =  CR LF                       ; Internet standard newline (\r\n)
+#   - SP              =  %x20                        ; Space (' ')
+#   - HTAB            =  %x09                        ; Horizontal tab (\t)
+#   - DQUOTE          =  %x22                        ; Double quote ('"')
+#   - ALPHA           =  %x41-5A / %x61-7A           ; A-Z / a-z
+#   - DIGIT           =  %x30-39                     ; 0-9
+#   - HEXDIG          =  DIGIT / "A-F" / "a-f"       ; 0-9 / A-F / a-f
+#   - OCTET           =  %x00-FF                     ; 1 byte of data
+#   - VCHAR           =  %x21-7E                     ; Visible printing characters ("!" - "~")
+#   ---
+# 
+# 
+#---# RFC HTTP-messages grammar #---#
+# 
+#   HTTP-message      = start-line CRLF
+#                       *( field-line CRLF )            --->    MUST have Host header (no repetitions)
+#                       CRLF
+#                       [ message-body ]
+# 
+# 
+#   start-line        = request-line / status-line
+# 
+# 
+#   request-line      = method SP request-target SP HTTP-version
+#  
+# 
+#   method            = token             --->     CASE-SENSITIVE
+# 
+# 
+#   token             = 1*tchar
+# 
+# 
+#   tchar             = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
+# 
+# 
+#   request-target    = origin-form
+# 
+# 
+#   origin-form       = absolute-path [ "?" query ]
+# 
+# 
+#   absolute-path     = 1*( "/" segment )
+# 
+# 
+#   segment           = *pchar
+# 
+# 
+#   pchar             = unreserved / pct-encoded / sub-delims / ":" / "@"
+# 
+# 
+#   unreserved        = ALPHA / DIGIT / "-" / "." / "_" / "~"
+# 
+# 
+#   pct-encoded       = "%" HEXDIG HEXDIG
+# 
+# 
+#   sub-delims        = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+# 
+# 
+#   query             = *( pchar / "/" / "?" )
+# 
+# 
+#   HTTP-version      = HTTP-name "/" DIGIT "." DIGIT          --->     CASE-SENSITIVE
+# 
+# 
+#   HTTP-name         = %s"HTTP"
+# 
+# 
+#   status-line       = HTTP-version SP status-code SP [ reason-phrase ]
+# 
+# 
+#   status-code       = 3 DIGIT 
+# 
+# 
+#   reason-phrase     = 1*( HTAB / SP / VCHAR / obs-text )
+# 
+# 
+#   field-line        = field-name ":" OWS field-value OWS
+# 
+# 
+#   field-name        = token               --->     CASE-INSENSITIVE
+# 
+# 
+#   OWS               = *( SP / HTAB )    ; optional WS (should trim)
+# 
+# 
+#   field-value       = *field-content
+# 
+# 
+#   field-content     = field-vchar [ 1*( SP / HTAB / field-vchar ) field-vchar ]
+# 
+# 
+#   field-vchar       = VCHAR / obs-text
+# 
+# 
+#   obs-text          = %x80-FF           --->     We will not recognize them (400 Bad Request)
+#
+# 
+#   message-body      = *OCTET            --->     Size based on Content-Length or Transfer-Encoding: chunked 
+# 
+# 
+#   chunked-body      = *chunk
+#                       last-chunk
+#                       trailer-section
+#                       CRLF
+# 
+# 
+#   chunk             = chunk-size [ chunk-ext ] CRLF
+#                       chunk-data CRLF
+# 
+# 
+#   chunk-size        = 1*HEXDIG
+# 
+# 
+#   chunk-ext         = *( ";" chunk-ext-name [ "=" chunk-ext-val ] )
+# 
+# 
+#   chunk-ext-name    = token
+# 
+# 
+#   chunk-ext-val     = token / quoted-string
+# 
+# 
+#   quoted-string     = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+# 
+# 
+#   qdtext            = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text     --->   HTAB / SP / '!' / '#' - '[' / ']' - '~' / obs-text
+# 
+# 
+#   quoted-pair       = "\" ( HTAB / SP / VCHAR / obs-text )
+# 
+# 
+#   chunk-data        = 1*OCTET    --->    MUST be exactly chunk-size octets
+# 
+# 
+#   last-chunk        = 1*("0") [ chunk-ext ] CRLF
+# 
+# 
+#   trailer-section   = *( field-line CRLF )
+# 
+#  
+#---# Mandatory headers grammar #---#
+# 
+#   Connection:       = "keep-alive" / "close"           --->  CASE-INSENSITIVE
+# 
+# 
+#   Host:             = reg-name ":" port            --->  CASE-INSENSITIVE   --->  MUST NOT BE EMPTY NOR DUPLICATED
+#   reg-name          = *( unreserved / pct-encoded / sub-delims)  
+#   port              = 1*DIGIT                       --->  0 => port <= 65335
+#  
+#  
+#   Content-Length    = 1*DIGIT
+# 
+# 
+#   Transfer-Encoding = "chunked"           --->    Tranfer-coding chunked (chunked-body)     --->     CASE-INSENSITIVE (CHUNKED == chunked)
+#  
+#  
+#   Content-Length and Transfer-Encoding ---> 400 Bad Request
+#   Neither Content-Length nor Transfer-Encoding and body ---> 400 Bad Request
+#  
+#  
+###########################################################################################
+###########################################################################################
+#
+# Sources:
+# RFC key words: https://www.rfc-editor.org/rfc/rfc2119.txt
+# HTTP 1.1 documentation: https://www.rfc-editor.org/rfc/rfc9112.html
+# HTTP Semantics documentation: https://www.rfc-editor.org/rfc/rfc9110.html
+# HTTP URI semantics https://www.rfc-editor.org/rfc/rfc3986
+# ABNF Core rules https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1
+#
+###########################################################################################
+
+# ACCEPTANCE CRITERIA:
+
+## REQUEST LINE (RQL)
+### 1. Fail with 400 Bad Request for INVALID request-line preceded by a SP 
+" GET / HTTP/1.1"
+
+### 2. Fail with 400 Bad Request for INVALID request-line followed by a SP 
+"GET / HTTP/1.1 "
+
+### 3. Fail with 400 Bad Request for INVALID request-line with 4 elements 
+"INVALID GET / HTTP/1.1"
+
+### 4. Fail with 400 Bad Request for INVALID request-line with 4 elements 
+"GET / HTTP/1.1 INVALID"
+
+### 5. Fail with 400 Bad Request for INVALID request-line
+"INVALID"
+
+### 6. Fail with 400 Bad Request for a only space request-line
+" "
+
+### 7. Fail with 400 Bad Request for an empty request-line
+""
+
+
+### METHOD CRITERIA
+### 1. Basic GET RQL (works)
+"GET / HTTP/1.1"
+
+### 2. Basic POST RQL (works)
+"POST / HTTP/1.1"
+
+### 3. Basic DELETE RQL (works)
+"DELETE / HTTP/1.1"
+
+### 4. Fail with 501 Not Implemented for case-insensitive method
+"get / HTTP/1.1"
+
+### 5. Fail with 501 Not Implemented for not-recognized method with only alphabetic characters
+"INVALID / HTTP/1.1"
+
+### 6. Fail with 501 Not Implemented for not-recognized method of tchars
+"!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz / HTTP/1.1"
+
+### 7. Fail with 400 Bad Request for non-token (tchars) method
+"(),/:;\r<=>\b?@\f[\\]\t{}\n / HTTP/1.1"
+
+### 8. Fail with 400 Bad Request for method containing non-token chars (tchars)
+"DEL(),/:;\r<=>\b?@\f[\\]\t{}\nTE / HTTP/1.1"
+
+### 9. Fail with 400 Bad Reqest for empty method
+" / HTTP/1.1"
+
+### 10. Fail with 400 Bad Request for non-existant method
+"/ HTTP/1.1"
+
+
+### FIRST SPACE CRITERIA
+### 1. Fail with 400 Bad Request if it doesn't have an SP
+"GET/ HTTP/1.1"
+
+### 2. Fail with 400 Bad Request if it has another character instead of SP
+"GET?/ HTTP/1.1"
+
+### 3. Fail with 400 Bad Request if it has a tabulation instead of SP
+"GET\t/ HTTP/1.1"
+
+### 4. Fail with 400 Bad Request if it has a tabulation and a SP
+"GET\t / HTTP/1.1"
+
+### 5. Fail with 400 Bad Request if it has a SP and a tabulation
+"GET \t/ HTTP/1.1"
+
+### 6. Fail with 400 Bad Request if it has multiple SP
+"GET   / HTTP/1.1"
+
+
+### TARGET CRITERIA
+### 1. Target with text. Works, target is /index
+"GET /index HTTP/1.1"
+
+### 2. Target with text and extension. Works, target is /index.html
+"GET /index.html HTTP/1.1"
+
+### 3. Target with multiple / (directories). Works, target is the specified
+"GET /profile/contact.php HTTP/1.1"
+"GET /courses/science/physics.py HTTP/1.1" 
+"GET /courses/science/physics.aspx HTTP/1.1" 
+
+### 4. Target references a directory (ends with /). Works, target is the specified
+"GET /courses/ HTTP/1.1"
+"GET /courses/spanish/ HTTP/1.1"
+
+### 5. Target doesn't start with /. 400 BR
+"GET ./ HTTP/1.1"
+"GET INVALID HTTP/1.1"
+"GET INVALID/ HTTP/1.1"
+
+### 6. Target contains only valid characters. Works, target is the specified
+# VALID CHARS -> pchar:
+# "0123456789"
+# "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+# "%AA"
+# "-._~!$&'()*+,;=:@"
+"GET /0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%AA-._~!$&'()*+,;=:@ HTTP/1.1"
+
+### 7.1. Target is consisted of invalid characters. 400 BR
+"GET /^{}[] HTTP/1.1"
+"GET /\b\"\n`\t HTTP/1.1"
+
+### 7.2. Target contains of invalid characters. 400 BR
+"GET /INVALID^{}[] HTTP/1.1"
+"GET /^{}[]INVALID HTTP/1.1"
+"GET /INVA^\r{}\"[]\t\bLID HTTP/1.1"
+
+### 8. Target contains valid pct-encoded. Works, target is the specified
+"GET /%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF HTTP/1.1"
+
+### 9. Target contains invalid pct-encoded. 400 BR
+"GET /%gg HTTP/1.1"
+"GET /%GG HTTP/1.1"
+"GET /%-r HTTP/1.1"
+
+### 10. Target contains incomplete pct-encoded. 400 BR
+"GET /%a HTTP/1.1"
+"GET /% HTTP/1.1"
+
+### 11. Target contains empty query. Works, target is /VALID/PATH/?
+"GET /VALID/PATH/? HTTP/1.1"
+
+### 12. Target contains query with empty param. Works, target is /VALID/PATH/?param
+"GET /VALID/PATH?param HTTP/1.1"
+
+### 13. Target contains query with param. Works, target is the specified
+"GET /VALID/PATH?param= HTTP/1.1"
+"GET /VALID/PATH?param=value HTTP/1.1"
+
+### 14. Target contains query with multiple params. Works, target is the specified
+"GET /VALID/PATH?param=value&mode HTTP/1.1"
+"GET /VALID/PATH?param=value&mode= HTTP/1.1"
+"GET /VALID/PATH?param=value&mode=true HTTP/1.1"
+
+### 15. Target's query contains only valid chars. Works, target is the specified
+# VALID CHARS -> pchar and "/?":
+# "0123456789"
+# "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+# "%AA"
+# "-._~!$&'()*+,;=:@"
+# "/?"
+"GET /VALID/PATH?0123456789/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/%AA/-._~/!$&'()*+,;=/:@/? HTTP/1.1"
+
+### 16.1. Target is consisted of invalid characters. 400 BR
+"GET /VALID/PATH?^{}[] HTTP/1.1"
+"GET /VALID/PATH?\b\"\n`\t HTTP/1.1"
+
+### 16.2. Target contains of invalid characters. 400 BR
+"GET /VALID/PATH?INVALID^{}[] HTTP/1.1"
+"GET /VALID/PATH?^{}[]INVALID HTTP/1.1"
+"GET /VALID/PATH?INVA^\r{}\"[]\t\bLID HTTP/1.1"
+
+### 17. Target's query contains valid pct-encoded. Works, target is the specified
+"GET /VALID/PATH/?%aa_%ff_%AA_%FF_%09_%A0_%9F_%a0_%9f_%Df_%dF HTTP/1.1"
+
+### 18. Target's query contains invalid pct-encoded. 400 BR
+"GET /VALID/PATH/?%gg HTTP/1.1"
+"GET /VALID/PATH/?%GG HTTP/1.1"
+"GET /VALID/PATH/?%-r HTTP/1.1"
+
+### 19. Target's query contains incomplete pct-encoded. 400 BR
+"GET /VALID/PATH/?%a HTTP/1.1"
+"GET /VALID/PATH/?% HTTP/1.1"
+"GET /VALID/PATH/%a? HTTP/1.1"
+"GET /VALID/PATH/%? HTTP/1.1"
+
+### 20. Target is only query. 400 BR
+"GET ?param=value HTTP/1.1"
+
+### 21. Target is longer than maximum allowed ({TARGET}.length() > 8000). 414 URI Too Long
+"GET /{TARGET} HTTP/1.1"
+
+### 22. Target is mixed with HTTP-version. 400 BR
+"GET /index.html/HTTP/1.1"
+"GET /index.html?HTTP/1.1"
+
+### 23. Mixed pct-encoded in path. Works
+"GET /%2e%2e/%2e%2e/%2e%2e/etc/passwd HTTP/1.1"
+
+### 24. Combinations in query. Works
+"GET /?? HTTP/1.1"
+"GET /?= HTTP/1.1"
+"GET /?& HTTP/1.1"
+"GET /?&&&&&& HTTP/1.1"
+
+### 25. Target with fragment. 400 BR
+"GET /index.html#section HTTP/1.1"
+"GET /index.html?param=value#section HTTP/1.1"
+
+### 26. Target is empty. 400 BR
+"GET  HTTP/1.1"
+
+### 27. Target is non-existant. 400 BR
+"GET HTTP/1.1"
+
+
+### LAST SPACE CRITERIA
+### 1. Fail with 400 Bad Request if it doesn't have an SP
+"GET /HTTP/1.1"
+
+### 2. Fail with 400 Bad Request if it has another character instead of SP
+"GET /?HTTP/1.1"
+
+### 3. Fail with 400 Bad Request if it has a tabulation instead of SP
+"GET /\tHTTP/1.1"
+
+### 4. Fail with 400 Bad Request if it has a tabulation and a SP
+"GET /\t HTTP/1.1"
+
+### 5. Fail with 400 Bad Request if it has a SP and a tabulation
+"GET / \tHTTP/1.1"
+
+### 6. Fail with 400 Bad Request if it has multiple SP
+"GET /   HTTP/1.1"
+
+
+### HTTP VERSION CRITERIA
+### 1. Fail with 400 Bad Request for case-insensitive HTTP-name
+"GET / Http/1.1"
+"GET / http/1.1"
+
+### 2. Fail with 400 Bad Request for an invalid HTTP-name
+"GET / INVALID/1.1"
+"GET / \rIN\b31VA\n()!%&9/LID/1.1"
+
+### 3. Fail with 400 Bad Request for repeated HTTP-name
+"GET / HTTPHTTP/1.1"
+
+### 4. Fail with 400 Bad Request for SP instead of HTTP-name
+"GET /  /1.1"
+
+### 5. Fail with 400 Bad Request for HTAB instead of HTTP-name
+"GET / \t/1.1"
+
+### 6. Fail with 400 Bad Request for empty HTTP-name
+"GET / /1.1"
+
+### 7. Fail with 400 Bad Request for an invalid '/'
+"GET / HTTP?1.1"
+"GET / HTTP$1.1"
+
+### 8. Fail with 400 Bad Request for repeated '/'
+"GET / HTTP//1.1"
+
+### 9. Fail with 400 Bad Request for SP instead of '/'
+"GET / HTTP 1.1"
+
+### 10. Fail with 400 Bad Request for HTAB instead of '/'
+"GET / HTTP\t1.1"
+
+### 11. Fail with 400 Bad Request for empty '/'
+"GET / HTTP1.1"
+
+### 12. Fail with 505 HTTP Version Not Supported for major version different of 1
+"GET / HTTP/0.1"
+"GET / HTTP/2.1"
+
+### 13. Fail with 400 Bad Request for invalid major version
+"GET / HTTP/?.1"
+"GET / HTTP/1fA($!.1"
+"GET / HTTP/fe\r\b1.1"
+
+### 14. Fail with 400 Bad Request for not single-digit major version
+"GET / HTTP/11.1"
+
+### 15. Fail with 400 Bad Request for negative major version
+"GET / HTTP/-1.1"
+
+### 16. Fail with 400 Bad Request for SP instead of major version
+"GET / HTTP/ .1"
+
+### 17. Fail with 400 Bad Request for HTAB instead of major version
+"GET / HTTP/\t.1"
+
+### 18. Fail with 400 Bad Request for empty major version
+"GET / HTTP/.1"
+
+### 19. Fail with 400 Bad Request for invalid '.'
+"GET / HTTP/1(1"
+"GET / HTTP/1F_1"
+
+### 20. Fail with 400 Bad Request for repeated '.'
+"GET / HTTP/1..1"
+
+### 21. Fail with 400 Bad Request for SP instead of '.'
+"GET / HTTP/1 1"
+
+### 22. Fail with 400 Bad Request for HTAB instead of '.'
+"GET / HTTP/1\t1"
+
+### 23. Fail with 400 Bad Request for empty '.'
+"GET / HTTP/11"
+
+### 24. Fail with 505 HTTP Version Not Supported for minor version different of 1
+"GET / HTTP/1.0"
+"GET / HTTP/1.2"
+
+### 25. Fail with 400 Bad Request for invalid minor version
+"GET / HTTP/1.?"
+"GET / HTTP/1.1fA($!"
+"GET / HTTP/1.fe\r\b1"
+
+### 26. Fail with 400 Bad Request for not single-digit minor version
+"GET / HTTP/1.11"
+
+### 27. Fail with 400 Bad Request for negative minor version
+"GET / HTTP/1.-1"
+
+### 28. Fail with 400 Bad Request for SP instead of minor version
+"GET / HTTP/1. "
+
+### 29. Fail with 400 Bad Request for HTAB instead of minor version
+"GET / HTTP/1.\t"
+
+### 30. Fail with 400 Bad Request for empty minor version
+"GET / HTTP/1."
+
+### 31. Fail with 400 Bad Request for INVALID HTTP-version
+"GET / INVALID"
+
+### 32. Fail with 400 Bad Request for INVALID HTTP-version
+"GET / 1.1"
+
+### 33. Fail with 400 Bad Request for incomplete HTTP-version
+"GET / HTTP"
+"GET / HTTP/"
+"GET / HTTP/1"
+
+### 32. Fail with 400 Bad Request for multiple minor versions HTTP-version
+"GET / HTTP/1.1.1"
+
+### 34. Fail with 400 Bad Request for empty HTTP-version
+"GET / "
+
+### 34. Fail with 400 Bad Request for non-existant HTTP-version
+"GET /"
+
+
+### TARGET PATH-QUERY SEPARATION
+### 1. Simple path with empty query -> path = "/" | query = ""
+"GET /? HTTP/1.1"
+
+### 2. Only path -> path = "index.html" | query = ""
+"GET /index.html HTTP/1.1"
+
+### 3. Path with empty query -> path = "index.html" | query = ""
+"GET /index.html? HTTP/1.1"
+
+### 4. Path and query -> path = "index.html" | query = "query"
+"GET /index.html?query HTTP/1.1"
+
+### 5. Path and query with multiple '?' -> path = "index.html" | query = "query?var?"
+"GET /index.html?query?var? HTTP/1.1"
+
+
+### TARGET DECODER
+### 1. Target without pct-encoded remains the same
+"GET /index.html HTTP/1.1\r\nHost: localhost\r\n\r\n"
+"GET /courses/biology/ HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 2. Target with pct-encoded -> target: "/index/ _\"_%_<_>_[_\\_]_{_}"
+"GET /index/%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 3. Target with pct-encoded case-insensitive -> target: "/index/<_<_>_>_\\_\\_{_{"
+"GET /index/%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 4. Target with pct-encoded control chars -> 400 BR
+"GET /index/%0d_%0A_%00_%7f HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 5. Query with pct-encoded chars remains the same
+"GET /index/query?%20_%22_%25_%3c_%3e_%5b_%5c_%5d_%7b_%7d HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 6. Query with pct-encoded case-insensitive remains the same
+"GET /index/query?%3c_%3C_%3e_%3E_%5c_%5C_%7b_%7B HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 7. Query with pct-encoded control chars -> 400 BR
+"GET /index/query?%0d_%0A_%00_%7f HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 8. Target with pct-encoded in path and query -> target: "/index/%?%25"
+"GET /index/%25?%25 HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 9. Target with pct-encoded '?' char in query -> query doesnt get decoded
+"GET /index.html?query%3fvar HTTP/1.1"
+
+### 10. Target with pct-encoded '?' char in path and query -> path is the whole thing and gets decoded
+"GET /index.html%3fquery%3fvar HTTP/1.1"
+
+### 11. Target with pct-encoded '?' char in path -> path gets decoded and has the first '?', while query = "var"
+"GET /index.html%3fquery?var HTTP/1.1"
+
+
+### TARGET PATH NORMALIZER
+### 1. Basic path -> "/"
+"/"
+
+### 2. Basic file path -> "index.html"
+"/index.html"
+
+### 3. Basic directory path -> "/courses/biology/"
+"/courses/biology/"
+
+### 4. Single current directory path -> "/"
+"/."
+
+### 5. Single current directory ended with slash -> "/"
+"/./"
+
+### 5. Multiple current directory -> "/"
+"/././."
+
+### 6. Multiple current directory ended with slash -> "/"
+"/./././"
+
+### 7. Single current directory after text -> "/courses/"
+"/courses/."
+
+### 8. Single current directory after text ended with slash -> "/courses/"
+"/courses/./"
+
+### 9. Multiple current directory after text -> "/courses/"
+"/courses/././."
+
+### 10. Multiple current directory after text ended with slash -> "/courses/"
+"/courses/./././"
+
+### 11. Single current directory before text -> "/courses"
+"/./courses"
+
+### 12. Multiple current directory before text ended with slash -> "/courses"
+"/./././courses"
+
+### 13. Multiple current directory before text without slash -> "/.courses"
+"/././.courses"
+
+### 14. Single current directory between text ended with slash -> "/courses/index.html"
+"/courses/./index.html"
+
+### 15. Multiple current directory between text ended with slash -> "/courses/index.html"
+"/courses/./././index.html"
+
+### 16. Multiple current directory between text without slash -> "/courses/.index.html"
+"/courses/././.index.html"
+
+### 17. Single current directory before and after text -> "/courses/"
+"/./courses/./"
+
+### 18. Multiple current directory before and after text -> "/courses/"
+"/././courses/././"
+
+### 19. Single parent directory path -> "/"
+"/.."
+
+### 20. Single parent directory ended with slash -> "/"
+"/../"
+
+### 21. Multiple parent directory -> "/"
+"/../../.."
+
+### 22. Multiple parent directory ended with slash -> "/"
+"/../../../"
+
+### 23. Single parent directory after text -> "/"
+"/courses/.."
+
+### 24. Single parent directory after text ended with slash -> "/"
+"/courses/../"
+
+### 25. Multiple parent directory after text -> "/"
+"/courses/../../.."
+
+### 26. Multiple parent directory after text ended with slash -> "/"
+"/courses/../../../"
+
+### 27. Single parent directory before text -> "/courses"
+"/../courses"
+
+### 28. Multiple parent directory before text ended with slash -> "/courses"
+"/../../../courses"
+
+### 29. Multiple parent directory before text without slash -> "/..courses"
+"/../../..courses"
+
+### 30. Single parent directory between text ended with slash -> "/index.html"
+"/courses/../index.html"
+
+### 31. Multiple parent directory between text ended with slash -> "/index.html"
+"/courses/../../../index.html"
+
+### 32. Multiple parent directory between text without slash -> "/..index.html"
+"/courses/../../..index.html"
+
+### 33. Single parent directory before and after text -> "/"
+"/../courses/../"
+
+### 34. Multiple parent directory before and after text -> "/"
+"/../../courses/../../"
+
+### 35. Multiple slashes -> "/"
+"////"
+
+### 36. Multiple slashes after text -> "/courses/"
+"/courses//////"
+
+### 37. Multiple slashes before text -> "/courses"
+"/////courses"
+
+### 38. Multiple slashes between text -> "/courses/index.html"
+"/courses/////index.html"
+
+### 39. Multiple slashes before and after text -> "/courses/"
+"///courses///"
+
+### 40. Combination of multiple current and parent directory, and slashes -> "/about/index.php" 
+"/./courses/..////about/index.php"
+
+### 41. Pct-encoded current directory -> "/about/index.html"
+"/%2e/about/index.html"
+
+### 42. Pct-encoded parent directory -> "/about/index.html"
+"/courses/%2e%2e/about/index.html"
+
+### 43. Pct-encoded slash -> "/courses/index.html"
+"/courses/%2f/%2Findex.html"
+
+### 44. Combination of pct-encoded and non pct-encoded current and parent directory, and slashes -> "/about/index.html"
+"//../%2e%2e/about/./%2e/%2F//index.html"
+
+### 45. Existing file outside root -> "/etc/passwd"
+"/../../../../..%2f..%2F%2e%2E/%2e%2E/%2e%2E/%2e%2E/%2e%2E/etc/passwd"
+
+
+### REQUEST HEADERS CRITERIA
+# --- Headers tests performed in RequestParser --- #
+### 1. Recognize simple header
+"Host: localhost"
+
+### 2. Recognize header with case insensitive key
+"hOST: localhost"
+
+### 3. Recognize header with key consisted of tchars
+"!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz: localhost"
+
+### 4. Take as failure a header key containing non-tchars 
+"(),/;\r<=>\b?@\f[\\]\t{}\n: localhost"
+"Ho(),/;\r<=>\b?@\f[\\]\t{}\nst: localhost"
+"Ho\x01\x14st: localhost"
+
+### 5. Take as failure a header key containing SP
+"Host : localhost"
+" Host: localhost"
+"Ho st: localhost"
+
+### 6. Take as failure a header key containing HTAB
+"Host\t: localhost"
+"\tHost: localhost"
+"Ho\tst: localhost"
+
+### 7. Take as failure a header key consisted of a single SP
+" : localhost"
+
+### 8. Take as failure a header key consisted of a single HTAB
+"\t: localhost"
+
+### 9. Take as failure an empty header key
+": localhost"
+
+### 10. Take as failure a header missing the colon separator 
+"Host localhost"
+
+### 11. Take as failure a header that has any other character replacing the colon separator
+"Host? localhost"
+"Host! localhost"
+"Hosta localhost"
+
+### 12. Take as failure a header that has a SP replacing the colon separator
+"Host  localhost"
+
+### 13. Take as failure a header that has a HTAB replacing the colon separator
+"Host\t localhost"
+
+### 14. Recognize a header with double colon separator (first is separator, second is header value)
+"Host::localhost"
+
+### 15. Recognize a header without first OWS
+"Host:localhost"
+
+### 16. Recognize a header with a single first OWS
+"Host: localhost"
+"Host:\tlocalhost"
+
+### 17. Recognize a header with a combination of single first OWS
+"Host: \tlocalhost"
+
+### 18. Recognize a header with a combination of multiple first OWS
+"Host: \t   \t\t  \t\tlocalhost"
+
+### 19. Recognize a header value with valid printable characters and HTAB
+"Host: !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ \t[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+
+### 20. Recognize a header value consisted of multiple words using SP as separator
+"Host: localhost and something else"
+
+### 21. Recognize a header value consisted of multiple words using HTAB as separator
+"Host: localhost\tand\tsomething\telse"
+
+### 22. Recognize a header value consisted of multiple words using multiple OWS as separator
+"Host: localhost\t \tand   \tsomething\t   \t\telse"
+
+### 23. Recognize a header value consisted of multiple valid chars
+"Host: !\"#$%&'()*+,-./0123456789 \t ;<=>?@ABCDEF\t \t[\\]^_`abcdefghijklmnop"
+
+### 24. Take as failure a header value consisted of control chars
+"Host: \r\b\n\n\r\x7f\x10"
+
+### 25. Recognize a header value consisted of a single SP
+"Host: "
+
+### 26. Recognize a header value consisted of a single HTAB
+"Host:\t"
+
+### 27. Recognize a header value consisted of multiple OWS
+"Host:\t \t\t   \t \t"
+
+### 28. Recognize an empty header value
+"Host:"
+
+### 29. Recognize a header without the final OWS
+"Host: localhost"
+
+### 30. Recognize a header with a single final OWS
+"Host: localhost "
+"Host: localhost\t"
+
+### 31. Recognize a header with a combination of single final HTAB
+"Host: localhost \t"
+
+### 32. Recognize a header with a combination of multiple final OWS
+"Host: localhost\t   \t\t  \t\t"
+
+### 33. Recognize multiple headers separated with CRLF
+"Host: localhost\r\nContent-Length:0\r\nConnection:\tclose"
+
+### 34. Take as failure multiple headers with OWS as separation
+"Host: localhost\r\n Content-Length: 0"
+"Host: localhost\r\n\tContent-Length: 0"
+
+### 35. Take as failure multiple headers bad separated
+"Host: localhost\rContent-Length: 0"
+"Host: localhost\nContent-Length: 0"
+"Host: localhost\b\fContent-Length: 0"
+"Host: localhost\r \nContent-Length: 0"
+
+### 36. Take as failure an invalid middle header
+"Host: localhost\r\nContent-Length: \b0\r\nConnection: close"
+
+### 37. Take as failure an invalid header
+"INVALID"
+
+### 38. Take as failure a OWS as header
+" "
+"\t"
+
+### 39. Take as failure an empty header
+""
+
+# --- Headers tests performed in RequestFactory --- #
+### 40. Take as failure a missing Host header
+"Connection: keep-alive\r\n\r\n"
+
+### 41. Take as failure an empty Host header
+"Host:\r\n\r\n"
+
+### 42. Take as failure a Host header consisted of OWS
+"Host:  \t  \t\t  \r\n\r\n"
+
+### 43. Recognize a Host header consisted of valid chars
+"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~!$&'()*+,;=\r\n\r\n"
+
+### 44. Decode pct-encoded chars in Host header
+"Host: localhost_%20_%5b_%7b\r\n\r\n"
+
+### 45. Take as failure bad pct-encoded chars in Host header
+"Host: localhost_%00_%7f\r\n\r\n"
+"Host: localhost_%xx"
+"Host: localhost_%f"
+"Host: localhost_%"
+
+### 46. Take as failure a Host header with invalid characters
+"Host: loc alh ost\r\n\r\n"
+"Host: loc\talh\tost\r\n\r\n"
+"Host: loc{alh[ost\r\n\r\n"
+
+### 47. Recognize a Host header with port
+"Host: localhost:8080\r\n\r\n"
+
+### 48. Take as failure a Host header with only port
+"Host:  \t  \t\t  :8000\r\n\r\n"
+
+### 49. Recognize a Host header consisted of valid chars and port
+"Host: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz%20-._~!$&'()*+,;=:8080\r\n\r\n"
+
+### 50. Take as failure a non-numeric port
+"Host: localhost:\r\n\r\n"
+"Host: localhost:invalid\r\n\r\n"
+"Host: localhost:31.023\r\n\r\n"
+
+### 51. Take as failure multiple ports
+"Host: localhost:31:30\r\n\r\n"
+
+### 52. Take as failure ports out of range
+"Host: localhost:-8419\r\n\r\n"
+"Host: localhost:1000000\r\n\r\n"
+
+### 53. Recognize a port with leading zeros
+"Host: localhost:0000000000008080\r\n\r\n"
+
+### 54. Take as failure a repeated Host header
+"Host: localhost\r\nHost: my.domain.com\r\n\r\n"
+
+### 55. Recognize case-insensitive headers
+"hOSt: localhost\r\nCoNNeCtIon: keep-alive\r\ncOntENT-leNGTH: 0\r\n\r\n"
+
+### 56. Recognize a request with valid CL header and size zero
+"Host: localhost\r\nContent-Length: 0\r\n\r\n"
+
+### 57. Recognize a request with valid CL header and size greater than zero
+"Host: localhost\r\nContent-Length: 10\r\n\r\nValid body"
+
+### 58. Take as failure a non-numeric Content-Length value
+"Host: localhost\r\nContent-Length:\r\n\r\n"
+"Host: localhost\r\nContent-Length: -23\r\n\r\n"
+"Host: localhost\r\nContent-Length: 2.03\r\n\r\n"
+"Host: localhost\r\nContent-Length: invalid\r\n\r\n"
+
+### 59. Take as failure a repeated CL header
+"Host: localhost\r\nContent-Length: 0\r\nContent-Length: 0\r\n\r\n"
+
+### 60. Recognize a request with valid TE
+"Host: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 61. Recognize a request with valid case-insensitive TE
+"Host: localhost\r\nTransfer-Encoding: cHUnKeD\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 62. Take as failure a request with invalid TE
+"Host: localhost\r\nTransfer-Encoding:\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+"Host: localhost\r\nTransfer-Encoding: invalid\r\n\r\n4\r\ntest\r\n0\r\n\r\n"
+
+### 63. Take as failure a repeated TE header
+"Host: localhost\r\Transfer-Encoding: chunked\r\Transfer-Encoding: chunked\r\n\r\n"
+
+### 64. Take as failure a request with body CL and TE chunked headers
+"Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked\r\n\r\n"
+
+### 65. Recognize a request with valid Connection header
+"Host: localhost\r\nConnection: keep-alive\r\n\r\n"
+"Host: localhost\r\nConnection: close\r\n\r\n"
+
+### 66. Recognize a request with valid case-insensitive Connection header
+"Host: localhost\r\Connection: KeEp-AliVE\r\n\r\n"
+"Host: localhost\r\Connection: cLOSe\r\n\r\n"
+
+### 67. Take as failure a request with invalid Connection header
+"Host: localhost\r\nConnection:\r\n\r\n"
+"Host: localhost\r\nConnection: invalid\r\n\r\n"
+
+### 68. Take as failure a repeated Connection header
+"Host: localhost\r\nConnection: close\r\Connection: close\r\n\r\n"
+
+
+### REQUEST FULL BODY CRITERIA
+#----# Having Content-Length header matching size #----#
+### 1. Accept empty body
+""
+
+### 2. Accept valid text body
+"Valid body"
+
+### 3. Accept any octet
+"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f" \
++ "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F" \
++ " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F" 
+
+### 4. Accept CRLF inside body
+"Valid\r\nbody"
+
+#----# No Content-Length header but no body #----#
+### 5. Accept empty body without Content-Length header
+""
+
+#----# Having Content-Length header with wrong size #----#
+### 6. Take as failure a body with length superior than Content-Length size
+"Content-Length: 0\r\n\r\nInvalid body"
+"Content-Length: 10\r\n\r\nInvalid body"
+
+### 7. Take as failure a body with length superior than Content-Length size consisted of WS
+"Content-Length: 0\r\n\r\n        "
+"Content-Length: 0\r\n\r\n\t\t\t\t"
+
+#----# No Content-Length header and body #----#
+### 8. Take as failure with 411 Length Required when a body is specified without Content-Length nor Transfer-Encoding: chunked
+"Invalid body"
+
+
+### REQUEST CHUNKED BODY CRITERIA
+#----# Having Transfer-Encoding header matching size #----#
+### 1. Recognize a basic chunked body with only last-chunk
+"0\r\n\r\n"
+
+### 2. Recognize a basic chunked body with only last-chunk with multiple 0s
+"0000000\r\n\r\n"
+
+### 3. Take as failure a last-chunk with other value than zero for chunk-size
+"5\r\n\r\n"
+"0a\r\n\r\n"
+"x\r\n\r\n"
+
+### 4. Take as failure a last-chunk with WS in chunk-size
+"0 \r\n\r\n"
+" 0\r\n\r\n"
+
+### 5. Take as failure a last-chunk with a SP as chunk-size
+" \r\n\r\n"
+
+### 6. Take as failure a last-chunk without chunk-size
+"\r\n\r\n"
+
+### 7. Take as failure a last-chunk with bad CRLF separator
+"0\r\r\n"
+"0\n\r\n"
+"0\f\b\r\n"
+"0\r \n\r\n"
+
+### 8. Take as failure a last-chunk with a SP as CRLF separator
+"0 \r\n"
+
+### 9. Take as failure a last-chunk without CRLF separator
+"0\r\n"
+
+### 10. Take as failure a last-chunk with data
+"0\r\nInvalid\r\n"
+
+### 11. Recognize a last-chunk with a basic chunk-extension with only chunk-ext-name
+"0;extension\r\n\r\n"
+
+### 12. Recognize a last-chunk with chunk-ext-name with valid chars
+"0;!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\r\n\r\n"
+
+### 13. Take as failure a last-chunk with chunk-ext-name with invalid chars
+"0;(),/:;<=>?@[\\]{}\r\n\r\n"
+"0;exten(),/:;<=>?@[\\]{}sion\r\n\r\n"
+
+### 14. Take as failure a last-chunk with chunk-ext-name with SP
+"0;ext en sion\r\n\r\n"
+"0; ext\r\n\r\n"
+"0;ext \r\n\r\n"
+
+### 15. Take as failure a last-chunk with SP as chunk-ext-name
+"0; \r\n\r\n"
+
+### 16. Take as failure a last-chunk with an empty chunk-extension
+"0;\r\n\r\n"
+
+### 17. Recognize a last-chunk with basic chunk-extension with chunk-ext-val
+"0;ext=value\r\n\r\n"
+
+### 18. Recognize a last-chunk with chunk-extension with chunk-ext-val with valid tchars
+"0;ext=!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\r\n\r\n"
+
+### 19. Take as failure a last-chunk with chunk-extension with chunk-ext-val with invalid tchars
+"0;ext=(),/:;<=>?@[\\]{}\r\n\r\n"
+"0;ext=val(),/:;<=>?@[\\]{}ue\r\n\r\n"
+
+### 20. Take as failure a last-chunk with chunk-extension with chunk-ext-val with SP
+"0;ext=va l ue\r\n\r\n"
+"0;ext= value\r\n\r\n"
+"0;ext=value \r\n\r\n"
+
+### 21. Take as failure a last-chunk with chunk-extension with SP as chunk-ext-val
+"0;ext= \r\n\r\n"
+
+### 22. Take as failure a last-chunk with chunk-extension with empty chunk-ext-val 
+"0;ext=\r\n\r\n"
+
+### 23. Recognize a last-chunk with chunk-extension with an empty quoted-string chunk-ext-val 
+"0;ext=\"\"\r\n\r\n"
+
+### 24. Recognize a last-chunk with chunk-extension with a non-empty quoted-string chunk-ext-val 
+"0;ext=\"validBody\"\r\n\r\n"
+
+### 25. Recognize a last-chunk with chunk-extension with a quoted-string chunk-ext-val with valid qdtext 
+"0;ext=\"!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~\t \\\\ \\\"\"\r\n\r\n"
+
+### 26. Recognize a last-chunk with chunk-extension with a quoted-string chunk-ext-val with valid quoted-pairs
+"0;ext=\"\\\\ \\\" \\ \\\t\"\r\n\r\n"
+
+### 27. Take as failure a last-chunk with chunk-extension with a quoted-string chunk-ext-val with invalid chars
+"0;ext=\"\r\f\b\x04\x01\"\r\n\r\n"
+"0;ext=\"\\\r\\\b\"\r\n\r\n"
+"0;ext=\"\\\"\r\n\r\n"
+"0;ext=\"\"\"\r\n\r\n"
+
+### 28. Take as failure a last-chunk with chunk-extension with a quoted-string chunk-ext-val with surrounding SP
+"0;ext= \"\"\r\n\r\n"
+"0;ext=\"\" \r\n\r\n"
+
+### 29. Take as failure a last-chunk with chunk-extension with a mal-formed quoted-string
+"0;ext=\"invalid\r\n\r\n"
+"0;ext=invalid\"\r\n\r\n"
+"0;ext=\"\r\n\r\n"
+
+### 30. Take as failure a last-chunk with mal-formed chunk-extension
+"0;=val\r\n\r\n"
+"0;=\r\n\r\n"
+"0;\"ext\"=val\r\n\r\n"
+"0;ext===\r\n\r\n"
+"0;ext=val=lue\r\n\r\n"
+"0;===\r\n\r\n"
+
+### 31. Recognize a last-chunk with multiple basic chunk-extensions
+"0;ext;ext\r\n\r\n"
+
+### 32. Recognize a last-chunk with multiple chunk-extensions with values
+"0;ext=val;ext=val\r\n\r\n"
+
+### 33. Recognize a last-chunk with multiple chunk-extensions with valid chars
+"0;ext=val;!#$%&'*+-.^_`|~=!#$%&'*+-.^_`|~\r\n\r\n"
+
+### 34. Recognize a last-chunk with multiple chunk-extensions with valid chars and valid quoted-pairs
+"0;ext=val;!#$%&'*+-.^_`|~=\"{|}~\t \\\\ \\\"\"\r\n\r\n"
+
+### 35. Take as failure a last-chunk with multiple chunk-extensions with invalid chars
+"0;ext=val;\r\b=val\r\n\r\n"
+"0;ext=val;ext=\b\f\r\n\r\n"
+"0;ext=val;ext=\"\\\b\"\r\n\r\n"
+
+### 36. Take as failure a last-chunk with multiple mal-formed chunk-extensions
+"0;ext=val;ext=\r\n\r\n"
+"0;ext=val;=val\r\n\r\n"
+"0;ext=val;=\r\n\r\n"
+
+### 37. Take as failure a last-chunk with multiple chunk-extensions separators
+"0;ext=val;;;ext=val\r\n\r\n"
+
+### 38. Take as failure a last-chunk with multiple chunk-extensions with mal-formed separator
+"0;ext=val ;ext=val\r\n\r\n"
+"0;ext=val; ext=val\r\n\r\n"
+
+### 39. Take as failure a last-chunk with multiple chunk-extensions with other character as chunk-extension separator
+"0;ext=valXext=val\r\n\r\n"
+"0;ext=val\"ext=val\r\n\r\n"
+
+### 40. Recognize a basic chunk
+"5\r\nValid\r\n0\r\n\r\n"
+
+### 41. Recognize a chunk with leading zeros in chunk-size 
+"000000000000000005\r\nValid\r\n0\r\n\r\n"
+
+### 42. Recognize a chunk with multiple hexadecimal digits in chunk-size 
+"0a\r\nValid body\r\n0\r\n\r\n"
+
+### 43. Recognize a chunk with case-insensitive hexadecimal digits in chunk-size 
+"0A\r\nValid body\r\n0\r\n\r\n"
+
+### 44. Take as failure a chunk with non-hexadecimal digits in chunk-size 
+"0g\r\nInvalid\r\n0\r\n\r\n"
+"0G\r\nInvalid\r\n0\r\n\r\n"
+"-4\r\nInvalid\r\n0\r\n\r\n"
+
+### 45. Take as failure a chunk with SP in chunk-size 
+"7 \r\nInvalid\r\n0\r\n\r\n"
+" 7\r\nInvalid\r\n0\r\n\r\n"
+
+### 46. Take as failure a chunk with SP as chunk-size 
+" \r\nInvalid\r\n0\r\n\r\n"
+
+### 47. Take as failure a chunk without chunk-size 
+"\r\nInvalid\r\n0\r\n\r\n"
+
+### 48. Recognize a chunk with chunk-extension 
+"0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n"
+
+### 49. Take as failure a chunk with a mal-formed first CRLF separator 
+"7\rInvalid\r\n0\r\n\r\n"
+"7\nInvalid\r\n0\r\n\r\n"
+"7\f\bInvalid\r\n0\r\n\r\n"
+
+### 50. Take as failure a chunk with a SP as first CRLF separator 
+"7 Invalid\r\n0\r\n\r\n"
+
+### 51. Take as failure a chunk without first CRLF separator 
+"7Invalid\r\n0\r\n\r\n"
+
+### 52. Recognize a chunk with CRLF separators in chunk-data as data (not as separator) 
+"0b\r\nValid\r\nbody\r\n0\r\n\r\n"
+"07\r\n\r\n\bbody\r\n0\r\n\r\n"
+
+### 53. Recognize a chunk with all octets in chunk-data 
+"7f\r\n\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f" \
++ "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F" \
++ " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F\r\n0\r\n\r\n" 
+
+### 54. Take as failure a chunk with a mal-formed last CRLF separator 
+"7\r\nInvalid\r0\r\n\r\n"
+"7\r\nInvalid\n0\r\n\r\n"
+"7\r\nInvalid\b\f0\r\n\r\n"
+
+### 55. Take as failure a chunk with a SP as last CRLF separator
+"7\r\nInvalid 0\r\n\r\n"
+
+### 56. Take as failure a chunk without last CRLF separator
+"7\r\nInvalid0\r\n\r\n"
+
+### 57. Recognize a chunked-body with multiple chunks
+"05\r\nValid\r\n01\r\n \r\n04\r\nbody\r\n0\r\n\r\n"
+
+### 58. Recognize a chunked-body with multiple chunks with chunk-extensions
+"05\r\nValid\r\n01;ext=value\r\n \r\n04;ext=\"value\"\r\nbody\r\n0\r\n\r\n"
+
+### 59. Take as failure a chunked-body with multiple chunks with invalid chars
+"05\r\nValid\r\n01\r\n\b \r\n04\r\nbody\r\n0\r\n\r\n"
+"05\r\nValid\r\n01\r\n \r\n04\r\n\bbody\r\n0\r\n\r\n"
+
+### 60. Recognize a chunked-body with a basic trailer-field
+"0\r\nTrailer: value\r\n\r\n"
+
+### 61. Recognize a chunked-body with multiple trailer-field
+"0\r\nTrailer: value\r\nTrailer2: value2\r\n\r\n"
+
+### 62. Recognize a chunked-body with multiple trailer-field and chunks
+"5\r\nValid\r\n5\r\n body\r\n0\r\nTrailer: value\r\nTrailer2: value2\r\n\r\n"
+
+### 63. Take as failure a chunked-body with invalid trailer-field
+"0\r\nTrailer: value\b\r\nTrailer2: value2\r\n\r\n"
+"0\r\nTrailer: value\r\nTrailer2\b: value2\r\n\r\n"
+
+### 64. Take as failure a chunked-body without the last CRLF separator
+"0\r\nTrailer: value"
+
+### 65. Take as failure a trailer-field as chunked-body
+"Header: value"
+
+### 66. Take as failure chunk with a chunk-data length bigger than chunk-size
+"01\r\nInvalid body\r\n0\r\n\r\n"
+
+### 67. Take as failure chunk with a chunk-data length smaller than chunk-size
+"FF\r\nInvalid body\r\n0\r\n\r\n"
+
+### 68. Take as failure chunked body without last-chunk
+"0c\r\nInvalid body\r\n"
+
+### 69. Take as failure chunked body with a trailer-field as last-chunk
+"0c\r\nInvalid body\r\nTrailer:value"
+
+### 70. Take as failure chunked body with text at the end
+"0\r\n\r\nInvalid text"
+
+### 71. Take as failure an invalid chunked body
+"INVALID"
+"0"
+"\r\n"
+
+### 72. Take as failure an empty chunked body
+""
+
+
+### CAN CREATE A RESPONSE CRITERIA
+### 1. Return true with a complete and valid request
+"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+### 2. Return true for a complex valid and complete request
+"POST /index.html%AA?%AA? HTTP/1.1\r\nHost: localhost_%FD\r\nConnection: close\r\n\r\n"
+
+### 3. Return false for a request without the first double CRLF separator
+"GET / HTTP/1.1\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r"
+"GET / HTTP/1.1\r\nHost: localhost\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r\n\r"
+
+### 4. Return true for an invalid but complete request
+"DELETE /index.html HTTP/1.1\r\nINVALID\r\n\r\n"
+"INVALID\r\n\r\n"
+"\x01\x05\x07\b\r\v\r\n\r\n"
+"\r\n\r\n"
+
+### 5. Return true for a complete request with an invalid body
+"GET / HTTP/1.1\r\nHost: localhost\r\n\r\nInvalid But Complete Body"
+
+### 6. Return true for a complete request with a valid full body
+"GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nValid body"
+
+### 7. Return true for a complete request with an invalid full body
+"GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\nInvalid body"
+"GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nInvalid body"
+
+### 8. Return false for a request with an incomplete full body
+"GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\n"
+"GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 15\r\n\r\nIncomplete"
+
+### 9. Return true for a complete request with a complete chunked body
+"0\r\n\r\n"
+"00000000\r\n\r\n"
+
+### 10. Return false for a last chunk without chunk size
+"\r\n\r\n"
+
+### 11. Return false for complete last chunk with invalid chunk size
+"x\r\n\r\n"
+"0000x\r\n\r\n"
+"000\b\f\r\n\r\n"
+
+### 12. Return true for a complete last chunk with extensions
+"0;\r\n\r\n"
+"0;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\n\r\n"
+"0;ext;;;\b\v;;;ext=\"\f\";ext=\r\r\n\r\n"
+
+### 13. Return false for a last chunk with malformed CRLF separator
+"0\r\r\n"
+"0\n\r\n"
+"0;ext;ext=val\r\r\n"
+"0;;\f;;\b\v\n\r\n"
+
+### 14. Return false for a last chunk without CRLF separator
+"0"
+"0\r"
+
+### 15. Return false for a last chunk with extensions without CRLF separator
+"0;"
+"0;ext;ext="
+"0;ext;;;;\f\v;;\b;e"
+"0;;;;;\r"
+
+### 16. Return true for a request with a chunked body with a complete chunk
+"a\r\nvalid body\r\n0\r\n\r\n"
+"000a\r\nvalid body\r\n0\r\n\r\n"
+
+### 17. Return false for a request with a chunked body with a chunk without chunk size
+"\r\nvalid body\r\n0\r\n\r\n"
+
+### 18. Return false for a request with a chunked body with a chunk with invalid chunk size
+"x\r\ninvalid\r\n0\r\n\r\n"
+"7x\r\ninvalid\r\n0\r\n\r\n"
+"0007x\r\ninvalid\r\n0\r\n\r\n"
+"0007\b\f\r\ninvalid\r\n0\r\n\r\n"
+
+### 19. Return true for a request with a chunked body with an complete chunk with extensions
+"0a;\r\nvalid body\r\n0\r\n\r\n"
+"0A;ext;ext=tok;ext=\"\t\\\\ \\\"\"\r\nvalid body\r\n0\r\n\r\n"
+"0a;ext;;;\b\v;;;ext=\"\f\";ext=\r\nvalid body\r\n0\r\n\r\n"
+
+### 20. Return false for a request with a chunked body with a chunk with malformed CRLF extension
+"0A\rvalid body\r\n0\r\n\r\n"
+"0A\nvalid body\r\n0\r\n\r\n"
+"0A;\rvalid body\r\n0\r\n\r\n"
+"0a;\nvalid body\r\n0\r\n\r\n"
+
+### 21. Return false for a request with a chunked body with chunk without CRLF separator
+"0000A"
+"a\r"
+
+### 22. Return false for a request with a chunked body with chunk with extension without CRLF separator
+"0A;"
+"0A;ext;ext="
+"0a;ext;;\b;e"
+"0a;;;;;\r"
+
+### 23. Return true for a request with a chunked body with multiple complete chunk with extensions
+"0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\n\r\n"
+"0000A;;;;;;ext=\";ext=\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;\b\t\v\r\nCompleted\r\n0;ext=\"\r\r\n\r\n"
+
+### 24. Return true for a chunk with chunk size equal or smaller than chunk data
+"0b\r\nValid\r\nbody\r\n0\r\n\r\n"
+"0b;ext\r\nValid\r\nbody\r\n0\r\n\r\n"
+"0b\r\nValid\r\nbody with more content\r\n0\r\n\r\n"
+"0b;ext\r\nValid\r\nbody with more content\r\n0\r\n\r\n"
+
+### 25. Return false for a chunk with chunk size bigger than chunk data
+"0b\r\ntoo\r\nSmall\r\n0\r\n\r\n"
+"0b;ext\r\ntoo\r\nSmall\r\n0\r\n\r\n"
+
+### 26. Return false for a chunked body without last CRLF
+"0\r\n"
+"0\r\n\r"
+"0a\r\nvalid body\r\n0\r\n"
+"0a\r\nvalid body\r\n0\r\n\r"
+
+### 27. Return false for a chunked body without last chunk 
+"0a\r\nvalid body\r\n"
+
+### 28. Return true for a chunked body with trailer fields 
+"0\r\ntrailer: field\r\n\r\n"
+"0\r\ninvalid\r\n\r\n"
+"0\r\ntrailer: \b\f\\\r\n\r\n"
+"0\r\ntrailer:field\r\nTrailer:field\r\n\r\n"
+"0\r\ninvalid\r\ninvalid\r\n\r\n"
+
+### 29. Return false for a chunked body with trailer field without last CRLF separator
+"0\r\ntrailer:field"
+"0\r\ntrailer:field\r"
+"0\r\ntrailer:field\r\n"
+"0\r\ntrailer:field\r\n\r"
+
+### 30. Return false for a chunked body with multiple trailer fields without last CRLF separator
+"0\r\ntrailer:field\r\nTrailer:field"
+"0\r\ntrailer:field\r\nTrailer:field\r"
+"0\r\ntrailer:field\r\nTrailer:field\r\n"
+"0\r\ntrailer:field\r\nTrailer:field\r\n\r"
+
+### 31. Return true for a chunked body with extra text at the end 
+"0\r\n\r\ninvalid: fields"
+"0\r\n\r\ninvalid: fields\r\n\r\n"
+
+### 32. Return false an incompleted chunked body 
+"invalid"
+"00"
+"\r\n"
+""
+
+### 33. Return true for a completed chunked body 
+"0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;ext\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\nTrailer: section\r\nCompleted: foo\r\n\r\n"
+"0000A;;ext\"\";ext=\r\nToo much body for this chunk size\r\n1;\b\v\fext=\r;ext\r\n \r\n09;ext\r\nCompleted!!!!\r\n0;ext=\"\\\\ \t\b\v\f \\\t\"\r\ninvalid\r\nCompleted: \b\r\n\r\n"
+
+
+
+
+
+
+
+# 1. Separate path-query (decode only path, not URI neither query)                      DONE
+# 2. Target pct-decoder                                                                 DONE
+# 3. Refactor RequestFactory::create()                                                  DONE
+# 4. Target normalizer criteria                                                         DONE
+# 5. Target normalizer                                                                  DONE
+# 6. Headers parser minimum design                                                      DONE
+# 7. Headers parsing criteria                                                           DONE
+# 8. Headers parsing                                                                    DONE
+# 9. TODO THINGS                                                                        DONE
+# 10. Full body parsing criteria                                                        DONE
+# 11. Full body parsing                                                                 DONE
+# 12. Chunked body parsing criteria                                                     DONE
+# 13. Chunked body parsing                                                              DONE
+# 14. RequestFactory::canCreateResponse() criteria                                      DONE
+# 15. RequestFactory::canCreateResponse()                                               DONE
+# 16. Final refactors and code checking                                                 DONE
+# 17. Test canCreateResponse in every assert of all suites                              
+# 18. Refactor code in webserv.cpp to work with RequestFactory::create()                
+
+
+
+# TESTS:
+
+# 1. Basic GET and DELETE requests
+"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+"DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+# 2. Basic POST request
+"POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 0\r\n\r\n"
+
+# 3. Fail with invalid HTTP method
+"INVALID / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+# 2. Single request, works
+"GET /index.html HTTP/1.1\r\nHost: localhost\r\nUser-Agent: nc\r\nAccept: */*\r\n\r\n"
+
+# 3. Missing Host header, 400 Bad Request
+"GET / HTTP/1.1\r\n\r\n"
+
+# 4. Wrong request line (double space), 400 Bad Request
+"GET  / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+# 5. Well-formed GET with body, works ignoring the body
+"GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 5\r\n\r\nHello"
+
+# 6. Single request, works
+"POST /submit HTTP/1.1\r\nHost: localhost\r\nContent-Length: 8\r\n\r\nfoo=bar\n"
+
+# 7. POST without Content-Length, 411 Length Required
+"POST /submit HTTP/1.1\r\nHost: localhost\r\n\r\nfoo=bar\n"
+
+# 8. Content-Length not numeric, 400 Bad Request
+"POST /submit HTTP/1.1\r\nHost: localhost\r\nContent-Length: abc\r\n\r\nfoo=bar"
+
+# 9. Single request, works
+"POST /api/data HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 15\r\n\r\n{\"key\":\"value\"}"
+
+# 10.Content-Length bigger than real body, 408 Request Timeout (or 400 Bad Request as the request has content)
+"POST /form HTTP/1.1\r\nHost: localhost\r\nContent-Length: 20\r\n\r\nshort body"
+
+# 11. Multiple requests, works
+"POST /form HTTP/1.1\r\nHost: localhost\r\nContent-Length: 20\r\n\r\nshort body" && "short body"
+
+# 12. Single request, works
+"DELETE /resource HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+# 13. Has body without Content-Length, 411 Length Required
+"DELETE /resource HTTP/1.1\r\nHost: localhost\r\n\r\nsome body"
+
+# 14. Well-formed DELETE with body, works ignoring the body
+"DELETE /resource HTTP/1.1\r\nHost: localhost\r\nContent-Length: 9\r\n\r\nsome body"
+
+# 15. Single request, works
+"GET /search?q=calistenia HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+# 16. Invalid HTTP version, 505 HTPP Version Not Supported
+"GET / HTTP/1.5\r\nHost: localhost\r\n\r\n"
+
+# 17. Well-formed request with repeated headers, works with the second header overriding the first one
+"GET / HTTP/1.1\r\nHost: localhost\r\nHost: cfidalgo.42.fr\r\n\r\n"
+
+# 18. Doesn't end the headers with \r\n\r\n, 408 Request Timeout (or 400 Bad Request as the request has content)
+"GET / HTTP/1.1\r\nHost: localhost\r\n"
+
+# 19. Multiple requests, works
+"GET / HTTP/1.1\r\nHost: localhost\r\n" && "\r\n"
+
+# 20. "Really long" request (works?)
+"GET /%08000d HTTP/1.1\r\nHost: localhost\r\n\r\n", 1 | nc localhost 8080
+
+# 21. Header key contains a non-tchar (https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6), 400 Bad Request
+"GET / HTTP/1.1\r\nHost: localhost\r\nUser-:Agent: nc\r\n\r\n"
+
+# 22. Header key contains control chars, 400 Bad Request
+"GET / HTTP/1.1\r\nHost: localhost\r\nUser-Agent\t: nc\r\n\r\n"
+
+# 23. Header value contains control chars and is not \t or ' ', 400 Bad Request
+"GET / HTTP/1.1\r\nHost: localhost\r\r\nUser-Agent: nc\r\n\r\n"
+
+# 24. Single request, works
+"POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ndata\r\n0\r\n\r\n"
+
+# 25. Multiple requests, works
+"POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r" && "\nda" && "ta\r\n0\r\n\r\n"
+
+# 26. Multiple requests. First doesn't work as chunk-size is non-numeric (abc). Second (last 2 printfs) don't work, as all headers are missing
+"POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\nabc\r" && "\nda" && "ta\r\n0\r\n\r\n"
+
+# 27. Multiple requests. First doesn't work as chunk-size is non-numeric (4\r). Second (last 2 printfs) don't work, as all headers are missing
+"POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\r" && "\nda" && "ta\r\n0\r\n\r\n"
+
+# 28. Single request, works
+"POST /data HTTP/1.1\r\nHost: localhost\r\nContent-Length: 6\r\n\r\ndata\r\n"
+
+# 29. Chunk size is empty, 411 Length Required
+"POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n\r\ndata\r\n0\r\n\r\n"
+
+# 30. Single request, works
+"POST /data HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n" && "0\r\n\r\n"

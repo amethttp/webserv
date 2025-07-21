@@ -1,6 +1,6 @@
 #include "Client.hpp"
-
 #include <iostream>
+#include "Request/RequestFactory/RequestFactory.hpp"
 
 uint32_t Client::idCounter_ = 1;
 
@@ -125,16 +125,6 @@ time_t Client::getLastReceivedPacket() const
     return this->lastReceivedPacket_;
 }
 
-std::string Client::getStringifiedRequest()
-{
-	return this->request_.getBuffer();
-}
-
-Request Client::getRequest() const
-{
-    return this->request_;
-}
-
 t_httpCode Client::getResponseStatus() const
 {
     return this->response_.statusLine_.getCode();
@@ -143,6 +133,11 @@ t_httpCode Client::getResponseStatus() const
 std::string Client::getResponseBuffer() const
 {
 	return this->response_.buffer_;
+}
+
+t_Request Client::getRequest() const
+{
+	return this->request_;
 }
 
 void Client::setFd(fd_t fd)
@@ -155,32 +150,9 @@ void Client::updateLastReceivedPacket()
 	this->lastReceivedPacket_ = std::time(NULL);
 }
 
-bool Client::hasFullRequestHeaders()
-{
-	return this->request_.hasFullHeaders();
-}
-
-void Client::buildRequest()
-{
-	this->request_.setComplete(request_.tryParseFromBuffer());
-
-	// std::cout << this->request_ << std::endl;
-	// std::cout << "Should build a response: " << (this->request_.isComplete() ? "true" : "false") << std::endl;
-}
-
-void Client::appendRequest(char *request)
-{
-	this->request_.appendBuffer(request);
-}
-
 bool Client::hasPendingRequest()
 {
 	return !this->request_.getBuffer().empty();
-}
-
-void Client::clearRequest()
-{
-	this->request_.clear();
 }
 
 void Client::eraseResponse(size_t bytesToErase)
@@ -199,12 +171,19 @@ bool Client::shouldClose()
 	return C_KEEP_ALIVE;
 }
 
+void Client::buildRequest(char *buffer)
+{
+	Result<t_Request> requestResult = RequestFactory::create(buffer);
+	if (requestResult.isSuccess())
+		this->request_ = requestResult.getValue();
+}
+
 void Client::buildResponse(Server *server, Location *location)
 {
-	HandlingResult res;
+	HandlingResult handlingResult;
 
-	res = RequestHandler::handleRequest(request_, *location, *server);
-	response_ = ResponseFactory::create(res);
+	handlingResult = RequestHandler::handleRequest(request_, *location, *server);
+	response_ = ResponseFactory::create(handlingResult);
 }
 
 void Client::buildResponse(t_httpCode code, t_connection mode)

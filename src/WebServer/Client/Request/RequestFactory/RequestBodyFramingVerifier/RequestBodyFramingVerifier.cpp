@@ -1,0 +1,156 @@
+#include "utils/numeric/numeric.hpp"
+#include "RequestBodyFramingVerifier.hpp"
+
+void RequestBodyFramingVerifier::advance(const size_t amount)
+{
+    this->pos_ += amount;
+
+    if (!hasFinishedText())
+        this->currentChar_ = this->text_[this->pos_];
+    else
+        this->currentChar_ = '\0';
+}
+
+char RequestBodyFramingVerifier::peek(const size_t distance) const
+{
+    const size_t peekedCharPos = this->pos_ + distance;
+
+    if (peekedCharPos >= this->text_.length())
+        return '\0';
+
+    return this->text_[peekedCharPos];
+}
+
+void RequestBodyFramingVerifier::skipChunkExtension()
+{
+    if (this->currentChar_ != ';')
+        return;
+
+    skipUntilNextCrlf();
+}
+
+void RequestBodyFramingVerifier::skipUntilNextCrlf()
+{
+    while (!hasFinishedText() && !isCrlf())
+    {
+        advance();
+    }
+}
+
+void RequestBodyFramingVerifier::skipTrailerFields()
+{
+    while (!hasFinishedText() && !isCrlf())
+    {
+        skipUntilNextCrlf();
+        advance(2);
+    }
+}
+
+bool RequestBodyFramingVerifier::consumeChunkSizeIfComplete()
+{
+    if (!std::isxdigit(this->currentChar_))
+        return false;
+
+    while (!hasFinishedText() && std::isxdigit(this->currentChar_))
+    {
+        advance();
+    }
+
+    skipChunkExtension();
+
+    if (!isCrlf())
+        return false;
+    advance(2);
+
+    return true;
+}
+
+void RequestBodyFramingVerifier::consumeChunkData(const size_t chunkSize)
+{
+    advance(chunkSize);
+    skipUntilNextCrlf();
+    advance(2);
+}
+
+bool RequestBodyFramingVerifier::hasFinishedText() const
+{
+    return this->pos_ >= this->text_.length();
+}
+
+bool RequestBodyFramingVerifier::isLastChunk() const
+{
+    int distance = 0;
+
+    if (peek(distance) != '0')
+        return false;
+
+    while (peek(distance) == '0')
+    {
+        distance++;
+    }
+
+    return (isCrlfAtDistance(distance) || isChunkExtensionAtDistance(distance));
+}
+
+bool RequestBodyFramingVerifier::isCrlf() const
+{
+    return this->currentChar_ == '\r' && peek() == '\n';
+}
+
+bool RequestBodyFramingVerifier::isCrlfAtDistance(const size_t distance) const
+{
+    return (peek(distance) == '\r' && peek(distance + 1) == '\n');
+}
+
+bool RequestBodyFramingVerifier::isChunkExtensionAtDistance(const size_t distance) const
+{
+    return peek(distance) == ';';
+}
+
+std::string RequestBodyFramingVerifier::getChunkSize() const
+{
+    size_t distance = 0;
+    std::string chunkSize;
+
+    while (std::isxdigit(peek(distance)))
+    {
+        chunkSize += peek(distance);
+        distance++;
+    }
+
+    return chunkSize;
+}
+
+RequestBodyFramingVerifier::RequestBodyFramingVerifier(const std::string &bodyString)
+{
+    this->text_ = bodyString;
+    this->pos_ = 0;
+    this->currentChar_ = this->text_[this->pos_];
+}
+
+RequestBodyFramingVerifier::~RequestBodyFramingVerifier() {}
+
+bool RequestBodyFramingVerifier::isFullBodyComplete(const size_t &contentLengthSize) const
+{
+    return this->text_.length() >= contentLengthSize;
+}
+
+bool RequestBodyFramingVerifier::isChunkedBodyComplete()
+{
+    while (!isLastChunk())
+    {
+        std::string chunkSize = getChunkSize();
+
+        if (!consumeChunkSizeIfComplete())
+            return false;
+
+        consumeChunkData(hexToDec(chunkSize));
+    }
+
+    if (!consumeChunkSizeIfComplete())
+        return false;
+
+    skipTrailerFields();
+
+    return isCrlf();
+}

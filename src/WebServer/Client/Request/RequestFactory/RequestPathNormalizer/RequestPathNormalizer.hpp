@@ -1,0 +1,26 @@
+#pragma once
+
+#include <string>
+#include <vector>
+
+typedef std::vector<std::string> pathSegments_t;
+
+class RequestPathNormalizer
+{
+private:
+    RequestPathNormalizer();
+
+    static bool isLastElement(const pathSegments_t &pathSegments, pathSegments_t::const_iterator it);
+    static bool isCurrentDirectory(const std::string &str);
+    static bool isEmptySegment(const pathSegments_t &pathSegments, pathSegments_t::const_iterator it);
+    static bool isParentDirectory(const std::string &str);
+    static void removeLastElement(pathSegments_t &pathSegments);
+
+    static bool hasTrailingDotSegment(const std::string &path);
+    static pathSegments_t getPathSegments(const std::string &path);
+    static pathSegments_t normalizePathSegments(const pathSegments_t &pathSegments);
+    static std::string buildNormalizedPath(const pathSegments_t &normalizedPathSegments);
+
+public:
+    static void normalize(std::string &path);
+};

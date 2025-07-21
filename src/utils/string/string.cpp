@@ -1,20 +1,11 @@
 #include "string.hpp"
 
-bool isEmpty(const std::string &str)
+bool endsWith(const std::string &str, const std::string &suffix)
 {
-	return str.empty();
-}
+	if (suffix.length() > str.length())
+		return false;
 
-std::string toLowerString(const std::string &str)
-{
-	std::string res(str);
-
-	for (std::string::iterator it = res.begin(); it != res.end(); ++it)
-	{
-		*it = std::tolower(*it);
-	}
-
-	return res;
+	return str.rfind(suffix) == str.length() - suffix.length();
 }
 
 std::vector<std::string> split(const std::string &input, const std::string &del)
@@ -36,6 +27,17 @@ std::vector<std::string> split(const std::string &input, const std::string &del)
 	return result;
 }
 
+std::string toLower(const std::string &string)
+{
+	std::string result;
+
+	for (size_t i = 0; i < string.length(); i++)
+	{
+		result += static_cast<char>(std::tolower(string[i]));
+	}
+
+	return result;
+}
 std::string trim(const std::string &input, const std::string &charsToTrim)
 {
 	size_t start = input.find_first_not_of(charsToTrim);
