@@ -31,7 +31,7 @@ bool Request::isValidHeaderKey(const std::string &key)
 {
 	u_char c;
 
-	for (int i = 0; i < key.length(); i++)
+	for (size_t i = 0; i < key.length(); i++)
 	{
 		c = static_cast<u_char>(key[i]);
 

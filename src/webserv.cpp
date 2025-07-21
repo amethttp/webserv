@@ -6,49 +6,49 @@
 
 static void setLocationsPH(Server &server)
 {
-	Location *location;
-	std::vector<Location *> testLocations;
-	std::vector<std::string> indexes;
-	std::set<t_method> allowedMethods;
-	t_return ret;
+    Location *location;
+    std::vector<Location *> testLocations;
+    std::vector<std::string> indexes;
+    std::set<t_method> allowedMethods;
+    t_return ret;
 
-	std::map<std::string, std::string> test;
+    std::map<std::string, std::string> test;
 
-	indexes.push_back("index");
-	indexes.push_back("index.html");
-	indexes.push_back("test.html");
-	indexes.push_back("test2.html");
-	allowedMethods.insert(M_GET);
-	allowedMethods.insert(M_POST);
-	test[".py"] = "/usr/bin/python3";
-	test[".sh"] = "/bin/bash";
+    indexes.push_back("index");
+    indexes.push_back("index.html");
+    indexes.push_back("test.html");
+    indexes.push_back("test2.html");
+    allowedMethods.insert(M_GET);
+    allowedMethods.insert(M_POST);
+    test[".py"] = "/usr/bin/python3";
+    test[".sh"] = "/bin/bash";
 
-	location = new Location();
-	location->setCGIs(test);
-	location->setRoot("tests/www");
-	location->setPath("/");
-	location->setAutoIndex(true);
-	location->setIndexList(indexes);
-	location->setMethods(allowedMethods);
-	testLocations.push_back(location);
+    location = new Location();
+    location->setCGIs(test);
+    location->setRoot("tests/www");
+    location->setPath("/");
+    location->setAutoIndex(true);
+    location->setIndexList(indexes);
+    location->setMethods(allowedMethods);
+    testLocations.push_back(location);
 
-	location = new Location();
-	location->setRoot("tests/www");
-	location->setPath("/test/index");
-	ret.code = MOVED_PERMANENTLY;
-	ret.path = "/test/index/";
-	location->setReturn(ret);
-	location->setAutoIndex(false);
-	location->setIndexList(indexes);
-	location->setMethods(allowedMethods);
-	testLocations.push_back(location);
-	server.setLocations(testLocations);
-	server.setUploadPath("tests/www/uploads/");
+    location = new Location();
+    location->setRoot("tests/www");
+    location->setPath("/test/index");
+    ret.code = MOVED_PERMANENTLY;
+    ret.path = "/test/index/";
+    location->setReturn(ret);
+    location->setAutoIndex(false);
+    location->setIndexList(indexes);
+    location->setMethods(allowedMethods);
+    testLocations.push_back(location);
+    server.setLocations(testLocations);
+    server.setUploadPath("tests/www/uploads/");
 }
 
 int main(int argc, char *argv[])
 {
-    
+
     try
     {
         WebServer webserver;
@@ -57,9 +57,8 @@ int main(int argc, char *argv[])
             configFile = argv[1];
         else
             configFile = "assets/configs/default.conf";
-        std::cout << configFile << std::endl;
         ConfigParser::useConfig(configFile, webserver);
-        webserver.serve();
+        // webserver.serve();
 
         // WebServer webServer = WebServer();
 
@@ -98,10 +97,10 @@ int main(int argc, char *argv[])
         // webServer.setServers(servers);
         // webServer.serve();
     }
-    catch(std::exception &e)
+    catch (std::exception &e)
     {
         std::cerr << "Error: " << e.what()
-            << ": " << strerror(errno) << std::endl;
+                  << std::endl;
     }
 
     return 0;

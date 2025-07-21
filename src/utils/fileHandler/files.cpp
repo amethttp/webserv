@@ -1,4 +1,5 @@
 #include "files.hpp"
+#include <string>
 
 std::string getMIME(std::string &target)
 {
@@ -8,7 +9,7 @@ std::string getMIME(std::string &target)
 	pos = target.rfind('.');
 	if (pos != std::string::npos)
 		res = Client::getExtensionType(target.substr(pos));
-	
+
 	return (res.empty() ? "text/plain" : res);
 }
 
@@ -43,24 +44,33 @@ std::string readFileToString(const std::string &path)
 	std::string str;
 	std::ifstream file(path.c_str(), std::ifstream::binary);
 
-    if (!file.is_open())
+	if (!file.is_open())
 	{
 		file.close();
-        throw (std::runtime_error("Couldn't open file"));
+		throw(std::runtime_error("Couldn't open file"));
 	}
 	if (stat(path.c_str(), &st))
 	{
 		file.close();
-		throw (std::runtime_error("Stat operation failed"));
+		throw(std::runtime_error("Stat operation failed"));
 	}
 	str.resize(static_cast<size_t>(st.st_size));
 	file.read(&str[0], static_cast<size_t>(st.st_size));
 	if (!file)
 	{
 		file.close();
-		throw (std::runtime_error("Reading operation failed"));
+		throw(std::runtime_error("Reading operation failed"));
 	}
-    file.close();
+	file.close();
 
 	return str;
+}
+
+std::string getFileExtension(const std::string &path)
+{
+	size_t extPos = path.find_last_of(".");
+	if (extPos >= path.length())
+		return "";
+	else
+		return path.substr(extPos + 1);
 }
