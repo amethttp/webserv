@@ -46,3 +46,31 @@ std::string trim(const std::string &input, const std::string &charsToTrim)
 	return input.substr(start, end - start + 1);
 }
 
+// Decide if we normalize slashes or not || Nginx default beaviour doesnt do it
+void removeTrailingSlashes(std::string &str)
+{
+	if (*(str.rbegin()) == '/' && str.length() > 1)
+		str.erase(str.length() - 1);
+}
+
+int countMatchingDepth(std::string base, std::string target)
+{
+	size_t i = 0;
+
+	if (base.length() > target.length())
+		return -1;
+
+	while (i < base.length())
+	{
+		if (base[i] != target[i])
+			break ;
+		i++;
+	}
+
+	if (i != base.length())
+		return -1;
+	else if ((base.length() != target.length()) && (base[i - 1] != '/'))
+		return -1;
+
+	return i;
+}

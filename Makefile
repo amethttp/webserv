@@ -89,8 +89,6 @@ vpath %.cpp $(SRC): \
 			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor : \
 			$(SRC)WebServer/Client/Response/RequestHandler : \
 			$(SRC)WebServer/Client/Response/RequestHandler/Result : \
-			$(SRC)WebServer/Client/RouteMatchers/Location : \
-			$(SRC)WebServer/Client/RouteMatchers/Server : \
 			$(SRC)WebServer/Server/Location : \
 			$(SRC)WebServer/Server/Session : \
 			$(SRC)WebServer/Server : \
@@ -117,8 +115,6 @@ SRCS = Request.cpp \
 		RequestExecutor.cpp \
 		RequestHandler.cpp \
 		HandlingResult.cpp \
-		LocationMatcher.cpp \
-		ServerMatcher.cpp \
 		Location.cpp \
 		Session.cpp \
 		Server.cpp \

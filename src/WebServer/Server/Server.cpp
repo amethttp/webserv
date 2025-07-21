@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "utils/string/string.hpp"
 
 Server::Server()
 {
@@ -20,6 +21,28 @@ bool Server::matchesName(std::string &match)
 	}
 
 	return false;
+}
+
+// Decide on no locations defined on server
+Location *Server::matchLocation(Request request)
+{
+    int matchIndex = 0;
+    int matchLength = 0;
+    int longestMatch = 0;
+    std::string targetRoute = request.getTarget();
+    std::vector<Location *> locations = this->getLocations();
+
+    for (size_t i = 0; i < locations.size(); ++i)
+    {
+        matchLength = countMatchingDepth(locations[i]->getPath(), targetRoute);
+        if (matchLength > longestMatch)
+        {
+            matchIndex = i;
+            longestMatch = matchLength;
+        }
+    }
+
+    return locations[matchIndex];
 }
 
 std::vector<int> Server::getPorts()

@@ -4,6 +4,7 @@
 #include <vector>
 #include "Session/Session.hpp"
 #include "Location/Location.hpp"
+#include "WebServer/Client/Request/Request.hpp"
 
 class Server
 {
@@ -19,6 +20,7 @@ public:
 	~Server();
 
 	bool matchesName(std::string &match);
+	Location *matchLocation(Request request);
 
 	std::vector<int> getPorts();
 	void setPorts(std::vector<int> &ports);

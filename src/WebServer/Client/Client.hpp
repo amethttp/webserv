@@ -9,8 +9,6 @@
 #include "Response/ResponseFactory/ResponseFactory.hpp"
 #include "Response/RequestHandler/RequestHandler.hpp"
 #include "Response/RequestHandler/RequestExecutor/RequestExecutor.hpp"
-#include "RouteMatchers/Server/ServerMatcher.hpp"
-#include "RouteMatchers/Location/LocationMatcher.hpp"
 #include "WebServer/Client/Response/RequestHandler/Result/HandlingResult.hpp"
 
 #define DISCONNECTED "disconnected"
@@ -36,7 +34,6 @@ public:
 	int getId();
 	fd_t getFd();
 	time_t getLastReceivedPacket() const;
-	std::string getStringifiedResponse();
 	std::string getStringifiedRequest();
 	Request getRequest() const;
 	t_httpCode getResponseStatus() const;
@@ -53,7 +50,7 @@ public:
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	void buildResponse(std::vector<Server *> &servers);
+	void buildResponse(Server *server, Location *location);
 	void buildResponse(t_httpCode code, t_connection mode);
 
 	static std::string getHttpErrorMsg(t_httpCode code);

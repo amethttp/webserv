@@ -16,20 +16,27 @@ private:
 	std::vector<Client *> clients_;
 
 	std::vector<fd_t> createServerFds();
+	
 	void setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds);
 	void setEpollRead(t_epoll &epoll, Client *client);
 	void setEpollWrite(t_epoll &epoll, Client *client);
+	
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
+	
 	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
 	std::vector<Client *>::iterator disconnectClient(Client *client, t_epoll &epoll, const std::string &reason);
-	void receiveRequest(Client *client, t_epoll &epoll);
-	bool tryBuildRequest(Client *client, char *buffer);
-	void readySendResponse(Client *client, t_epoll &epoll);
-	void sendResponse(Client *client, t_epoll &epoll);
+	std::vector<Client *>::iterator removeClient(Client *client);
 	void checkClientEvent(t_epoll &epoll, const int &eventIndex);
 	void handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll);
-	std::vector<Client *>::iterator removeClient(Client *client);
 	void disconnectTimedoutClients(t_epoll &epoll);
+	
+	void receiveRequest(Client *client, t_epoll &epoll);
+	bool tryBuildRequest(Client *client, char *buffer);
+	
+	Server *matchServer(Request request);
+	void buildResponse(Client *client);
+	void readySendResponse(Client *client, t_epoll &epoll);
+	void sendResponse(Client *client, t_epoll &epoll);
 
 public:
 	WebServer();

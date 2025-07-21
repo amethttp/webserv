@@ -199,14 +199,9 @@ bool Client::shouldClose()
 	return C_KEEP_ALIVE;
 }
 
-void Client::buildResponse(std::vector<Server *> &servers)
+void Client::buildResponse(Server *server, Location *location)
 {
-	Server *server;
-	Location *location;
 	HandlingResult res;
-
-	server = ServerMatcher::matchServer(request_, servers);
-	location = LocationMatcher::matchLocation(request_, *server);
 
 	res = RequestHandler::handleRequest(request_, *location, *server);
 	response_ = ResponseFactory::create(res);
@@ -214,5 +209,5 @@ void Client::buildResponse(std::vector<Server *> &servers)
 
 void Client::buildResponse(t_httpCode code, t_connection mode)
 {
-	this->response_ = ResponseFactory::create(code, mode);
+	response_ = ResponseFactory::create(code, mode);
 }

@@ -147,6 +147,30 @@ bool WebServer::tryBuildRequest(Client *client, char *buffer)
 	return true;
 }
 
+Server *WebServer::matchServer(Request request)
+{
+    std::string hostName = request.getHeaders()["Host"];
+
+    for (std::vector<Server *>::iterator serverIt = servers_.begin(); serverIt != servers_.end(); ++serverIt)
+    {
+        if ((*serverIt)->matchesName(hostName))
+            return *serverIt;
+    }
+
+    return *servers_.begin();
+}
+
+void WebServer::buildResponse(Client *client)
+{
+	Server *server;
+	Location *location;
+
+	server = this->matchServer(client->getRequest());
+	location = server->matchLocation(client->getRequest());
+
+	client->buildResponse(server, location);
+}
+
 void WebServer::readySendResponse(Client *client, t_epoll &epoll)
 {
 	client->clearRequest();
@@ -165,7 +189,7 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 		client->updateLastReceivedPacket();
 		if (!this->tryBuildRequest(client, buffer))
 			return ;
-		client->buildResponse(this->servers_);
+		this->buildResponse(client);
 		this->readySendResponse(client, epoll);
 	}
 	else if (bytesReceived == 0)
