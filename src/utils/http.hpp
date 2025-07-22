@@ -11,6 +11,7 @@ typedef enum e_method
 	M_GET,
 	M_POST,
 	M_DELETE,
+	M_AMOUNT,
 	M_NOT_IMPLEMENTED,
 	M_NOT_ALLOWED
 } t_method;
