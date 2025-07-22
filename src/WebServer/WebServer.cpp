@@ -9,7 +9,7 @@
 #include <netinet/in.h>
 #include "WebServer.hpp"
 #include "Client/Client.hpp"
-#include "Request/RequestFactory/RequestFactory.hpp"
+#include "Client/Request/RequestFactory/RequestFactory.hpp"
 
 WebServer::WebServer()
 {
@@ -138,20 +138,19 @@ std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_ep
 	return removeClient(client);
 }
 
-bool WebServer::tryBuildRequest(Client *client, char *buffer)
+bool WebServer::tryBuildRequest(Client *client, const char *buffer)
 {
-	if (RequestFactory::canCreateAResponse(buffer))
-	{
-		client->buildRequest(buffer);
-		return true;
-	}
+	client->getRequest().buffer.append(buffer);
+	if (RequestFactory::canCreateAResponse(client->getRequest().buffer) == false)
+		return false;
 
-	return false;
+	client->buildRequest(client->getRequest().buffer.c_str());
+	return true;
 }
 
 Server *WebServer::matchServer(t_Request request)
 {
-    std::string hostName = request.headers.getHeader("Host").getValue();
+    std::string hostName = request.headers.getHeaderValue(HOST);
 
     for (std::vector<Server *>::iterator serverIt = servers_.begin(); serverIt != servers_.end(); ++serverIt)
     {
@@ -167,6 +166,7 @@ void WebServer::buildResponse(Client *client)
 	Server *server;
 	Location *location;
 
+	client->getRequest().buffer.clear();
 	server = this->matchServer(client->getRequest());
 	location = server->matchLocation(client->getRequest());
 
@@ -189,7 +189,8 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	if (bytesReceived > 0)
 	{
 		client->updateLastReceivedPacket();
-		if (RequestFactory::canCreateAResponse(buffer) == false)
+
+		if (!this->tryBuildRequest(client, buffer))
 			return ;
 		this->buildResponse(client);
 		this->readySendResponse(client, epoll);

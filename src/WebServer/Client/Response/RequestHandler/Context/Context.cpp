@@ -13,9 +13,9 @@ Context::Context(t_Request&req, Location &loc, Server &server) : request_(req), 
 
 void Context::checkRequestHeaders()
 {
-	if (request_.headers.contains("Connection"))
+	if (request_.headers.contains(CONNECTION))
 	{
-		if (request_.headers.getHeader("Connection").getValue() == "close")
+		if (request_.headers.getHeaderValue(CONNECTION) == "close")
 			this->connectionMode_ = C_CLOSE;
 	}
 }

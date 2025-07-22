@@ -152,7 +152,7 @@ void Client::updateLastReceivedPacket()
 
 bool Client::hasPendingRequest()
 {
-	return !this->request_.getBuffer().empty();
+	return !this->request_.buffer.empty();
 }
 
 void Client::eraseResponse(size_t bytesToErase)
@@ -162,16 +162,16 @@ void Client::eraseResponse(size_t bytesToErase)
 
 bool Client::shouldClose()
 {
-    if (this->response_.headers_.contains("Connection"))
+    if (this->response_.headers_.contains(CONNECTION))
 	{
-		if (this->response_.headers_.getHeader("Connection").getValue() == "close")
+		if (this->response_.headers_.getHeaderValue(CONNECTION) == "close")
 			return C_CLOSE;
 	}
 
 	return C_KEEP_ALIVE;
 }
 
-void Client::buildRequest(char *buffer)
+void Client::buildRequest(const char *buffer)
 {
 	Result<t_Request> requestResult = RequestFactory::create(buffer);
 	if (requestResult.isSuccess())

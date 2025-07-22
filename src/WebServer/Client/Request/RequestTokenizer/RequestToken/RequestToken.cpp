@@ -1,6 +1,6 @@
 #include "RequestToken.hpp"
 
-RequestToken::RequestToken(const tokenType_t type, const std::string &value)
+RequestToken::RequestToken(const t_tokenType type, const std::string &value)
 {
     this->type_ = type;
     this->value_ = value;
@@ -8,7 +8,7 @@ RequestToken::RequestToken(const tokenType_t type, const std::string &value)
 
 RequestToken::~RequestToken() {}
 
-tokenType_t RequestToken::getType() const
+t_tokenType RequestToken::getType() const
 {
     return this->type_;
 }

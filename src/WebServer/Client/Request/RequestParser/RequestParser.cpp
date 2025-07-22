@@ -7,7 +7,7 @@ RequestParser::RequestParser(const RequestTokenizer &tokenizer)
 {
 }
 
-result_t RequestParser::eat(const tokenType_t type)
+result_t RequestParser::eat(const t_tokenType type)
 {
     if (this->currentToken_.getType() != type)
         return FAIL;
@@ -60,7 +60,7 @@ Result<RequestLine> RequestParser::parseRequestLine()
     requestLine.setHttpVersion(this->currentToken_.getValue());
     hasFailed |= eat(HTTP_VERSION);
 
-    hasFailed |= eat(EOF);
+    hasFailed |= eat(TT_EOF);
 
     if (hasFailed)
         return Result<RequestLine>::fail(BAD_REQUEST_ERR);
@@ -80,12 +80,12 @@ Result<HeaderCollection> RequestParser::parseHeaders()
         headers.addHeader(this->currentToken_.getValue());
         hasFailed |= eat(HEADER);
 
-        if (this->currentToken_.getType() != EOF)
+        if (this->currentToken_.getType() != TT_EOF)
             hasFailed |= eat(CRLF);
     }
     while (this->currentToken_.getType() == HEADER);
 
-    hasFailed |= eat(EOF);
+    hasFailed |= eat(TT_EOF);
 
     if (hasFailed)
         return Result<HeaderCollection>::fail(BAD_REQUEST_ERR);
@@ -98,7 +98,7 @@ Result<Body> RequestParser::parseFullBody(const size_t contentLengthSize)
     Body body;
     const std::string bodyMessage = eatOctetStreamToken(contentLengthSize);
 
-    if (eat(EOF) == FAIL)
+    if (eat(TT_EOF) == FAIL)
         return Result<Body>::fail(BAD_REQUEST_ERR);
 
     body.addFragment(bodyMessage);
@@ -129,7 +129,7 @@ Result<Body> RequestParser::parseChunkedBody()
 
     hasFailed |= eat(CRLF);
 
-    hasFailed |= eat(EOF);
+    hasFailed |= eat(TT_EOF);
 
     if (hasFailed)
         return Result<Body>::fail(BAD_REQUEST_ERR);

@@ -16,7 +16,7 @@ static t_httpCode postFile(Context &ctx, HandlingResult res)
 		file.close();
 		throw (std::runtime_error("Error creating file"));
 	}
-	file << ctx.request_.getBody();
+	file << ctx.request_.body.getMessage();
 	res.tempHeaders_.addHeader("Content-Location", ctx.targetPath_);
 
 	return CREATED;

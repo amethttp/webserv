@@ -9,4 +9,6 @@ typedef struct s_Request
 	RequestLine requestLine;
 	HeaderCollection headers;
 	Body body;
+
+	std::string buffer;
 } t_Request;

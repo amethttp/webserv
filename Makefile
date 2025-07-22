@@ -61,22 +61,24 @@ INCLUDES = -I$(SRC)
 #----VPATH----#
 vpath %.cpp $(SRC): \
             $(SRC)utils: \
-            $(SRC)utils/string: \
-            $(SRC)utils/numeric: \
-            $(SRC)utils/Result: \
-            $(SRC)WebServer: \
-            $(SRC)WebServer/Client: \
-            $(SRC)WebServer/Client/Request: \
-            $(SRC)WebServer/Client/Request/RequestFactory: \
-            $(SRC)WebServer/Client/Request/RequestParser: \
-            $(SRC)WebServer/Client/Response: \
-            $(SRC)WebServer/Server: \
-            $(SRC)WebServer/Server/Location: \
-            $(SRC)WebServer/Server/Session: \
-            $(SRC)WebServer/Client/Request : \
-			$(SRC)WebServer/Client/Response/StatusLine : \
+            $(SRC)WebServer/Client/Request/Body : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestBodyFramingVerifier : \
+			$(SRC)WebServer/Client/Request/RequestFactory : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestPathNormalizer : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestPctDecoder : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestProcesser : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ConnectionHeaderValidator : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/HostHeaderValidator : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator : \
+			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/TransferEncodingHeaderValidator : \
+			$(SRC)WebServer/Client/Request/RequestLine : \
+			$(SRC)WebServer/Client/Request/RequestLine/Target : \
+			$(SRC)WebServer/Client/Request/RequestParser : \
+			$(SRC)WebServer/Client/Request/RequestTokenizer/RequestToken : \
+			$(SRC)WebServer/Client/Request/RequestTokenizer : \
 			$(SRC)WebServer/Client/Response/ResponseFactory : \
-			$(SRC)WebServer/Client : \
+			$(SRC)WebServer/Client/Response/StatusLine : \
 			$(SRC)WebServer/Client/Response/RequestHandler/Context : \
 			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods : \
 			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Factory : \
@@ -86,34 +88,38 @@ vpath %.cpp $(SRC): \
 			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor : \
 			$(SRC)WebServer/Client/Response/RequestHandler : \
 			$(SRC)WebServer/Client/Response/RequestHandler/Result : \
+			$(SRC)WebServer/Client : \
 			$(SRC)WebServer/Server/Location : \
 			$(SRC)WebServer/Server/Session : \
 			$(SRC)WebServer/Server : \
 			$(SRC)WebServer : \
-			$(SRC)utils/numeric : \
-			$(SRC)utils/string : \
+			$(SRC)utils/HeaderCollection/Header : \
+			$(SRC)utils/HeaderCollection : \
 			$(SRC)utils/cgi : \
 			$(SRC)utils/fileHandler : \
-			$(SRC)utils/HeaderCollection : \
-			$(SRC)utils/HeaderCollection/Header :
-
+			$(SRC)utils/numeric : \
+			$(SRC)utils/string : \
+			$(SRC)utils/Result : 
 
 #----SHARED----#
-SRCS = webserv.cpp \
-		WebServer.cpp \
-		Client.cpp \
-		Request.cpp \
-		Response.cpp \
-		Server.cpp \
-		Location.cpp \
-		Session.cpp \
-		string.cpp \
-		numeric.cpp \
-		SimpleResult.cpp \
-		RequestFactory.cpp\
+SRCS = Body.cpp \
+		RequestBodyFramingVerifier.cpp \
+		RequestFactory.cpp \
+		RequestPathNormalizer.cpp \
+		RequestPctDecoder.cpp \
+		RequestProcesser.cpp \
+		ConnectionHeaderValidator.cpp \
+		ContentLengthHeaderValidator.cpp \
+		HostHeaderValidator.cpp \
+		RequestValidator.cpp \
+		TransferEncodingHeaderValidator.cpp \
+		RequestLine.cpp \
+		Target.cpp \
 		RequestParser.cpp \
-		StatusLine.cpp \
+		RequestToken.cpp \
+		RequestTokenizer.cpp \
 		ResponseFactory.cpp \
+		StatusLine.cpp \
 		Context.cpp \
 		AMethod.cpp \
 		MethodFactory.cpp \
@@ -123,10 +129,19 @@ SRCS = webserv.cpp \
 		RequestExecutor.cpp \
 		RequestHandler.cpp \
 		HandlingResult.cpp \
+		Client.cpp \
+		Location.cpp \
+		Session.cpp \
+		Server.cpp \
+		WebServer.cpp \
+		Header.cpp \
+		HeaderCollection.cpp \
 		cgi.cpp \
 		files.cpp \
-		HeaderCollection.cpp \
-		Header.cpp
+		numeric.cpp \
+		string.cpp \
+		SimpleResult.cpp \
+		webserv.cpp
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)

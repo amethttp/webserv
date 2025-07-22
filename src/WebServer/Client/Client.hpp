@@ -45,7 +45,7 @@ public:
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	void buildRequest(char *buffer);
+	void buildRequest(const char *buffer);
 	void buildResponse(Server *server, Location *location);
 	void buildResponse(t_httpCode code, t_connection mode);
 

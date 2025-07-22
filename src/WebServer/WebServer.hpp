@@ -31,7 +31,7 @@ private:
 	void disconnectTimedoutClients(t_epoll &epoll);
 	
 	void receiveRequest(Client *client, t_epoll &epoll);
-	bool tryBuildRequest(Client *client, char *buffer);
+	bool tryBuildRequest(Client *client, const char *buffer);
 	
 	Server *matchServer(t_Request request);
 	void buildResponse(Client *client);

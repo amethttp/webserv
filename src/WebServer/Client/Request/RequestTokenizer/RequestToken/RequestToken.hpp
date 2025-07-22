@@ -2,7 +2,7 @@
 
 #include <string>
 
-typedef enum tokenType_e
+typedef enum e_tokenType
 {
     METHOD,
     SP,
@@ -13,22 +13,22 @@ typedef enum tokenType_e
     LAST_CHUNK,
     OCTET_STREAM,
     CRLF,
-    EOF,
+    TT_EOF,
     UNKNOWN,
     EMPTY
-} tokenType_t;
+} t_tokenType;
 
 class RequestToken
 {
 private:
-    tokenType_t type_;
+    t_tokenType type_;
     std::string value_;
 
 public:
-    RequestToken(tokenType_t type, const std::string &value);
+    RequestToken(t_tokenType type, const std::string &value);
     ~RequestToken();
 
-    tokenType_t getType() const;
+    t_tokenType getType() const;
     std::string getValue();
 
     std::string toString() const;

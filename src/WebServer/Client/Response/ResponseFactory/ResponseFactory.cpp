@@ -41,7 +41,7 @@ static void setResponseHeaders(t_connection mode, t_Response &response)
 {
 	response.headers_.addHeader("Server", "Amethttp");
 	response.headers_.addHeader("Date", getImfFixdate());
-	response.headers_.addHeader("Connection", (mode ? "close" : "keep-alive"));
+	response.headers_.addHeader(CONNECTION, (mode ? "close" : "keep-alive"));
 }
 
 static void setRepresentationHeaders(t_Response &response)
@@ -49,7 +49,7 @@ static void setRepresentationHeaders(t_Response &response)
 	std::ostringstream length;
 
 	length << response.body_.content.length();
-	response.headers_.addHeader("Content-Length", length.str());
+	response.headers_.addHeader(CONTENT_LENGTH, length.str());
 	if (!response.body_.content.empty())
 		response.headers_.addHeader("Content-Type", response.body_.type);
 }

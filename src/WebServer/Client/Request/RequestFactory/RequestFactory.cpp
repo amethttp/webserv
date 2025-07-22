@@ -93,13 +93,13 @@ Result<Body> RequestFactory::buildChunkedBodyFromString(const std::string &bodyS
 
 Result<Body> RequestFactory::buildRequestBodyFromString(const HeaderCollection &headers, const std::string &bodyString)
 {
-    if (headers.contains("Content-Length"))
+    if (headers.contains(CONTENT_LENGTH))
     {
-        const size_t contentLengthSize = strToUlong(headers.getHeader("Content-Length").getValue());
+        const size_t contentLengthSize = strToUlong(headers.getHeaderValue(CONTENT_LENGTH));
         return buildFullBodyFromString(contentLengthSize, bodyString);
     }
 
-    if (headers.contains("Transfer-Encoding"))
+    if (headers.contains(TRANSFER_ENCODING))
     {
         return buildChunkedBodyFromString(bodyString);
     }
@@ -152,13 +152,13 @@ bool RequestFactory::canCreateAResponse(const std::string &requestString)
     const HeaderCollection headers = headersResult.getValue();
     RequestBodyFramingVerifier requestBodyFramingVerifier(bodyString);
 
-    if (headers.contains("Content-Length"))
+    if (headers.contains(CONTENT_LENGTH))
     {
-        const size_t contentLengthSize = strToUlong(headers.getHeader("Content-Length").getValue());
+        const size_t contentLengthSize = strToUlong(headers.getHeader(CONTENT_LENGTH).getValue());
         return requestBodyFramingVerifier.isFullBodyComplete(contentLengthSize);
     }
 
-    if (headers.contains("Transfer-Encoding"))
+    if (headers.contains(TRANSFER_ENCODING))
     {
         return requestBodyFramingVerifier.isChunkedBodyComplete();
     }

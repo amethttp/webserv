@@ -2,7 +2,7 @@
 
 RequestLine::RequestLine()
 {
-    this->method_ = NOT_IMPLEMENTED;
+    this->method_ = M_NOT_IMPLEMENTED;
 }
 
 RequestLine::~RequestLine() {}
@@ -35,13 +35,13 @@ std::string RequestLine::getHttpVersion() const
 void RequestLine::setMethod(const std::string &methodString)
 {
     if (methodString == "GET")
-        this->method_ = GET;
+        this->method_ = M_GET;
     else if (methodString == "POST")
-        this->method_ = POST;
+        this->method_ = M_POST;
     else if (methodString == "DELETE")
-        this->method_ = DELETE;
+        this->method_ = M_DELETE;
     else
-        this->method_ = NOT_IMPLEMENTED;
+        this->method_ = M_NOT_IMPLEMENTED;
 }
 
 void RequestLine::setTargetUri(const std::string &uriString)

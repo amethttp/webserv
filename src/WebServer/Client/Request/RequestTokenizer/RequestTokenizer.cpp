@@ -363,7 +363,7 @@ std::string RequestTokenizer::crlf()
 RequestToken RequestTokenizer::getNextToken()
 {
     if (hasFinishedText())
-        return RequestToken(EOF, "");
+        return RequestToken(TT_EOF, "");
 
     if (this->currentChar_ == ' ')
         return RequestToken(SP, sp());
@@ -395,7 +395,7 @@ RequestToken RequestTokenizer::getNextToken()
 RequestToken RequestTokenizer::getOctetStreamToken(const size_t size)
 {
     if (hasFinishedText())
-        return RequestToken(EOF, "");
+        return RequestToken(TT_EOF, "");
 
     const std::string octetStreamString = this->text_.substr(this->pos_, size);
     advance(size);

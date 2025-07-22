@@ -19,7 +19,7 @@ private:
     RequestTokenizer tokenizer_;
     RequestToken currentToken_;
 
-    result_t eat(tokenType_t type);
+    result_t eat(t_tokenType type);
 
     std::string eatOctetStreamToken(const size_t &streamSize);
     result_t eatTrailerFields();
