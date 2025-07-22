@@ -150,6 +150,11 @@ void Client::updateLastReceivedPacket()
 	this->lastReceivedPacket_ = std::time(NULL);
 }
 
+void Client::appendToRequestBuffer(const char *toAppend)
+{
+	this->request_.buffer.append(toAppend);
+}
+
 bool Client::hasPendingRequest()
 {
 	return !this->request_.buffer.empty();

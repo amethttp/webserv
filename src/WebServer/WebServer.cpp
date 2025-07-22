@@ -140,7 +140,7 @@ std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_ep
 
 bool WebServer::tryBuildRequest(Client *client, const char *buffer)
 {
-	client->getRequest().buffer.append(buffer);
+	client->appendToRequestBuffer(buffer);
 	if (RequestFactory::canCreateAResponse(client->getRequest().buffer) == false)
 		return false;
 
@@ -189,7 +189,6 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	if (bytesReceived > 0)
 	{
 		client->updateLastReceivedPacket();
-
 		if (!this->tryBuildRequest(client, buffer))
 			return ;
 		this->buildResponse(client);

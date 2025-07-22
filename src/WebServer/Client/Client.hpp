@@ -42,6 +42,7 @@ public:
 
 	bool hasPendingRequest();
 	void updateLastReceivedPacket();
+	void appendToRequestBuffer(const char *toAppend);
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
