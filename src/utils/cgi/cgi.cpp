@@ -2,7 +2,7 @@
 
 bool matchCGI(std::string &path, Location &location, t_cgi &cgi)
 {
-	int pos = path.rfind('.');
+	size_t pos = path.rfind('.');
 	std::map<std::string, std::string>::iterator cgiIt;
 	std::map<std::string, std::string> allowedCGIs = location.getCGIs();
 

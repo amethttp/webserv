@@ -66,61 +66,98 @@ SUITES_FILES=$(shell find $(SUITES)* -type f -name "*.cpp" 2>/dev/null | xargs b
 
 
 #----VPATH----#
-vpath %.cpp $(SRC):\
-            $(SRC)test:\
-            $(SRC)test/TestFailure:\
-            $(SUITES):\
+vpath %.cpp $(SRC) : \
+            $(SRC)test : \
+            $(SRC)test/TestFailure : \
+            $(SUITES) :\
             $(SUITES_DIRECTORIES)\
-            $(PROJ_SRC)WebServer/Client/Request/RequestLine/\
-            $(PROJ_SRC)WebServer/Client/Request/RequestLine/Target/\
-            $(PROJ_SRC)WebServer/Client/Request/HeaderCollection/\
-            $(PROJ_SRC)WebServer/Client/Request/HeaderCollection/Header\
-            $(PROJ_SRC)WebServer/Client/Request/Body/\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestBodyFramingVerifier\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/HostHeaderValidator\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/TransferEncodingHeaderValidator\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ConnectionHeaderValidator\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestProcesser\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestPctDecoder\
-            $(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestPathNormalizer\
-            $(PROJ_SRC)WebServer/Client/Request/RequestParser/\
-            $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/\
-            $(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/RequestToken/\
-            $(PROJ_SRC)utils/HTTP/\
-            $(PROJ_SRC)utils/string/\
-            $(PROJ_SRC)utils/numeric/\
-            $(PROJ_SRC)utils/Result/\
+			$(PROJ_SRC) : \
+			$(PROJ_SRC)utils : \
+			$(PROJ_SRC)WebServer/Client/Request/Body : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestBodyFramingVerifier : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestPathNormalizer : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestPctDecoder : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestProcesser : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ConnectionHeaderValidator : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/HostHeaderValidator : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/TransferEncodingHeaderValidator : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestLine : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestLine/Target : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestParser : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/RequestToken : \
+			$(PROJ_SRC)WebServer/Client/Request/RequestTokenizer : \
+			$(PROJ_SRC)WebServer/Client/Response/ResponseFactory : \
+			$(PROJ_SRC)WebServer/Client/Response/StatusLine : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/Context : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Factory : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler : \
+			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/Result : \
+			$(PROJ_SRC)WebServer/Client : \
+			$(PROJ_SRC)WebServer/Server/Location : \
+			$(PROJ_SRC)WebServer/Server/Session : \
+			$(PROJ_SRC)WebServer/Server : \
+			$(PROJ_SRC)WebServer : \
+			$(PROJ_SRC)utils/HeaderCollection/Header : \
+			$(PROJ_SRC)utils/HeaderCollection : \
+			$(PROJ_SRC)utils/cgi : \
+			$(PROJ_SRC)utils/fileHandler : \
+			$(PROJ_SRC)utils/numeric : \
+			$(PROJ_SRC)utils/string : \
+			$(PROJ_SRC)utils/Result : 
 			
 
 #----SHARED----#
 SRCS = main.cpp \
-       test.cpp \
-       TestFailure.cpp \
-       $(SUITES_FILES) \
-       RequestLine.cpp \
-       Target.cpp \
-       HeaderCollection.cpp \
-       Header.cpp \
-       Body.cpp \
-       RequestFactory.cpp \
-       RequestBodyFramingVerifier.cpp \
-       RequestValidator.cpp \
-       HostHeaderValidator.cpp \
-       ContentLengthHeaderValidator.cpp \
-       TransferEncodingHeaderValidator.cpp \
-       ConnectionHeaderValidator.cpp \
-       RequestProcesser.cpp \
-       RequestPctDecoder.cpp \
-       RequestPathNormalizer.cpp \
-       RequestParser.cpp \
-       RequestTokenizer.cpp \
-       RequestToken.cpp \
-       string.cpp \
-       numeric.cpp \
-       SimpleResult.cpp \
+		test.cpp \
+		TestFailure.cpp \
+		$(SUITES_FILES) \
+		Body.cpp \
+		RequestBodyFramingVerifier.cpp \
+		RequestFactory.cpp \
+		RequestPathNormalizer.cpp \
+		RequestPctDecoder.cpp \
+		RequestProcesser.cpp \
+		ConnectionHeaderValidator.cpp \
+		ContentLengthHeaderValidator.cpp \
+		HostHeaderValidator.cpp \
+		RequestValidator.cpp \
+		TransferEncodingHeaderValidator.cpp \
+		RequestLine.cpp \
+		Target.cpp \
+		RequestParser.cpp \
+		RequestToken.cpp \
+		RequestTokenizer.cpp \
+		ResponseFactory.cpp \
+		StatusLine.cpp \
+		Context.cpp \
+		AMethod.cpp \
+		MethodFactory.cpp \
+		Delete.cpp \
+		Get.cpp \
+		Post.cpp \
+		RequestExecutor.cpp \
+		RequestHandler.cpp \
+		HandlingResult.cpp \
+		Client.cpp \
+		Location.cpp \
+		Session.cpp \
+		Server.cpp \
+		WebServer.cpp \
+		Header.cpp \
+		HeaderCollection.cpp \
+		cgi.cpp \
+		files.cpp \
+		numeric.cpp \
+		string.cpp \
+		SimpleResult.cpp
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)

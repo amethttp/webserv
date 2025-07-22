@@ -23,6 +23,9 @@ MethodFactory::MethodFactory(std::set<t_method> methods)
 			case M_DELETE:
 				addMethod(M_DELETE, createMethodDelete);
 				break;
+			
+			default:
+				break;
 		}
 	}
 }

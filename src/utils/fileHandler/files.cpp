@@ -2,7 +2,7 @@
 
 std::string getMIME(std::string &target)
 {
-	int pos;
+	size_t pos;
 	std::string res = "";
 
 	pos = target.rfind('.');

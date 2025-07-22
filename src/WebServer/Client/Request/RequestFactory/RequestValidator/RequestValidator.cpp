@@ -9,7 +9,7 @@
 
 SimpleResult RequestValidator::validateRequestLine(const RequestLine &requestLine)
 {
-    if (requestLine.getMethod() == NOT_IMPLEMENTED)
+    if (requestLine.getMethod() == M_NOT_IMPLEMENTED)
         return SimpleResult::fail(NOT_IMPLEMENTED_ERR);
 
     if (requestLine.getTargetUri().length() > MAX_URI_LENGTH)

@@ -96,7 +96,7 @@ static Body parseFromValidChunkedBody(const std::string &requestBodyString)
     return result.getValue();
 }
 
-static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
+static void assertRequestLine(t_method method, const std::string &targetUri, const std::string &version)
 {
     ASSERT_EQUALS(method, requestLine.getMethod());
     ASSERT_EQUALS(targetUri, requestLine.getTargetUri());
@@ -181,21 +181,21 @@ TEST(recognize_a_basic_GET_request_line)
 {
     requestLine = parseFromValidRequestLine("GET / HTTP/1.1");
 
-    assertRequestLine(GET, "/", "HTTP/1.1");
+    assertRequestLine(M_GET, "/", "HTTP/1.1");
 }
 
 TEST(recognize_a_basic_POST_request_line)
 {
     requestLine = parseFromValidRequestLine("POST / HTTP/1.1");
 
-    assertRequestLine(POST, "/", "HTTP/1.1");
+    assertRequestLine(M_POST, "/", "HTTP/1.1");
 }
 
 TEST(recognize_a_basic_DELETE_request_line)
 {
     requestLine = parseFromValidRequestLine("DELETE / HTTP/1.1");
 
-    assertRequestLine(DELETE, "/", "HTTP/1.1");
+    assertRequestLine(M_DELETE, "/", "HTTP/1.1");
 }
 
 
@@ -204,14 +204,14 @@ TEST(recognize_as_not_implemented_a_case_insensitive_method)
 {
     requestLine = parseFromValidRequestLine("get / HTTP/1.1");
 
-    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
+    assertRequestLine(M_NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
 
 TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_only_of_alphabetic_characters)
 {
     requestLine = parseFromValidRequestLine("NotImplemented / HTTP/1.1");
 
-    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
+    assertRequestLine(M_NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
 
 TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_of_tchars)
@@ -221,7 +221,7 @@ TEST(recognize_as_not_implemented_a_non_implemented_method_consisted_of_tchars)
 
     requestLine = parseFromValidRequestLine(nonImplementedRequestLineString);
 
-    assertRequestLine(NOT_IMPLEMENTED, "/", "HTTP/1.1");
+    assertRequestLine(M_NOT_IMPLEMENTED, "/", "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_method_consisted_of_invalid_characters)
@@ -282,42 +282,42 @@ TEST(recognize_a_simple_alphabetic_target)
 {
     requestLine = parseFromValidRequestLine("GET /index HTTP/1.1");
 
-    assertRequestLine(GET, "/index", "HTTP/1.1");
+    assertRequestLine(M_GET, "/index", "HTTP/1.1");
 }
 
 TEST(recognize_a_target_with_extension)
 {
     requestLine = parseFromValidRequestLine("GET /index.html HTTP/1.1");
 
-    assertRequestLine(GET, "/index.html", "HTTP/1.1");
+    assertRequestLine(M_GET, "/index.html", "HTTP/1.1");
 }
 
 TEST(recognize_a_target_with_one_directory_level)
 {
     requestLine = parseFromValidRequestLine("GET /profile/contact.php HTTP/1.1");
 
-    assertRequestLine(GET, "/profile/contact.php", "HTTP/1.1");
+    assertRequestLine(M_GET, "/profile/contact.php", "HTTP/1.1");
 }
 
 TEST(recognize_a_target_with_multiple_directory_levels)
 {
     requestLine = parseFromValidRequestLine("GET /courses/science/physics.py HTTP/1.1");
 
-    assertRequestLine(GET, "/courses/science/physics.py", "HTTP/1.1");
+    assertRequestLine(M_GET, "/courses/science/physics.py", "HTTP/1.1");
 }
 
 TEST(recognize_a_directory_target)
 {
     requestLine = parseFromValidRequestLine("GET /about/ HTTP/1.1");
 
-    assertRequestLine(GET, "/about/", "HTTP/1.1");
+    assertRequestLine(M_GET, "/about/", "HTTP/1.1");
 }
 
 TEST(recognize_a_multiple_directory_target)
 {
     requestLine = parseFromValidRequestLine("GET /about/services/ HTTP/1.1");
 
-    assertRequestLine(GET, "/about/services/", "HTTP/1.1");
+    assertRequestLine(M_GET, "/about/services/", "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_not_starting_with_slash)
@@ -335,7 +335,7 @@ TEST(recognize_a_target_consisted_of_pchars)
 
     requestLine = parseFromValidRequestLine(validRequestLine);
 
-    assertRequestLine(GET, target, "HTTP/1.1");
+    assertRequestLine(M_GET, target, "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_consisted_of_invalid_characters)
@@ -358,7 +358,7 @@ TEST(recognize_a_target_with_valid_pct_encoded_pchars)
 
     requestLine = parseFromValidRequestLine(validRequestLine);
 
-    assertRequestLine(GET, target, "HTTP/1.1");
+    assertRequestLine(M_GET, target, "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_with_invalid_pct_encoded_pchars)
@@ -378,28 +378,28 @@ TEST(recognize_a_target_with_an_empty_query)
 {
     requestLine = parseFromValidRequestLine("GET /VALID/PATH/? HTTP/1.1");
 
-    assertRequestLine(GET, "/VALID/PATH/?", "HTTP/1.1");
+    assertRequestLine(M_GET, "/VALID/PATH/?", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_an_empty_parameter)
 {
     requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param HTTP/1.1");
 
-    assertRequestLine(GET, "/VALID/PATH/?param", "HTTP/1.1");
+    assertRequestLine(M_GET, "/VALID/PATH/?param", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_full_parameter)
 {
     requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param=anyValue HTTP/1.1");
 
-    assertRequestLine(GET, "/VALID/PATH/?param=anyValue", "HTTP/1.1");
+    assertRequestLine(M_GET, "/VALID/PATH/?param=anyValue", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_multiple_parameters)
 {
     requestLine = parseFromValidRequestLine("GET /VALID/PATH/?param=anyValue&mode= HTTP/1.1");
 
-    assertRequestLine(GET, "/VALID/PATH/?param=anyValue&mode=", "HTTP/1.1");
+    assertRequestLine(M_GET, "/VALID/PATH/?param=anyValue&mode=", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_consisted_of_valid_characters)
@@ -410,7 +410,7 @@ TEST(recognize_a_query_consisted_of_valid_characters)
 
     requestLine = parseFromValidRequestLine(validRequestLine);
 
-    assertRequestLine(GET, target, "HTTP/1.1");
+    assertRequestLine(M_GET, target, "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_query_consisted_of_invalid_characters)
@@ -433,7 +433,7 @@ TEST(recognize_a_query_with_valid_pct_encoded_pchars)
 
     requestLine = parseFromValidRequestLine(validRequestLine);
 
-    assertRequestLine(GET, target, "HTTP/1.1");
+    assertRequestLine(M_GET, target, "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_query_with_invalid_pct_encoded_pchars)
@@ -464,7 +464,7 @@ TEST(recognize_a_target_longer_than_maximum_length)
 
     requestLine = parseFromValidRequestLine(targetTooLongRequestLine);
 
-    assertRequestLine(GET, target, "HTTP/1.1");
+    assertRequestLine(M_GET, target, "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_mixed_with_HTTP_version)
@@ -477,35 +477,35 @@ TEST(recognize_a_not_normalized_pct_encoded_target)
 {
     requestLine = parseFromValidRequestLine("GET /%2e%2e/%2e%2e/%2e%2e/etc/passwd HTTP/1.1");
 
-    assertRequestLine(GET, "/%2e%2e/%2e%2e/%2e%2e/etc/passwd", "HTTP/1.1");
+    assertRequestLine(M_GET, "/%2e%2e/%2e%2e/%2e%2e/etc/passwd", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_single_question_mark)
 {
     requestLine = parseFromValidRequestLine("GET /?? HTTP/1.1");
 
-    assertRequestLine(GET, "/??", "HTTP/1.1");
+    assertRequestLine(M_GET, "/??", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_single_equal)
 {
     requestLine = parseFromValidRequestLine("GET /?= HTTP/1.1");
 
-    assertRequestLine(GET, "/?=", "HTTP/1.1");
+    assertRequestLine(M_GET, "/?=", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_a_single_ampersand)
 {
     requestLine = parseFromValidRequestLine("GET /?& HTTP/1.1");
 
-    assertRequestLine(GET, "/?&", "HTTP/1.1");
+    assertRequestLine(M_GET, "/?&", "HTTP/1.1");
 }
 
 TEST(recognize_a_query_with_multiple_ampersands)
 {
     requestLine = parseFromValidRequestLine("GET /?&&&&&& HTTP/1.1");
 
-    assertRequestLine(GET, "/?&&&&&&", "HTTP/1.1");
+    assertRequestLine(M_GET, "/?&&&&&&", "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_with_a_fragment_section)
@@ -623,7 +623,7 @@ TEST(recognize_a_non_supported_major_version)
 {
     requestLine = parseFromValidRequestLine("GET / HTTP/2.1");
 
-    assertRequestLine(GET, "/", "HTTP/2.1");
+    assertRequestLine(M_GET, "/", "HTTP/2.1");
 }
 
 TEST(take_as_failure_an_invalid_major_version)
@@ -689,7 +689,7 @@ TEST(recognize_a_non_supported_minor_version)
 {
     requestLine = parseFromValidRequestLine("GET / HTTP/1.0");
 
-    assertRequestLine(GET, "/", "HTTP/1.0");
+    assertRequestLine(M_GET, "/", "HTTP/1.0");
 }
 
 TEST(take_as_failure_an_invalid_minor_version)

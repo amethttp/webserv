@@ -5,7 +5,7 @@
 
 namespace
 {
-    Request_t request;
+    t_Request request;
 }
 
 static void assertCanCreateAResponseIsTrue(const std::string &requestString)
@@ -22,30 +22,30 @@ static void assertCanCreateAResponseIsFalse(const std::string &requestString)
     ASSERT_FALSE(canCreateAResponse);
 }
 
-static Request_t createFromValidRequest(const std::string &requestString)
+static t_Request createFromValidRequest(const std::string &requestString)
 {
     assertCanCreateAResponseIsTrue(requestString);
 
-    const Result<Request_t> result = RequestFactory::create(requestString);
+    const Result<t_Request> result = RequestFactory::create(requestString);
 
     return result.getValue();
 }
 
-static Request_t createRequestFromValidRequestLine(const std::string &requestLineString)
+static t_Request createRequestFromValidRequestLine(const std::string &requestLineString)
 {
     const std::string requestString = requestLineString + "\r\nHost: localhost\r\n\r\n";
 
     return createFromValidRequest(requestString);
 }
 
-static Request_t createRequestFromValidHeaders(const std::string &headersString)
+static t_Request createRequestFromValidHeaders(const std::string &headersString)
 {
     const std::string requestString = "GET / HTTP/1.1\r\n" + headersString + "\r\n\r\n";
 
     return createFromValidRequest(requestString);
 }
 
-static Request_t createRequestFromValidBody(const std::string &bodyTypeHeader, const std::string &body)
+static t_Request createRequestFromValidBody(const std::string &bodyTypeHeader, const std::string &body)
 {
     const std::string requestString = "GET / HTTP/1.1\r\nHost: localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
 
@@ -58,7 +58,7 @@ static void assertTargetComponents(const std::string &path, const std::string &q
     ASSERT_EQUALS(query, request.requestLine.getTargetQuery());
 }
 
-static void assertRequestLine(method_t method, const std::string &targetUri, const std::string &version)
+static void assertRequestLine(t_method method, const std::string &targetUri, const std::string &version)
 {
     ASSERT_EQUALS(method, request.requestLine.getMethod());
     ASSERT_EQUALS(targetUri, request.requestLine.getTargetUri());
@@ -89,7 +89,7 @@ static void assertRequestIsInvalid(const std::string &invalidRequestString, cons
 {
     assertCanCreateAResponseIsTrue(invalidRequestString);
 
-    Result<Request_t> result = RequestFactory::create(invalidRequestString);
+    Result<t_Request> result = RequestFactory::create(invalidRequestString);
 
     ASSERT_TRUE(result.isFailure());
     ASSERT_EQUALS(errorMessage, result.getError());
@@ -137,7 +137,7 @@ TEST(recognize_basic_HTTP_GET_request)
     request = createFromValidRequest("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
     assertTargetComponents("/", "");
-    assertRequestLine(GET, "/", "HTTP/1.1");
+    assertRequestLine(M_GET, "/", "HTTP/1.1");
     assertHeaderSize(1);
     assertHeader(HOST, "localhost");
     assertBodyIsEmpty();
@@ -148,7 +148,7 @@ TEST(recognize_basic_HTTP_DELETE_request)
     request = createFromValidRequest("DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
     assertTargetComponents("/", "");
-    assertRequestLine(DELETE, "/", "HTTP/1.1");
+    assertRequestLine(M_DELETE, "/", "HTTP/1.1");
     assertHeaderSize(1);
     assertHeader(HOST, "localhost");
     assertBodyIsEmpty();
@@ -159,7 +159,7 @@ TEST(recognize_basic_HTTP_POST_request)
     request = createFromValidRequest("POST / HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
     assertTargetComponents("/", "");
-    assertRequestLine(POST, "/", "HTTP/1.1");
+    assertRequestLine(M_POST, "/", "HTTP/1.1");
     assertHeaderSize(1);
     assertHeader(HOST, "localhost");
     assertBodyIsEmpty();
@@ -171,7 +171,7 @@ TEST(recognize_a_request_with_valid_request_line)
 {
     request = createRequestFromValidRequestLine("GET /about/index/-._~%50%2c!$&().html?param=value?*+,;=%3c HTTP/1.1");
 
-    assertRequestLine(GET, "/about/index/-._~%50%2c!$&().html?param=value?*+,;=%3c", "HTTP/1.1");
+    assertRequestLine(M_GET, "/about/index/-._~%50%2c!$&().html?param=value?*+,;=%3c", "HTTP/1.1");
 }
 
 TEST(take_as_failure_an_invalid_request_line)
@@ -210,7 +210,7 @@ TEST(process_a_request_target_separation_and_decoding_and_normalization)
     request = createRequestFromValidRequestLine("GET " + unprocessedTarget + " HTTP/1.1");
 
     assertTargetComponents("/about/index.html_<_<_>_?void", unprocessedQuery);
-    assertRequestLine(GET, unprocessedTarget, "HTTP/1.1");
+    assertRequestLine(M_GET, unprocessedTarget, "HTTP/1.1");
 }
 
 TEST(take_as_failure_a_target_with_pct_encoded_control_chars)
