@@ -20,9 +20,10 @@ int main(int argc, char *argv[])
 	}
 	catch (std::exception &e)
 	{
-		std::cout << "Some error occurred with config <"
-				  << configFile << "> because " << e.what() << "."
+		std::cerr << "webserv: "
+				  << e.what()
 				  << std::endl;
+		return 1;
 	}
 	return 0;
 }

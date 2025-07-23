@@ -86,6 +86,7 @@ vpath %.cpp $(SRC): \
             $(SRC)WebServer/Server/Session: \
             $(SRC)WebServer/Config: \
             $(SRC)WebServer/Config/ConfigReader: \
+            $(SRC)WebServer/Config/ConfigReader/ReaderContext: \
 
 
 #----SHARED----#
@@ -98,7 +99,8 @@ SRCS = webserv.cpp \
         Location.cpp \
         Session.cpp \
         Config.cpp \
-        ConfigReader.cpp 
+        ConfigReader.cpp \
+        ReaderContext.cpp
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
