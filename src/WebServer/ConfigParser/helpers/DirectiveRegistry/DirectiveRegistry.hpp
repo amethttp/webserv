@@ -1,18 +1,8 @@
 #pragma once
 #include <map>
 #include <string>
-
-struct SDirective
-{
-	int argMin;
-	int argMax;
-	bool isContainer;
-
-	SDirective(int min, int max, bool block)
-		: argMin(min), argMax(max), isContainer(block) {}
-
-	SDirective() : argMin(0), argMax(0), isContainer(false) {}
-};
+#include "../../models/SDirective.hpp"
+#include "../../models/ConfigNode.hpp"
 
 class DirectiveRegistry
 {
@@ -22,4 +12,5 @@ private:
 public:
 	static std::map<std::string, SDirective> getDirectives();
 	static SDirective getDirective(std::string &key);
+	static void checkConfigNode(ConfigNode &node);
 };

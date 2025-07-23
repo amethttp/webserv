@@ -1,5 +1,7 @@
-#include "DirectiveRegistry.hpp"
 #include <sys/socket.h>
+#include <exception>
+#include <sstream>
+#include "DirectiveRegistry.hpp"
 #include "utils/http.hpp"
 
 static std::map<std::string, SDirective> initDirectivesMap()
@@ -30,5 +32,33 @@ std::map<std::string, SDirective> DirectiveRegistry::getDirectives()
 
 SDirective DirectiveRegistry::getDirective(std::string &key)
 {
-    return directives_.at(key);
+    SDirective directive;
+    try
+    {
+        directive = directives_.at(key);
+    }
+    catch (const std::exception &e)
+    {
+        std::stringstream what;
+        what << "Unknown directive \"" << key << "\"";
+        throw std::runtime_error(what.str());
+    }
+    return directive;
+}
+
+void DirectiveRegistry::checkConfigNode(ConfigNode &node)
+{
+    SDirective directive = getDirective(node.name);
+    if (node.params.size() > directive.argMax)
+    {
+        std::stringstream what;
+        what << "directive \"" << node.name << "\" expected a maximum amount of " << directive.argMax << " arguments while " << node.params.size() << " were given";
+        throw std::runtime_error(what.str());
+    }
+    else if (node.params.size() < directive.argMin)
+    {
+        std::stringstream what;
+        what << "directive \"" << node.name << "\" expected a minimum amount of " << directive.argMin << " arguments while " << node.params.size() << " were given";
+        throw std::runtime_error(what.str());
+    }
 }
