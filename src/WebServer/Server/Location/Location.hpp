@@ -16,6 +16,10 @@ typedef struct s_error_page
 {
 	t_httpCode code;
 	std::string page;
+	bool operator<(const s_error_page &other) const
+	{
+		return code < other.code || (code == other.code && page < other.page);
+	}
 } t_error_page;
 
 class Location
