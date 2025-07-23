@@ -224,7 +224,7 @@ static void parse_config(const std::string &input, std::vector<ConfigNode> &conf
 				what << "unexpected left brace \"{\" near " << stack.top().current.name;
 				throw std::runtime_error(what.str());
 			}
-			// TODO: Check if directive exists!
+			DirectiveRegistry::checkConfigNode(stack.top().current);
 			stack.top().container->push_back(stack.top().current);
 			std::vector<ConfigNode> &children = stack.top().container->back().children;
 			stack.push((Frame){&children, stack.top().current, false});
