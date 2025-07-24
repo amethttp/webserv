@@ -48,6 +48,13 @@ std::string trim(const std::string &input, const std::string &charsToTrim)
 	return input.substr(start, end - start + 1);
 }
 
+void removeDoubleSlashes(std::string &str)
+{
+	for (std::string::iterator it = str.begin(); it != str.end(); ++it)
+		if (*it == '/' && (it + 1) != str.end() && *(it + 1) == '/')
+			it = str.erase(it);
+}
+
 // Decide if we normalize slashes or not || Nginx default beaviour doesnt do it
 void removeTrailingSlashes(std::string &str)
 {

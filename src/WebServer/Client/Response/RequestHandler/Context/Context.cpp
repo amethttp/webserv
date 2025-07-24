@@ -1,4 +1,5 @@
 #include "Context.hpp"
+#include "utils/string/string.hpp"
 
 Context::Context(t_Request&req, Location &loc, Server &server) : request_(req), location_(loc)
 {
@@ -23,6 +24,7 @@ void Context::checkRequestHeaders()
 void Context::routeTarget()
 {
 	this->targetPath_ = this->location_.getRoot() + this->request_.requestLine.getTargetPath();
+	removeDoubleSlashes(this->targetPath_);
 }
 
 void  Context::fitMethod()

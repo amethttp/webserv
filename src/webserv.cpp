@@ -15,7 +15,7 @@ static void setLocationsPH(Server &server)
 
 	indexes.push_back("index");
 	indexes.push_back("index.html");
-	indexes.push_back("test.html");
+	indexes.push_back("test1.html");
 	indexes.push_back("test2.html");
 	allowedMethods.insert(M_GET);
 	allowedMethods.insert(M_POST);
@@ -24,7 +24,7 @@ static void setLocationsPH(Server &server)
 
 	location = new Location();
 	location->setCGIs(test);
-	location->setRoot("tests/");
+	location->setRoot("tests/www/");
 	location->setPath("/");
 	location->setAutoIndex(true);
 	location->setIndexList(indexes);
@@ -32,7 +32,7 @@ static void setLocationsPH(Server &server)
 	testLocations.push_back(location);
 
 	location = new Location();
-	location->setRoot("tests/www/");
+	location->setRoot("tests/");
 	location->setPath("/test/index");
 	ret.code = MOVED_PERMANENTLY;
 	ret.path = "/test/index/";

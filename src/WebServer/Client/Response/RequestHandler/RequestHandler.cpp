@@ -45,15 +45,18 @@ static void setBodyFromString(std::string str, HandlingResult &res)
 
 void RequestHandler::handleReturnDirective(Context &ctx, HandlingResult &res)
 {
-    t_return ret = ctx.getReturn();
+	t_httpCode retCode = ctx.getReturn().code;
+	std::string retPath = ctx.getReturn().path;
 
-    if (!ret.path.empty())
+    if (!retPath.empty())
 	{
-		if (isRedirection(ret.code))
-			setRedirectionResult(ret.code, ret.path, res);
+		if (isRedirection(retCode))
+			setRedirectionResult(retCode, retPath, res);
 		else
-			setBodyFromString(ret.path, res);
+			setBodyFromString(retPath, res);
 	}
+
+	res.code_ = retCode;
 }
 
 void RequestHandler::handleExecution(Context &ctx, HandlingResult &res)

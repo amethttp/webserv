@@ -12,5 +12,6 @@ std::string toLower(const std::string &string);
 
 std::string trim(const std::string &input, const std::string &charsToTrim);
 
+void removeDoubleSlashes(std::string &str);
 void removeTrailingSlashes(std::string &str);
 int countMatchingDepth(std::string base, std::string target);
