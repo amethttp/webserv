@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 typedef enum e_connection
 {
@@ -63,3 +64,6 @@ typedef enum e_httpCode
 	GATEWAY_TIME_OUT=504,
 	HTTP_VERSION_NOT_SUPPORTED=505
 } t_httpCode;
+
+
+t_method getHTTPMethod(const std::string &method);

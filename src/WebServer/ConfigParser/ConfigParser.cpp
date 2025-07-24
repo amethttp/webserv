@@ -7,6 +7,7 @@
 #include "models/Token.hpp"
 #include "utils/string/string.hpp"
 #include "helpers/DirectiveRegistry/DirectiveRegistry.hpp"
+#include "models/ConfigBlock.hpp"
 
 static void checkFileAcceptance(t_configs &configs)
 {
@@ -26,31 +27,31 @@ static void checkFileAcceptance(t_configs &configs)
 		throw std::runtime_error("Extra closing brace");
 }
 
-static void parseConfigs(t_configs &configs)
-{
-	// TODO: Fill WebServer from configs (line per line?)
-	// TODO: Read container directives and store container' containers(general context could be a container)
-	// TODO: Inherit parent directives and override them with read of saved containers' directives
-	std::vector<std::string> lines = split(configs.fileContent, "\n");
-	std::string line = lines.at(0);
-	for (size_t i = 0; i < lines.size(); i++)
-	{
-		std::string token;
-		bool comment = false;
-		for (size_t i = 0; i < line.length(); i++)
-		{
-			if (comment)
-				break;
-			char c = line.at(i);
-			if (c == '#')
-				comment = true;
-			token += c;
-		}
+// static void parseConfigs(t_configs &configs)
+// {
+// TODO: Fill WebServer from configs (line per line?)
+// TODO: Read container directives and store container' containers(general context could be a container)
+// TODO: Inherit parent directives and override them with read of saved containers' directives
+// std::vector<std::string> lines = split(configs.fileContent, "\n");
+// std::string line = lines.at(0);
+// for (size_t i = 0; i < lines.size(); i++)
+// {
+// 	std::string token;
+// 	bool comment = false;
+// 	for (size_t i = 0; i < line.length(); i++)
+// 	{
+// 		if (comment)
+// 			break;
+// 		char c = line.at(i);
+// 		if (c == '#')
+// 			comment = true;
+// 		token += c;
+// 	}
 
-		if (i - 1 < lines.size())
-			line += lines.at(i + 1);
-	}
-}
+// 	if (i - 1 < lines.size())
+// 		line += lines.at(i + 1);
+// }
+// }
 
 static void checkFileExtension(t_configs &configs)
 {
@@ -258,6 +259,107 @@ static void parse_config(const std::string &input, std::vector<ConfigNode> &conf
 	}
 }
 
+static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
+{
+	if (node.name == "server_name")
+		block.names_ = node.params;
+	else if (node.name == "listen")
+	{
+		for (std::vector<std::string>::const_iterator it = node.params.begin(); it != node.params.end(); ++it)
+		{
+			int port;
+			if (std::istringstream(*it) >> port)
+				block.ports_.push_back(port);
+		}
+	}
+	else if (node.name == "upload_path")
+		block.uploadPath_ = node.params.at(0);
+	else if (node.name == "root")
+		block.root_ = node.params.at(0);
+	else if (node.name == "cgi")
+		block.cgis_[node.params.at(0)] = node.params.at(1);
+	else if (node.name == "autoindex")
+		block.autoIndex_ = node.params.at(0) == "on";
+	else if (node.name == "index")
+		block.indexList_ = node.params;
+	else if (node.name == "client_max_body_size")
+	{
+		// TODO: Split magnitud and check if an integer is sufficient
+		int val;
+		if (std::istringstream(node.params.at(0)) >> val)
+			block.clientMaxBodySize_ = val;
+	}
+	else if (node.name == "method")
+	{
+		for (size_t i = 0; i < node.params.size(); i++)
+		{
+			t_method method = getHTTPMethod(node.params.at(i));
+			if (method != METHOD_NOT_ALLOWED)
+				block.methods_.insert(method);
+		}
+	}
+	else if (node.name == "error_page")
+	{
+		t_error_page err;
+		int num;
+		if (std::istringstream(node.params.at(0)) >> num)
+			err.code = (t_httpCode)num;
+		err.page = node.params.at(1);
+		block.errorPages_.insert(err);
+	}
+	else if (node.name == "return")
+	{
+		int num;
+		if (std::istringstream(node.params.at(0)) >> num)
+			block.return_.code = (t_httpCode)num;
+		block.return_.path = node.params.at(1);
+	}
+}
+
+static void mapTreeToBlock(const std::vector<ConfigNode> &tree, ConfigBlock &block)
+{
+	std::cout << "Entro once" << std::endl;
+	std::vector<ConfigNode> pendingChildren;
+	for (std::vector<ConfigNode>::const_iterator it = tree.begin(); it != tree.end(); ++it)
+	{
+		const ConfigNode &node = *it;
+		if (node.name == "server" || node.name == "location")
+			pendingChildren.push_back(node);
+		else
+			fillBlockFromNode(node, block);
+	}
+	std::cout << block << std::endl;
+	for (std::vector<ConfigNode>::iterator it = pendingChildren.begin(); it != pendingChildren.end(); ++it)
+	{
+		std::cout << "Pending size" << pendingChildren.size() << std::endl;
+		block.children.push_back(block);
+		if (it->name == "server")
+			block.children.back().type = SERVER_BLOCK;
+		else if (it->name == "location")
+		{
+			block.children.back().path_ = it->params.at(0);
+			block.children.back().type = LOCATION_BLOCK;
+		}
+		mapTreeToBlock(it->children, block.children.back());
+	}
+}
+
+static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
+{
+	ConfigNode &prev = *tree.begin();
+	std::vector<Server *> servers;
+	std::vector<ConfigNode> parents;
+	ConfigBlock block;
+	block.type = CONTEXT_BLOCK;
+	mapTreeToBlock(tree, block);
+	// for (std::vector<ConfigNode>::iterator it = tree.begin(); it != tree.end(); ++it)
+	// {
+	// 	ConfigNode &node = *it;
+	// 	// std::cout << node.name << std::endl;
+	// }
+	webServer.setServers(servers);
+}
+
 void ConfigParser::useConfig(std::string &path, WebServer &ws)
 {
 	std::cout << "parsing " << path << std::endl;
@@ -269,8 +371,5 @@ void ConfigParser::useConfig(std::string &path, WebServer &ws)
 	std::vector<ConfigNode> tree;
 	checkFileAcceptance(configs);
 	parse_config(configs.fileContent, tree);
-	print_tree(tree);
-	// parseConfigs(configs);
-	// std::cout << "CONFIGS READ:\n"
-	// 		  << configs.fileContent << std::endl;
+	fillWebserver(ws, tree);
 }

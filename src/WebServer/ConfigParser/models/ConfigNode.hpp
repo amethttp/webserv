@@ -7,7 +7,11 @@ struct ConfigNode
 	std::string name;
 	std::vector<std::string> params;
 	std::vector<ConfigNode> children;
-	
+
+	bool operator<(const ConfigNode other) const
+	{
+		return name < other.name;
+	}
 };
 
 struct Frame

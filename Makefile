@@ -93,6 +93,7 @@ vpath %.cpp $(SRC): \
 			$(SRC)WebServer/Client/RequestHandler/Result : \
 			$(SRC)WebServer/Client/RouteMatchers/Location : \
 			$(SRC)WebServer/Client/RouteMatchers/Server : \
+			$(SRC)WebServer/Server/ServerMapper : \
 			$(SRC)WebServer/Server/Location : \
 			$(SRC)WebServer/Server/Session : \
 			$(SRC)WebServer/Server : \
@@ -102,7 +103,8 @@ vpath %.cpp $(SRC): \
 			$(SRC)utils/cgi : \
 			$(SRC)utils/fileHandler : \
 			$(SRC)utils/HeaderCollection : \
-			$(SRC)utils/HeaderCollection/Header :
+			$(SRC)utils/HeaderCollection/Header : \
+			$(SRC)utils
 
 
 #----SHARED----#
@@ -133,7 +135,9 @@ SRCS = Request.cpp \
 		Header.cpp \
 		webserv.cpp \
 		ConfigParser.cpp \
-		DirectiveRegistry.cpp
+		DirectiveRegistry.cpp \
+		ServerMapper.cpp \
+		http.cpp
 
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
