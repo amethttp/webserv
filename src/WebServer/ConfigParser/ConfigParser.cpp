@@ -344,19 +344,58 @@ static void mapTreeToBlock(const std::vector<ConfigNode> &tree, ConfigBlock &blo
 	}
 }
 
+static void setLocationFromBlock(Location *location, const ConfigBlock &block)
+{
+	location->setPath(block.path_);
+	location->setRoot(block.root_);
+	location->setCGIs(block.cgis_);
+	location->setAutoIndex(block.autoIndex_);
+	location->setIndexList(block.indexList_);
+	location->setMethods(block.methods_);
+	location->setReturn(block.return_);
+	location->setErrorPages(block.errorPages_);
+}
+
+static void setServerFromBlock(Server *server, const ConfigBlock &block)
+{
+	server->setPorts(block.ports_);
+	server->setNames(block.names_);
+	server->setUploadPath(block.uploadPath_);
+}
+
 static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
 {
 	ConfigNode &prev = *tree.begin();
 	std::vector<Server *> servers;
 	std::vector<ConfigNode> parents;
 	ConfigBlock block;
+	block.clientMaxBodySize_ = 0;
+	block.return_.code = (t_httpCode)0;
+	block.return_.path = "";
 	block.type = CONTEXT_BLOCK;
 	mapTreeToBlock(tree, block);
-	// for (std::vector<ConfigNode>::iterator it = tree.begin(); it != tree.end(); ++it)
-	// {
-	// 	ConfigNode &node = *it;
-	// 	// std::cout << node.name << std::endl;
-	// }
+	for (std::vector<ConfigBlock>::iterator it = block.children.begin(); it != block.children.end(); ++it)
+	{
+		ConfigBlock &children = *it;
+		std::cout << children.type << std::endl;
+		if (children.type == SERVER_BLOCK)
+		{
+			servers.push_back(new Server());
+			setServerFromBlock(servers.back(), children);
+			std::vector<Location *> tempLocations;
+			for (std::vector<ConfigBlock>::iterator it = children.children.begin(); it != children.children.end(); ++it)
+			{
+				ConfigBlock &nested = *it;
+				if (nested.type == LOCATION_BLOCK)
+				{
+					tempLocations.push_back(new Location());
+					setLocationFromBlock(tempLocations.back(), nested);
+				}
+			}
+			servers.back()->setLocations(tempLocations);
+		}
+	}
+
 	webServer.setServers(servers);
 }
 

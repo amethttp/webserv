@@ -21,14 +21,14 @@ public:
 	bool matchesName(std::string &match);
 
 	std::vector<int> getPorts();
-	void setPorts(std::vector<int> &ports);
+	void setPorts(const std::vector<int> &ports);
 
 	std::vector<Location *> getLocations();
-	void setLocations(std::vector<Location *> &locations);
+	void setLocations(const std::vector<Location *> &locations);
 
 	std::vector<std::string> getNames();
-	void setNames(std::vector<std::string> &names);
+	void setNames(const std::vector<std::string> &names);
 
 	std::string getUploadPath();
-	void setUploadPath(std::string path);
+	void setUploadPath(const std::string &path);
 };

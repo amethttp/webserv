@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         else
             configFile = "assets/configs/default.conf";
         ConfigParser::useConfig(configFile, webserver);
-        // webserver.serve();
+        webserver.serve();
 
         // WebServer webServer = WebServer();
 

@@ -45,7 +45,9 @@ public:
 	void setIndexList(const std::vector<std::string> indexes);
 	void setMethods(const std::set<t_method> &methods);
 	void setReturn(const t_return &ret);
+	void setMaxBodySize(const size_t size);
 	void setCGIs(std::map<std::string, std::string> cgis);
+	void setErrorPages(const std::set<t_error_page> errorPages_);
 
 	std::string getPath();
 	std::string getRoot();
