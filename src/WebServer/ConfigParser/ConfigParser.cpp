@@ -241,7 +241,7 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		{
 			int port;
 			if (std::istringstream(*it) >> port)
-				block.ports_.push_back(port);
+				block.ports_.insert(port);
 		}
 	}
 	else if (node.name == "upload_path")

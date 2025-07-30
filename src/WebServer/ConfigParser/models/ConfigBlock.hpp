@@ -14,7 +14,7 @@ enum ConfigBlockType
 struct ConfigBlock
 {
 	ConfigBlockType type;
-	std::vector<int> ports_;		 // TODO: Convert it to set
+	std::set<int> ports_;		 // TODO: Convert it to set
 	std::vector<std::string> names_; // TODO: Convert it to set
 	std::string uploadPath_;
 	std::string path_;
@@ -40,8 +40,8 @@ ConfigBlock::ConfigBlock()
 std::ostream &operator<<(std::ostream &stream, const ConfigBlock &block)
 {
 	stream << "- PRINTING BLOCK (" << block.type << ") -\nPorts: {";
-	for (size_t i = 0; i < block.ports_.size(); i++)
-		stream << block.ports_.at(i) << ", ";
+	for (std::set<int>::const_iterator portsIt = block.ports_.begin(); portsIt != block.ports_.end(); ++portsIt)
+        stream << *portsIt << ", ";
 	stream << "}\nNames: {";
 	for (size_t i = 0; i < block.names_.size(); i++)
 		stream << block.names_.at(i) << ", ";

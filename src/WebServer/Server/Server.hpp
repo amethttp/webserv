@@ -10,7 +10,7 @@ class Server
 {
 private:
 	std::vector<Location *> locations_;
-	std::vector<int> ports_;
+	std::set<int> ports_;
 	std::vector<Session> sessions_;
 	std::vector<std::string> names_;
 	std::string uploadPath_;
@@ -22,8 +22,8 @@ public:
 	bool matchesName(std::string &match);
 	Location *matchLocation(t_Request request);
 
-	std::vector<int> getPorts();
-	void setPorts(const std::vector<int> &ports);
+	std::set<int> getPorts();
+	void setPorts(const std::set<int> &ports);
 
 	std::vector<Location *> getLocations();
 	void setLocations(const std::vector<Location *> &locations);

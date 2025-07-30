@@ -38,8 +38,8 @@ std::vector<fd_t> WebServer::createServerFds()
 	serverAddress.sin_family = AF_INET;
 	for (std::vector<Server *>::iterator serversIt = servers_.begin(); serversIt != servers_.end(); ++serversIt)
 	{
-		std::vector<int> serverPorts = (*serversIt)->getPorts();
-		for (std::vector<int>::iterator portsIt = serverPorts.begin(); portsIt != serverPorts.end(); ++portsIt)
+		std::set<int> serverPorts = (*serversIt)->getPorts();
+		for (std::set<int>::iterator portsIt = serverPorts.begin(); portsIt != serverPorts.end(); ++portsIt)
 		{
 			serverAddress.sin_port = htons(*portsIt);
 			int socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);

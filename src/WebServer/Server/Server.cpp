@@ -46,12 +46,12 @@ Location *Server::matchLocation(t_Request request)
     return locations[matchIndex];
 }
 
-std::vector<int> Server::getPorts()
+std::set<int> Server::getPorts()
 {
     return this->ports_;
 }
 
-void Server::setPorts(const std::vector<int> &ports)
+void Server::setPorts(const std::set<int> &ports)
 {
     this->ports_ = ports;
 }
@@ -90,8 +90,8 @@ void Server::setDefaults()
 {
     if (ports_.empty())
     {
-        ports_.push_back(8000);
-        ports_.push_back(80);
+        ports_.insert(8000);
+        ports_.insert(80);
     }
     if (names_.empty())
         names_.push_back("");
@@ -102,8 +102,8 @@ void Server::setDefaults()
 std::ostream &operator<<(std::ostream &stream, const Server &server)
 {
     stream << "-- SERVER -- \nPorts: {";
-    for (size_t i = 0; i < server.ports_.size(); i++)
-        stream << server.ports_.at(i) << ", ";
+    for (std::set<int>::const_iterator portsIt = server.ports_.begin(); portsIt != server.ports_.end(); ++portsIt)
+        stream << *portsIt << ", ";
     stream << "}\nNames: {";
     for (size_t i = 0; i < server.names_.size(); i++)
         stream << server.names_.at(i) << ", ";
