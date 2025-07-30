@@ -351,6 +351,7 @@ static void setLocationFromBlock(Location *location, const ConfigBlock &block)
 	location->setCGIs(block.cgis_);
 	location->setAutoIndex(block.autoIndex_);
 	location->setIndexList(block.indexList_);
+	location->setMaxBodySize(block.clientMaxBodySize_);
 	location->setMethods(block.methods_);
 	location->setReturn(block.return_);
 	location->setErrorPages(block.errorPages_);
@@ -395,7 +396,6 @@ static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
 			servers.back()->setLocations(tempLocations);
 		}
 	}
-
 	webServer.setServers(servers);
 }
 
