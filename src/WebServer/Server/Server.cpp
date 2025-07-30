@@ -86,6 +86,19 @@ void Server::setUploadPath(const std::string &path)
     this->uploadPath_ = path;
 }
 
+void Server::setDefaults()
+{
+    if (ports_.empty())
+    {
+        ports_.push_back(8000);
+        ports_.push_back(80);
+    }
+    if (names_.empty())
+        names_.push_back("");
+    if (uploadPath_.empty())
+        uploadPath_ = "uploads";
+}
+
 std::ostream &operator<<(std::ostream &stream, const Server &server)
 {
     stream << "-- SERVER -- \nPorts: {";

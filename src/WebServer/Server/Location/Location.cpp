@@ -3,7 +3,7 @@
 
 Location::Location()
 {
-	bzero(&this->return_, sizeof(this->return_));
+	clientMaxBodySize_ = 0;
 }
 
 Location::~Location()
@@ -119,4 +119,23 @@ std::ostream &operator<<(std::ostream &stream, const Location &location)
 		stream << it->code << " " << it->page << ", ";
 	stream << "}" << std::endl;
 	return stream;
+}
+
+void Location::setDefaults()
+{
+	if (path_.empty())
+		path_ = "/";
+	if (root_.empty())
+		root_ = "html";
+	if (!autoIndex_)
+		autoIndex_ = false;
+	if (indexList_.empty())
+		indexList_.push_back("index.html");
+	if (clientMaxBodySize_ == 0)
+		clientMaxBodySize_ = 1048576;
+	if (methods_.empty())
+	{
+		methods_.insert(M_GET);
+		methods_.insert(M_POST);
+	}
 }

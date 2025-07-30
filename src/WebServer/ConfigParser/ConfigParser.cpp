@@ -11,8 +11,6 @@
 
 static void checkFileAcceptance(t_configs &configs)
 {
-	if (configs.fileContent.length() < 2)
-		throw std::runtime_error("Config file is empty");
 	int braces = 0;
 	for (size_t i = 0; i < configs.fileContent.length(); i++)
 	{
@@ -26,32 +24,6 @@ static void checkFileAcceptance(t_configs &configs)
 	else if (braces < 0)
 		throw std::runtime_error("Extra closing brace");
 }
-
-// static void parseConfigs(t_configs &configs)
-// {
-// TODO: Fill WebServer from configs (line per line?)
-// TODO: Read container directives and store container' containers(general context could be a container)
-// TODO: Inherit parent directives and override them with read of saved containers' directives
-// std::vector<std::string> lines = split(configs.fileContent, "\n");
-// std::string line = lines.at(0);
-// for (size_t i = 0; i < lines.size(); i++)
-// {
-// 	std::string token;
-// 	bool comment = false;
-// 	for (size_t i = 0; i < line.length(); i++)
-// 	{
-// 		if (comment)
-// 			break;
-// 		char c = line.at(i);
-// 		if (c == '#')
-// 			comment = true;
-// 		token += c;
-// 	}
-
-// 	if (i - 1 < lines.size())
-// 		line += lines.at(i + 1);
-// }
-// }
 
 static void checkFileExtension(t_configs &configs)
 {
@@ -370,15 +342,16 @@ static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
 	std::vector<Server *> servers;
 	std::vector<ConfigNode> parents;
 	ConfigBlock block;
-	block.clientMaxBodySize_ = 0;
-	block.return_.code = (t_httpCode)0;
-	block.return_.path = "";
-	block.type = CONTEXT_BLOCK;
 	mapTreeToBlock(tree, block);
+	if (block.children.empty())
+	{
+		block.children.push_back(block);
+		block.children.back().type = SERVER_BLOCK;
+	}
 	for (std::vector<ConfigBlock>::iterator it = block.children.begin(); it != block.children.end(); ++it)
 	{
 		ConfigBlock &children = *it;
-		// std::cout << children.type << std::endl;
+		std::cout << children.type << std::endl;
 		if (children.type == SERVER_BLOCK)
 		{
 			servers.push_back(new Server());
@@ -391,9 +364,17 @@ static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
 				{
 					tempLocations.push_back(new Location());
 					setLocationFromBlock(tempLocations.back(), nested);
+					tempLocations.back()->setDefaults();
 				}
 			}
+			if (tempLocations.empty())
+			{
+				tempLocations.push_back(new Location());
+				setLocationFromBlock(tempLocations.back(), children);
+				tempLocations.back()->setDefaults();
+			}
 			servers.back()->setLocations(tempLocations);
+			servers.back()->setDefaults();
 		}
 	}
 	webServer.setServers(servers);

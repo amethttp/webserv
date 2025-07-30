@@ -27,7 +27,15 @@ struct ConfigBlock
 	t_return return_;
 	std::set<t_error_page> errorPages_;
 	std::vector<ConfigBlock> children;
+
+	ConfigBlock();
 };
+
+ConfigBlock::ConfigBlock()
+{
+	type = CONTEXT_BLOCK;
+	clientMaxBodySize_ = 0;
+}
 
 std::ostream &operator<<(std::ostream &stream, const ConfigBlock &block)
 {

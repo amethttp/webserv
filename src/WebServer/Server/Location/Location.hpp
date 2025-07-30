@@ -10,6 +10,12 @@ typedef struct s_return
 {
 	t_httpCode code;
 	std::string path;
+
+	s_return()
+	{
+		code = (t_httpCode) 0;
+		path = "";
+	}
 } t_return;
 
 typedef struct s_error_page
@@ -57,5 +63,7 @@ public:
 	t_return getReturn();
 	bool getAutoIndex();
 	std::vector<std::string> getIndexList();
+	void setDefaults();
+
 	friend std::ostream &operator<<(std::ostream &, const Location &);
 };
