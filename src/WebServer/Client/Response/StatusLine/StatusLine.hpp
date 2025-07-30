@@ -1,6 +1,6 @@
 #include <string>
 #include <iostream>
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 
 class StatusLine
 {

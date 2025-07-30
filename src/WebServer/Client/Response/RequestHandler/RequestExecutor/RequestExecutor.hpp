@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 #include "utils/cgi/cgi.hpp"
 #include "Methods/AMethod.hpp"
 #include "Methods/Factory/MethodFactory.hpp"

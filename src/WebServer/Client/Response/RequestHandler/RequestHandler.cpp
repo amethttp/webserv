@@ -88,7 +88,7 @@ static void tryCustomErrorPage(Context &ctx, HandlingResult &res)
     if (matchCustomErrorPage(res.code_, ctx.location_, errPage))
 	{
 		// config parse that an error page MUST have a URI page 
-        res.tempBody_.content =  readFileToString(errPage.page);
+        res.tempBody_.content = readFileToString(errPage.page);
         res.tempBody_.type = getMIME(errPage.page);
 	}
 }

@@ -2,7 +2,7 @@
 
 #include <string>
 #include <map>
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 #include "WebServer/Client/Response/Response.hpp"
 #include "utils/HeaderCollection/HeaderCollection.hpp"
 

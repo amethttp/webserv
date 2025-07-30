@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 #include "WebServer/Client/Request/Request.hpp"
 #include "WebServer/Server/Server.hpp"
 #include "WebServer/Server/Location/Location.hpp"

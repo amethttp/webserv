@@ -3,7 +3,7 @@
 #include <set>
 #include <vector>
 #include <string>
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 #include <string.h>
 
 typedef struct s_return
@@ -16,6 +16,10 @@ typedef struct s_error_page
 {
 	t_httpCode code;
 	std::string page;
+	bool operator<(const s_error_page &other) const
+	{
+		return code < other.code || (code == other.code && page < other.page);
+	}
 } t_error_page;
 
 class Location
@@ -26,7 +30,7 @@ private:
 	std::map<std::string, std::string> cgis_;
 	bool autoIndex_;
 	std::vector<std::string> indexList_;
-	// size_t clientMaxBodySize_; // In bytes
+	size_t clientMaxBodySize_; // In bytes
 	std::set<t_method> methods_;
 	t_return return_;
 	std::set<t_error_page> errorPages_;
@@ -41,7 +45,9 @@ public:
 	void setIndexList(const std::vector<std::string> indexes);
 	void setMethods(const std::set<t_method> &methods);
 	void setReturn(const t_return &ret);
+	void setMaxBodySize(const size_t size);
 	void setCGIs(std::map<std::string, std::string> cgis);
+	void setErrorPages(const std::set<t_error_page> errorPages_);
 
 	std::string getPath();
 	std::string getRoot();

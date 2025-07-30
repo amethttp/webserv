@@ -50,7 +50,7 @@ std::vector<int> Server::getPorts()
 	return this->ports_;
 }
 
-void Server::setPorts(std::vector<int> &ports)
+void Server::setPorts(const std::vector<int> &ports)
 {
 	this->ports_ = ports;
 }
@@ -60,7 +60,7 @@ std::vector<Location *> Server::getLocations()
 	return this->locations_;
 }
 
-void Server::setLocations(std::vector<Location *> &locations)
+void Server::setLocations(const std::vector<Location *> &locations)
 {
 	this->locations_ = locations;
 }
@@ -70,7 +70,7 @@ std::vector<std::string> Server::getNames()
     return this->names_;
 }
 
-void Server::setNames(std::vector<std::string> &names)
+void Server::setNames(const std::vector<std::string> &names)
 {
 	this->names_ = names;
 }
@@ -80,7 +80,7 @@ std::string Server::getUploadPath()
     return this->uploadPath_;
 }
 
-void Server::setUploadPath(std::string path)
+void Server::setUploadPath(const std::string &path)
 {
 	this->uploadPath_ = path;
 }

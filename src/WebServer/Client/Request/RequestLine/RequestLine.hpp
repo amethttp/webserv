@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Target/Target.hpp"
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 #include <string>
 
 class RequestLine

@@ -50,7 +50,7 @@ NAME = webserv
 
 #----COMPILER----#
 CC = c++
-CCFLAGS += -std=c++98 -w -Wall -Wextra -Wpedantic -fsanitize=address -g # -Ofast
+CCFLAGS += -std=c++98 -Wall -Wextra -Werror -Wpedantic -fsanitize=address -g -w # -Ofast
 
 
 #----DIRS----#
@@ -60,6 +60,8 @@ INCLUDES = -I$(SRC)
 
 #----VPATH----#
 vpath %.cpp $(SRC): \
+            $(SRC)WebServer/ConfigParser : \
+            $(SRC)WebServer/ConfigParser/helpers/DirectiveRegistry/ : \
 			$(SRC)utils: \
 			$(SRC)WebServer/Client/Request/Body : \
 			$(SRC)WebServer/Client/Request/RequestFactory/RequestBodyFramingVerifier : \
@@ -89,6 +91,7 @@ vpath %.cpp $(SRC): \
 			$(SRC)WebServer/Client/Response/RequestHandler : \
 			$(SRC)WebServer/Client/Response/RequestHandler/Result : \
 			$(SRC)WebServer/Client : \
+			$(SRC)WebServer/Server/ServerMapper : \
 			$(SRC)WebServer/Server/Location : \
 			$(SRC)WebServer/Server/Session : \
 			$(SRC)WebServer/Server : \
@@ -99,7 +102,8 @@ vpath %.cpp $(SRC): \
 			$(SRC)utils/fileHandler : \
 			$(SRC)utils/numeric : \
 			$(SRC)utils/string : \
-			$(SRC)utils/Result : 
+			$(SRC)utils/Result : \
+			$(SRC)utils/http : 
 
 #----SHARED----#
 SRCS = Body.cpp \
@@ -141,7 +145,12 @@ SRCS = Body.cpp \
 		numeric.cpp \
 		string.cpp \
 		SimpleResult.cpp \
-		webserv.cpp
+		webserv.cpp \
+		ConfigParser.cpp \
+		DirectiveRegistry.cpp \
+		ServerMapper.cpp \
+		http.cpp
+
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)

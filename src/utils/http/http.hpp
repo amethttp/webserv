@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 #define BAD_REQUEST_ERR "400 Bad Request"
 #define NOT_IMPLEMENTED_ERR "501 Not Implemented"
@@ -17,6 +18,7 @@ typedef enum e_method
 	M_GET,
 	M_POST,
 	M_DELETE,
+	M_AMOUNT,
 	M_NOT_IMPLEMENTED,
 	M_NOT_ALLOWED
 } t_method;
@@ -68,3 +70,6 @@ typedef enum e_httpCode
 	GATEWAY_TIME_OUT=504,
 	HTTP_VERSION_NOT_SUPPORTED=505
 } t_httpCode;
+
+
+t_method getHTTPMethod(const std::string &method);

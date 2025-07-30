@@ -36,12 +36,24 @@ void Location::setMethods(const std::set<t_method> &methods)
 
 void Location::setReturn(const t_return &ret)
 {
-	this->return_ = ret;
+	this->return_.code = ret.code;
+	if (!ret.path.empty())
+		this->return_.path = ret.path;
+}
+
+void Location::setMaxBodySize(const size_t size)
+{
+	this->clientMaxBodySize_ = size;
 }
 
 void Location::setCGIs(std::map<std::string, std::string> cgis)
 {
 	this->cgis_ = cgis;
+}
+
+void Location::setErrorPages(const std::set<t_error_page> errorPages_)
+{
+	this->errorPages_ = errorPages_;
 }
 
 std::string Location::getPath()

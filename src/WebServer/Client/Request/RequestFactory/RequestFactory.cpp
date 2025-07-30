@@ -1,5 +1,5 @@
 #include "RequestFactory.hpp"
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 #include "utils/string/string.hpp"
 #include "utils/numeric/numeric.hpp"
 #include "../RequestParser/RequestParser.hpp"

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "utils/HTTP/http.hpp"
+#include "utils/http/http.hpp"
 #include "WebServer/Client/Response/RequestHandler/Result/HandlingResult.hpp"
 #include "WebServer/Server/Location/Location.hpp"
 

@@ -27,6 +27,26 @@ std::vector<std::string> split(const std::string &input, const std::string &del)
 	return result;
 }
 
+std::vector<std::string> splitSet(const std::string &input, const std::string &delimiters)
+{
+	std::vector<std::string> result;
+	size_t start = 0;
+	size_t end = input.find_first_of(delimiters);
+
+	while (end != std::string::npos)
+	{
+		if (end > start)
+			result.push_back(input.substr(start, end - start));
+		start = end + 1;
+		end = input.find_first_of(delimiters, start);
+	}
+
+	if (start < input.length())
+		result.push_back(input.substr(start));
+
+	return result;
+}
+
 std::string toLower(const std::string &string)
 {
 	std::string result;
@@ -38,6 +58,7 @@ std::string toLower(const std::string &string)
 
 	return result;
 }
+
 std::string trim(const std::string &input, const std::string &charsToTrim)
 {
 	size_t start = input.find_first_not_of(charsToTrim);
@@ -48,7 +69,10 @@ std::string trim(const std::string &input, const std::string &charsToTrim)
 	return input.substr(start, end - start + 1);
 }
 
-void removeDoubleSlashes(std::string &str)
+std::string getSpaceValues()
+{
+	return SPACE_VALUES;
+}void removeDoubleSlashes(std::string &str)
 {
 	for (std::string::iterator it = str.begin(); it != str.end(); ++it)
 		if (*it == '/' && (it + 1) != str.end() && *(it + 1) == '/')
