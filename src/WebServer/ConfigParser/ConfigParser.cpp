@@ -318,7 +318,7 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 
 static void mapTreeToBlock(const std::vector<ConfigNode> &tree, ConfigBlock &block)
 {
-	std::cout << "Entro once" << std::endl;
+	// std::cout << "Entro once" << std::endl;
 	std::vector<ConfigNode> pendingChildren;
 	for (std::vector<ConfigNode>::const_iterator it = tree.begin(); it != tree.end(); ++it)
 	{
@@ -328,10 +328,10 @@ static void mapTreeToBlock(const std::vector<ConfigNode> &tree, ConfigBlock &blo
 		else
 			fillBlockFromNode(node, block);
 	}
-	std::cout << block << std::endl;
+	// std::cout << block << std::endl;
 	for (std::vector<ConfigNode>::iterator it = pendingChildren.begin(); it != pendingChildren.end(); ++it)
 	{
-		std::cout << "Pending size" << pendingChildren.size() << std::endl;
+		// std::cout << "Pending size" << pendingChildren.size() << std::endl;
 		block.children.push_back(block);
 		if (it->name == "server")
 			block.children.back().type = SERVER_BLOCK;
@@ -378,7 +378,7 @@ static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
 	for (std::vector<ConfigBlock>::iterator it = block.children.begin(); it != block.children.end(); ++it)
 	{
 		ConfigBlock &children = *it;
-		std::cout << children.type << std::endl;
+		// std::cout << children.type << std::endl;
 		if (children.type == SERVER_BLOCK)
 		{
 			servers.push_back(new Server());
@@ -411,4 +411,5 @@ void ConfigParser::useConfig(std::string &path, WebServer &ws)
 	checkFileAcceptance(configs);
 	parse_config(configs.fileContent, tree);
 	fillWebserver(ws, tree);
+	std::cout << ws << std::endl;
 }

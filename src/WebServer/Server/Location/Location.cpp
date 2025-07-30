@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Location.hpp"
 
 Location::Location()
@@ -73,7 +74,7 @@ std::set<t_method> Location::getMethods()
 
 std::set<t_error_page> Location::getErrorPages()
 {
-    return this->errorPages_;
+	return this->errorPages_;
 }
 
 std::map<std::string, std::string> Location::getCGIs()
@@ -83,7 +84,7 @@ std::map<std::string, std::string> Location::getCGIs()
 
 t_return Location::getReturn()
 {
-    return this->return_;
+	return this->return_;
 }
 
 bool Location::getAutoIndex()
@@ -94,4 +95,28 @@ bool Location::getAutoIndex()
 std::vector<std::string> Location::getIndexList()
 {
 	return this->indexList_;
+}
+
+std::ostream &operator<<(std::ostream &stream, const Location &location)
+{
+	stream << "- LOCATION -" << std::endl
+		   << "Path: " << location.path_ << std::endl
+		   << "Root: " << location.root_ << std::endl
+		   << "Cgis: {";
+	for (std::map<std::string, std::string>::const_iterator it = location.cgis_.begin(); it != location.cgis_.end(); ++it)
+		stream << it->first << " => " << it->second << ", ";
+	stream << "}\nAuto index: " << location.autoIndex_ << std::endl
+		   << "Index list: {";
+	for (std::vector<std::string>::const_iterator it = location.indexList_.begin(); it != location.indexList_.end(); ++it)
+		stream << *it << ", ";
+	stream << "}\nMax body size: " << location.clientMaxBodySize_ << std::endl
+		   << "Methods: {";
+	for (std::set<t_method>::const_iterator it = location.methods_.begin(); it != location.methods_.end(); ++it)
+		stream << (*it) << ", ";
+	stream << "}\nReturn: " << location.return_.code << " " << location.return_.path << std::endl
+		   << "Error pages: {";
+	for (std::set<t_error_page>::const_iterator it = location.errorPages_.begin(); it != location.errorPages_.end(); ++it)
+		stream << it->code << " " << it->page << ", ";
+	stream << "}" << std::endl;
+	return stream;
 }

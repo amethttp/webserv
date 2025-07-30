@@ -33,4 +33,6 @@ public:
 
 	std::string getUploadPath();
 	void setUploadPath(const std::string &path);
+	
+	friend std::ostream &operator<<(std::ostream &stream, const Server &server);
 };

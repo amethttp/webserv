@@ -17,11 +17,11 @@ WebServer::WebServer()
 
 WebServer::~WebServer()
 {
-	for (std::vector<Client*>::iterator it = clients_.begin(); it != clients_.end(); ++it) 
+	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end(); ++it)
 		delete *it;
 	this->clients_.clear();
 
-	for (std::vector<Server*>::iterator it = servers_.begin(); it != servers_.end(); ++it) 
+	for (std::vector<Server *>::iterator it = servers_.begin(); it != servers_.end(); ++it)
 		delete *it;
 	this->servers_.clear();
 }
@@ -150,15 +150,15 @@ bool WebServer::tryBuildRequest(Client *client, const char *buffer)
 
 Server *WebServer::matchServer(t_Request request)
 {
-    std::string hostName = request.headers.getHeaderValue(HOST);
+	std::string hostName = request.headers.getHeaderValue(HOST);
 
-    for (std::vector<Server *>::iterator serverIt = servers_.begin(); serverIt != servers_.end(); ++serverIt)
-    {
-        if ((*serverIt)->matchesName(hostName))
-            return *serverIt;
-    }
+	for (std::vector<Server *>::iterator serverIt = servers_.begin(); serverIt != servers_.end(); ++serverIt)
+	{
+		if ((*serverIt)->matchesName(hostName))
+			return *serverIt;
+	}
 
-    return *servers_.begin();
+	return *servers_.begin();
 }
 
 void WebServer::buildResponse(Client *client)
@@ -190,7 +190,7 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	{
 		client->updateLastReceivedPacket();
 		if (!this->tryBuildRequest(client, buffer))
-			return ;
+			return;
 		this->buildResponse(client);
 		this->readySendResponse(client, epoll);
 	}
@@ -316,4 +316,13 @@ void WebServer::serve()
 	serversFds = createServerFds();
 	setEpollInstance(epoll, serversFds);
 	handleConnectionEvents(serversFds, epoll);
+}
+
+std::ostream &operator<<(std::ostream &stream, const WebServer &ws)
+{
+	stream << "--- WEBSERVER ---" << std::endl;
+	for (std::vector<Server *>::const_iterator it = ws.servers_.begin(); it != ws.servers_.end(); ++it)
+		stream << **it << "\r\n";
+	stream << "\r\n";
+	return stream;
 }

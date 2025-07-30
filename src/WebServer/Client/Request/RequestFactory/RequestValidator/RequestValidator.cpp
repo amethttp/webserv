@@ -15,7 +15,7 @@ SimpleResult RequestValidator::validateRequestLine(const RequestLine &requestLin
     if (requestLine.getTargetUri().length() > MAX_URI_LENGTH)
         return SimpleResult::fail(URI_TOO_LONG_ERR);
 
-    if (requestLine.getHttpVersion() != "http/1.1")
+    if (requestLine.getHttpVersion() != "HTTP/1.1")
         return SimpleResult::fail(HTTP_VERSION_NOT_SUPPORTED_ERR);
 
     if (!RequestPctDecoder::isWellEncoded(requestLine.getTargetUri()))

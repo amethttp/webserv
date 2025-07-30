@@ -57,4 +57,5 @@ public:
 	t_return getReturn();
 	bool getAutoIndex();
 	std::vector<std::string> getIndexList();
+	friend std::ostream &operator<<(std::ostream &, const Location &);
 };
