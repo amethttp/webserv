@@ -5,6 +5,7 @@
 #include "utils/epoll.hpp"
 #include "Client/Client.hpp"
 #include "Server/Server.hpp"
+#include "utils/Result/Result.hpp"
 
 #define READ_BUFFER_SIZE 4096
 #define TIMEOUT 5000
@@ -31,11 +32,9 @@ private:
 	void disconnectTimedoutClients(t_epoll &epoll);
 
 	void receiveRequest(Client *client, t_epoll &epoll);
-	bool tryBuildRequest(Client *client, const char *buffer);
 
-	Server *matchServer(t_Request request);
-	void buildResponse(Client *client);
-	void readySendResponse(Client *client, t_epoll &epoll);
+	Server *matchServer(std::string hostName);
+	void processRequest(Client *client, Result<t_Request> &result);
 	void sendResponse(Client *client, t_epoll &epoll);
 
 public:

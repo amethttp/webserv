@@ -10,7 +10,7 @@ class Context
 {
 public:
 	t_method method_;
-	t_Request &request_;
+	const t_Request &request_;
 	Location &location_;
 	std::string uploadPath_;
 	std::string targetPath_;
@@ -20,7 +20,7 @@ public:
 	void routeTarget();
 	void fitMethod();
 public:
-	Context(t_Request&request, Location &location, Server &server);
+	Context(const t_Request &request, Location &location, Server &server);
 	~Context();
 
 	t_method getMethod() const;

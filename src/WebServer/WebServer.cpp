@@ -10,6 +10,7 @@
 #include "WebServer.hpp"
 #include "Client/Client.hpp"
 #include "Client/Request/RequestFactory/RequestFactory.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 WebServer::WebServer()
 {
@@ -157,20 +158,8 @@ std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_ep
 	return removeClient(client);
 }
 
-bool WebServer::tryBuildRequest(Client *client, const char *buffer)
+Server *WebServer::matchServer(std::string hostName)
 {
-	client->appendToRequestBuffer(buffer);
-	if (RequestFactory::canCreateAResponse(client->getRequest().buffer) == false)
-		return false;
-
-	client->buildRequest(client->getRequest().buffer.c_str());
-	return true;
-}
-
-Server *WebServer::matchServer(t_Request request)
-{
-	std::string hostName = request.headers.getHeaderValue(HOST);
-
 	for (std::vector<Server *>::iterator serverIt = servers_.begin(); serverIt != servers_.end(); ++serverIt)
 	{
 		if ((*serverIt)->matchesName(hostName))
@@ -180,22 +169,30 @@ Server *WebServer::matchServer(t_Request request)
 	return *servers_.begin();
 }
 
-void WebServer::buildResponse(Client *client)
+void WebServer::processRequest(Client *client, Result<t_Request> &result)
 {
 	Server *server;
 	Location *location;
+	HandlingResult handlingResult;
 
-	client->getRequest().buffer.clear();
-	server = this->matchServer(client->getRequest());
-	location = server->matchLocation(client->getRequest());
+	if (result.isSuccess())
+	{
+		client->setRequest(result.getValue());
+		server = this->matchServer(client->getRequest().headers.getHeaderValue(HOST));
+		location = server->matchLocation(client->getRequest().requestLine.getTargetPath());
+		handlingResult = RequestHandler::handleRequest(client->getRequest(), *location, *server);
 
-	client->buildResponse(server, location);
-}
+		client->buildResponse(handlingResult);
+	}
+	else
+	{
+		t_httpCode code = result.getError();
+		t_connection mode = (code == 404) ? C_CLOSE : C_KEEP_ALIVE;
 
-void WebServer::readySendResponse(Client *client, t_epoll &epoll)
-{
-	// TO DO: Check if clear request needed
-	setEpollWrite(epoll, client);
+		client->buildResponse(code, mode);
+	}
+
+	client->clearRequestBuffer();
 }
 
 void WebServer::receiveRequest(Client *client, t_epoll &epoll)
@@ -205,13 +202,17 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 
 	bzero(buffer, sizeof(buffer));
 	bytesReceived = recv(client->getFd(), buffer, READ_BUFFER_SIZE, 0);
-	if (bytesReceived > 0)
+	if (0 < bytesReceived)
 	{
 		client->updateLastReceivedPacket();
-		if (!this->tryBuildRequest(client, buffer))
+		if (!client->canBuildRequest(buffer))
 			return;
-		this->buildResponse(client);
-		this->readySendResponse(client, epoll);
+		else
+		{
+			Result<t_Request> result = RequestFactory::create(client->getRequestBuffer());
+			this->processRequest(client, result);
+		}
+		this->setEpollWrite(epoll,client);
 	}
 	else if (bytesReceived == 0)
 		disconnectClient(client, epoll, DISCONNECTED);
@@ -244,11 +245,6 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
 {
 	Client *client = static_cast<Client *>(epoll.eventBuffer[eventIndex].data.ptr);
-
-	// struct sockaddr_in addr;
-	// socklen_t len = sizeof(addr);
-	// getsockname(client->getFd(), (struct sockaddr*)&addr, &len);
-	// int local_port = ntohs(addr.sin_port);
 
 	if (epoll.eventBuffer[eventIndex].events & EPOLLIN)
 		receiveRequest(client, epoll);
@@ -307,7 +303,7 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 			if ((*it)->hasPendingRequest())
 			{
 				(*it)->buildResponse(REQUEST_TIME_OUT, C_CLOSE);
-				this->readySendResponse(*it, epoll);
+				this->setEpollWrite(epoll, *it);
 			}
 			else
 			{

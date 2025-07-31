@@ -11,5 +11,5 @@ private:
 	static void handleReturnDirective(Context &ctx, HandlingResult &res);
 
 public:
-	static HandlingResult handleRequest(t_Request&request, Location &location, Server &server);
+	static HandlingResult handleRequest(const t_Request&request, Location &location, Server &server);
 };

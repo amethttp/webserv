@@ -106,7 +106,7 @@ Result<Body> RequestFactory::buildRequestBodyFromString(const HeaderCollection &
 
     if (!bodyString.empty())
     {
-        return Result<Body>::fail(LENGTH_REQUIRED_ERR);
+        return Result<Body>::fail(LENGTH_REQUIRED);
     }
 
     return Result<Body>::ok(Body());

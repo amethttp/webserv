@@ -135,9 +135,19 @@ std::string Client::getResponseBuffer() const
 	return this->response_.buffer_;
 }
 
-t_Request Client::getRequest() const
+const t_Request &Client::getRequest() const
 {
 	return this->request_;
+}
+
+std::string Client::getRequestBuffer() const
+{
+	return this->request_.buffer;
+}
+
+void Client::clearRequestBuffer()
+{
+	this->request_.buffer.clear();
 }
 
 void Client::setFd(fd_t fd)
@@ -176,22 +186,26 @@ bool Client::shouldClose()
 	return C_KEEP_ALIVE;
 }
 
-void Client::buildRequest(const char *buffer)
+bool Client::canBuildRequest(const char *buffer)
 {
-	Result<t_Request> requestResult = RequestFactory::create(buffer);
-	if (requestResult.isSuccess())
-		this->request_ = requestResult.getValue();
+	this->appendToRequestBuffer(buffer);
+	if (RequestFactory::canCreateAResponse(this->request_.buffer) == false)
+		return false;
+
+	return true;
 }
 
-void Client::buildResponse(Server *server, Location *location)
+void Client::setRequest(t_Request request)
 {
-	HandlingResult handlingResult;
+	this->request_ = request;
+}
 
-	handlingResult = RequestHandler::handleRequest(request_, *location, *server);
-	response_ = ResponseFactory::create(handlingResult);
+void Client::buildResponse(HandlingResult &result)
+{
+	this->response_ = ResponseFactory::create(result);
 }
 
 void Client::buildResponse(t_httpCode code, t_connection mode)
 {
-	response_ = ResponseFactory::create(code, mode);
+	this->response_ = ResponseFactory::create(code, mode);
 }

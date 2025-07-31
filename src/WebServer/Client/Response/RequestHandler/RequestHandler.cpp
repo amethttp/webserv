@@ -93,10 +93,10 @@ static void tryCustomErrorPage(Context &ctx, HandlingResult &res)
 	}
 }
 
-HandlingResult RequestHandler::handleRequest(t_Request&request, Location &location, Server &server)
+HandlingResult RequestHandler::handleRequest(const t_Request &request, Location &location, Server &server)
 {
     HandlingResult result;
-    Context ctx(request, location, server);
+    Context  ctx(request, location, server);
 
 	if (checkReturn(ctx.location_))
 		handleReturnDirective(ctx, result);

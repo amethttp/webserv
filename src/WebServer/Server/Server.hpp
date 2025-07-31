@@ -20,7 +20,7 @@ public:
 	~Server();
 
 	bool matchesName(std::string &match);
-	Location *matchLocation(t_Request request);
+	Location *matchLocation(std::string targetRoute);
 
 	std::set<int> getPorts();
 	void setPorts(const std::set<int> &ports);

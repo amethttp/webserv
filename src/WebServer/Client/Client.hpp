@@ -36,7 +36,9 @@ public:
 	time_t getLastReceivedPacket() const;
 	t_httpCode getResponseStatus() const;
 	std::string getResponseBuffer() const;
-	t_Request getRequest() const;
+	const t_Request &getRequest() const;
+	std::string getRequestBuffer() const;
+	void clearRequestBuffer();
 
 	void setFd(fd_t fd);
 
@@ -46,8 +48,9 @@ public:
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	void buildRequest(const char *buffer);
-	void buildResponse(Server *server, Location *location);
+	bool canBuildRequest(const char *buffer);
+	void setRequest(t_Request request);
+	void buildResponse(HandlingResult &result);
 	void buildResponse(t_httpCode code, t_connection mode);
 
 	static std::string getHttpErrorMsg(t_httpCode code);

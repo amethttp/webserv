@@ -1,7 +1,7 @@
 #include "Context.hpp"
 #include "utils/string/string.hpp"
 
-Context::Context(t_Request&req, Location &loc, Server &server) : request_(req), location_(loc)
+Context::Context(const t_Request &req, Location &loc, Server &server) : request_(req), location_(loc)
 {
 	this->connectionMode_ = C_KEEP_ALIVE;
 
