@@ -26,34 +26,53 @@ WebServer::~WebServer()
 	this->servers_.clear();
 }
 
+static fd_t setServerFd(sockaddr_in &serverAddress, std::set<int> serverPorts)
+{
+	int enable = 1;
+
+	for (std::set<int>::iterator portsIt = serverPorts.begin(); portsIt != serverPorts.end(); ++portsIt)
+	{
+		serverAddress.sin_port = htons(*portsIt);
+		int socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+		// TODO: ERASE SETSOCKOPT
+		if (setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
+			throw std::runtime_error("Couldn't set SO_REUSEADDR");
+		if (socketFd < 0)
+			throw std::runtime_error("Couldn't create socket");
+		if (bind(socketFd, (struct sockaddr *)(&serverAddress), sizeof(serverAddress)) == -1)
+			throw std::runtime_error("Couldn't bind socket");
+		if (listen(socketFd, SOMAXCONN) == -1)
+			throw std::runtime_error("Couldn't listen to port");
+		return socketFd;
+	}
+}
+
 std::vector<fd_t> WebServer::createServerFds()
 {
 	sockaddr_in serverAddress;
+	fd_t serverFd;
 	std::vector<fd_t> serversFds;
 	// TODO: ERASE THIS VAR
-	int enable = 1;
 
 	bzero(&serverAddress, sizeof(serverAddress));
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 	serverAddress.sin_family = AF_INET;
-	for (std::vector<Server *>::iterator serversIt = servers_.begin(); serversIt != servers_.end(); ++serversIt)
+	for (std::vector<Server *>::iterator serversIt = servers_.begin(); serversIt != servers_.end();)
 	{
-		std::set<int> serverPorts = (*serversIt)->getPorts();
-		for (std::set<int>::iterator portsIt = serverPorts.begin(); portsIt != serverPorts.end(); ++portsIt)
+		try
 		{
-			serverAddress.sin_port = htons(*portsIt);
-			int socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-			// TODO: ERASE SETSOCKOPT
-			if (setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
-				throw std::runtime_error("Couldn't set SO_REUSEADDR");
-			if (socketFd < 0)
-				throw std::runtime_error("Couldn't create socket");
-			if (bind(socketFd, (struct sockaddr *)(&serverAddress), sizeof(serverAddress)) == -1)
-				throw std::runtime_error("Couldn't bind socket");
-			if (listen(socketFd, SOMAXCONN) == -1)
-				throw std::runtime_error("Couldn't listen to port");
-			serversFds.push_back(socketFd);
+			std::set<int> serverPorts = (*serversIt)->getPorts();
+			serverFd = setServerFd(serverAddress, serverPorts);
+			serversFds.push_back(serverFd);
 		}
+		catch(const std::exception& e)
+		{
+			std::cerr << e.what() << " || Server: " << *((*serversIt)->getNames().begin()) << std::endl;
+			delete *serversIt;
+			serversIt = servers_.erase(serversIt);
+			continue ;
+		}
+		serversIt++;
 	}
 	return serversFds;
 }
