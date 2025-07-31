@@ -58,21 +58,21 @@ static std::map<std::string, std::string> initializeExtensionDict()
 {
 	std::map<std::string, std::string> tempMap;
 
-    tempMap[".txt"]  = "text/plain";
-    tempMap[".html"] = "text/html";
+	tempMap[".txt"] = "text/plain";
+	tempMap[".html"] = "text/html";
 	tempMap[".htm"] = "text/html";
-    tempMap[".css"]  = "text/css";
-    tempMap[".js"]   = "application/javascript";
-    tempMap[".json"] = "application/json";
-    tempMap[".xml"]  = "application/xml";
-    tempMap[".png"]  = "image/png";
-    tempMap[".jpg"]  = "image/jpeg";
-    tempMap[".jpeg"] = "image/jpeg";
-    tempMap[".gif"]  = "image/gif";
-    tempMap[".ico"]  = "image/x-icon";
-    tempMap[".pdf"]  = "application/pdf";
-    tempMap[".zip"]  = "application/zip";
-    tempMap[".tar"]  = "application/x-tar";
+	tempMap[".css"] = "text/css";
+	tempMap[".js"] = "application/javascript";
+	tempMap[".json"] = "application/json";
+	tempMap[".xml"] = "application/xml";
+	tempMap[".png"] = "image/png";
+	tempMap[".jpg"] = "image/jpeg";
+	tempMap[".jpeg"] = "image/jpeg";
+	tempMap[".gif"] = "image/gif";
+	tempMap[".ico"] = "image/x-icon";
+	tempMap[".pdf"] = "application/pdf";
+	tempMap[".zip"] = "application/zip";
+	tempMap[".tar"] = "application/x-tar";
 
 	return tempMap;
 }
@@ -122,12 +122,12 @@ fd_t Connection::getFd()
 
 time_t Connection::getLastReceivedPacket() const
 {
-    return this->lastReceivedPacket_;
+	return this->lastReceivedPacket_;
 }
 
 t_httpCode Connection::getResponseStatus() const
 {
-    return this->response_.statusLine_.getCode();
+	return this->response_.statusLine_.getCode();
 }
 
 std::string Connection::getResponseBuffer() const
@@ -167,12 +167,11 @@ void Connection::eraseResponse(size_t bytesToErase)
 
 bool Connection::shouldClose()
 {
-    if (this->response_.headers_.contains(CONNECTION))
+	if (this->response_.headers_.contains(CONNECTION))
 	{
 		if (this->response_.headers_.getHeaderValue(CONNECTION) == "close")
 			return C_CLOSE;
 	}
-
 	return C_KEEP_ALIVE;
 }
 
@@ -188,10 +187,10 @@ void Connection::buildResponse(Server *server, Location *location)
 	HandlingResult handlingResult;
 
 	handlingResult = RequestHandler::handleRequest(request_, *location, *server);
-	response_ = ResponseFactory::create(handlingResult);
+	this->response_ = ResponseFactory::create(handlingResult);
 }
 
 void Connection::buildResponse(t_httpCode code, t_connection mode)
 {
-	response_ = ResponseFactory::create(code, mode);
+	this->response_ = ResponseFactory::create(code, mode);
 }

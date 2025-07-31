@@ -13,30 +13,30 @@ class WebServer
 {
 private:
 	std::vector<Server *> servers_;
-	std::vector<Connection *> clients_;
+	std::vector<Connection *> connections_;
 
 	std::vector<fd_t> createServerFds();
 
 	void setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds);
-	void setEpollRead(t_epoll &epoll, Connection *client);
-	void setEpollWrite(t_epoll &epoll, Connection *client);
+	void setEpollRead(t_epoll &epoll, Connection *connection);
+	void setEpollWrite(t_epoll &epoll, Connection *connection);
 
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 
 	void acceptNewConnection(fd_t &serverFd, t_epoll &epoll);
-	std::vector<Connection *>::iterator disconnectConnection(Connection *client, t_epoll &epoll, const std::string &reason);
-	std::vector<Connection *>::iterator removeConnection(Connection *client);
+	std::vector<Connection *>::iterator disconnectConnection(Connection *connection, t_epoll &epoll, const std::string &reason);
+	std::vector<Connection *>::iterator removeConnection(Connection *connection);
 	void checkConnectionEvent(t_epoll &epoll, const int &eventIndex);
 	void handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll);
 	void disconnectTimedoutConnections(t_epoll &epoll);
 
-	void receiveRequest(Connection *client, t_epoll &epoll);
-	bool tryBuildRequest(Connection *client, const char *buffer);
+	void receiveRequest(Connection *connection, t_epoll &epoll);
+	bool tryBuildRequest(Connection *connection, const char *buffer);
 
 	Server *matchServer(t_Request request);
-	void buildResponse(Connection *client);
-	void readySendResponse(Connection *client, t_epoll &epoll);
-	void sendResponse(Connection *client, t_epoll &epoll);
+	void buildResponse(Connection *connection);
+	void readySendResponse(Connection *connection, t_epoll &epoll);
+	void sendResponse(Connection *connection, t_epoll &epoll);
 
 public:
 	WebServer();

@@ -3,6 +3,8 @@
 #include <ctime>
 #include <sstream>
 #include "WebServer/Connection/Connection.hpp"
+#include "utils/CookieHelper/CookieHelper.hpp"
+#include "utils/string/string.hpp"
 
 static bool isRedirection(t_httpCode code)
 {
@@ -93,7 +95,39 @@ static void tryCustomErrorPage(Context &ctx, HandlingResult &res)
 	}
 }
 
-HandlingResult RequestHandler::handleRequest(t_Request&request, Location &location, Server &server)
+static void useSession(t_Request &request, Server &server, HandlingResult &result)
+{
+	std::cout << "Sessions amount: " << server.getSessions().size() << std::endl;
+	std::string value;
+	try
+	{
+		std::vector<std::string> values = split(request.headers.getHeaderValue(COOKIE_REQUEST_KEY), ";");
+		for (std::vector<std::string>::const_iterator it = values.begin(); it != values.end() && value.empty(); ++it)
+		{
+			if ((*it).find("sessionId=") != std::string::npos)
+				value = *it;
+		}
+		if (value.empty())
+			throw std::runtime_error("dummy throw");
+		value = split(value, "=")[1];
+		std::stringstream ss(value);
+		int sessId;
+		ss >> sessId;
+		Session * sess = server.getSession(sessId);
+		std::cout << "Session id: " << sess->getId() << ", desc: " << sess->getDesc() << std::endl;
+	}
+	catch(const std::exception& e)
+	{
+		std::stringstream cookieVal;
+		Session *session = new Session();
+		server.pushSession(session);
+		cookieVal << "sessionId=" << session->getId() << "; expires=Fri, 31 Dec 9999 23:59:59 GMT; HttpOnly";
+		result.tempHeaders_.addHeader("Set-Cookie", cookieVal.str());
+		std::cout << "------ NEW SESSION: " << session->getId() << std::endl;
+	}
+}
+
+HandlingResult RequestHandler::handleRequest(t_Request &request, Location &location, Server &server)
 {
     HandlingResult result;
     Context ctx(request, location, server);
@@ -102,8 +136,8 @@ HandlingResult RequestHandler::handleRequest(t_Request&request, Location &locati
 		handleReturnDirective(ctx, result);
 	else
 		handleExecution(ctx, result);
-    
     tryCustomErrorPage(ctx, result);
+	useSession(request, server, result);
 
     return result;
 }

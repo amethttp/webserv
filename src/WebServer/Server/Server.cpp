@@ -11,6 +11,9 @@ Server::~Server()
     for (std::vector<Location *>::iterator it = locations_.begin(); it != locations_.end(); ++it)
         delete *it;
     this->locations_.clear();
+    for (std::map<int, Session *>::const_iterator it = this->sessions_.begin(); it != this->sessions_.end(); ++it)
+        delete (*it).second;
+    this->sessions_.clear();
 }
 
 bool Server::matchesName(std::string &match)
@@ -113,4 +116,23 @@ std::ostream &operator<<(std::ostream &stream, const Server &server)
         stream << **it;
     stream << std::endl;
     return stream;
+}
+
+Session *Server::getSession(int id)
+{
+    return this->sessions_.at(id);
+}
+
+std::map<int, Session *> Server::getSessions()
+{
+    return this->sessions_;
+}
+
+void Server::pushSession(Session *session)
+{
+    int index = 0;
+    if (!this->sessions_.empty())
+        index = (--this->sessions_.end())->first + 1;
+    this->sessions_[index] = session;
+    session->setId(index);
 }
