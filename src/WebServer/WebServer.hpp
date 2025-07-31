@@ -3,7 +3,7 @@
 #include <vector>
 #include "utils/fd.hpp"
 #include "utils/epoll.hpp"
-#include "Client/Client.hpp"
+#include "Connection/Connection.hpp"
 #include "Server/Server.hpp"
 
 #define READ_BUFFER_SIZE 4096
@@ -13,30 +13,30 @@ class WebServer
 {
 private:
 	std::vector<Server *> servers_;
-	std::vector<Client *> clients_;
+	std::vector<Connection *> clients_;
 
 	std::vector<fd_t> createServerFds();
 
 	void setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds);
-	void setEpollRead(t_epoll &epoll, Client *client);
-	void setEpollWrite(t_epoll &epoll, Client *client);
+	void setEpollRead(t_epoll &epoll, Connection *client);
+	void setEpollWrite(t_epoll &epoll, Connection *client);
 
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 
-	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
-	std::vector<Client *>::iterator disconnectClient(Client *client, t_epoll &epoll, const std::string &reason);
-	std::vector<Client *>::iterator removeClient(Client *client);
-	void checkClientEvent(t_epoll &epoll, const int &eventIndex);
+	void acceptNewConnection(fd_t &serverFd, t_epoll &epoll);
+	std::vector<Connection *>::iterator disconnectConnection(Connection *client, t_epoll &epoll, const std::string &reason);
+	std::vector<Connection *>::iterator removeConnection(Connection *client);
+	void checkConnectionEvent(t_epoll &epoll, const int &eventIndex);
 	void handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll);
-	void disconnectTimedoutClients(t_epoll &epoll);
+	void disconnectTimedoutConnections(t_epoll &epoll);
 
-	void receiveRequest(Client *client, t_epoll &epoll);
-	bool tryBuildRequest(Client *client, const char *buffer);
+	void receiveRequest(Connection *client, t_epoll &epoll);
+	bool tryBuildRequest(Connection *client, const char *buffer);
 
 	Server *matchServer(t_Request request);
-	void buildResponse(Client *client);
-	void readySendResponse(Client *client, t_epoll &epoll);
-	void sendResponse(Client *client, t_epoll &epoll);
+	void buildResponse(Connection *client);
+	void readySendResponse(Connection *client, t_epoll &epoll);
+	void sendResponse(Connection *client, t_epoll &epoll);
 
 public:
 	WebServer();

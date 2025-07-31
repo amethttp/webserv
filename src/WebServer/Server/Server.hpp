@@ -4,7 +4,7 @@
 #include <vector>
 #include "Session/Session.hpp"
 #include "Location/Location.hpp"
-#include "WebServer/Client/Request/Request.hpp"
+#include "WebServer/Connection/Request/Request.hpp"
 
 class Server
 {

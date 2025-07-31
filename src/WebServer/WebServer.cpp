@@ -8,8 +8,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "WebServer.hpp"
-#include "Client/Client.hpp"
-#include "Client/Request/RequestFactory/RequestFactory.hpp"
+#include "Connection/Connection.hpp"
+#include "Connection/Request/RequestFactory/RequestFactory.hpp"
 
 WebServer::WebServer()
 {
@@ -17,7 +17,7 @@ WebServer::WebServer()
 
 WebServer::~WebServer()
 {
-	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end(); ++it)
+	for (std::vector<Connection *>::iterator it = clients_.begin(); it != clients_.end(); ++it)
 		delete *it;
 	this->clients_.clear();
 
@@ -73,15 +73,15 @@ void WebServer::setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds)
 	}
 }
 
-void WebServer::setEpollRead(t_epoll &epoll, Client *client)
+void WebServer::setEpollRead(t_epoll &epoll, Connection *client)
 {
 	epoll.eventConfig.events = EPOLLIN;
-	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
+	epoll.eventConfig.data.ptr = static_cast<Connection *>(client);
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
 		throw std::runtime_error("Couldn't add POLLIN flag to client fd");
 }
 
-void WebServer::setEpollWrite(t_epoll &epoll, Client *client)
+void WebServer::setEpollWrite(t_epoll &epoll, Connection *client)
 {
 	epoll.eventConfig.events = EPOLLOUT;
 	epoll.eventConfig.data.ptr = static_cast<void *>(client);
@@ -99,46 +99,46 @@ fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
 	return -1;
 }
 
-void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
+void WebServer::acceptNewConnection(fd_t &serverFd, t_epoll &epoll)
 {
-	sockaddr_in newClientAddress;
-	socklen_t socketSize = sizeof(newClientAddress);
+	sockaddr_in newConnectionAddress;
+	socklen_t socketSize = sizeof(newConnectionAddress);
 
 	while (true)
 	{
-		bzero(&newClientAddress, sizeof(newClientAddress));
-		fd_t newClientFd = accept(serverFd, (struct sockaddr *)&newClientAddress, &socketSize);
-		if (newClientFd < 0)
+		bzero(&newConnectionAddress, sizeof(newConnectionAddress));
+		fd_t newConnectionFd = accept(serverFd, (struct sockaddr *)&newConnectionAddress, &socketSize);
+		if (newConnectionFd < 0)
 		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
 			throw std::runtime_error("Couldn't accept new client");
 		}
-		if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
+		if (fcntl(newConnectionFd, F_SETFL, O_NONBLOCK) < 0)
 			throw std::runtime_error("Couldn't set NONBLOCKING flag to client fd");
-		Client *newClient = new Client();
-		this->clients_.push_back(newClient);
-		newClient->setFd(newClientFd);
-		epoll.eventConfig.data.ptr = newClient;
+		Connection *newConnection = new Connection();
+		this->clients_.push_back(newConnection);
+		newConnection->setFd(newConnectionFd);
+		epoll.eventConfig.data.ptr = newConnection;
 		epoll.eventConfig.events = EPOLLIN;
-		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newClientFd, &epoll.eventConfig) == -1)
+		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newConnectionFd, &epoll.eventConfig) == -1)
 			throw std::runtime_error("Couldn't add client fd to epoll");
-		std::cout << "New Client (ID: " << newClient->getId() << ") connected" << std::endl;
+		std::cout << "New Connection (ID: " << newConnection->getId() << ") connected" << std::endl;
 	}
 }
 
-std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
+std::vector<Connection *>::iterator WebServer::disconnectConnection(Connection *client, t_epoll &epoll, const std::string &reason)
 {
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, client->getFd(), NULL) == -1)
 		throw std::runtime_error("Couldn't delete client fd from epoll");
 	if (close(client->getFd()) == -1)
 		throw std::runtime_error("Couldn't close client fd");
-	std::cout << "Client (ID: " << client->getId() << ") " << reason << std::endl;
+	std::cout << "Connection (ID: " << client->getId() << ") " << reason << std::endl;
 
-	return removeClient(client);
+	return removeConnection(client);
 }
 
-bool WebServer::tryBuildRequest(Client *client, const char *buffer)
+bool WebServer::tryBuildRequest(Connection *client, const char *buffer)
 {
 	client->appendToRequestBuffer(buffer);
 	if (RequestFactory::canCreateAResponse(client->getRequest().buffer) == false)
@@ -161,7 +161,7 @@ Server *WebServer::matchServer(t_Request request)
 	return *servers_.begin();
 }
 
-void WebServer::buildResponse(Client *client)
+void WebServer::buildResponse(Connection *client)
 {
 	Server *server;
 	Location *location;
@@ -173,13 +173,13 @@ void WebServer::buildResponse(Client *client)
 	client->buildResponse(server, location);
 }
 
-void WebServer::readySendResponse(Client *client, t_epoll &epoll)
+void WebServer::readySendResponse(Connection *client, t_epoll &epoll)
 {
 	// TO DO: Check if clear request needed
 	setEpollWrite(epoll, client);
 }
 
-void WebServer::receiveRequest(Client *client, t_epoll &epoll)
+void WebServer::receiveRequest(Connection *client, t_epoll &epoll)
 {
 	int bytesReceived;
 	char buffer[READ_BUFFER_SIZE + 1];
@@ -195,12 +195,12 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 		this->readySendResponse(client, epoll);
 	}
 	else if (bytesReceived == 0)
-		disconnectClient(client, epoll, DISCONNECTED);
+		disconnectConnection(client, epoll, DISCONNECTED);
 	else
 		throw std::runtime_error("Couldn't receive data from client fd");
 }
 
-void WebServer::sendResponse(Client *client, t_epoll &epoll)
+void WebServer::sendResponse(Connection *client, t_epoll &epoll)
 {
 	ssize_t bytesSent = send(client->getFd(), client->getResponseBuffer().c_str(), client->getResponseBuffer().length(), 0);
 
@@ -216,15 +216,15 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 		std::string reason = DISCONNECTED;
 		if (client->getResponseStatus() == REQUEST_TIME_OUT)
 			reason = TIMED_OUT;
-		disconnectClient(client, epoll, reason);
+		disconnectConnection(client, epoll, reason);
 	}
 	else
 		setEpollRead(epoll, client);
 }
 
-void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
+void WebServer::checkConnectionEvent(t_epoll &epoll, const int &eventIndex)
 {
-	Client *client = static_cast<Client *>(epoll.eventBuffer[eventIndex].data.ptr);
+	Connection *client = static_cast<Connection *>(epoll.eventBuffer[eventIndex].data.ptr);
 
 	// struct sockaddr_in addr;
 	// socklen_t len = sizeof(addr);
@@ -253,19 +253,19 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 			fd_t serverFd = getServerFd(serversFds, epoll.eventBuffer[i].data.fd);
 
 			if (serverFd != -1)
-				acceptNewClient(serverFd, epoll);
+				acceptNewConnection(serverFd, epoll);
 			else
-				checkClientEvent(epoll, i);
+				checkConnectionEvent(epoll, i);
 		}
-		disconnectTimedoutClients(epoll);
+		disconnectTimedoutConnections(epoll);
 	}
 }
 
-std::vector<Client *>::iterator WebServer::removeClient(Client *client)
+std::vector<Connection *>::iterator WebServer::removeConnection(Connection *client)
 {
 	int clientId = client->getId();
 
-	for (std::vector<Client *>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
+	for (std::vector<Connection *>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
 	{
 		if ((*it)->getId() == clientId)
 		{
@@ -277,11 +277,11 @@ std::vector<Client *>::iterator WebServer::removeClient(Client *client)
 	return this->clients_.end();
 }
 
-void WebServer::disconnectTimedoutClients(t_epoll &epoll)
+void WebServer::disconnectTimedoutConnections(t_epoll &epoll)
 {
 	time_t now = std::time(NULL);
 
-	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end();)
+	for (std::vector<Connection *>::iterator it = clients_.begin(); it != clients_.end();)
 	{
 		if ((now - (*it)->getLastReceivedPacket()) * 1000 > TIMEOUT)
 		{
@@ -292,7 +292,7 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 			}
 			else
 			{
-				it = disconnectClient(*it, epoll, TIMED_OUT);
+				it = disconnectConnection(*it, epoll, TIMED_OUT);
 				continue;
 			}
 		}
