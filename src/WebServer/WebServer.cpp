@@ -250,6 +250,8 @@ void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
 		receiveRequest(client, epoll);
 	else if (epoll.eventBuffer[eventIndex].events & EPOLLOUT)
 		sendResponse(client, epoll);
+	else
+		disconnectClient(client, epoll, DISCONNECTED);
 }
 
 void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll)
