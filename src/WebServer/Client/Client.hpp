@@ -37,18 +37,17 @@ public:
 	t_httpCode getResponseStatus() const;
 	std::string getResponseBuffer() const;
 	const t_Request &getRequest() const;
-	std::string getRequestBuffer() const;
+	const std::string &getRequestBuffer() const;
 	void clearRequestBuffer();
 
 	void setFd(fd_t fd);
 
 	bool hasPendingRequest();
-	void updateLastReceivedPacket();
+	void updateLastReceivedPacket(char *buffer);
 	void appendToRequestBuffer(const char *toAppend);
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	bool canBuildRequest(const char *buffer);
 	void setRequest(t_Request request);
 	void buildResponse(HandlingResult &result);
 	void buildResponse(t_httpCode code, t_connection mode);

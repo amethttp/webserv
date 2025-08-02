@@ -194,7 +194,7 @@ void WebServer::processRequest(Client *client, Result<t_Request> &result)
 
 	client->clearRequestBuffer();
 }
-// TODO: Client not disconnecting after closing tab?????
+
 void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 {
 	int bytesReceived;
@@ -204,14 +204,12 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	bytesReceived = recv(client->getFd(), buffer, READ_BUFFER_SIZE, 0);
 	if (0 < bytesReceived)
 	{
-		client->updateLastReceivedPacket();
-		if (!client->canBuildRequest(buffer))
+		client->updateLastReceivedPacket(buffer);
+		if (!RequestFactory::canCreateAResponse(client->getRequestBuffer()))
 			return;
-		else
-		{
-			Result<t_Request> result = RequestFactory::create(client->getRequestBuffer());
-			this->processRequest(client, result);
-		}
+
+		Result<t_Request> result = RequestFactory::create(client->getRequestBuffer());
+		this->processRequest(client, result);
 		this->setEpollWrite(epoll,client);
 	}
 	else if (bytesReceived == 0)

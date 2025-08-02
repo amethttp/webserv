@@ -140,7 +140,7 @@ const t_Request &Client::getRequest() const
 	return this->request_;
 }
 
-std::string Client::getRequestBuffer() const
+const std::string &Client::getRequestBuffer() const
 {
 	return this->request_.buffer;
 }
@@ -155,8 +155,9 @@ void Client::setFd(fd_t fd)
 	this->fd_ = fd;
 }
 
-void Client::updateLastReceivedPacket()
+void Client::updateLastReceivedPacket(char *buffer)
 {
+	this->appendToRequestBuffer(buffer);
 	this->lastReceivedPacket_ = std::time(NULL);
 }
 
@@ -184,15 +185,6 @@ bool Client::shouldClose()
 	}
 
 	return C_KEEP_ALIVE;
-}
-
-bool Client::canBuildRequest(const char *buffer)
-{
-	this->appendToRequestBuffer(buffer);
-	if (RequestFactory::canCreateAResponse(this->request_.buffer) == false)
-		return false;
-
-	return true;
 }
 
 void Client::setRequest(t_Request request)
