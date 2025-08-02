@@ -27,7 +27,7 @@ bool timedOut(time_t start)
 	return false;
 }
 
-std::string readOutput(int pipefd[2])
+std::string readOutput(int pipefd[2]) // TODO: throw for err on read
 {
 	std::stringstream output;
 	char buffer[BUFFER_SIZE];

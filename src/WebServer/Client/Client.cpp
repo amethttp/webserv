@@ -192,7 +192,7 @@ void Client::setRequest(t_Request request)
 	this->request_ = request;
 }
 
-void Client::buildResponse(HandlingResult &result)
+void Client::buildResponse(t_HandlingResult &result)
 {
 	this->response_ = ResponseFactory::create(result);
 }

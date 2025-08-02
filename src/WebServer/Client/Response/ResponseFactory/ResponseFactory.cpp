@@ -88,7 +88,7 @@ void ResponseFactory::setStatusLine(t_httpCode code, t_Response &response)
 	response.statusLine_.setFields(code, codeMsg);
 }
 
-t_Response ResponseFactory::create(HandlingResult &res)
+t_Response ResponseFactory::create(t_HandlingResult &res)
 {
 	t_Response response;
 

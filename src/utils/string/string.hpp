@@ -5,10 +5,7 @@
 
 #define SPACE_VALUES " \f\n\r\t\v"
 
-#define SPACE_VALUES " \f\n\r\t\v"
-
 bool endsWith(const std::string &str, const std::string &suffix);
-bool isEmpty(const std::string &str);
 
 std::vector<std::string> split(const std::string &input, const std::string &del);
 

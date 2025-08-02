@@ -25,25 +25,36 @@ static std::string getRedirectionHTML(t_httpCode code, std::string &uri)
 	return html.str();
 }
 
-static bool checkReturn(Location &location)
+static bool checkBodySize(const t_Request &request, Context &ctx)
 {
-	return (location.getReturn().code != 0);
+	return (request.body.getMessage().size() > ctx.location_.getMaxBodySize());
 }
 
-static void setRedirectionResult(t_httpCode code, std::string uri, HandlingResult &res)
+static void setMaxSizeError(t_HandlingResult &result)
+{
+	result.code_ = REQUEST_ENTITY_TOO_LARGE;
+	result.mode_ = C_CLOSE;
+}
+
+static bool checkReturn(Context &ctx)
+{
+	return (ctx.location_.getReturn().code != 0);
+}
+
+static void setRedirectionResult(t_httpCode code, std::string uri, t_HandlingResult &res)
 {
 	res.tempHeaders_.addHeader("Location", uri);
 	res.tempBody_.content = getRedirectionHTML(code, uri);
 	res.tempBody_.type = Client::getExtensionType(".html");
 }
 
-static void setBodyFromString(std::string str, HandlingResult &res)
+static void setBodyFromString(std::string str, t_HandlingResult &res)
 {
 	res.tempBody_.content = str;
 	res.tempBody_.type = Client::getExtensionType(".txt");
 }
 
-void RequestHandler::handleReturnDirective(Context &ctx, HandlingResult &res)
+void RequestHandler::handleReturnDirective(Context &ctx, t_HandlingResult &res)
 {
 	t_httpCode retCode = ctx.getReturn().code;
 	std::string retPath = ctx.getReturn().path;
@@ -59,7 +70,7 @@ void RequestHandler::handleReturnDirective(Context &ctx, HandlingResult &res)
 	res.code_ = retCode;
 }
 
-void RequestHandler::handleExecution(Context &ctx, HandlingResult &res)
+void RequestHandler::handleExecution(Context &ctx, t_HandlingResult &res)
 {
     res = RequestExecutor::executeRequest(ctx);
 }
@@ -81,7 +92,7 @@ static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_pa
 	return false;
 }
 
-static void tryCustomErrorPage(Context &ctx, HandlingResult &res)
+static void tryCustomErrorPage(Context &ctx, t_HandlingResult &res)
 {
     t_error_page errPage;
 
@@ -93,15 +104,23 @@ static void tryCustomErrorPage(Context &ctx, HandlingResult &res)
 	}
 }
 
-HandlingResult RequestHandler::handleRequest(const t_Request &request, Location &location, Server &server)
+t_HandlingResult RequestHandler::handleRequest(const t_Request &request, Location &location, Server &server)
 {
-    HandlingResult result;
+    t_HandlingResult result;
     Context  ctx(request, location, server);
 
-	if (checkReturn(ctx.location_))
+	if (checkBodySize(request, ctx))
+	{
+		setMaxSizeError(result);
+	}
+	else if (checkReturn(ctx))
+	{
 		handleReturnDirective(ctx, result);
+	}
 	else
+	{
 		handleExecution(ctx, result);
+	}
     
     tryCustomErrorPage(ctx, result);
 

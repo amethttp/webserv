@@ -13,7 +13,7 @@ typedef struct s_return
 
 	s_return()
 	{
-		code = (t_httpCode) 0;
+		code =  0;
 		path = "";
 	}
 } t_return;
@@ -45,6 +45,7 @@ public:
 	Location();
 	~Location();
 
+	void setDefaults();
 	void setPath(const std::string &path);
 	void setRoot(const std::string &root);
 	void setAutoIndex(bool mode);
@@ -57,13 +58,13 @@ public:
 
 	std::string getPath();
 	std::string getRoot();
-	std::set<t_method> getMethods();
-	std::set<t_error_page> getErrorPages();
-	std::map<std::string, std::string> getCGIs();
-	t_return getReturn();
 	bool getAutoIndex();
 	std::vector<std::string> getIndexList();
-	void setDefaults();
+	std::set<t_method> getMethods();
+	t_return getReturn();
+	size_t getMaxBodySize();
+	std::map<std::string, std::string> getCGIs();
+	std::set<t_error_page> getErrorPages();
 
 	friend std::ostream &operator<<(std::ostream &, const Location &);
 };

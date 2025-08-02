@@ -49,7 +49,7 @@ public:
 	bool shouldClose();
 
 	void setRequest(t_Request request);
-	void buildResponse(HandlingResult &result);
+	void buildResponse(t_HandlingResult &result);
 	void buildResponse(t_httpCode code, t_connection mode);
 
 	static std::string getHttpErrorMsg(t_httpCode code);

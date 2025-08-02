@@ -121,7 +121,7 @@ static t_httpCode tryIndex(Context &ctx, t_Body &body)
 	return tryAutoIndex(ctx, body);
 }
 
-static void run(Context &ctx, HandlingResult &res)
+static void run(Context &ctx, t_HandlingResult &res)
 {
 	int statCheck;
 
@@ -173,18 +173,21 @@ static t_httpCode handleCgiOutput(Context &ctx, t_cgi &cgi, t_Body &body)
 	return waitForOutput(child, pipefd, startTime, body);
 }
 
-static void runCGI(Context &ctx, t_cgi &cgi, HandlingResult &res)
+static void runCGI(Context &ctx, t_cgi &cgi, t_HandlingResult &res) // TODO: extract this into method...
 {
 	res.code_ = handleCgiOutput(ctx, cgi, res.tempBody_);
 	if (res.code_ == OK)
 		res.isCGI_ = true;
+	else if (res.code_ == GATEWAY_TIME_OUT)	
+		res.mode_ = C_CLOSE;
 }
 
-HandlingResult mGet::execute(Context &ctx)
+t_HandlingResult mGet::execute(Context &ctx)
 {
 	t_cgi cgi;
-	HandlingResult res;
+	t_HandlingResult res;
 
+	res.mode_ = ctx.getConnectionMode();
 	if (matchCGI(ctx.targetPath_, ctx.location_, cgi))
 		runCGI(ctx, cgi, res);
 	else

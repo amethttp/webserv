@@ -12,12 +12,12 @@ static t_httpCode removeFile(const char *path)
 	return NO_CONTENT;
 }
 
-HandlingResult mDelete::execute(Context &ctx)
+t_HandlingResult mDelete::execute(Context &ctx)
 {
-	HandlingResult res;
-
+	t_HandlingResult res;
 	int statCheck;
 
+	res.mode_ = ctx.getConnectionMode();
 	statCheck = checkPath(ctx.targetPath_);
 	switch (statCheck)
 	{

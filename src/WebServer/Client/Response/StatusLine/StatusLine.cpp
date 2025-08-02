@@ -7,7 +7,7 @@ StatusLine::StatusLine()
 
 void StatusLine::clear()
 {
-	this->code_ = (t_httpCode)0;
+	this->code_ = 0;
 	this->httpVersion_.clear();
 	this->statusMessage_.clear();
 }

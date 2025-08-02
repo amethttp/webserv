@@ -173,7 +173,7 @@ void WebServer::processRequest(Client *client, Result<t_Request> &result)
 {
 	Server *server;
 	Location *location;
-	HandlingResult handlingResult;
+	t_HandlingResult handlingResult; // TODO: Set context here...
 
 	if (result.isSuccess())
 	{
@@ -187,7 +187,7 @@ void WebServer::processRequest(Client *client, Result<t_Request> &result)
 	else
 	{
 		t_httpCode code = result.getError();
-		t_connection mode = (code == 404) ? C_CLOSE : C_KEEP_ALIVE;
+		t_connection mode = C_CLOSE;
 
 		client->buildResponse(code, mode);
 	}

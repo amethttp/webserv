@@ -4,7 +4,7 @@ mPost::mPost()
 {
 }
 
-static t_httpCode postFile(Context &ctx, HandlingResult res)
+static t_httpCode postFile(Context &ctx, t_HandlingResult res)
 {
 	if (pathExists(ctx.targetPath_))
 		return CONFLICT;
@@ -22,12 +22,12 @@ static t_httpCode postFile(Context &ctx, HandlingResult res)
 	return CREATED;
 }
 
-HandlingResult mPost::execute(Context &ctx)
+t_HandlingResult mPost::execute(Context &ctx)
 {
-	HandlingResult res;
-
 	int statCheck;
+	t_HandlingResult res;
 
+	res.mode_ = ctx.getConnectionMode();
 	statCheck = checkPath(ctx.uploadPath_);
 	switch (statCheck)
 	{

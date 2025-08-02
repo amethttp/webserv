@@ -275,7 +275,7 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		t_error_page err;
 		int num;
 		if (std::istringstream(node.params.at(0)) >> num)
-			err.code = (t_httpCode)num;
+			err.code = num;
 		err.page = node.params.at(1);
 		block.errorPages_.insert(err);
 	}
@@ -283,7 +283,7 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 	{
 		int num;
 		if (std::istringstream(node.params.at(0)) >> num)
-			block.return_.code = (t_httpCode)num;
+			block.return_.code = num;
 		block.return_.path = node.params.at(1);
 	}
 }

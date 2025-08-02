@@ -87,6 +87,11 @@ t_return Location::getReturn()
 	return this->return_;
 }
 
+size_t Location::getMaxBodySize()
+{
+    return this->clientMaxBodySize_;
+}
+
 bool Location::getAutoIndex()
 {
 	return this->autoIndex_;
