@@ -1,7 +1,13 @@
 #include "Context.hpp"
+#include "WebServer/WebServer.hpp"
 #include "utils/string/string.hpp"
 
-Context::Context(const t_Request &req, Location &loc, Server &server) : request_(req), location_(loc)
+Context::Context() : request_(NULL), location_(NULL)
+{
+	this->connectionMode_ = C_KEEP_ALIVE;
+}
+
+Context::Context(const t_Request *req, const Location *loc, const Server *server) : request_(req), location_(loc)
 {
 	this->connectionMode_ = C_KEEP_ALIVE;
 
@@ -9,28 +15,43 @@ Context::Context(const t_Request &req, Location &loc, Server &server) : request_
 	fitMethod();
 	checkRequestHeaders();
 
-	this->uploadPath_ = server.getUploadPath();
+	this->uploadPath_ = server->getUploadPath();
+}
+
+void Context::init(const std::vector<Server *> &servers, const t_Request &request)
+{
+	Server *server;
+
+	this->request_ = &request;
+	server = WebServer::matchServer(servers, this->request_->headers.getHeaderValue(HOST));
+	this->location_ = server->matchLocation(this->request_->requestLine.getTargetPath());
+
+	routeTarget();
+	fitMethod();
+	checkRequestHeaders();
+
+	this->uploadPath_ = server->getUploadPath();
 }
 
 void Context::checkRequestHeaders()
 {
-	if (request_.headers.contains(CONNECTION))
+	if (this->request_->headers.contains(CONNECTION))
 	{
-		if (request_.headers.getHeaderValue(CONNECTION) == "close")
+		if (this->request_->headers.getHeaderValue(CONNECTION) == "close")
 			this->connectionMode_ = C_CLOSE;
 	}
 }
 
 void Context::routeTarget()
 {
-	this->targetPath_ = this->location_.getRoot() + this->request_.requestLine.getTargetPath();
+	this->targetPath_ = this->location_->getRoot() + this->request_->requestLine.getTargetPath();
 	removeDoubleSlashes(this->targetPath_);
 }
 
 void  Context::fitMethod()
 {
-	t_method reqMethod = this->request_.requestLine.getMethod();
-	std::set<t_method> allowedMethods = this->location_.getMethods();
+	t_method reqMethod = this->request_->requestLine.getMethod();
+	std::set<t_method> allowedMethods = this->location_->getMethods();
 
 	if (allowedMethods.find(reqMethod) != allowedMethods.end())
 		this->method_ = reqMethod;
@@ -43,6 +64,11 @@ std::string Context::getTargetPath() const
 	return this->targetPath_;
 }
 
+std::string Context::getUploadPath() const
+{
+    return this->uploadPath_;
+}
+
 t_connection Context::getConnectionMode() const
 {
 	return this->connectionMode_;
@@ -50,12 +76,22 @@ t_connection Context::getConnectionMode() const
 
 t_return Context::getReturn() const
 {
-	return this->location_.getReturn();
+	return this->location_->getReturn();
 }
 
 t_method Context::getMethod() const
 {
 	return this->method_;
+}
+
+const t_Request &Context::getRequest() const
+{
+	return *this->request_;
+}
+
+const Location &Context::getLocation() const
+{
+	return *this->location_;
 }
 
 Context::~Context()

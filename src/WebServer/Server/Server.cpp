@@ -45,7 +45,7 @@ Location *Server::matchLocation(std::string targetRoute)
     return locations[matchIndex];
 }
 
-std::set<int> Server::getPorts()
+std::set<int> Server::getPorts() const
 {
     return this->ports_;
 }
@@ -55,7 +55,7 @@ void Server::setPorts(const std::set<int> &ports)
     this->ports_ = ports;
 }
 
-std::vector<Location *> Server::getLocations()
+std::vector<Location *> Server::getLocations() const
 {
     return this->locations_;
 }
@@ -65,7 +65,7 @@ void Server::setLocations(const std::vector<Location *> &locations)
     this->locations_ = locations;
 }
 
-std::vector<std::string> Server::getNames()
+std::vector<std::string> Server::getNames() const
 {
     return this->names_;
 }
@@ -75,7 +75,7 @@ void Server::setNames(const std::vector<std::string> &names)
     this->names_ = names;
 }
 
-std::string Server::getUploadPath()
+std::string Server::getUploadPath() const
 {
     return this->uploadPath_;
 }

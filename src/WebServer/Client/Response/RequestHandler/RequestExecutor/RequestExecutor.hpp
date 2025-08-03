@@ -11,5 +11,5 @@ class RequestExecutor
 private:
 
 public:
-	static t_HandlingResult executeRequest(Context &c);
+	static t_HandlingResult executeRequest(const Context &c);
 };

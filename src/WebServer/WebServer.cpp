@@ -158,29 +158,27 @@ std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_ep
 	return removeClient(client);
 }
 
-Server *WebServer::matchServer(std::string hostName)
+Server *WebServer::matchServer(const std::vector<Server *> &servers, std::string hostName)
 {
-	for (std::vector<Server *>::iterator serverIt = servers_.begin(); serverIt != servers_.end(); ++serverIt)
+	for (std::vector<Server *>::const_iterator serverIt = servers.begin(); serverIt != servers.end(); ++serverIt)
 	{
 		if ((*serverIt)->matchesName(hostName))
 			return *serverIt;
 	}
 
-	return *servers_.begin();
+	return *servers.begin();
 }
 
 void WebServer::processRequest(Client *client, Result<t_Request> &result)
 {
-	Server *server;
-	Location *location;
-	t_HandlingResult handlingResult; // TODO: Set context here...
+	Context context;
+	t_HandlingResult handlingResult;
 
 	if (result.isSuccess())
 	{
 		client->setRequest(result.getValue());
-		server = this->matchServer(client->getRequest().headers.getHeaderValue(HOST));
-		location = server->matchLocation(client->getRequest().requestLine.getTargetPath());
-		handlingResult = RequestHandler::handleRequest(client->getRequest(), *location, *server);
+		context.init(this->getServers(), client->getRequest());
+		handlingResult = RequestHandler::handleRequest(context);
 
 		client->buildResponse(handlingResult);
 	}
@@ -313,6 +311,11 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 		}
 		++it;
 	}
+}
+
+const std::vector<Server *> &WebServer::getServers()
+{
+    return this->servers_;
 }
 
 void WebServer::setServers(std::vector<Server *> &servers)

@@ -57,47 +57,47 @@ void Location::setErrorPages(const std::set<t_error_page> errorPages_)
 	this->errorPages_ = errorPages_;
 }
 
-std::string Location::getPath()
+std::string Location::getPath() const
 {
 	return this->path_;
 }
 
-std::string Location::getRoot()
+std::string Location::getRoot() const
 {
 	return this->root_;
 }
 
-std::set<t_method> Location::getMethods()
+std::set<t_method> Location::getMethods() const
 {
 	return this->methods_;
 }
 
-std::set<t_error_page> Location::getErrorPages()
+std::set<t_error_page> Location::getErrorPages() const
 {
 	return this->errorPages_;
 }
 
-std::map<std::string, std::string> Location::getCGIs()
+std::map<std::string, std::string> Location::getCGIs() const
 {
 	return this->cgis_;
 }
 
-t_return Location::getReturn()
+t_return Location::getReturn() const
 {
 	return this->return_;
 }
 
-size_t Location::getMaxBodySize()
+size_t Location::getMaxBodySize() const
 {
     return this->clientMaxBodySize_;
 }
 
-bool Location::getAutoIndex()
+bool Location::getAutoIndex() const
 {
 	return this->autoIndex_;
 }
 
-std::vector<std::string> Location::getIndexList()
+std::vector<std::string> Location::getIndexList() const
 {
 	return this->indexList_;
 }

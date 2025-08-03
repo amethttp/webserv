@@ -56,15 +56,15 @@ public:
 	void setCGIs(std::map<std::string, std::string> cgis);
 	void setErrorPages(const std::set<t_error_page> errorPages_);
 
-	std::string getPath();
-	std::string getRoot();
-	bool getAutoIndex();
-	std::vector<std::string> getIndexList();
-	std::set<t_method> getMethods();
-	t_return getReturn();
-	size_t getMaxBodySize();
-	std::map<std::string, std::string> getCGIs();
-	std::set<t_error_page> getErrorPages();
+	std::string getPath() const;
+	std::string getRoot() const;
+	bool getAutoIndex() const;
+	std::vector<std::string> getIndexList() const;
+	std::set<t_method> getMethods() const;
+	t_return getReturn() const;
+	size_t getMaxBodySize() const;
+	std::map<std::string, std::string> getCGIs() const;
+	std::set<t_error_page> getErrorPages() const;
 
 	friend std::ostream &operator<<(std::ostream &, const Location &);
 };

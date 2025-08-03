@@ -17,5 +17,5 @@ public:
 	mGet();
 	~mGet();
 
-	t_HandlingResult execute(Context &ctx);
+	t_HandlingResult execute(const Context &ctx);
 };

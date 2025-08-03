@@ -12,17 +12,17 @@ static t_httpCode removeFile(const char *path)
 	return NO_CONTENT;
 }
 
-t_HandlingResult mDelete::execute(Context &ctx)
+t_HandlingResult mDelete::execute(const Context &ctx)
 {
 	t_HandlingResult res;
 	int statCheck;
 
 	res.mode_ = ctx.getConnectionMode();
-	statCheck = checkPath(ctx.targetPath_);
+	statCheck = checkPath(ctx.getTargetPath());
 	switch (statCheck)
 	{
 		case S_IFREG:
-			res.code_ = removeFile(ctx.targetPath_.c_str());
+			res.code_ = removeFile(ctx.getTargetPath().c_str());
 			break ;
 		case EACCES:
 		case S_IFDIR:

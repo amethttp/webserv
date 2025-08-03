@@ -25,9 +25,9 @@ static std::string getRedirectionHTML(t_httpCode code, std::string &uri)
 	return html.str();
 }
 
-static bool checkBodySize(const t_Request &request, Context &ctx)
+static bool checkBodySize(const Context &ctx)
 {
-	return (request.body.getMessage().size() > ctx.location_.getMaxBodySize());
+	return (ctx.getRequest().body.getMessage().size() > ctx.getLocation().getMaxBodySize());
 }
 
 static void setMaxSizeError(t_HandlingResult &result)
@@ -36,9 +36,9 @@ static void setMaxSizeError(t_HandlingResult &result)
 	result.mode_ = C_CLOSE;
 }
 
-static bool checkReturn(Context &ctx)
+static bool checkReturn(const Context &ctx)
 {
-	return (ctx.location_.getReturn().code != 0);
+	return (ctx.getLocation().getReturn().code != 0);
 }
 
 static void setRedirectionResult(t_httpCode code, std::string uri, t_HandlingResult &res)
@@ -54,7 +54,7 @@ static void setBodyFromString(std::string str, t_HandlingResult &res)
 	res.tempBody_.type = Client::getExtensionType(".txt");
 }
 
-void RequestHandler::handleReturnDirective(Context &ctx, t_HandlingResult &res)
+static void handleReturnDirective(const Context &ctx, t_HandlingResult &res)
 {
 	t_httpCode retCode = ctx.getReturn().code;
 	std::string retPath = ctx.getReturn().path;
@@ -70,12 +70,12 @@ void RequestHandler::handleReturnDirective(Context &ctx, t_HandlingResult &res)
 	res.code_ = retCode;
 }
 
-void RequestHandler::handleExecution(Context &ctx, t_HandlingResult &res)
+static void handleExecution(const Context &ctx, t_HandlingResult &res)
 {
     res = RequestExecutor::executeRequest(ctx);
 }
 
-static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_page &page)
+static bool matchCustomErrorPage(t_httpCode code, const Location &location, t_error_page &page)
 {
 	std::set<t_error_page> errorPages = location.getErrorPages();
 	bzero(&page, sizeof(page));
@@ -92,11 +92,11 @@ static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_pa
 	return false;
 }
 
-static void tryCustomErrorPage(Context &ctx, t_HandlingResult &res)
+static void tryCustomErrorPage(const Context &ctx, t_HandlingResult &res)
 {
     t_error_page errPage;
 
-    if (matchCustomErrorPage(res.code_, ctx.location_, errPage))
+    if (matchCustomErrorPage(res.code_, ctx.getLocation(), errPage))
 	{
 		// config parse that an error page MUST have a URI page 
         res.tempBody_.content = readFileToString(errPage.page);
@@ -104,12 +104,11 @@ static void tryCustomErrorPage(Context &ctx, t_HandlingResult &res)
 	}
 }
 
-t_HandlingResult RequestHandler::handleRequest(const t_Request &request, Location &location, Server &server)
+t_HandlingResult RequestHandler::handleRequest(const Context &ctx)
 {
     t_HandlingResult result;
-    Context  ctx(request, location, server);
 
-	if (checkBodySize(request, ctx))
+	if (checkBodySize(ctx))
 	{
 		setMaxSizeError(result);
 	}

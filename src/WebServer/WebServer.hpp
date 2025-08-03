@@ -32,8 +32,6 @@ private:
 	void disconnectTimedoutClients(t_epoll &epoll);
 
 	void receiveRequest(Client *client, t_epoll &epoll);
-
-	Server *matchServer(std::string hostName);
 	void processRequest(Client *client, Result<t_Request> &result);
 	void sendResponse(Client *client, t_epoll &epoll);
 
@@ -41,9 +39,11 @@ public:
 	WebServer();
 	~WebServer();
 
+	const std::vector<Server *> &getServers();
 	void setServers(std::vector<Server *> &servers);
 
 	void serve();
 
+	static Server *matchServer(const std::vector<Server *> &servers, std::string hostName);
 	friend std::ostream &operator<<(std::ostream &stream, const WebServer &ws);
 };

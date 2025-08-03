@@ -1,6 +1,6 @@
 #include "cgi.hpp"
 
-bool matchCGI(std::string &path, Location &location, t_cgi &cgi)
+bool matchCGI(const std::string &path, const Location &location, t_cgi &cgi)
 {
 	size_t pos = path.rfind('.');
 	std::map<std::string, std::string>::iterator cgiIt;

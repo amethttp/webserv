@@ -18,4 +18,4 @@ typedef std::pair<std::string, std::string> t_cgi;
 bool timedOut(time_t start);
 std::string readOutput(int pipefd[2]);
 t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_Body &body);
-bool matchCGI(std::string &path, Location &location, t_cgi &cgi);
+bool matchCGI(const std::string &path, const Location &location, t_cgi &cgi);

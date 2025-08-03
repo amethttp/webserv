@@ -4,7 +4,7 @@ mGet::mGet()
 {
 }
 
-static t_httpCode getFile(std::string &target, t_Body &body)
+static t_httpCode getFile(const std::string &target, t_Body &body)
 {
 	body.content = readFileToString(target.c_str());
 	body.type = getMIME(target);
@@ -31,7 +31,7 @@ static void closeHTML(std::ostringstream &html)
 	html << readFileToString(INDEX_CLOSE);
 }
 
-static void appendElementToHTML(std::ostringstream &html, std::string &targetPath, std::string &anchorName, std::string displayName, unsigned char type)
+static void appendElementToHTML(std::ostringstream &html, const std::string &targetPath, const std::string &anchorName, const std::string &displayName, unsigned char type)
 {
 	struct stat st;
 	std::ostringstream size;
@@ -61,9 +61,9 @@ static void setIndexNames(struct dirent *dir, std::string &anchorName, std::stri
 		displayName = anchorName.substr(0,22) + "..>";
 }
 
-static t_httpCode tryAutoIndex(Context &ctx, t_Body &body)
+static t_httpCode tryAutoIndex(const Context &ctx, t_Body &body)
 {
-	if (!ctx.location_.getAutoIndex())
+	if (!ctx.getLocation().getAutoIndex())
 		return FORBIDDEN;
 
 	DIR *d;
@@ -72,16 +72,16 @@ static t_httpCode tryAutoIndex(Context &ctx, t_Body &body)
 	std::string displayName;
 	std::ostringstream html;
 
-	d = opendir(ctx.targetPath_.c_str());
+	d = opendir(ctx.getTargetPath().c_str());
 	if (d)
 	{
-		startHTML(html, ctx.targetPath_.c_str());
+		startHTML(html, ctx.getTargetPath().c_str());
 		dir = readdir(d);
 		while (dir != NULL)
 		{
 			// if (dir->d_type == DT_REG || dir->d_type == DT_LNK || dir->d_type == DT_UNKNOWN)
 			setIndexNames(dir, anchorName, displayName);
-			appendElementToHTML(html, ctx.targetPath_, anchorName, displayName, dir->d_type);
+			appendElementToHTML(html, ctx.getTargetPath(), anchorName, displayName, dir->d_type);
 			dir = readdir(d);
 		}
 		closedir(d);
@@ -94,17 +94,17 @@ static t_httpCode tryAutoIndex(Context &ctx, t_Body &body)
 	return FORBIDDEN;
 }
 
-static bool findIndex(Context &ctx)
+static bool findIndex(const Context &ctx)
 {
 	std::string indexPath;
-	std::vector<std::string> indexList = ctx.location_.getIndexList();
+	std::vector<std::string> indexList = ctx.getLocation().getIndexList();
 
 	for (std::vector<std::string>::iterator ite = indexList.begin(); ite != indexList.end(); ++ite)
 	{
-		indexPath = ctx.targetPath_ + (*ite);
+		indexPath = ctx.getTargetPath() + (*ite);
 		if (checkPath(indexPath) == S_IFREG)
 		{
-			ctx.targetPath_ = indexPath;
+			ctx.getTargetPath() = indexPath;
 			return true;
 		}
 	}
@@ -112,24 +112,24 @@ static bool findIndex(Context &ctx)
 	return false;
 }
 
-static t_httpCode tryIndex(Context &ctx, t_Body &body)
+static t_httpCode tryIndex(const Context &ctx, t_Body &body)
 {
-	// normalizeTrailingSlash(ctx.targetPath_);
+	// normalizeTrailingSlash(ctx.getTargetPath());
 	if (findIndex(ctx))
-		return getFile(ctx.targetPath_, body);
+		return getFile(ctx.getTargetPath(), body);
 	
 	return tryAutoIndex(ctx, body);
 }
 
-static void run(Context &ctx, t_HandlingResult &res)
+static void run(const Context &ctx, t_HandlingResult &res)
 {
 	int statCheck;
 
-	statCheck = checkPath(ctx.targetPath_);
+	statCheck = checkPath(ctx.getTargetPath());
 	switch (statCheck)
 	{
 		case S_IFREG:
-			res.code_ = getFile(ctx.targetPath_, res.tempBody_);
+			res.code_ = getFile(ctx.getTargetPath(), res.tempBody_);
 			break ;
 		case S_IFDIR:
 			res.code_ = tryIndex(ctx, res.tempBody_);
@@ -145,7 +145,7 @@ static void run(Context &ctx, t_HandlingResult &res)
 
 }
 
-static t_httpCode handleCgiOutput(Context &ctx, t_cgi &cgi, t_Body &body)
+static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 {
 	int pipefd[2];
 	pid_t child;
@@ -160,7 +160,7 @@ static t_httpCode handleCgiOutput(Context &ctx, t_cgi &cgi, t_Body &body)
 	else if (child == CHILD_OK)
 	{
 		char *env[] = { NULL };
-		char *argv[] = { strdup(cgi.second.c_str()), strdup(ctx.targetPath_.c_str()), NULL };
+		char *argv[] = { strdup(cgi.second.c_str()), strdup(ctx.getTargetPath().c_str()), NULL };
 
 		close(pipefd[0]);
 		dup2(pipefd[1], STDOUT_FILENO);
@@ -173,7 +173,7 @@ static t_httpCode handleCgiOutput(Context &ctx, t_cgi &cgi, t_Body &body)
 	return waitForOutput(child, pipefd, startTime, body);
 }
 
-static void runCGI(Context &ctx, t_cgi &cgi, t_HandlingResult &res) // TODO: extract this into method...
+static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res) // TODO: extract this into method...
 {
 	res.code_ = handleCgiOutput(ctx, cgi, res.tempBody_);
 	if (res.code_ == OK)
@@ -182,13 +182,13 @@ static void runCGI(Context &ctx, t_cgi &cgi, t_HandlingResult &res) // TODO: ext
 		res.mode_ = C_CLOSE;
 }
 
-t_HandlingResult mGet::execute(Context &ctx)
+t_HandlingResult mGet::execute(const Context &ctx)
 {
 	t_cgi cgi;
 	t_HandlingResult res;
 
 	res.mode_ = ctx.getConnectionMode();
-	if (matchCGI(ctx.targetPath_, ctx.location_, cgi))
+	if (matchCGI(ctx.getTargetPath(), ctx.getLocation(), cgi))
 		runCGI(ctx, cgi, res);
 	else
 		run(ctx, res);

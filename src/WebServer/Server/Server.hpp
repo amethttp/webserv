@@ -22,16 +22,16 @@ public:
 	bool matchesName(std::string &match);
 	Location *matchLocation(std::string targetRoute);
 
-	std::set<int> getPorts();
+	std::set<int> getPorts() const;
 	void setPorts(const std::set<int> &ports);
 
-	std::vector<Location *> getLocations();
+	std::vector<Location *> getLocations() const;
 	void setLocations(const std::vector<Location *> &locations);
 
-	std::vector<std::string> getNames();
+	std::vector<std::string> getNames() const;
 	void setNames(const std::vector<std::string> &names);
 
-	std::string getUploadPath();
+	std::string getUploadPath() const;
 	void setUploadPath(const std::string &path);
 	
 	void setDefaults();

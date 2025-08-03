@@ -1,7 +1,7 @@
 #include "files.hpp"
 #include <string>
 
-std::string getMIME(std::string &target)
+std::string getMIME(const std::string &target)
 {
 	size_t pos;
 	std::string res = "";
@@ -19,14 +19,14 @@ void normalizeTrailingSlash(std::string &path)
 		path += '/';
 }
 
-bool pathExists(std::string &path)
+bool pathExists(const std::string &path)
 {
 	struct stat st;
 
 	return (stat(path.c_str(), &st) == 0);
 }
 
-int checkPath(std::string &path)
+int checkPath(const std::string &path)
 {
 	struct stat st;
 
