@@ -1,11 +1,29 @@
 #include "Exceptions.hpp"
 
-const char *FatalException::what(char *msg) const throw()
+FatalException::FatalException(const char *msg)
 {
-    return (msg);
+    this->exceptionMsg = "Fatal Exception: <" + static_cast<std::string>(msg) + ">";
 }
 
-const char *ConnectionException::what(char *msg) const throw()
+FatalException::~FatalException() throw()
 {
-    return (msg);
+}
+
+const char *FatalException::what() const throw()
+{
+    return (this->exceptionMsg.c_str());
+}
+
+RecoverableException::RecoverableException(const char *msg)
+{
+    this->exceptionMsg = "Recoverable Exception: <" + static_cast<std::string>(msg) + ">";
+}
+
+RecoverableException::~RecoverableException() throw()
+{
+}
+
+const char *RecoverableException::what() const throw()
+{
+    return (this->exceptionMsg.c_str());
 }

@@ -1,4 +1,5 @@
 #include "Get.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 mGet::mGet()
 {
@@ -84,7 +85,8 @@ static t_httpCode tryAutoIndex(const Context &ctx, t_Body &body)
 			appendElementToHTML(html, ctx.getTargetPath(), anchorName, displayName, dir->d_type);
 			dir = readdir(d);
 		}
-		closedir(d);
+		if (closedir(d))
+			throw (RecoverableException("Couldn't close dir"));
 		closeHTML(html);
 		body.content = html.str();
 		body.type = Client::getExtensionType(".html");
@@ -152,11 +154,11 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	time_t startTime;
 
 	if (pipe(pipefd))
-		throw (std::runtime_error("Ceci n'est pas une pipe"));
+		throw (RecoverableException("Ceci n'est pas une pipe"));
 	startTime = std::time(NULL);
 	child = fork();
 	if (child < 0)
-		throw (std::runtime_error("Couldn't fork CGI properly"));
+		throw (RecoverableException("Couldn't fork CGI properly"));
 	else if (child == CHILD_OK)
 	{
 		char *env[] = { NULL };

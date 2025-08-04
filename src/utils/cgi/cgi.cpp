@@ -1,4 +1,5 @@
 #include "cgi.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 bool matchCGI(const std::string &path, const Location &location, t_cgi &cgi)
 {
@@ -27,7 +28,7 @@ bool timedOut(time_t start)
 	return false;
 }
 
-std::string readOutput(int pipefd[2]) // TODO: throw for err on read
+std::string readOutput(int pipefd[2])
 {
 	std::stringstream output;
 	char buffer[BUFFER_SIZE];
@@ -36,6 +37,8 @@ std::string readOutput(int pipefd[2]) // TODO: throw for err on read
 	close(pipefd[1]);
 	while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
 		output.write(buffer, bytes_read);
+	if (bytes_read == -1)
+		RecoverableException("Couldn't read CGI output");
 	close(pipefd[0]);
 
 	return output.str();
@@ -55,7 +58,7 @@ t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_Body &body)
 		usleep(100);
 	}
 	if (status < 0)
-		throw (std::runtime_error("WaitPid failed"));
+		throw (RecoverableException("WaitPid failed"));
 	if (WEXITSTATUS(status) != 0)
 		return INTERNAL_SERVER_ERROR;
 

@@ -99,6 +99,7 @@ vpath %.cpp $(SRC): \
 			$(SRC)utils/HeaderCollection/Header : \
 			$(SRC)utils/HeaderCollection : \
 			$(SRC)utils/cgi : \
+			$(SRC)utils/exceptions : \
 			$(SRC)utils/fileHandler : \
 			$(SRC)utils/numeric : \
 			$(SRC)utils/string : \
@@ -140,6 +141,7 @@ SRCS = Body.cpp \
 		Header.cpp \
 		HeaderCollection.cpp \
 		cgi.cpp \
+		Exceptions.cpp \
 		files.cpp \
 		numeric.cpp \
 		string.cpp \

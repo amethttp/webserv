@@ -1,4 +1,5 @@
 #include "Delete.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 mDelete::mDelete()
 {
@@ -7,7 +8,7 @@ mDelete::mDelete()
 static t_httpCode removeFile(const char *path)
 {
 	if (std::remove(path) < 0)
-		throw std::runtime_error("Couldn't remove resource");
+		throw RecoverableException("Couldn't remove resource");
 
 	return NO_CONTENT;
 }

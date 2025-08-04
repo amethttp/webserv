@@ -37,13 +37,13 @@ static fd_t setServerFd(sockaddr_in &serverAddress, std::set<int> serverPorts)
 		int socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 		// TODO: ERASE SETSOCKOPT
 		if (setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
-			throw std::runtime_error("Couldn't set SO_REUSEADDR");
+			throw FatalException("Couldn't set SO_REUSEADDR");
 		if (socketFd < 0)
-			throw std::runtime_error("Couldn't create socket");
+			throw FatalException("Couldn't create socket");
 		if (bind(socketFd, (struct sockaddr *)(&serverAddress), sizeof(serverAddress)) == -1)
-			throw std::runtime_error("Couldn't bind socket");
+			throw RecoverableException("Couldn't bind socket");
 		if (listen(socketFd, SOMAXCONN) == -1)
-			throw std::runtime_error("Couldn't listen to port");
+			throw RecoverableException("Couldn't listen to port");
 		return socketFd;
 	}
 }
@@ -66,12 +66,13 @@ std::vector<fd_t> WebServer::createServerFds()
 			serverFd = setServerFd(serverAddress, serverPorts);
 			serversFds.push_back(serverFd);
 		}
-		catch(const std::exception& e)
+		catch(const RecoverableException& e)
 		{
 			std::cerr << e.what() << " || Server: " << *((*serversIt)->getNames().begin()) << std::endl;
+			close(serverFd);
 			delete *serversIt;
 			serversIt = servers_.erase(serversIt);
-			continue ;
+			continue;
 		}
 		serversIt++;
 	}
@@ -82,14 +83,25 @@ void WebServer::setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds)
 {
 	epoll.fd = epoll_create1(0);
 	if (epoll.fd == -1)
-		throw std::runtime_error("Couldn't create epoll");
+		throw FatalException("Couldn't create epoll");
 
 	epoll.eventConfig.events = EPOLLIN;
-	for (std::vector<fd_t>::iterator it = serversFds.begin(); it != serversFds.end(); ++it)
+	for (std::vector<fd_t>::iterator it = serversFds.begin(); it != serversFds.end(); )
 	{
-		epoll.eventConfig.data.fd = *it;
-		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, *it, &epoll.eventConfig) == -1)
-			throw std::runtime_error("Couldn't add server fd to epoll");
+		try
+		{
+			epoll.eventConfig.data.fd = *it;
+			if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, *it, &epoll.eventConfig) == -1)
+				throw RecoverableException("Couldn't add server fd to epoll");
+		}
+		catch(const RecoverableException& e)
+		{
+			std::cerr << e.what() << " Server FD: " << *it << std::endl;
+			close(*it);
+			it = serversFds.erase(it);
+			continue;
+		}
+		it++;
 	}
 }
 
@@ -98,7 +110,7 @@ void WebServer::setEpollRead(t_epoll &epoll, Client *client)
 	epoll.eventConfig.events = EPOLLIN;
 	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
-		throw std::runtime_error("Couldn't add POLLIN flag to client fd");
+		throw RecoverableException("Couldn't add POLLIN flag to client fd");
 }
 
 void WebServer::setEpollWrite(t_epoll &epoll, Client *client)
@@ -106,7 +118,7 @@ void WebServer::setEpollWrite(t_epoll &epoll, Client *client)
 	epoll.eventConfig.events = EPOLLOUT;
 	epoll.eventConfig.data.ptr = static_cast<void *>(client);
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
-		throw std::runtime_error("Couldn't add POLLOUT flag to client fd");
+		throw RecoverableException("Couldn't add POLLOUT flag to client fd");
 }
 
 fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
@@ -120,39 +132,53 @@ fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
 }
 
 void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
-{
+{	
 	sockaddr_in newClientAddress;
 	socklen_t socketSize = sizeof(newClientAddress);
 
 	while (true)
 	{
-		bzero(&newClientAddress, sizeof(newClientAddress));
-		fd_t newClientFd = accept(serverFd, (struct sockaddr *)&newClientAddress, &socketSize);
-		if (newClientFd < 0)
+		try
 		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break;
-			throw std::runtime_error("Couldn't accept new client");
+			bzero(&newClientAddress, sizeof(newClientAddress));
+			fd_t newClientFd = accept(serverFd, (struct sockaddr *)&newClientAddress, &socketSize);
+			if (newClientFd < 0)
+			{
+				if (errno == EAGAIN || errno == EWOULDBLOCK)
+					break;
+				throw RecoverableException("Couldn't accept new client");
+			}
+			if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
+			{
+				close(newClientFd);
+				throw RecoverableException("Couldn't set NONBLOCKING flag to client fd");
+			}
+			Client *newClient = new Client();
+			newClient->setFd(newClientFd);
+			epoll.eventConfig.data.ptr = newClient;
+			epoll.eventConfig.events = EPOLLIN;
+			if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newClientFd, &epoll.eventConfig) == -1)
+			{
+				close(newClientFd);
+				delete newClient;
+				throw RecoverableException("Couldn't add client fd to epoll");
+			}
+			this->clients_.push_back(newClient);
+			std::cout << "New Client (ID: " << newClient->getId() << ") connected" << std::endl;
 		}
-		if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
-			throw std::runtime_error("Couldn't set NONBLOCKING flag to client fd");
-		Client *newClient = new Client();
-		this->clients_.push_back(newClient);
-		newClient->setFd(newClientFd);
-		epoll.eventConfig.data.ptr = newClient;
-		epoll.eventConfig.events = EPOLLIN;
-		if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newClientFd, &epoll.eventConfig) == -1)
-			throw std::runtime_error("Couldn't add client fd to epoll");
-		std::cout << "New Client (ID: " << newClient->getId() << ") connected" << std::endl;
+		catch(const RecoverableException& e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
 	}
 }
 
 std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
 {
 	if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, client->getFd(), NULL) == -1)
-		throw std::runtime_error("Couldn't delete client fd from epoll");
+		throw FatalException("Couldn't delete client fd from epoll");
 	if (close(client->getFd()) == -1)
-		throw std::runtime_error("Couldn't close client fd");
+		throw FatalException("Couldn't close client fd");
 	std::cout << "Client (ID: " << client->getId() << ") " << reason << std::endl;
 
 	return removeClient(client);
@@ -171,25 +197,29 @@ Server *WebServer::matchServer(const std::vector<Server *> &servers, std::string
 
 void WebServer::processRequest(Client *client, Result<t_Request> &result)
 {
-	Context context;
-	t_HandlingResult handlingResult;
-
-	if (result.isSuccess())
+	try
 	{
-		client->setRequest(result.getValue());
-		context.init(this->getServers(), client->getRequest());
-		handlingResult = RequestHandler::handleRequest(context);
+		Context context;
+		t_HandlingResult handlingResult;
 
-		client->buildResponse(handlingResult);
+		if (result.isSuccess())
+		{
+			client->setRequest(result.getValue());
+			context.init(this->getServers(), client->getRequest());
+			handlingResult = RequestHandler::handleRequest(context);
+
+			client->buildResponse(handlingResult);
+		}
+		else
+		{
+			client->buildResponse(result.getError(), C_CLOSE);
+		}
 	}
-	else
+	catch(const RecoverableException& e)
 	{
-		t_httpCode code = result.getError();
-		t_connection mode = C_CLOSE;
-
-		client->buildResponse(code, mode);
+		std::cerr << e.what() << std::endl;
+		client->buildResponse(INTERNAL_SERVER_ERROR, C_CLOSE);
 	}
-
 	client->clearRequestBuffer();
 }
 
@@ -213,7 +243,7 @@ void WebServer::receiveRequest(Client *client, t_epoll &epoll)
 	else if (bytesReceived == 0)
 		disconnectClient(client, epoll, DISCONNECTED);
 	else
-		throw std::runtime_error("Couldn't receive data from client fd");
+		throw RecoverableException("Couldn't receive data from client fd");
 }
 
 void WebServer::sendResponse(Client *client, t_epoll &epoll)
@@ -221,7 +251,7 @@ void WebServer::sendResponse(Client *client, t_epoll &epoll)
 	ssize_t bytesSent = send(client->getFd(), client->getResponseBuffer().c_str(), client->getResponseBuffer().length(), 0);
 
 	if (bytesSent < 0)
-		throw std::runtime_error("Couldn't send response");
+		throw RecoverableException("Couldn't send response");
 
 	client->eraseResponse(bytesSent);
 	if ((ssize_t)client->getResponseBuffer().length())
@@ -242,12 +272,21 @@ void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
 {
 	Client *client = static_cast<Client *>(epoll.eventBuffer[eventIndex].data.ptr);
 
-	if (epoll.eventBuffer[eventIndex].events & EPOLLIN)
-		receiveRequest(client, epoll);
-	else if (epoll.eventBuffer[eventIndex].events & EPOLLOUT)
-		sendResponse(client, epoll);
-	else
+	try
+	{
+		if (epoll.eventBuffer[eventIndex].events & EPOLLIN)
+			receiveRequest(client, epoll);
+		else if (epoll.eventBuffer[eventIndex].events & EPOLLOUT)
+			sendResponse(client, epoll);
+		else
+			disconnectClient(client, epoll, DISCONNECTED);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
 		disconnectClient(client, epoll, DISCONNECTED);
+	}
+	
 }
 
 void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll)
@@ -259,7 +298,7 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 	{
 		readyFds = epoll_wait(epoll.fd, epoll.eventBuffer, EVENT_BUFFER_SIZE, TIMEOUT);
 		if (readyFds == -1)
-			throw std::runtime_error("Couldn't wait for epoll fds");
+			throw FatalException("Couldn't wait for epoll fds");
 
 		for (int i = 0; i < readyFds; i++)
 		{

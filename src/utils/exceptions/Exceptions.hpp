@@ -1,14 +1,25 @@
 #pragma once
 #include <exception>
+#include <string>
 
 class FatalException : public std::exception
 {
-	public:
-		virtual const char *what(char *msg) const throw();
+private:
+	std::string exceptionMsg;
+public:
+	FatalException(const char *msg);
+	virtual ~FatalException() throw();
+
+	const char *what() const throw();
 };
 
-class ConnectionException : public std::exception
+class RecoverableException : public std::exception
 {
-	public:
-		virtual const char *what(char *msg) const throw();
+private:
+	std::string exceptionMsg;
+public:
+	RecoverableException(const char *msg);
+	virtual ~RecoverableException() throw();
+
+	const char *what() const throw();
 };

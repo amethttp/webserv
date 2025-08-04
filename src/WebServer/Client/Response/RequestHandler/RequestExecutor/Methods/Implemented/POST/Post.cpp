@@ -1,4 +1,5 @@
 #include "Post.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 mPost::mPost()
 {
@@ -14,7 +15,7 @@ static t_httpCode postFile(const Context &ctx, t_HandlingResult res)
 	if (!file.is_open())
 	{
 		file.close();
-		throw (std::runtime_error("Error creating file"));
+		throw (RecoverableException("Error creating file"));
 	}
 	file << ctx.getRequest().body.getMessage();
 	res.tempHeaders_.addHeader("Content-Location", ctx.getTargetPath());

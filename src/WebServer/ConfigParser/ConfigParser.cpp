@@ -6,8 +6,9 @@
 #include "models/ConfigNode.hpp"
 #include "models/Token.hpp"
 #include "utils/string/string.hpp"
-#include "helpers/DirectiveRegistry/DirectiveRegistry.hpp"
 #include "models/ConfigBlock.hpp"
+#include "helpers/DirectiveRegistry/DirectiveRegistry.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 static void checkFileAcceptance(t_configs &configs)
 {
@@ -20,16 +21,16 @@ static void checkFileAcceptance(t_configs &configs)
 			braces--;
 	}
 	if (braces > 0)
-		throw std::runtime_error("Missing some brace to close container");
+		throw FatalException("Missing some brace to close container");
 	else if (braces < 0)
-		throw std::runtime_error("Extra closing brace");
+		throw FatalException("Extra closing brace");
 }
 
 static void checkFileExtension(t_configs &configs)
 {
 	std::string fileExtension = getFileExtension(*configs.path);
 	if (fileExtension != "conf" && fileExtension != "")
-		throw std::runtime_error("Only .conf files are allowed");
+		throw FatalException("Only .conf files are allowed");
 }
 
 static std::vector<Token> tokenize(const std::string &input)
@@ -181,7 +182,7 @@ static void parse_config(const std::string &input, std::vector<ConfigNode> &conf
 			{
 				std::stringstream what;
 				what << "unexpected semicolon near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			DirectiveRegistry::checkConfigNode(stack.top().current);
 			stack.top().container->push_back(stack.top().current);
@@ -195,7 +196,7 @@ static void parse_config(const std::string &input, std::vector<ConfigNode> &conf
 			{
 				std::stringstream what;
 				what << "unexpected left brace \"{\" near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			DirectiveRegistry::checkConfigNode(stack.top().current);
 			stack.top().container->push_back(stack.top().current);
@@ -210,13 +211,13 @@ static void parse_config(const std::string &input, std::vector<ConfigNode> &conf
 			{
 				std::stringstream what;
 				what << "unexpected closing brace \"}\" near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			else if (stack.top().building && !stack.top().current.name.empty())
 			{
 				std::stringstream what;
 				what << "unexpected1 closing brace \"}\" near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			stack.pop();
 			stack.top().building = false;
@@ -227,7 +228,7 @@ static void parse_config(const std::string &input, std::vector<ConfigNode> &conf
 	{
 		std::stringstream what;
 		what << "missing semicolon near " << stack.top().current.name;
-		throw std::runtime_error(what.str());
+		throw FatalException(what.str().c_str());
 	}
 }
 
