@@ -53,7 +53,7 @@ static void freeArr(char **arr)
 {
 	for (size_t i = 0; arr && arr[i]; ++i)
 		free(arr[i]);
-	free(arr);
+	delete[] arr;
 }
 
 static std::string getHostName(const std::string &hostValue)
@@ -84,7 +84,6 @@ static char **setEnvironment(const Context &ctx)
 	const std::string serverName = "SERVER_NAME=" + getHostName(ctx.getRequest().headers.getHeaderValue(HOST));
 	const std::string serverPort = "SERVER_PORT=" + getHostPort(ctx.getRequest().headers.getHeaderValue(HOST));
 	const std::string cookie = "HTTP_COOKIE=" + ctx.getRequest().headers.getHeaderValue("Cookie");
-
 
 	size_t envSize = 10;
 	char **env = new char *[envSize + 1];
@@ -190,7 +189,7 @@ static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res)
 		res.mode_ = C_CLOSE;
 }
 
-t_HandlingResult mPost::execute(const Context &ctx)
+t_HandlingResult mPost::execute(Context &ctx)
 {
 	t_cgi cgi;
 	t_HandlingResult res;

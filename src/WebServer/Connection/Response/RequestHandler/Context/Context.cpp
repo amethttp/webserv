@@ -1,6 +1,7 @@
 #include "Context.hpp"
 #include "WebServer/WebServer.hpp"
 #include "utils/string/string.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 Context::Context() : request_(NULL), location_(NULL), server_(NULL)
 {
@@ -22,6 +23,8 @@ void Context::init(const std::vector<Server *> &servers, const t_Request &reques
 {
 	this->request_ = &request;
 	this->server_ = WebServer::matchServer(servers, this->request_->headers.getHeaderValue(HOST));
+	if (!this->server_)
+		throw RecoverableException("Couldn't match server");
 	this->location_ = this->server_->matchLocation(this->request_->requestLine.getTargetPath());
 
 	routeTarget();
@@ -75,6 +78,11 @@ std::string Context::getUploadPath() const
 t_connection Context::getConnectionMode() const
 {
 	return this->connectionMode_;
+}
+
+void Context::setTargetPath(const std::string &path)
+{
+	this->targetPath_ = path;
 }
 
 t_return Context::getReturn() const

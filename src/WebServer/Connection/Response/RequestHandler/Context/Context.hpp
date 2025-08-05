@@ -36,5 +36,7 @@ public:
 	std::string getUploadPath() const;
 	t_connection getConnectionMode() const;
 
+	void setTargetPath(const std::string &path);
+
 	void pushServerSession(Session *session);
 };

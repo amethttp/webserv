@@ -72,7 +72,7 @@ static void handleReturnDirective(const Context &ctx, t_HandlingResult &res)
 	res.code_ = retCode;
 }
 
-static void handleExecution(const Context &ctx, t_HandlingResult &res)
+static void handleExecution(Context &ctx, t_HandlingResult &res)
 {
     res = RequestExecutor::executeRequest(ctx);
 }

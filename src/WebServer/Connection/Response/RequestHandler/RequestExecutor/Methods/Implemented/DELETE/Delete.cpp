@@ -13,7 +13,7 @@ static t_httpCode removeFile(const char *path)
 	return NO_CONTENT;
 }
 
-t_HandlingResult mDelete::execute(const Context &ctx)
+t_HandlingResult mDelete::execute(Context &ctx)
 {
 	t_HandlingResult res;
 	int statCheck;

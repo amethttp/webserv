@@ -7,7 +7,7 @@ mGet::mGet()
 
 static t_httpCode getFile(const std::string &target, t_Body &body)
 {
-	body.content = readFileToString(target.c_str());
+	body.content = readFileToString(target);
 	body.type = getMIME(target);
 
 	return OK;
@@ -96,7 +96,7 @@ static t_httpCode tryAutoIndex(const Context &ctx, t_Body &body)
 	return FORBIDDEN;
 }
 
-static bool findIndex(const Context &ctx)
+static bool findIndex(Context &ctx)
 {
 	std::string indexPath;
 	std::vector<std::string> indexList = ctx.getLocation().getIndexList();
@@ -106,7 +106,7 @@ static bool findIndex(const Context &ctx)
 		indexPath = ctx.getTargetPath() + (*ite);
 		if (checkPath(indexPath) == S_IFREG)
 		{
-			ctx.getTargetPath() = indexPath;
+			ctx.setTargetPath(indexPath);
 			return true;
 		}
 	}
@@ -114,7 +114,7 @@ static bool findIndex(const Context &ctx)
 	return false;
 }
 
-static t_httpCode tryIndex(const Context &ctx, t_Body &body)
+static t_httpCode tryIndex(Context &ctx, t_Body &body)
 {
 	// normalizeTrailingSlash(ctx.getTargetPath());
 	if (findIndex(ctx))
@@ -123,7 +123,7 @@ static t_httpCode tryIndex(const Context &ctx, t_Body &body)
 	return tryAutoIndex(ctx, body);
 }
 
-static void run(const Context &ctx, t_HandlingResult &res)
+static void run(Context &ctx, t_HandlingResult &res)
 {
 	int statCheck;
 
@@ -150,7 +150,7 @@ static void freeArr(char **arr)
 {
 	for (size_t i = 0; arr && arr[i]; ++i)
 		free(arr[i]);
-	free(arr);
+	delete[] arr;
 }
 
 static std::string getHostName(const std::string &hostValue)
@@ -249,7 +249,7 @@ static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res)
 		res.mode_ = C_CLOSE;
 }
 
-t_HandlingResult mGet::execute(const Context &ctx)
+t_HandlingResult mGet::execute(Context &ctx)
 {
 	t_cgi cgi;
 	t_HandlingResult res;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "RequestExecutor.hpp"
 
-t_HandlingResult RequestExecutor::executeRequest(const Context &ctx)
+t_HandlingResult RequestExecutor::executeRequest(Context &ctx)
 {
 	AMethod *method;
 	t_HandlingResult result;
@@ -11,7 +11,7 @@ t_HandlingResult RequestExecutor::executeRequest(const Context &ctx)
 	if (!method)
 	{
 		result.code_ = METHOD_NOT_ALLOWED;
-		result.mode_ = ctx.getConnectionMode(); // check this
+		result.mode_ = ctx.getConnectionMode();
 	}
 	else
 	{
