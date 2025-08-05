@@ -124,7 +124,6 @@ static void useSession(Context &ctx, t_HandlingResult &result)
 		std::stringstream ss(value);
 		int sessId;
 		ss >> sessId;
-		std::cout << "tango " << sessId << std::endl;
 		Session *sess = ctx.getServer().getSession(sessId);
 		std::cout << "Session id: " << sess->getId() << ", desc: " << sess->getDesc() << std::endl;
 	}

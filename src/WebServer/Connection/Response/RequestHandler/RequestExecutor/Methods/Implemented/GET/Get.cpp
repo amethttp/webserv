@@ -147,6 +147,74 @@ static void run(const Context &ctx, t_HandlingResult &res)
 
 }
 
+static void printCharArray(char** arr) {
+    if (!arr)
+        return;
+
+    for (int i = 0; arr[i] != NULL; ++i) {
+        std::cout << "[" << i << "]: " << arr[i] << std::endl;
+    }
+}
+
+static void freeArr(char** arr)
+{
+	for (size_t i = 0; arr && arr[i]; ++i)
+    	free(arr[i]);
+	free(arr);
+}
+
+static std::string getHostName(const std::string &hostValue)
+{
+    const size_t portSeparator = hostValue.find(':');
+    const std::string hostName = hostValue.substr(0, portSeparator);
+
+    return hostName;
+}
+
+static std::string getHostPort(const std::string &hostValue)
+{
+    const size_t portSeparator = hostValue.find(':');
+    const std::string hostPort = hostValue.substr(portSeparator + 1);
+
+    return hostPort;
+}
+
+static char **setEnvironment(const Context &ctx, t_cgi &cgi)
+{
+	const std::string scriptName = "SCRIPT_NAME=" + ctx.getRequest().requestLine.getTargetPath();
+	const std::string queryString = "QUERY_STRING=" + ctx.getRequest().requestLine.getTargetQuery();
+	const std::string serverName = "SERVER_NAME=" + getHostName(ctx.getRequest().headers.getHeaderValue(HOST));
+	const std::string serverPort = "SERVER_PORT=" + getHostPort(ctx.getRequest().headers.getHeaderValue(HOST));
+
+	char **env = (char **)malloc(sizeof(char *) * 8);
+	if (!env)
+		return NULL;
+
+	env[0] = strdup("REQUEST_METHOD=GET");
+	env[1] = strdup(scriptName.c_str());
+	env[2] = strdup(queryString.c_str());
+	env[3] = strdup("SERVER_PROTOCOL=HTTP/1.1");
+	env[4] = strdup("GATEWAY_INTERFACE=CGI/1.1");
+	env[5] = strdup(serverName.c_str());
+	env[6] = strdup(serverPort.c_str());
+	env[7] = NULL;
+
+    return env;
+}
+
+static char **setArgs(const Context &ctx, t_cgi &cgi)
+{
+	char **argv = (char **)malloc(sizeof(char *) * 3);
+	if (!argv)
+		return NULL;
+
+	argv[0] = strdup(cgi.second.c_str());
+	argv[1] = strdup(ctx.getTargetPath().c_str());
+	argv[2] = NULL;
+
+    return argv;
+}
+
 static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 {
 	int pipefd[2];
@@ -158,17 +226,23 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	startTime = std::time(NULL);
 	child = fork();
 	if (child < 0)
+	{
+		close(pipefd[0]);
+		close(pipefd[1]);
 		throw (RecoverableException("Couldn't fork CGI properly"));
+	}
 	else if (child == CHILD_OK)
 	{
-		char *env[] = { NULL };
-		char *argv[] = { strdup(cgi.second.c_str()), strdup(ctx.getTargetPath().c_str()), NULL };
+		char **env = setEnvironment(ctx, cgi);
+		char **argv = setArgs(ctx, cgi);
 
 		close(pipefd[0]);
 		dup2(pipefd[1], STDOUT_FILENO);
 		close(pipefd[1]);
 
 		execve(cgi.second.c_str(), argv, env);
+		freeArr(env);
+		freeArr(argv);
 		exit(1);
 	}
 
@@ -180,7 +254,7 @@ static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res) // TOD
 	res.code_ = handleCgiOutput(ctx, cgi, res.tempBody_);
 	if (res.code_ == OK)
 		res.isCGI_ = true;
-	else if (res.code_ == GATEWAY_TIME_OUT)	
+	else if (res.code_ == GATEWAY_TIME_OUT)
 		res.mode_ = C_CLOSE;
 }
 
