@@ -35,7 +35,6 @@ static fd_t setServerFd(sockaddr_in &serverAddress, std::set<int> serverPorts)
 	{
 		serverAddress.sin_port = htons(*portsIt);
 		int socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-		// TODO: ERASE SETSOCKOPT
 		if (setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
 			throw FatalException("Couldn't set SO_REUSEADDR");
 		if (socketFd < 0)
@@ -54,7 +53,6 @@ std::vector<fd_t> WebServer::createServerFds()
 	sockaddr_in serverAddress;
 	fd_t serverFd;
 	std::vector<fd_t> serversFds;
-	// TODO: ERASE THIS VAR
 
 	bzero(&serverAddress, sizeof(serverAddress));
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
@@ -232,7 +230,7 @@ void WebServer::receiveRequest(Connection *connection, t_epoll &epoll)
 
 	bzero(buffer, sizeof(buffer));
 	bytesReceived = recv(connection->getFd(), buffer, READ_BUFFER_SIZE, 0);
-	if (0 < bytesReceived)
+	if (bytesReceived > 0)
 	{
 		connection->updateLastReceivedPacket(buffer);
 		if (!RequestFactory::canCreateAResponse(connection->getRequestBuffer()))

@@ -16,15 +16,15 @@ static t_httpCode getFile(const std::string &target, t_Body &body)
 static void startHTML(std::ostringstream &html, const std::string &targetName)
 {
 	html << "<!DOCTYPE html>\n"
-		<< "<html>\n"
-			<< "<head>\n"
-				<< "<title>" << "Index of: " << targetName << "</title>\n"
-				<< readFileToString(INDEX_STYLE)
-			<< "</head>\n"
-			<< "<body>\n"
-				<< "<h2>" << "Index of: " << targetName << "</h2>\n"
-					<< readFileToString(INDEX_FILE_LIST)
-					<< "<ul>\n";
+		 << "<html>\n"
+		 << "<head>\n"
+		 << "<title>" << "Index of: " << targetName << "</title>\n"
+		 << readFileToString(INDEX_STYLE)
+		 << "</head>\n"
+		 << "<body>\n"
+		 << "<h2>" << "Index of: " << targetName << "</h2>\n"
+		 << readFileToString(INDEX_FILE_LIST)
+		 << "<ul>\n";
 }
 
 static void closeHTML(std::ostringstream &html)
@@ -46,10 +46,10 @@ static void appendElementToHTML(std::ostringstream &html, const std::string &tar
 		lastModified = ctime(&st.st_mtime);
 	}
 	html << "<li class=\"file-item\">"
-			<< "<div><a href=\"" << anchorName << "\">" << displayName <<"</a></div>\n"
-			<< "<div>" << size.str() << "</div>\n"
-			<< "<div>" << lastModified << "</div>\n"
-		<< "</li>\n";
+		 << "<div><a href=\"" << anchorName << "\">" << displayName << "</a></div>\n"
+		 << "<div>" << size.str() << "</div>\n"
+		 << "<div>" << lastModified << "</div>\n"
+		 << "</li>\n";
 }
 
 static void setIndexNames(struct dirent *dir, std::string &anchorName, std::string &displayName)
@@ -59,7 +59,7 @@ static void setIndexNames(struct dirent *dir, std::string &anchorName, std::stri
 		anchorName += "/";
 	displayName = anchorName;
 	if (displayName.length() > 25)
-		displayName = anchorName.substr(0,22) + "..>";
+		displayName = anchorName.substr(0, 22) + "..>";
 }
 
 static t_httpCode tryAutoIndex(const Context &ctx, t_Body &body)
@@ -86,7 +86,7 @@ static t_httpCode tryAutoIndex(const Context &ctx, t_Body &body)
 			dir = readdir(d);
 		}
 		if (closedir(d))
-			throw (RecoverableException("Couldn't close dir"));
+			throw(RecoverableException("Couldn't close dir"));
 		closeHTML(html);
 		body.content = html.str();
 		body.type = Connection::getExtensionType(".html");
@@ -130,44 +130,43 @@ static void run(const Context &ctx, t_HandlingResult &res)
 	statCheck = checkPath(ctx.getTargetPath());
 	switch (statCheck)
 	{
-		case S_IFREG:
-			res.code_ = getFile(ctx.getTargetPath(), res.tempBody_);
-			break ;
-		case S_IFDIR:
-			res.code_ = tryIndex(ctx, res.tempBody_);
-			break ;
-		case EACCES:
-			res.code_ = FORBIDDEN;
-			break ;
+	case S_IFREG:
+		res.code_ = getFile(ctx.getTargetPath(), res.tempBody_);
+		break;
+	case S_IFDIR:
+		res.code_ = tryIndex(ctx, res.tempBody_);
+		break;
+	case EACCES:
+		res.code_ = FORBIDDEN;
+		break;
 
-		default:
-			res.code_ = NOT_FOUND;
-			break ;
+	default:
+		res.code_ = NOT_FOUND;
+		break;
 	}
-
 }
 
-static void freeArr(char** arr)
+static void freeArr(char **arr)
 {
 	for (size_t i = 0; arr && arr[i]; ++i)
-    	free(arr[i]);
+		free(arr[i]);
 	free(arr);
 }
 
 static std::string getHostName(const std::string &hostValue)
 {
-    const size_t portSeparator = hostValue.find(':');
-    const std::string hostName = hostValue.substr(0, portSeparator);
+	const size_t portSeparator = hostValue.find(':');
+	const std::string hostName = hostValue.substr(0, portSeparator);
 
-    return hostName;
+	return hostName;
 }
 
 static std::string getHostPort(const std::string &hostValue)
 {
-    const size_t portSeparator = hostValue.find(':');
-    const std::string hostPort = hostValue.substr(portSeparator + 1);
+	const size_t portSeparator = hostValue.find(':');
+	const std::string hostPort = hostValue.substr(portSeparator + 1);
 
-    return hostPort;
+	return hostPort;
 }
 
 static char **setEnvironment(const Context &ctx)
@@ -191,7 +190,7 @@ static char **setEnvironment(const Context &ctx)
 	env[6] = strdup(serverPort.c_str());
 	env[envSize] = NULL;
 
-    return env;
+	return env;
 }
 
 static char **setArgs(const Context &ctx, t_cgi &cgi)
@@ -206,7 +205,7 @@ static char **setArgs(const Context &ctx, t_cgi &cgi)
 	argv[1] = strdup(ctx.getTargetPath().c_str());
 	argv[argvSize] = NULL;
 
-    return argv;
+	return argv;
 }
 
 static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
@@ -216,14 +215,14 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	time_t startTime;
 
 	if (pipe(pipefd))
-		throw (RecoverableException("Ceci n'est pas une pipe"));
+		throw(RecoverableException("Ceci n'est pas une pipe"));
 	startTime = std::time(NULL);
 	child = fork();
 	if (child < 0)
 	{
 		close(pipefd[0]);
 		close(pipefd[1]);
-		throw (RecoverableException("Couldn't fork CGI properly"));
+		throw(RecoverableException("Couldn't fork CGI properly"));
 	}
 	else if (child == CHILD_OK)
 	{
@@ -243,7 +242,7 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	return waitForOutput(child, pipefd, startTime, body);
 }
 
-static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res) // TODO: extract this into method...
+static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res)
 {
 	res.code_ = handleCgiOutput(ctx, cgi, res.tempBody_);
 	if (res.code_ == OK)

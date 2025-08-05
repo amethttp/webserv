@@ -18,7 +18,7 @@
 #     - request start-line ----> request-line
 #     - response start-line ---> status-line
 #
-#  
+#
 # 3.  Normal procedure to parse an HTTP message:
 #     - 1. Read the start-line into a structure
 #     - 2. Read each header into a hash table / map until the empty line
@@ -198,16 +198,16 @@
 #
 #
 # 30. The trailer section is used to add dynamically generated metada. It consists of: *( field-line CRLF ). A receiver that builds the chunked body MAY discard
-#     the received trailer fields. 
+#     the received trailer fields.
 #
 #
 ###########################################################################################
 ###########################################################################################
-# 
+#
 # REQUEST GRAMMAR
-# 
+#
 #---# ABNF Core Rules: #---#
-# 
+#
 #   ---
 #   - CR              =  %x0D                        ; Carriage return (\r)
 #   - LF              =  %x0A                        ; Linefeed (\n)
@@ -221,157 +221,157 @@
 #   - OCTET           =  %x00-FF                     ; 1 byte of data
 #   - VCHAR           =  %x21-7E                     ; Visible printing characters ("!" - "~")
 #   ---
-# 
-# 
+#
+#
 #---# RFC HTTP-messages grammar #---#
-# 
+#
 #   HTTP-message      = start-line CRLF
 #                       *( field-line CRLF )            --->    MUST have Host header (no repetitions)
 #                       CRLF
 #                       [ message-body ]
-# 
-# 
+#
+#
 #   start-line        = request-line / status-line
-# 
-# 
+#
+#
 #   request-line      = method SP request-target SP HTTP-version
-#  
-# 
+#
+#
 #   method            = token             --->     CASE-SENSITIVE
-# 
-# 
+#
+#
 #   token             = 1*tchar
-# 
-# 
+#
+#
 #   tchar             = "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
-# 
-# 
+#
+#
 #   request-target    = origin-form
-# 
-# 
+#
+#
 #   origin-form       = absolute-path [ "?" query ]
-# 
-# 
+#
+#
 #   absolute-path     = 1*( "/" segment )
-# 
-# 
+#
+#
 #   segment           = *pchar
-# 
-# 
+#
+#
 #   pchar             = unreserved / pct-encoded / sub-delims / ":" / "@"
-# 
-# 
+#
+#
 #   unreserved        = ALPHA / DIGIT / "-" / "." / "_" / "~"
-# 
-# 
+#
+#
 #   pct-encoded       = "%" HEXDIG HEXDIG
-# 
-# 
+#
+#
 #   sub-delims        = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
-# 
-# 
+#
+#
 #   query             = *( pchar / "/" / "?" )
-# 
-# 
+#
+#
 #   HTTP-version      = HTTP-name "/" DIGIT "." DIGIT          --->     CASE-SENSITIVE
-# 
-# 
+#
+#
 #   HTTP-name         = %s"HTTP"
-# 
-# 
+#
+#
 #   status-line       = HTTP-version SP status-code SP [ reason-phrase ]
-# 
-# 
-#   status-code       = 3 DIGIT 
-# 
-# 
+#
+#
+#   status-code       = 3 DIGIT
+#
+#
 #   reason-phrase     = 1*( HTAB / SP / VCHAR / obs-text )
-# 
-# 
+#
+#
 #   field-line        = field-name ":" OWS field-value OWS
-# 
-# 
+#
+#
 #   field-name        = token               --->     CASE-INSENSITIVE
-# 
-# 
+#
+#
 #   OWS               = *( SP / HTAB )    ; optional WS (should trim)
-# 
-# 
+#
+#
 #   field-value       = *field-content
-# 
-# 
+#
+#
 #   field-content     = field-vchar [ 1*( SP / HTAB / field-vchar ) field-vchar ]
-# 
-# 
+#
+#
 #   field-vchar       = VCHAR / obs-text
-# 
-# 
+#
+#
 #   obs-text          = %x80-FF           --->     We will not recognize them (400 Bad Request)
 #
-# 
-#   message-body      = *OCTET            --->     Size based on Content-Length or Transfer-Encoding: chunked 
-# 
-# 
+#
+#   message-body      = *OCTET            --->     Size based on Content-Length or Transfer-Encoding: chunked
+#
+#
 #   chunked-body      = *chunk
 #                       last-chunk
 #                       trailer-section
 #                       CRLF
-# 
-# 
+#
+#
 #   chunk             = chunk-size [ chunk-ext ] CRLF
 #                       chunk-data CRLF
-# 
-# 
+#
+#
 #   chunk-size        = 1*HEXDIG
-# 
-# 
+#
+#
 #   chunk-ext         = *( ";" chunk-ext-name [ "=" chunk-ext-val ] )
-# 
-# 
+#
+#
 #   chunk-ext-name    = token
-# 
-# 
+#
+#
 #   chunk-ext-val     = token / quoted-string
-# 
-# 
+#
+#
 #   quoted-string     = DQUOTE *( qdtext / quoted-pair ) DQUOTE
-# 
-# 
+#
+#
 #   qdtext            = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text     --->   HTAB / SP / '!' / '#' - '[' / ']' - '~' / obs-text
-# 
-# 
+#
+#
 #   quoted-pair       = "\" ( HTAB / SP / VCHAR / obs-text )
-# 
-# 
+#
+#
 #   chunk-data        = 1*OCTET    --->    MUST be exactly chunk-size octets
-# 
-# 
+#
+#
 #   last-chunk        = 1*("0") [ chunk-ext ] CRLF
-# 
-# 
+#
+#
 #   trailer-section   = *( field-line CRLF )
-# 
-#  
+#
+#
 #---# Mandatory headers grammar #---#
-# 
+#
 #   Connection:       = "keep-alive" / "close"           --->  CASE-INSENSITIVE
-# 
-# 
+#
+#
 #   Host:             = reg-name ":" port            --->  CASE-INSENSITIVE   --->  MUST NOT BE EMPTY NOR DUPLICATED
-#   reg-name          = *( unreserved / pct-encoded / sub-delims)  
+#   reg-name          = *( unreserved / pct-encoded / sub-delims)
 #   port              = 1*DIGIT                       --->  0 => port <= 65335
-#  
-#  
+#
+#
 #   Content-Length    = 1*DIGIT
-# 
-# 
+#
+#
 #   Transfer-Encoding = "chunked"           --->    Tranfer-coding chunked (chunked-body)     --->     CASE-INSENSITIVE (CHUNKED == chunked)
-#  
-#  
+#
+#
 #   Content-Length and Transfer-Encoding ---> 400 Bad Request
 #   Neither Content-Length nor Transfer-Encoding and body ---> 400 Bad Request
-#  
-#  
+#
+#
 ###########################################################################################
 ###########################################################################################
 #
@@ -387,16 +387,16 @@
 # ACCEPTANCE CRITERIA:
 
 ## REQUEST LINE (RQL)
-### 1. Fail with 400 Bad Request for INVALID request-line preceded by a SP 
+### 1. Fail with 400 Bad Request for INVALID request-line preceded by a SP
 " GET / HTTP/1.1"
 
-### 2. Fail with 400 Bad Request for INVALID request-line followed by a SP 
+### 2. Fail with 400 Bad Request for INVALID request-line followed by a SP
 "GET / HTTP/1.1 "
 
-### 3. Fail with 400 Bad Request for INVALID request-line with 4 elements 
+### 3. Fail with 400 Bad Request for INVALID request-line with 4 elements
 "INVALID GET / HTTP/1.1"
 
-### 4. Fail with 400 Bad Request for INVALID request-line with 4 elements 
+### 4. Fail with 400 Bad Request for INVALID request-line with 4 elements
 "GET / HTTP/1.1 INVALID"
 
 ### 5. Fail with 400 Bad Request for INVALID request-line
@@ -470,8 +470,8 @@
 
 ### 3. Target with multiple / (directories). Works, target is the specified
 "GET /profile/contact.php HTTP/1.1"
-"GET /courses/science/physics.py HTTP/1.1" 
-"GET /courses/science/physics.aspx HTTP/1.1" 
+"GET /courses/science/physics.py HTTP/1.1"
+"GET /courses/science/physics.aspx HTTP/1.1"
 
 ### 4. Target references a directory (ends with /). Works, target is the specified
 "GET /courses/ HTTP/1.1"
@@ -904,7 +904,7 @@
 ### 39. Multiple slashes before and after text -> "/courses/"
 "///courses///"
 
-### 40. Combination of multiple current and parent directory, and slashes -> "/about/index.php" 
+### 40. Combination of multiple current and parent directory, and slashes -> "/about/index.php"
 "/./courses/..////about/index.php"
 
 ### 41. Pct-encoded current directory -> "/about/index.html"
@@ -934,7 +934,7 @@
 ### 3. Recognize header with key consisted of tchars
 "!#$%&'*+-.^_`|~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz: localhost"
 
-### 4. Take as failure a header key containing non-tchars 
+### 4. Take as failure a header key containing non-tchars
 "(),/;\r<=>\b?@\f[\\]\t{}\n: localhost"
 "Ho(),/;\r<=>\b?@\f[\\]\t{}\nst: localhost"
 "Ho\x01\x14st: localhost"
@@ -958,7 +958,7 @@
 ### 9. Take as failure an empty header key
 ": localhost"
 
-### 10. Take as failure a header missing the colon separator 
+### 10. Take as failure a header missing the colon separator
 "Host localhost"
 
 ### 11. Take as failure a header that has any other character replacing the colon separator
@@ -1172,7 +1172,7 @@
 ### 3. Accept any octet
 "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f" \
 + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F" \
-+ " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F" 
++ " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F"
 
 ### 4. Accept CRLF inside body
 "Valid\r\nbody"
@@ -1272,16 +1272,16 @@
 ### 21. Take as failure a last-chunk with chunk-extension with SP as chunk-ext-val
 "0;ext= \r\n\r\n"
 
-### 22. Take as failure a last-chunk with chunk-extension with empty chunk-ext-val 
+### 22. Take as failure a last-chunk with chunk-extension with empty chunk-ext-val
 "0;ext=\r\n\r\n"
 
-### 23. Recognize a last-chunk with chunk-extension with an empty quoted-string chunk-ext-val 
+### 23. Recognize a last-chunk with chunk-extension with an empty quoted-string chunk-ext-val
 "0;ext=\"\"\r\n\r\n"
 
-### 24. Recognize a last-chunk with chunk-extension with a non-empty quoted-string chunk-ext-val 
+### 24. Recognize a last-chunk with chunk-extension with a non-empty quoted-string chunk-ext-val
 "0;ext=\"validBody\"\r\n\r\n"
 
-### 25. Recognize a last-chunk with chunk-extension with a quoted-string chunk-ext-val with valid qdtext 
+### 25. Recognize a last-chunk with chunk-extension with a quoted-string chunk-ext-val with valid qdtext
 "0;ext=\"!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~\t \\\\ \\\"\"\r\n\r\n"
 
 ### 26. Recognize a last-chunk with chunk-extension with a quoted-string chunk-ext-val with valid quoted-pairs
@@ -1346,54 +1346,54 @@
 ### 40. Recognize a basic chunk
 "5\r\nValid\r\n0\r\n\r\n"
 
-### 41. Recognize a chunk with leading zeros in chunk-size 
+### 41. Recognize a chunk with leading zeros in chunk-size
 "000000000000000005\r\nValid\r\n0\r\n\r\n"
 
-### 42. Recognize a chunk with multiple hexadecimal digits in chunk-size 
+### 42. Recognize a chunk with multiple hexadecimal digits in chunk-size
 "0a\r\nValid body\r\n0\r\n\r\n"
 
-### 43. Recognize a chunk with case-insensitive hexadecimal digits in chunk-size 
+### 43. Recognize a chunk with case-insensitive hexadecimal digits in chunk-size
 "0A\r\nValid body\r\n0\r\n\r\n"
 
-### 44. Take as failure a chunk with non-hexadecimal digits in chunk-size 
+### 44. Take as failure a chunk with non-hexadecimal digits in chunk-size
 "0g\r\nInvalid\r\n0\r\n\r\n"
 "0G\r\nInvalid\r\n0\r\n\r\n"
 "-4\r\nInvalid\r\n0\r\n\r\n"
 
-### 45. Take as failure a chunk with SP in chunk-size 
+### 45. Take as failure a chunk with SP in chunk-size
 "7 \r\nInvalid\r\n0\r\n\r\n"
 " 7\r\nInvalid\r\n0\r\n\r\n"
 
-### 46. Take as failure a chunk with SP as chunk-size 
+### 46. Take as failure a chunk with SP as chunk-size
 " \r\nInvalid\r\n0\r\n\r\n"
 
-### 47. Take as failure a chunk without chunk-size 
+### 47. Take as failure a chunk without chunk-size
 "\r\nInvalid\r\n0\r\n\r\n"
 
-### 48. Recognize a chunk with chunk-extension 
+### 48. Recognize a chunk with chunk-extension
 "0a;ext=val;ext=\"\\\\ \\\"\";ext=val2\r\nValid body\r\n0\r\n\r\n"
 
-### 49. Take as failure a chunk with a mal-formed first CRLF separator 
+### 49. Take as failure a chunk with a mal-formed first CRLF separator
 "7\rInvalid\r\n0\r\n\r\n"
 "7\nInvalid\r\n0\r\n\r\n"
 "7\f\bInvalid\r\n0\r\n\r\n"
 
-### 50. Take as failure a chunk with a SP as first CRLF separator 
+### 50. Take as failure a chunk with a SP as first CRLF separator
 "7 Invalid\r\n0\r\n\r\n"
 
-### 51. Take as failure a chunk without first CRLF separator 
+### 51. Take as failure a chunk without first CRLF separator
 "7Invalid\r\n0\r\n\r\n"
 
-### 52. Recognize a chunk with CRLF separators in chunk-data as data (not as separator) 
+### 52. Recognize a chunk with CRLF separators in chunk-data as data (not as separator)
 "0b\r\nValid\r\nbody\r\n0\r\n\r\n"
 "07\r\n\r\n\bbody\r\n0\r\n\r\n"
 
-### 53. Recognize a chunk with all octets in chunk-data 
+### 53. Recognize a chunk with all octets in chunk-data
 "7f\r\n\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0b\x0C\x0d\x0E\x0f" \
 + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1B\x1c\x1D\x1e\x1F" \
-+ " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F\r\n0\r\n\r\n" 
++ " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7F\r\n0\r\n\r\n"
 
-### 54. Take as failure a chunk with a mal-formed last CRLF separator 
+### 54. Take as failure a chunk with a mal-formed last CRLF separator
 "7\r\nInvalid\r0\r\n\r\n"
 "7\r\nInvalid\n0\r\n\r\n"
 "7\r\nInvalid\b\f0\r\n\r\n"
@@ -1578,10 +1578,10 @@
 "0a\r\nvalid body\r\n0\r\n"
 "0a\r\nvalid body\r\n0\r\n\r"
 
-### 27. Return false for a chunked body without last chunk 
+### 27. Return false for a chunked body without last chunk
 "0a\r\nvalid body\r\n"
 
-### 28. Return true for a chunked body with trailer fields 
+### 28. Return true for a chunked body with trailer fields
 "0\r\ntrailer: field\r\n\r\n"
 "0\r\ninvalid\r\n\r\n"
 "0\r\ntrailer: \b\f\\\r\n\r\n"
@@ -1600,44 +1600,19 @@
 "0\r\ntrailer:field\r\nTrailer:field\r\n"
 "0\r\ntrailer:field\r\nTrailer:field\r\n\r"
 
-### 31. Return true for a chunked body with extra text at the end 
+### 31. Return true for a chunked body with extra text at the end
 "0\r\n\r\ninvalid: fields"
 "0\r\n\r\ninvalid: fields\r\n\r\n"
 
-### 32. Return false an incompleted chunked body 
+### 32. Return false an incompleted chunked body
 "invalid"
 "00"
 "\r\n"
 ""
 
-### 33. Return true for a completed chunked body 
+### 33. Return true for a completed chunked body
 "0000A;ext;ext=\"\";ext\r\nValid body\r\n1;ext;ext;ext\r\n \r\n09;ext\r\nCompleted\r\n0;ext=\"\\\\ \\\t\"\r\nTrailer: section\r\nCompleted: foo\r\n\r\n"
 "0000A;;ext\"\";ext=\r\nToo much body for this chunk size\r\n1;\b\v\fext=\r;ext\r\n \r\n09;ext\r\nCompleted!!!!\r\n0;ext=\"\\\\ \t\b\v\f \\\t\"\r\ninvalid\r\nCompleted: \b\r\n\r\n"
-
-
-
-
-
-
-
-# 1. Separate path-query (decode only path, not URI neither query)                      DONE
-# 2. Target pct-decoder                                                                 DONE
-# 3. Refactor RequestFactory::create()                                                  DONE
-# 4. Target normalizer criteria                                                         DONE
-# 5. Target normalizer                                                                  DONE
-# 6. Headers parser minimum design                                                      DONE
-# 7. Headers parsing criteria                                                           DONE
-# 8. Headers parsing                                                                    DONE
-# 9. TODO THINGS                                                                        DONE
-# 10. Full body parsing criteria                                                        DONE
-# 11. Full body parsing                                                                 DONE
-# 12. Chunked body parsing criteria                                                     DONE
-# 13. Chunked body parsing                                                              DONE
-# 14. RequestFactory::canCreateResponse() criteria                                      DONE
-# 15. RequestFactory::canCreateResponse()                                               DONE
-# 16. Final refactors and code checking                                                 DONE
-# 17. Test canCreateResponse in every assert of all suites                              
-# 18. Refactor code in webserv.cpp to work with RequestFactory::create()                
 
 
 

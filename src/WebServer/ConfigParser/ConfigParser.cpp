@@ -199,7 +199,6 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		block.indexList_ = node.params;
 	else if (node.name == "connection_max_body_size")
 	{
-		// TODO: Split magnitud and check if an integer is sufficient
 		int val;
 		if (std::istringstream(node.params.at(0)) >> val)
 			block.connectionMaxBodySize_ = val;

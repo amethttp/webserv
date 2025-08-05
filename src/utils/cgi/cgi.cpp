@@ -58,7 +58,7 @@ t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_Body &body)
 		usleep(100);
 	}
 	if (status < 0)
-		throw (RecoverableException("WaitPid failed"));
+		throw(RecoverableException("WaitPid failed"));
 	if (WEXITSTATUS(status) != 0)
 		return INTERNAL_SERVER_ERROR;
 

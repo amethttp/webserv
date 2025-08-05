@@ -15,7 +15,7 @@ static t_httpCode postFile(const Context &ctx, t_HandlingResult &res)
 	if (!file.is_open())
 	{
 		file.close();
-		throw (RecoverableException("Error creating file"));
+		throw(RecoverableException("Error creating file"));
 	}
 	file << ctx.getRequest().body.getMessage();
 	res.tempHeaders_.addHeader("Content-Location", ctx.getTargetPath());
@@ -31,43 +31,42 @@ static t_HandlingResult run(const Context &ctx, t_HandlingResult &res)
 	statCheck = checkPath(ctx.getUploadPath());
 	switch (statCheck)
 	{
-		case S_IFDIR:
-			res.code_ = postFile(ctx, res);
-			break ;
-		case EACCES:
-			res.code_ = FORBIDDEN;
-			break ;
+	case S_IFDIR:
+		res.code_ = postFile(ctx, res);
+		break;
+	case EACCES:
+		res.code_ = FORBIDDEN;
+		break;
 
-		default:
-			res.code_ = NOT_FOUND;
-			break ;
+	default:
+		res.code_ = NOT_FOUND;
+		break;
 	}
 
 	return res;
 }
 
-
-static void freeArr(char** arr)
+static void freeArr(char **arr)
 {
 	for (size_t i = 0; arr && arr[i]; ++i)
-    	free(arr[i]);
+		free(arr[i]);
 	free(arr);
 }
 
 static std::string getHostName(const std::string &hostValue)
 {
-    const size_t portSeparator = hostValue.find(':');
-    const std::string hostName = hostValue.substr(0, portSeparator);
+	const size_t portSeparator = hostValue.find(':');
+	const std::string hostName = hostValue.substr(0, portSeparator);
 
-    return hostName;
+	return hostName;
 }
 
 static std::string getHostPort(const std::string &hostValue)
 {
-    const size_t portSeparator = hostValue.find(':');
-    const std::string hostPort = hostValue.substr(portSeparator + 1);
+	const size_t portSeparator = hostValue.find(':');
+	const std::string hostPort = hostValue.substr(portSeparator + 1);
 
-    return hostPort;
+	return hostPort;
 }
 
 static char **setEnvironment(const Context &ctx)
@@ -98,7 +97,7 @@ static char **setEnvironment(const Context &ctx)
 	env[8] = strdup(serverPort.c_str());
 	env[envSize] = NULL;
 
-    return env;
+	return env;
 }
 
 static char **setArgs(const Context &ctx, t_cgi &cgi)
@@ -113,7 +112,7 @@ static char **setArgs(const Context &ctx, t_cgi &cgi)
 	argv[1] = strdup(ctx.getTargetPath().c_str());
 	argv[argvSize] = NULL;
 
-    return argv;
+	return argv;
 }
 
 static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
@@ -124,12 +123,12 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	time_t startTime;
 
 	if (pipe(outPipe))
-		throw (RecoverableException("Ceci n'est pas une pipe"));
+		throw(RecoverableException("Ceci n'est pas une pipe"));
 	if (pipe(inPipe))
 	{
 		close(outPipe[0]);
 		close(outPipe[1]);
-		throw (RecoverableException("Ceci n'est pas une pipe"));
+		throw(RecoverableException("Ceci n'est pas une pipe"));
 	}
 	startTime = std::time(NULL);
 	child = fork();
@@ -139,7 +138,7 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 		close(inPipe[1]);
 		close(outPipe[0]);
 		close(outPipe[1]);
-		throw (RecoverableException("Couldn't fork CGI properly"));
+		throw(RecoverableException("Couldn't fork CGI properly"));
 	}
 	else if (child == CHILD_OK)
 	{
@@ -180,7 +179,7 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	return waitForOutput(child, outPipe, startTime, body);
 }
 
-static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res) // TODO: extract this into method...
+static void runCGI(const Context &ctx, t_cgi &cgi, t_HandlingResult &res)
 {
 	res.code_ = handleCgiOutput(ctx, cgi, res.tempBody_);
 	if (res.code_ == OK)
