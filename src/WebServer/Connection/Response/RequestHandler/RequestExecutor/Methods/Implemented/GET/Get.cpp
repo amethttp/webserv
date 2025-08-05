@@ -148,12 +148,12 @@ static void run(const Context &ctx, t_HandlingResult &res)
 }
 
 static void printCharArray(char** arr) {
-    if (!arr)
-        return;
+	if (!arr)
+		return;
 
-    for (int i = 0; arr[i] != NULL; ++i) {
-        std::cout << "[" << i << "]: " << arr[i] << std::endl;
-    }
+	for (int i = 0; arr[i] != NULL; ++i) {
+		std::cout << "[" << i << "]: " << arr[i] << std::endl;
+	}
 }
 
 static void freeArr(char** arr)
@@ -186,31 +186,34 @@ static char **setEnvironment(const Context &ctx, t_cgi &cgi)
 	const std::string serverName = "SERVER_NAME=" + getHostName(ctx.getRequest().headers.getHeaderValue(HOST));
 	const std::string serverPort = "SERVER_PORT=" + getHostPort(ctx.getRequest().headers.getHeaderValue(HOST));
 
-	char **env = (char **)malloc(sizeof(char *) * 8);
+	size_t envSize = 7;
+	char **env = (char **)malloc(sizeof(char *) * (envSize + 1));
 	if (!env)
 		return NULL;
 
-	env[0] = strdup("REQUEST_METHOD=GET");
+	env[0] = strdup("REQUEST_METHOD=POST");
 	env[1] = strdup(scriptName.c_str());
 	env[2] = strdup(queryString.c_str());
 	env[3] = strdup("SERVER_PROTOCOL=HTTP/1.1");
 	env[4] = strdup("GATEWAY_INTERFACE=CGI/1.1");
 	env[5] = strdup(serverName.c_str());
 	env[6] = strdup(serverPort.c_str());
-	env[7] = NULL;
+	env[envSize] = NULL;
 
     return env;
 }
 
 static char **setArgs(const Context &ctx, t_cgi &cgi)
 {
-	char **argv = (char **)malloc(sizeof(char *) * 3);
+	size_t argvSize = 2;
+
+	char **argv = (char **)malloc(sizeof(char *) * (argvSize + 1));
 	if (!argv)
 		return NULL;
 
 	argv[0] = strdup(cgi.second.c_str());
 	argv[1] = strdup(ctx.getTargetPath().c_str());
-	argv[2] = NULL;
+	argv[argvSize] = NULL;
 
     return argv;
 }

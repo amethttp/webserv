@@ -5,6 +5,7 @@
 
 #define HOST "Host"
 #define CONTENT_LENGTH "Content-Length"
+#define CONTENT_TYPE "Content-Type"
 #define TRANSFER_ENCODING "Transfer-Encoding"
 #define CONNECTION "Connection"
 

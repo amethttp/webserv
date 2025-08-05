@@ -4,6 +4,7 @@
 
 Server::Server()
 {
+    this->uploadPath_.clear();
 }
 
 Server::~Server()
