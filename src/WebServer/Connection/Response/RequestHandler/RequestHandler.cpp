@@ -133,7 +133,7 @@ static void useSession(Context &ctx, t_HandlingResult &result)
 		Session *session = new Session();
 		ctx.pushServerSession(session);
 		cookieVal << "sessionId=" << session->getId() << "; expires=Fri, 31 Dec 9999 23:59:59 GMT; HttpOnly";
-		result.tempHeaders_.addHeader("Set-Cookie", cookieVal.str());
+		result.tempHeaders_.addHeader(COOKIE_RESPONSE_KEY, cookieVal.str());
 		std::cout << "------ NEW SESSION: " << session->getId() << std::endl;
 	}
 }

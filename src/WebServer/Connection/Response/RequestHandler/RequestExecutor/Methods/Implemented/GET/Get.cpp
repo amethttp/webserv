@@ -175,8 +175,9 @@ static char **setEnvironment(const Context &ctx)
 	const std::string queryString = "QUERY_STRING=" + ctx.getRequest().requestLine.getTargetQuery();
 	const std::string serverName = "SERVER_NAME=" + getHostName(ctx.getRequest().headers.getHeaderValue(HOST));
 	const std::string serverPort = "SERVER_PORT=" + getHostPort(ctx.getRequest().headers.getHeaderValue(HOST));
+	const std::string cookie = "HTTP_COOKIE=" + ctx.getRequest().headers.getHeaderValue("Cookie");
 
-	size_t envSize = 7;
+	size_t envSize = 8;
 	char **env = (char **)malloc(sizeof(char *) * (envSize + 1));
 	if (!env)
 		return NULL;
@@ -188,6 +189,7 @@ static char **setEnvironment(const Context &ctx)
 	env[4] = strdup("GATEWAY_INTERFACE=CGI/1.1");
 	env[5] = strdup(serverName.c_str());
 	env[6] = strdup(serverPort.c_str());
+	env[7] = strdup(cookie.c_str());
 	env[envSize] = NULL;
 
 	return env;
