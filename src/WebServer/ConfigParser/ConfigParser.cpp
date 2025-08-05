@@ -255,12 +255,12 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		block.autoIndex_ = node.params.at(0) == "on";
 	else if (node.name == "index")
 		block.indexList_ = node.params;
-	else if (node.name == "client_max_body_size")
+	else if (node.name == "connection_max_body_size")
 	{
 		// TODO: Split magnitud and check if an integer is sufficient
 		int val;
 		if (std::istringstream(node.params.at(0)) >> val)
-			block.clientMaxBodySize_ = val;
+			block.connectionMaxBodySize_ = val;
 	}
 	else if (node.name == "method")
 	{
@@ -324,7 +324,7 @@ static void setLocationFromBlock(Location *location, const ConfigBlock &block)
 	location->setCGIs(block.cgis_);
 	location->setAutoIndex(block.autoIndex_);
 	location->setIndexList(block.indexList_);
-	location->setMaxBodySize(block.clientMaxBodySize_);
+	location->setMaxBodySize(block.connectionMaxBodySize_);
 	location->setMethods(block.methods_);
 	location->setReturn(block.return_);
 	location->setErrorPages(block.errorPages_);

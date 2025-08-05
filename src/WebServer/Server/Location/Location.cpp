@@ -3,7 +3,7 @@
 
 Location::Location()
 {
-	clientMaxBodySize_ = 0;
+	connectionMaxBodySize_ = 0;
 }
 
 Location::~Location()
@@ -44,7 +44,7 @@ void Location::setReturn(const t_return &ret)
 
 void Location::setMaxBodySize(const size_t size)
 {
-	this->clientMaxBodySize_ = size;
+	this->connectionMaxBodySize_ = size;
 }
 
 void Location::setCGIs(std::map<std::string, std::string> cgis)
@@ -89,7 +89,7 @@ t_return Location::getReturn() const
 
 size_t Location::getMaxBodySize() const
 {
-    return this->clientMaxBodySize_;
+    return this->connectionMaxBodySize_;
 }
 
 bool Location::getAutoIndex() const
@@ -114,7 +114,7 @@ std::ostream &operator<<(std::ostream &stream, const Location &location)
 		   << "Index list: {";
 	for (std::vector<std::string>::const_iterator it = location.indexList_.begin(); it != location.indexList_.end(); ++it)
 		stream << *it << ", ";
-	stream << "}\nMax body size: " << location.clientMaxBodySize_ << std::endl
+	stream << "}\nMax body size: " << location.connectionMaxBodySize_ << std::endl
 		   << "Methods: {";
 	for (std::set<t_method>::const_iterator it = location.methods_.begin(); it != location.methods_.end(); ++it)
 		stream << (*it) << ", ";
@@ -136,8 +136,8 @@ void Location::setDefaults()
 		autoIndex_ = false;
 	if (indexList_.empty())
 		indexList_.push_back("index.html");
-	if (clientMaxBodySize_ == 0)
-		clientMaxBodySize_ = 1048576;
+	if (connectionMaxBodySize_ == 0)
+		connectionMaxBodySize_ = 1048576;
 	if (methods_.empty())
 	{
 		methods_.insert(M_GET);

@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fstream>
-#include "WebServer/Client/Client.hpp"
+#include "WebServer/Connection/Connection.hpp"
 
 std::string getMIME(const std::string &target);
 void normalizeTrailingSlash(std::string &path);

@@ -8,8 +8,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "WebServer.hpp"
-#include "Client/Client.hpp"
-#include "Client/Request/RequestFactory/RequestFactory.hpp"
+#include "Connection/Connection.hpp"
+#include "Connection/Request/RequestFactory/RequestFactory.hpp"
 #include "utils/exceptions/Exceptions.hpp"
 
 WebServer::WebServer()
@@ -18,9 +18,9 @@ WebServer::WebServer()
 
 WebServer::~WebServer()
 {
-	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end(); ++it)
+	for (std::vector<Connection *>::iterator it = connections_.begin(); it != connections_.end(); ++it)
 		delete *it;
-	this->clients_.clear();
+	this->connections_.clear();
 
 	for (std::vector<Server *>::iterator it = servers_.begin(); it != servers_.end(); ++it)
 		delete *it;
@@ -105,20 +105,20 @@ void WebServer::setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds)
 	}
 }
 
-void WebServer::setEpollRead(t_epoll &epoll, Client *client)
+void WebServer::setEpollRead(t_epoll &epoll, Connection *connection)
 {
 	epoll.eventConfig.events = EPOLLIN;
-	epoll.eventConfig.data.ptr = static_cast<Client *>(client);
-	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
-		throw RecoverableException("Couldn't add POLLIN flag to client fd");
+	epoll.eventConfig.data.ptr = static_cast<Connection *>(connection);
+	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, connection->getFd(), &epoll.eventConfig) == -1)
+		throw RecoverableException("Couldn't add POLLIN flag to connection fd");
 }
 
-void WebServer::setEpollWrite(t_epoll &epoll, Client *client)
+void WebServer::setEpollWrite(t_epoll &epoll, Connection *connection)
 {
 	epoll.eventConfig.events = EPOLLOUT;
-	epoll.eventConfig.data.ptr = static_cast<void *>(client);
-	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, client->getFd(), &epoll.eventConfig) == -1)
-		throw RecoverableException("Couldn't add POLLOUT flag to client fd");
+	epoll.eventConfig.data.ptr = static_cast<void *>(connection);
+	if (epoll_ctl(epoll.fd, EPOLL_CTL_MOD, connection->getFd(), &epoll.eventConfig) == -1)
+		throw RecoverableException("Couldn't add POLLOUT flag to connection fd");
 }
 
 fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
@@ -131,40 +131,40 @@ fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
 	return -1;
 }
 
-void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
+void WebServer::acceptNewConnection(fd_t &serverFd, t_epoll &epoll)
 {	
-	sockaddr_in newClientAddress;
-	socklen_t socketSize = sizeof(newClientAddress);
+	sockaddr_in newConnectionAddress;
+	socklen_t socketSize = sizeof(newConnectionAddress);
 
 	while (true)
 	{
 		try
 		{
-			bzero(&newClientAddress, sizeof(newClientAddress));
-			fd_t newClientFd = accept(serverFd, (struct sockaddr *)&newClientAddress, &socketSize);
-			if (newClientFd < 0)
+			bzero(&newConnectionAddress, sizeof(newConnectionAddress));
+			fd_t newConnectionFd = accept(serverFd, (struct sockaddr *)&newConnectionAddress, &socketSize);
+			if (newConnectionFd < 0)
 			{
 				if (errno == EAGAIN || errno == EWOULDBLOCK)
 					break;
-				throw RecoverableException("Couldn't accept new client");
+				throw RecoverableException("Couldn't accept new connection");
 			}
-			if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) < 0)
+			if (fcntl(newConnectionFd, F_SETFL, O_NONBLOCK) < 0)
 			{
-				close(newClientFd);
-				throw RecoverableException("Couldn't set NONBLOCKING flag to client fd");
+				close(newConnectionFd);
+				throw RecoverableException("Couldn't set NONBLOCKING flag to connection fd");
 			}
-			Client *newClient = new Client();
-			newClient->setFd(newClientFd);
-			epoll.eventConfig.data.ptr = newClient;
+			Connection *newConnection = new Connection();
+			newConnection->setFd(newConnectionFd);
+			epoll.eventConfig.data.ptr = newConnection;
 			epoll.eventConfig.events = EPOLLIN;
-			if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newClientFd, &epoll.eventConfig) == -1)
+			if (epoll_ctl(epoll.fd, EPOLL_CTL_ADD, newConnectionFd, &epoll.eventConfig) == -1)
 			{
-				close(newClientFd);
-				delete newClient;
-				throw RecoverableException("Couldn't add client fd to epoll");
+				close(newConnectionFd);
+				delete newConnection;
+				throw RecoverableException("Couldn't add connection fd to epoll");
 			}
-			this->clients_.push_back(newClient);
-			std::cout << "New Client (ID: " << newClient->getId() << ") connected" << std::endl;
+			this->connections_.push_back(newConnection);
+			std::cout << "New Connection (ID: " << newConnection->getId() << ") connected" << std::endl;
 		}
 		catch(const RecoverableException& e)
 		{
@@ -173,15 +173,15 @@ void WebServer::acceptNewClient(fd_t &serverFd, t_epoll &epoll)
 	}
 }
 
-std::vector<Client *>::iterator WebServer::disconnectClient(Client *client, t_epoll &epoll, const std::string &reason)
+std::vector<Connection *>::iterator WebServer::disconnectConnection(Connection *connection, t_epoll &epoll, const std::string &reason)
 {
-	if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, client->getFd(), NULL) == -1)
-		throw FatalException("Couldn't delete client fd from epoll");
-	if (close(client->getFd()) == -1)
-		throw FatalException("Couldn't close client fd");
-	std::cout << "Client (ID: " << client->getId() << ") " << reason << std::endl;
+	if (epoll_ctl(epoll.fd, EPOLL_CTL_DEL, connection->getFd(), NULL) == -1)
+		throw FatalException("Couldn't delete connection fd from epoll");
+	if (close(connection->getFd()) == -1)
+		throw FatalException("Couldn't close connection fd");
+	std::cout << "Connection (ID: " << connection->getId() << ") " << reason << std::endl;
 
-	return removeClient(client);
+	return removeConnection(connection);
 }
 
 Server *WebServer::matchServer(const std::vector<Server *> &servers, std::string hostName)
@@ -195,7 +195,7 @@ Server *WebServer::matchServer(const std::vector<Server *> &servers, std::string
 	return *servers.begin();
 }
 
-void WebServer::processRequest(Client *client, Result<t_Request> &result)
+void WebServer::processRequest(Connection *connection, Result<t_Request> &result)
 {
 	try
 	{
@@ -204,87 +204,87 @@ void WebServer::processRequest(Client *client, Result<t_Request> &result)
 
 		if (result.isSuccess())
 		{
-			client->setRequest(result.getValue());
-			context.init(this->getServers(), client->getRequest());
+			connection->setRequest(result.getValue());
+			context.init(this->getServers(), connection->getRequest());
 			handlingResult = RequestHandler::handleRequest(context);
 
-			client->buildResponse(handlingResult);
+			connection->buildResponse(handlingResult);
 		}
 		else
 		{
-			client->buildResponse(result.getError(), C_CLOSE);
+			connection->buildResponse(result.getError(), C_CLOSE);
 		}
 	}
 	catch(const RecoverableException& e)
 	{
 		std::cerr << e.what() << std::endl;
-		client->buildResponse(INTERNAL_SERVER_ERROR, C_CLOSE);
+		connection->buildResponse(INTERNAL_SERVER_ERROR, C_CLOSE);
 	}
-	client->clearRequestBuffer();
+	connection->clearRequestBuffer();
 }
 
-void WebServer::receiveRequest(Client *client, t_epoll &epoll)
+void WebServer::receiveRequest(Connection *connection, t_epoll &epoll)
 {
 	int bytesReceived;
 	char buffer[READ_BUFFER_SIZE + 1];
 
 	bzero(buffer, sizeof(buffer));
-	bytesReceived = recv(client->getFd(), buffer, READ_BUFFER_SIZE, 0);
+	bytesReceived = recv(connection->getFd(), buffer, READ_BUFFER_SIZE, 0);
 	if (0 < bytesReceived)
 	{
-		client->updateLastReceivedPacket(buffer);
-		if (!RequestFactory::canCreateAResponse(client->getRequestBuffer()))
+		connection->updateLastReceivedPacket(buffer);
+		if (!RequestFactory::canCreateAResponse(connection->getRequestBuffer()))
 			return;
 
-		Result<t_Request> result = RequestFactory::create(client->getRequestBuffer());
-		this->processRequest(client, result);
-		this->setEpollWrite(epoll,client);
+		Result<t_Request> result = RequestFactory::create(connection->getRequestBuffer());
+		this->processRequest(connection, result);
+		this->setEpollWrite(epoll,connection);
 	}
 	else if (bytesReceived == 0)
-		disconnectClient(client, epoll, DISCONNECTED);
+		disconnectConnection(connection, epoll, DISCONNECTED);
 	else
-		throw RecoverableException("Couldn't receive data from client fd");
+		throw RecoverableException("Couldn't receive data from connection fd");
 }
 
-void WebServer::sendResponse(Client *client, t_epoll &epoll)
+void WebServer::sendResponse(Connection *connection, t_epoll &epoll)
 {
-	ssize_t bytesSent = send(client->getFd(), client->getResponseBuffer().c_str(), client->getResponseBuffer().length(), 0);
+	ssize_t bytesSent = send(connection->getFd(), connection->getResponseBuffer().c_str(), connection->getResponseBuffer().length(), 0);
 
 	if (bytesSent < 0)
 		throw RecoverableException("Couldn't send response");
 
-	client->eraseResponse(bytesSent);
-	if ((ssize_t)client->getResponseBuffer().length())
+	connection->eraseResponse(bytesSent);
+	if ((ssize_t)connection->getResponseBuffer().length())
 		return;
 
-	if (client->shouldClose())
+	if (connection->shouldClose())
 	{
 		std::string reason = DISCONNECTED;
-		if (client->getResponseStatus() == REQUEST_TIME_OUT)
+		if (connection->getResponseStatus() == REQUEST_TIME_OUT)
 			reason = TIMED_OUT;
-		disconnectClient(client, epoll, reason);
+		disconnectConnection(connection, epoll, reason);
 	}
 	else
-		setEpollRead(epoll, client);
+		setEpollRead(epoll, connection);
 }
 
-void WebServer::checkClientEvent(t_epoll &epoll, const int &eventIndex)
+void WebServer::checkConnectionEvent(t_epoll &epoll, const int &eventIndex)
 {
-	Client *client = static_cast<Client *>(epoll.eventBuffer[eventIndex].data.ptr);
+	Connection *connection = static_cast<Connection *>(epoll.eventBuffer[eventIndex].data.ptr);
 
 	try
 	{
 		if (epoll.eventBuffer[eventIndex].events & EPOLLIN)
-			receiveRequest(client, epoll);
+			receiveRequest(connection, epoll);
 		else if (epoll.eventBuffer[eventIndex].events & EPOLLOUT)
-			sendResponse(client, epoll);
+			sendResponse(connection, epoll);
 		else
-			disconnectClient(client, epoll, DISCONNECTED);
+			disconnectConnection(connection, epoll, DISCONNECTED);
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
-		disconnectClient(client, epoll, DISCONNECTED);
+		disconnectConnection(connection, epoll, DISCONNECTED);
 	}
 	
 }
@@ -305,35 +305,35 @@ void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &e
 			fd_t serverFd = getServerFd(serversFds, epoll.eventBuffer[i].data.fd);
 
 			if (serverFd != -1)
-				acceptNewClient(serverFd, epoll);
+				acceptNewConnection(serverFd, epoll);
 			else
-				checkClientEvent(epoll, i);
+				checkConnectionEvent(epoll, i);
 		}
-		disconnectTimedoutClients(epoll);
+		disconnectTimedoutConnections(epoll);
 	}
 }
 
-std::vector<Client *>::iterator WebServer::removeClient(Client *client)
+std::vector<Connection *>::iterator WebServer::removeConnection(Connection *connection)
 {
-	int clientId = client->getId();
+	int connectionId = connection->getId();
 
-	for (std::vector<Client *>::iterator it = this->clients_.begin(); it != this->clients_.end(); ++it)
+	for (std::vector<Connection *>::iterator it = this->connections_.begin(); it != this->connections_.end(); ++it)
 	{
-		if ((*it)->getId() == clientId)
+		if ((*it)->getId() == connectionId)
 		{
 			delete *it;
-			return this->clients_.erase(it);
+			return this->connections_.erase(it);
 		}
 	}
 
-	return this->clients_.end();
+	return this->connections_.end();
 }
 
-void WebServer::disconnectTimedoutClients(t_epoll &epoll)
+void WebServer::disconnectTimedoutConnections(t_epoll &epoll)
 {
 	time_t now = std::time(NULL);
 
-	for (std::vector<Client *>::iterator it = clients_.begin(); it != clients_.end();)
+	for (std::vector<Connection *>::iterator it = connections_.begin(); it != connections_.end();)
 	{
 		if ((now - (*it)->getLastReceivedPacket()) * 1000 > TIMEOUT)
 		{
@@ -344,7 +344,7 @@ void WebServer::disconnectTimedoutClients(t_epoll &epoll)
 			}
 			else
 			{
-				it = disconnectClient(*it, epoll, TIMED_OUT);
+				it = disconnectConnection(*it, epoll, TIMED_OUT);
 				continue;
 			}
 		}

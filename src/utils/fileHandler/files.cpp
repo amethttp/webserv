@@ -9,7 +9,7 @@ std::string getMIME(const std::string &target)
 
 	pos = target.rfind('.');
 	if (pos != std::string::npos)
-		res = Client::getExtensionType(target.substr(pos));
+		res = Connection::getExtensionType(target.substr(pos));
 
 	return (res.empty() ? "text/plain" : res);
 }

@@ -15,7 +15,7 @@ static std::map<std::string, SDirective> initDirectivesMap()
     directives["autoindex"] = SDirective(1, 1, false);
     directives["root"] = SDirective(1, 1, false);
     directives["error_page"] = SDirective(2, 2, false);
-    directives["client_max_body_size"] = SDirective(1, 1, false);
+    directives["connection_max_body_size"] = SDirective(1, 1, false);
     directives["method"] = SDirective(1, M_AMOUNT, false);
     directives["upload_path"] = SDirective(1, 1, false);
     directives["cgi"] = SDirective(2, 2, false);

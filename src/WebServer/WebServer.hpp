@@ -3,7 +3,7 @@
 #include <vector>
 #include "utils/fd.hpp"
 #include "utils/epoll.hpp"
-#include "Client/Client.hpp"
+#include "Connection/Connection.hpp"
 #include "Server/Server.hpp"
 #include "utils/Result/Result.hpp"
 
@@ -14,26 +14,26 @@ class WebServer
 {
 private:
 	std::vector<Server *> servers_;
-	std::vector<Client *> clients_;
+	std::vector<Connection *> connections_;
 
 	std::vector<fd_t> createServerFds();
 
 	void setEpollInstance(t_epoll &epoll, std::vector<fd_t> &serversFds);
-	void setEpollRead(t_epoll &epoll, Client *client);
-	void setEpollWrite(t_epoll &epoll, Client *client);
+	void setEpollRead(t_epoll &epoll, Connection *connection);
+	void setEpollWrite(t_epoll &epoll, Connection *connection);
 
 	fd_t getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd);
 
-	void acceptNewClient(fd_t &serverFd, t_epoll &epoll);
-	std::vector<Client *>::iterator disconnectClient(Client *client, t_epoll &epoll, const std::string &reason);
-	std::vector<Client *>::iterator removeClient(Client *client);
-	void checkClientEvent(t_epoll &epoll, const int &eventIndex);
+	void acceptNewConnection(fd_t &serverFd, t_epoll &epoll);
+	std::vector<Connection *>::iterator disconnectConnection(Connection *connection, t_epoll &epoll, const std::string &reason);
+	std::vector<Connection *>::iterator removeConnection(Connection *connection);
+	void checkConnectionEvent(t_epoll &epoll, const int &eventIndex);
 	void handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll);
-	void disconnectTimedoutClients(t_epoll &epoll);
+	void disconnectTimedoutConnections(t_epoll &epoll);
 
-	void receiveRequest(Client *client, t_epoll &epoll);
-	void processRequest(Client *client, Result<t_Request> &result);
-	void sendResponse(Client *client, t_epoll &epoll);
+	void receiveRequest(Connection *connection, t_epoll &epoll);
+	void processRequest(Connection *connection, Result<t_Request> &result);
+	void sendResponse(Connection *connection, t_epoll &epoll);
 
 public:
 	WebServer();

@@ -63,34 +63,34 @@ vpath %.cpp $(SRC): \
             $(SRC)WebServer/ConfigParser : \
             $(SRC)WebServer/ConfigParser/helpers/DirectiveRegistry/ : \
 			$(SRC)utils: \
-			$(SRC)WebServer/Client/Request/Body : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestBodyFramingVerifier : \
-			$(SRC)WebServer/Client/Request/RequestFactory : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestPathNormalizer : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestPctDecoder : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestProcesser : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ConnectionHeaderValidator : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/HostHeaderValidator : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator : \
-			$(SRC)WebServer/Client/Request/RequestFactory/RequestValidator/TransferEncodingHeaderValidator : \
-			$(SRC)WebServer/Client/Request/RequestLine : \
-			$(SRC)WebServer/Client/Request/RequestLine/Target : \
-			$(SRC)WebServer/Client/Request/RequestParser : \
-			$(SRC)WebServer/Client/Request/RequestTokenizer/RequestToken : \
-			$(SRC)WebServer/Client/Request/RequestTokenizer : \
-			$(SRC)WebServer/Client/Response/ResponseFactory : \
-			$(SRC)WebServer/Client/Response/StatusLine : \
-			$(SRC)WebServer/Client/Response/RequestHandler/Context : \
-			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods : \
-			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Factory : \
-			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
-			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
-			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
-			$(SRC)WebServer/Client/Response/RequestHandler/RequestExecutor : \
-			$(SRC)WebServer/Client/Response/RequestHandler/Result : \
-			$(SRC)WebServer/Client/Response/RequestHandler : \
-			$(SRC)WebServer/Client : \
+			$(SRC)WebServer/Connection/Request/Body : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestBodyFramingVerifier : \
+			$(SRC)WebServer/Connection/Request/RequestFactory : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestPathNormalizer : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestPctDecoder : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestProcesser : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/ConnectionHeaderValidator : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/HostHeaderValidator : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestValidator : \
+			$(SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/TransferEncodingHeaderValidator : \
+			$(SRC)WebServer/Connection/Request/RequestLine : \
+			$(SRC)WebServer/Connection/Request/RequestLine/Target : \
+			$(SRC)WebServer/Connection/Request/RequestParser : \
+			$(SRC)WebServer/Connection/Request/RequestTokenizer/RequestToken : \
+			$(SRC)WebServer/Connection/Request/RequestTokenizer : \
+			$(SRC)WebServer/Connection/Response/ResponseFactory : \
+			$(SRC)WebServer/Connection/Response/StatusLine : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/Context : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Factory : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor : \
+			$(SRC)WebServer/Connection/Response/RequestHandler/Result : \
+			$(SRC)WebServer/Connection/Response/RequestHandler : \
+			$(SRC)WebServer/Connection : \
 			$(SRC)WebServer/Server/ServerMapper : \
 			$(SRC)WebServer/Server/Location : \
 			$(SRC)WebServer/Server/Session : \
@@ -133,7 +133,7 @@ SRCS = Body.cpp \
 		Post.cpp \
 		RequestExecutor.cpp \
 		RequestHandler.cpp \
-		Client.cpp \
+		Connection.cpp \
 		Location.cpp \
 		Session.cpp \
 		Server.cpp \
