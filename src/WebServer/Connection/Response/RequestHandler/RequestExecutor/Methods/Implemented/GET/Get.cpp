@@ -119,7 +119,7 @@ static t_httpCode tryIndex(const Context &ctx, t_Body &body)
 	// normalizeTrailingSlash(ctx.getTargetPath());
 	if (findIndex(ctx))
 		return getFile(ctx.getTargetPath(), body);
-	
+
 	return tryAutoIndex(ctx, body);
 }
 
@@ -147,15 +147,6 @@ static void run(const Context &ctx, t_HandlingResult &res)
 
 }
 
-static void printCharArray(char** arr) {
-	if (!arr)
-		return;
-
-	for (int i = 0; arr[i] != NULL; ++i) {
-		std::cout << "[" << i << "]: " << arr[i] << std::endl;
-	}
-}
-
 static void freeArr(char** arr)
 {
 	for (size_t i = 0; arr && arr[i]; ++i)
@@ -179,7 +170,7 @@ static std::string getHostPort(const std::string &hostValue)
     return hostPort;
 }
 
-static char **setEnvironment(const Context &ctx, t_cgi &cgi)
+static char **setEnvironment(const Context &ctx)
 {
 	const std::string scriptName = "SCRIPT_NAME=" + ctx.getRequest().requestLine.getTargetPath();
 	const std::string queryString = "QUERY_STRING=" + ctx.getRequest().requestLine.getTargetQuery();
@@ -236,7 +227,7 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	}
 	else if (child == CHILD_OK)
 	{
-		char **env = setEnvironment(ctx, cgi);
+		char **env = setEnvironment(ctx);
 		char **argv = setArgs(ctx, cgi);
 
 		close(pipefd[0]);

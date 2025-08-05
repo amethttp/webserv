@@ -1,7 +1,7 @@
 #include "test/test.hpp"
 #include "test/assert/assert.hpp"
-#include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
-#include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
+#include "WebServer/Connection/Request/RequestFactory/RequestFactory.hpp"
+#include "WebServer/Connection/Request/RequestParser/RequestParser.hpp"
 
 namespace
 {
@@ -85,35 +85,35 @@ static void assertBody(const std::string &body)
     ASSERT_EQUALS(body, request.body.getMessage());
 }
 
-static void assertRequestIsInvalid(const std::string &invalidRequestString, const std::string &errorMessage)
+static void assertRequestIsInvalid(const std::string &invalidRequestString, const t_httpCode &errorCode)
 {
     assertCanCreateAResponseIsTrue(invalidRequestString);
 
     Result<t_Request> result = RequestFactory::create(invalidRequestString);
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS(errorMessage, result.getError());
+    ASSERT_EQUALS(errorCode, result.getError());
 }
 
-static void assertRequestIsInvalidFromRequestLine(const std::string &invalidRequestLineString, const std::string &errorMessage)
+static void assertRequestIsInvalidFromRequestLine(const std::string &invalidRequestLineString, const t_httpCode &errorCode)
 {
     const std::string invalidRequestString = invalidRequestLineString + "\r\nHost: localhost\r\n\r\n";
 
-    assertRequestIsInvalid(invalidRequestString, errorMessage);
+    assertRequestIsInvalid(invalidRequestString, errorCode);
 }
 
-static void assertRequestIsInvalidFromHeaders(const std::string &invalidHeadersString, const std::string &errorMessage)
+static void assertRequestIsInvalidFromHeaders(const std::string &invalidHeadersString, const t_httpCode &errorCode)
 {
     const std::string invalidRequestString = "GET / HTTP/1.1\r\n" + invalidHeadersString + "\r\n\r\n";
 
-    assertRequestIsInvalid(invalidRequestString, errorMessage);
+    assertRequestIsInvalid(invalidRequestString, errorCode);
 }
 
-static void assertRequestIsInvalidFromBody(const std::string &bodyTypeHeader, const std::string &body, const std::string &errorMessage)
+static void assertRequestIsInvalidFromBody(const std::string &bodyTypeHeader, const std::string &body, const t_httpCode &errorCode)
 {
     const std::string invalidRequestString = "GET / HTTP/1.1\r\nHost:localhost\r\n" + bodyTypeHeader + "\r\n\r\n" + body;
 
-    assertRequestIsInvalid(invalidRequestString, errorMessage);
+    assertRequestIsInvalid(invalidRequestString, errorCode);
 }
 
 static void assertCanCreateAResponseIsTrueFromBody(const std::string &bodyTypeHeader, const std::string &body)
@@ -176,12 +176,12 @@ TEST(recognize_a_request_with_valid_request_line)
 
 TEST(take_as_failure_an_invalid_request_line)
 {
-    assertRequestIsInvalidFromRequestLine("INVALID", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromRequestLine("INVALID", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_non_implemented_HTTP_method)
 {
-    assertRequestIsInvalidFromRequestLine("NOT_IMPLEMENTED / HTTP/1.1", NOT_IMPLEMENTED_ERR);
+    assertRequestIsInvalidFromRequestLine("NOT_IMPLEMENTED / HTTP/1.1", NOT_IMPLEMENTED);
 }
 
 TEST(take_as_failure_an_uri_longer_than_max_length)
@@ -190,13 +190,13 @@ TEST(take_as_failure_an_uri_longer_than_max_length)
     const std::string invalidTarget = "/" + std::string(MAX_URI_LENGTH, anyCharacter);
     const std::string requestString = "GET " + invalidTarget + " HTTP/1.1";
 
-    assertRequestIsInvalidFromRequestLine(requestString, URI_TOO_LONG_ERR);
+    assertRequestIsInvalidFromRequestLine(requestString, REQUEST_URI_TOO_LARGE);
 }
 
 TEST(take_as_failure_a_non_supported_HTTP_version)
 {
-    assertRequestIsInvalidFromRequestLine("GET / HTTP/2.1", HTTP_VERSION_NOT_SUPPORTED_ERR);
-    assertRequestIsInvalidFromRequestLine("GET / HTTP/1.0", HTTP_VERSION_NOT_SUPPORTED_ERR);
+    assertRequestIsInvalidFromRequestLine("GET / HTTP/2.1", HTTP_VERSION_NOT_SUPPORTED);
+    assertRequestIsInvalidFromRequestLine("GET / HTTP/1.0", HTTP_VERSION_NOT_SUPPORTED);
 }
 
 
@@ -215,27 +215,27 @@ TEST(process_a_request_target_separation_and_decoding_and_normalization)
 
 TEST(take_as_failure_a_target_with_pct_encoded_control_chars)
 {
-    assertRequestIsInvalidFromRequestLine("GET /index/%0d HTTP/1.1", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromRequestLine("GET /index/%0A HTTP/1.1", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromRequestLine("GET /index/?%00 HTTP/1.1", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromRequestLine("GET /index/?%7f HTTP/1.1", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromRequestLine("GET /index/%0d HTTP/1.1", BAD_REQUEST);
+    assertRequestIsInvalidFromRequestLine("GET /index/%0A HTTP/1.1", BAD_REQUEST);
+    assertRequestIsInvalidFromRequestLine("GET /index/?%00 HTTP/1.1", BAD_REQUEST);
+    assertRequestIsInvalidFromRequestLine("GET /index/?%7f HTTP/1.1", BAD_REQUEST);
 }
 
 
 /* REQUEST HEADERS TESTS */
 TEST(take_as_failure_a_request_without_host_header)
 {
-    assertRequestIsInvalidFromHeaders("Connection: keep-alive", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Connection: keep-alive", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_an_empty_host_header)
 {
-    assertRequestIsInvalidFromHeaders("Host:", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host:", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_consisted_of_OWS)
 {
-    assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  ", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  ", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
@@ -250,16 +250,16 @@ TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters)
 
 TEST(take_as_failure_a_request_with_a_host_header_containing_wrong_pct_encoded_chars)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost_%xx", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost_%f", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost_%", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost_%xx", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost_%f", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost_%", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_containing_invalid_characters)
 {
-    assertRequestIsInvalidFromHeaders("Host: loc alh ost", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: loc\talh\tost", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: loc{alh[ost", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: loc alh ost", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: loc\talh\tost", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: loc{alh[ost", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_a_host_header_with_port)
@@ -272,9 +272,9 @@ TEST(recognize_a_request_with_a_host_header_with_port)
 
 TEST(take_as_failure_a_host_header_with_only_port)
 {
-    assertRequestIsInvalidFromHeaders("Host::8000\r\n\r\n", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: :8000\r\n\r\n", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  :8000\r\n\r\n", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host::8000\r\n\r\n", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: :8000\r\n\r\n", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host:  \t  \t\t  :8000\r\n\r\n", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters_and_port)
@@ -290,20 +290,20 @@ TEST(recognize_a_request_with_a_host_header_consisted_of_valid_characters_and_po
 
 TEST(take_as_failure_a_request_with_a_host_header_with_a_non_numeric_port)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost:", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost:invalid", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost:31.023", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost:", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost:invalid", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost:31.023", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_with_multiple_ports)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost:31:30", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost:31:30", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_a_host_header_with_port_out_of_range)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost:-8419", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost:1000000", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost:-8419", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost:1000000", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_a_host_header_with_a_port_with_leading_zeros)
@@ -316,7 +316,7 @@ TEST(recognize_a_request_with_a_host_header_with_a_port_with_leading_zeros)
 
 TEST(take_as_failure_a_request_with_multiple_host_headers)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nHost: my.domain.com", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nHost: my.domain.com", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_case_insensitive_headers)
@@ -349,15 +349,15 @@ TEST(recognize_a_request_with_valid_content_length_header_and_value_greater_than
 
 TEST(take_as_failure_a_request_with_a_content_length_header_with_non_numeric_value)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length:", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: -23", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 2.03", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: invalid", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length:", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: -23", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 2.03", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: invalid", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_multiple_content_length_headers)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 0\r\nContent-Length: 0", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 0\r\nContent-Length: 0", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_valid_transfer_encoding_header)
@@ -371,18 +371,18 @@ TEST(recognize_a_request_with_valid_transfer_encoding_header)
 
 TEST(take_as_failure_a_request_with_a_transfer_encoding_header_with_invalid_value)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding:", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding: invalid", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding:", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding: invalid", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_multiple_transfer_encoding_headers)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding: chunked\r\nTransfer-Encoding: chunked", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nTransfer-Encoding: chunked\r\nTransfer-Encoding: chunked", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_content_length_and_transfer_encoding_headers)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nContent-Length: 0\r\nTransfer-Encoding: chunked", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_valid_connection_header_with_keep_alive_value)
@@ -405,13 +405,13 @@ TEST(recognize_a_request_with_valid_connection_header_with_close_value)
 
 TEST(take_as_failure_a_request_with_a_connection_header_with_invalid_value)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection:", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: invalid", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection:", BAD_REQUEST);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: invalid", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_multiple_connection_headers)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: close\r\nConnection: close", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost\r\nConnection: close\r\nConnection: close", BAD_REQUEST);
 }
 
 
@@ -426,7 +426,7 @@ TEST(recognize_and_decode_a_request_with_a_host_header_containing_valid_pct_enco
 
 TEST(take_as_failure_a_host_name_with_pct_encoded_control_characters)
 {
-    assertRequestIsInvalidFromHeaders("Host: localhost_%00_%7f", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromHeaders("Host: localhost_%00_%7f", BAD_REQUEST);
 }
 
 TEST(recognize_a_request_with_valid_case_insensitive_transfer_encoding_header)
@@ -474,14 +474,14 @@ TEST(recognize_a_request_with_an_empty_body_without_content_length_header)
 
 TEST(take_as_failure_a_request_with_a_body_length_superior_than_content_length_header_size)
 {
-    assertRequestIsInvalidFromBody("Content-Length: 0", "Invalid body", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromBody("Content-Length: 10", "Invalid body", BAD_REQUEST_ERR);
-    assertRequestIsInvalidFromBody("Content-Length: 0", " \t \t \t", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromBody("Content-Length: 0", "Invalid body", BAD_REQUEST);
+    assertRequestIsInvalidFromBody("Content-Length: 10", "Invalid body", BAD_REQUEST);
+    assertRequestIsInvalidFromBody("Content-Length: 0", " \t \t \t", BAD_REQUEST);
 }
 
 TEST(take_as_failure_a_request_with_body_without_content_length_nor_transfer_encoding_headers)
 {
-    assertRequestIsInvalidFromBody("No-Length: specified", "Invalid body", LENGTH_REQUIRED_ERR);
+    assertRequestIsInvalidFromBody("No-Length: specified", "Invalid body", LENGTH_REQUIRED);
 }
 
 
@@ -502,7 +502,7 @@ TEST(recognize_a_request_with_a_chunked_body)
 
 TEST(take_as_failure_a_request_with_an_invalid_body)
 {
-    assertRequestIsInvalidFromBody("Transfer-Encoding: chunked", "1\r\nINVALID BODY\r\n0\r\n\r\n", BAD_REQUEST_ERR);
+    assertRequestIsInvalidFromBody("Transfer-Encoding: chunked", "1\r\nINVALID BODY\r\n0\r\n\r\n", BAD_REQUEST);
 }
 
 

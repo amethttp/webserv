@@ -16,14 +16,14 @@ static std::string getRedirectionHTML(t_httpCode code, std::string &uri)
 	std::ostringstream html;
 
 	html << "<!DOCTYPE html>\n"
-		<<"<html>\n" 
+		<<"<html>\n"
 		<< "<head><title>" << code << " " << Connection::getHttpErrorMsg(code) << "</title></head>\n"
 		<< "<body>\n"
 		<< "<h1>" << Connection::getHttpErrorMsg(code) << "</h1>\n"
 		<< "<p>The document has moved <a href=\"" << uri << "\">" << "here" << "</a>.</p>\n"
 		<< "</body>\n"
 		<< "</html>\n";
-	
+
 	return html.str();
 }
 
@@ -119,7 +119,7 @@ static void useSession(Context &ctx, t_HandlingResult &result)
 				value = *it;
 		}
 		if (value.empty())
-			throw std::runtime_error("dummy throw");
+			throw std::runtime_error("");
 		value = split(value, "=")[1];
 		std::stringstream ss(value);
 		int sessId;

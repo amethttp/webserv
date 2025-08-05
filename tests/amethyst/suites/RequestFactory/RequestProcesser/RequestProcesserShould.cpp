@@ -1,7 +1,7 @@
 #include "test/test.hpp"
 #include "test/assert/assert.hpp"
-#include "WebServer/Client/Request/Request.hpp"
-#include "WebServer/Client/Request/RequestFactory/RequestProcesser/RequestProcesser.hpp"
+#include "WebServer/Connection/Request/Request.hpp"
+#include "WebServer/Connection/Request/RequestFactory/RequestProcesser/RequestProcesser.hpp"
 
 namespace
 {

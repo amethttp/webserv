@@ -154,7 +154,7 @@ bool RequestFactory::canCreateAResponse(const std::string &requestString)
 
     if (headers.contains(CONTENT_LENGTH))
     {
-        const size_t contentLengthSize = strToUlong(headers.getHeader(CONTENT_LENGTH).getValue());
+        const size_t contentLengthSize = strToUlong(headers.getHeaderValue(CONTENT_LENGTH));
         return requestBodyFramingVerifier.isFullBodyComplete(contentLengthSize);
     }
 

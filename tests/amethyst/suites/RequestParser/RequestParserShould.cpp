@@ -1,7 +1,7 @@
 #include "test/test.hpp"
 #include "test/assert/assert.hpp"
-#include "WebServer/Client/Request/RequestParser/RequestParser.hpp"
-#include "WebServer/Client/Request/RequestFactory/RequestFactory.hpp"
+#include "WebServer/Connection/Request/RequestParser/RequestParser.hpp"
+#include "WebServer/Connection/Request/RequestFactory/RequestFactory.hpp"
 
 namespace
 {
@@ -113,7 +113,7 @@ static void assertRequestLineIsInvalid(const std::string &invalidRequestString)
     const Result<RequestLine> result = sut.parseRequestLine();
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+    ASSERT_EQUALS(BAD_REQUEST, result.getError());
 }
 
 static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
@@ -126,7 +126,7 @@ static void assertRequestHeaderIsInvalid(const std::string &invalidHeader)
     const Result<HeaderCollection> result = sut.parseHeaders();
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+    ASSERT_EQUALS(BAD_REQUEST, result.getError());
 }
 
 static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const std::string &invalidBody)
@@ -139,7 +139,7 @@ static void assertRequestFullBodyIsInvalid(const size_t contentLengthSize, const
     Result<Body> result = sut.parseFullBody(contentLengthSize);
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+    ASSERT_EQUALS(BAD_REQUEST, result.getError());
 }
 
 static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
@@ -152,7 +152,7 @@ static void assertRequestChunkedBodyIsInvalid(const std::string &invalidBody)
     Result<Body> result = sut.parseChunkedBody();
 
     ASSERT_TRUE(result.isFailure());
-    ASSERT_EQUALS(BAD_REQUEST_ERR, result.getError());
+    ASSERT_EQUALS(BAD_REQUEST, result.getError());
 }
 
 static void assertHeaderSize(const size_t size)

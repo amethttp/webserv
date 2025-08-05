@@ -209,7 +209,7 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		for (size_t i = 0; i < node.params.size(); i++)
 		{
 			t_method method = getHTTPMethod(node.params.at(i));
-			if (method != METHOD_NOT_ALLOWED)
+			if (method != M_NOT_IMPLEMENTED)
 				block.methods_.insert(method);
 		}
 	}
@@ -278,7 +278,6 @@ static void setServerFromBlock(Server *server, const ConfigBlock &block)
 
 static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
 {
-	ConfigNode &prev = *tree.begin();
 	std::vector<Server *> servers;
 	std::vector<ConfigNode> parents;
 	ConfigBlock block;

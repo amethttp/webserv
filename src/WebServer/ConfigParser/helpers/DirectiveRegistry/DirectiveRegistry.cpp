@@ -50,13 +50,13 @@ SDirective DirectiveRegistry::getDirective(std::string &key)
 void DirectiveRegistry::checkConfigNode(ConfigNode &node)
 {
     SDirective directive = getDirective(node.name);
-    if (node.params.size() > directive.argMax)
+    if (node.params.size() > (size_t) directive.argMax)
     {
         std::stringstream what;
         what << "directive \"" << node.name << "\" expected a maximum amount of " << directive.argMax << " arguments while " << node.params.size() << " were given";
         throw FatalException(what.str().c_str());
     }
-    else if (node.params.size() < directive.argMin)
+    else if (node.params.size() < (size_t) directive.argMin)
     {
         std::stringstream what;
         what << "directive \"" << node.name << "\" expected a minimum amount of " << directive.argMin << " arguments while " << node.params.size() << " were given";

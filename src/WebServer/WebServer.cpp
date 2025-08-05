@@ -46,6 +46,7 @@ static fd_t setServerFd(sockaddr_in &serverAddress, std::set<int> serverPorts)
 			throw RecoverableException("Couldn't listen to port");
 		return socketFd;
 	}
+	return -1;
 }
 
 std::vector<fd_t> WebServer::createServerFds()
@@ -133,7 +134,7 @@ fd_t WebServer::getServerFd(std::vector<fd_t> &serversFds, fd_t eventFd)
 }
 
 void WebServer::acceptNewConnection(fd_t &serverFd, t_epoll &epoll)
-{	
+{
 	sockaddr_in newConnectionAddress;
 	socklen_t socketSize = sizeof(newConnectionAddress);
 
@@ -287,7 +288,7 @@ void WebServer::checkConnectionEvent(t_epoll &epoll, const int &eventIndex)
 		std::cerr << e.what() << std::endl;
 		disconnectConnection(connection, epoll, DISCONNECTED);
 	}
-	
+
 }
 
 void WebServer::handleConnectionEvents(std::vector<fd_t> &serversFds, t_epoll &epoll)

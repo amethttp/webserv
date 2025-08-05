@@ -28,7 +28,7 @@ static std::string getImfFixdate()
     std::tm *gmt = std::gmtime(&timeNow);
     std::string res;
 	size_t resSize;
-	
+
 	res.resize(50);
     if ((resSize = std::strftime(&res[0], res.size(), "%a, %d %b %Y %H:%M:%S GMT", gmt)))
 	{
@@ -80,7 +80,7 @@ void ResponseFactory::setStatusLine(t_httpCode code, t_Response &response)
 			defaultCode != 400 &&
 			defaultCode != 500)
 		{
-			throw RecoverableException("Couldn't determine error code");			
+			throw RecoverableException("Couldn't determine error code");
 		}
 		code = static_cast<t_httpCode>(defaultCode);
 		codeMsg = Connection::getHttpErrorMsg(code);

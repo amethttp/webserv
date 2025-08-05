@@ -54,15 +54,6 @@ static void freeArr(char** arr)
 	free(arr);
 }
 
-static void printCharArray(char** arr) {
-	if (!arr)
-		return;
-
-	for (int i = 0; arr[i] != NULL; ++i) {
-		std::cerr << "[" << i << "]: " << arr[i] << std::endl;
-	}
-}
-
 static std::string getHostName(const std::string &hostValue)
 {
     const size_t portSeparator = hostValue.find(':');
@@ -79,7 +70,7 @@ static std::string getHostPort(const std::string &hostValue)
     return hostPort;
 }
 
-static char **setEnvironment(const Context &ctx, t_cgi &cgi)
+static char **setEnvironment(const Context &ctx)
 {
 	std::stringstream ss;
 	ss << ctx.getRequest().body.getMessage().size();
@@ -127,11 +118,11 @@ static char **setArgs(const Context &ctx, t_cgi &cgi)
 
 static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 {
-	int outPipe[2]; 
-	int inPipe[2];  
+	int outPipe[2];
+	int inPipe[2];
 	pid_t child;
 	time_t startTime;
- 
+
 	if (pipe(outPipe))
 		throw (RecoverableException("Ceci n'est pas une pipe"));
 	if (pipe(inPipe))
@@ -152,12 +143,12 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	}
 	else if (child == CHILD_OK)
 	{
-		char **env = setEnvironment(ctx, cgi);
+		char **env = setEnvironment(ctx);
 		char **argv = setArgs(ctx, cgi);
 
 		close(outPipe[0]);
 		close(inPipe[1]);
-		
+
 		dup2(outPipe[1], STDOUT_FILENO);
 		close(outPipe[1]);
 		dup2(inPipe[0], STDIN_FILENO);
@@ -168,9 +159,9 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 		freeArr(argv);
 		exit(1);
 	}
-	close(outPipe[1]);  
-	close(inPipe[0]);   
-	
+	close(outPipe[1]);
+	close(inPipe[0]);
+
 	const std::string &reqBody = ctx.getRequest().body.getMessage();
 	size_t total = 0;
 	ssize_t written = 0;
@@ -179,7 +170,7 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	{
 		written = write(inPipe[1], reqBody.c_str() + total, reqBody.size() - total);
 		if (written <= 0)
-			break; 
+			break;
 		total += written;
 	}
 	if (written < 0)

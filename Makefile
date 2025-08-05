@@ -60,8 +60,8 @@ INCLUDES = -I$(SRC)
 
 #----VPATH----#
 vpath %.cpp $(SRC): \
-            $(SRC)WebServer/ConfigParser : \
-            $(SRC)WebServer/ConfigParser/helpers/DirectiveRegistry/ : \
+			$(SRC)WebServer/ConfigParser : \
+			$(SRC)WebServer/ConfigParser/helpers/DirectiveRegistry/ : \
 			$(SRC)utils: \
 			$(SRC)WebServer/Connection/Request/Body : \
 			$(SRC)WebServer/Connection/Request/RequestFactory/RequestBodyFramingVerifier : \
@@ -91,7 +91,6 @@ vpath %.cpp $(SRC): \
 			$(SRC)WebServer/Connection/Response/RequestHandler/Result : \
 			$(SRC)WebServer/Connection/Response/RequestHandler : \
 			$(SRC)WebServer/Connection : \
-			$(SRC)WebServer/Server/ServerMapper : \
 			$(SRC)WebServer/Server/Location : \
 			$(SRC)WebServer/Server/Session : \
 			$(SRC)WebServer/Server : \
@@ -104,7 +103,7 @@ vpath %.cpp $(SRC): \
 			$(SRC)utils/numeric : \
 			$(SRC)utils/string : \
 			$(SRC)utils/Result : \
-			$(SRC)utils/http : 
+			$(SRC)utils/http :
 
 #----SHARED----#
 SRCS = Body.cpp \
@@ -149,7 +148,6 @@ SRCS = Body.cpp \
 		webserv.cpp \
 		ConfigParser.cpp \
 		DirectiveRegistry.cpp \
-		ServerMapper.cpp \
 		http.cpp
 
 

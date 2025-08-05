@@ -6,7 +6,7 @@
 
 TEST(create_successful_result)
 {
-    std::string expectedError = std::string("");
+    t_httpCode expectedError = 0;
     int expectedValue = ANY_VALUE;
 
     Result<int> sut = Result<int>::ok(expectedValue);
@@ -19,7 +19,7 @@ TEST(create_successful_result)
 
 TEST(create_failed_result)
 {
-    std::string expectedError = std::string("any error");
+    t_httpCode expectedError = BAD_REQUEST;
 
     Result<int> sut = Result<int>::fail(expectedError);
 
@@ -28,16 +28,16 @@ TEST(create_failed_result)
     ASSERT_EQUALS(expectedError, sut.getError());
 }
 
-TEST(throw_invalid_argument_exception_when_creating_failed_result_without_error)
+TEST(throw_invalid_argument_exception_when_creating_failed_result_with_error_code_equals_to_zero)
 {
-    std::string invalidError = std::string("");
+    t_httpCode invalidError = 0;
 
     ASSERT_THROWS(Result<int>::fail(invalidError), std::invalid_argument);
 }
 
 TEST(throw_logic_error_exception_when_accessing_value_in_a_failed_result)
 {
-    std::string anyError = std::string("any error");
+    t_httpCode anyError = BAD_REQUEST;
 
     Result<int> sut = Result<int>::fail(anyError);
 

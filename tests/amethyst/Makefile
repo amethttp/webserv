@@ -72,35 +72,37 @@ vpath %.cpp $(SRC) : \
             $(SUITES) :\
             $(SUITES_DIRECTORIES)\
 			$(PROJ_SRC) : \
-			$(PROJ_SRC)utils : \
-			$(PROJ_SRC)WebServer/Client/Request/Body : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestBodyFramingVerifier : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestPathNormalizer : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestPctDecoder : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestProcesser : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ConnectionHeaderValidator : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/HostHeaderValidator : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestFactory/RequestValidator/TransferEncodingHeaderValidator : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestLine : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestLine/Target : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestParser : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestTokenizer/RequestToken : \
-			$(PROJ_SRC)WebServer/Client/Request/RequestTokenizer : \
-			$(PROJ_SRC)WebServer/Client/Response/ResponseFactory : \
-			$(PROJ_SRC)WebServer/Client/Response/StatusLine : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/Context : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Factory : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/RequestExecutor : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler : \
-			$(PROJ_SRC)WebServer/Client/Response/RequestHandler/Result : \
-			$(PROJ_SRC)WebServer/Client : \
+			$(PROJ_SRC)WebServer/ConfigParser : \
+			$(PROJ_SRC)WebServer/ConfigParser/helpers/DirectiveRegistry/ : \
+			$(PROJ_SRC)utils: \
+			$(PROJ_SRC)WebServer/Connection/Request/Body : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestBodyFramingVerifier : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestPathNormalizer : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestPctDecoder : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestProcesser : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/ConnectionHeaderValidator : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/ContentLengthHeaderValidator : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/HostHeaderValidator : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestValidator : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestFactory/RequestValidator/TransferEncodingHeaderValidator : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestLine : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestLine/Target : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestParser : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestTokenizer/RequestToken : \
+			$(PROJ_SRC)WebServer/Connection/Request/RequestTokenizer : \
+			$(PROJ_SRC)WebServer/Connection/Response/ResponseFactory : \
+			$(PROJ_SRC)WebServer/Connection/Response/StatusLine : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/Context : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Factory : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/DELETE : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler/Result : \
+			$(PROJ_SRC)WebServer/Connection/Response/RequestHandler : \
+			$(PROJ_SRC)WebServer/Connection : \
 			$(PROJ_SRC)WebServer/Server/Location : \
 			$(PROJ_SRC)WebServer/Server/Session : \
 			$(PROJ_SRC)WebServer/Server : \
@@ -108,11 +110,13 @@ vpath %.cpp $(SRC) : \
 			$(PROJ_SRC)utils/HeaderCollection/Header : \
 			$(PROJ_SRC)utils/HeaderCollection : \
 			$(PROJ_SRC)utils/cgi : \
+			$(PROJ_SRC)utils/exceptions : \
 			$(PROJ_SRC)utils/fileHandler : \
 			$(PROJ_SRC)utils/numeric : \
 			$(PROJ_SRC)utils/string : \
-			$(PROJ_SRC)utils/Result : 
-			
+			$(PROJ_SRC)utils/Result : \
+			$(PROJ_SRC)utils/http :
+
 
 #----SHARED----#
 SRCS = main.cpp \
@@ -145,8 +149,7 @@ SRCS = main.cpp \
 		Post.cpp \
 		RequestExecutor.cpp \
 		RequestHandler.cpp \
-		HandlingResult.cpp \
-		Client.cpp \
+		Connection.cpp \
 		Location.cpp \
 		Session.cpp \
 		Server.cpp \
@@ -154,10 +157,14 @@ SRCS = main.cpp \
 		Header.cpp \
 		HeaderCollection.cpp \
 		cgi.cpp \
+		Exceptions.cpp \
 		files.cpp \
 		numeric.cpp \
 		string.cpp \
-		SimpleResult.cpp
+		SimpleResult.cpp \
+		ConfigParser.cpp \
+		DirectiveRegistry.cpp \
+		http.cpp
 
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
