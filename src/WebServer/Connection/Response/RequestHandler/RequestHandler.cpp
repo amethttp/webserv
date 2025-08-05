@@ -107,7 +107,6 @@ static void tryCustomErrorPage(const Context &ctx, t_HandlingResult &res)
 
 static void useSession(Context &ctx, t_HandlingResult &result)
 {
-	std::cout << "Sessions amount: " << ctx.getServer().getSessions().size() << std::endl;
 	std::string value;
 
 	try
@@ -134,7 +133,6 @@ static void useSession(Context &ctx, t_HandlingResult &result)
 		ctx.pushServerSession(session);
 		cookieVal << "sessionId=" << session->getId() << "; expires=Fri, 31 Dec 9999 23:59:59 GMT; HttpOnly";
 		result.tempHeaders_.addHeader(COOKIE_RESPONSE_KEY, cookieVal.str());
-		std::cout << "------ NEW SESSION: " << session->getId() << std::endl;
 	}
 }
 

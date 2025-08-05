@@ -9,6 +9,7 @@
 #include "models/ConfigBlock.hpp"
 #include "helpers/DirectiveRegistry/DirectiveRegistry.hpp"
 #include "utils/exceptions/Exceptions.hpp"
+#include "utils/numeric/numeric.hpp"
 
 static void checkFileAcceptance(t_configs &configs)
 {
@@ -158,7 +159,7 @@ static void parseConfig(const std::string &input, std::vector<ConfigNode> &confi
 			else if (stack.top().building && !stack.top().current.name.empty())
 			{
 				std::stringstream what;
-				what << "unexpected1 closing brace \"}\" near " << stack.top().current.name;
+				what << "unexpected closing brace \"}\" near " << stack.top().current.name;
 				throw FatalException(what.str().c_str());
 			}
 			stack.pop();
@@ -183,8 +184,10 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		for (std::vector<std::string>::const_iterator it = node.params.begin(); it != node.params.end(); ++it)
 		{
 			int port;
-			if (std::istringstream(*it) >> port)
+			if (isLong(*it) && std::istringstream(*it) >> port)
 				block.ports_.insert(port);
+			else
+				throw std::runtime_error("listen: invalid value");
 		}
 	}
 	else if (node.name == "upload_path")
@@ -200,8 +203,10 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 	else if (node.name == "connection_max_body_size")
 	{
 		int val;
-		if (std::istringstream(node.params.at(0)) >> val)
+		if (isLong(node.params.at(0)) && std::istringstream(node.params.at(0)) >> val)
 			block.connectionMaxBodySize_ = val;
+		else
+			throw std::runtime_error("connection_max_body_size: invalid value");
 	}
 	else if (node.name == "method")
 	{
@@ -216,17 +221,29 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 	{
 		t_error_page err;
 		int num;
-		if (std::istringstream(node.params.at(0)) >> num)
+		if (isLong(node.params.at(0)) && std::istringstream(node.params.at(0)) >> num)
 			err.code = num;
+		else
+			throw std::runtime_error("error_page: invalid value");
 		err.page = node.params.at(1);
 		block.errorPages_.insert(err);
 	}
 	else if (node.name == "return")
 	{
 		int num;
-		if (std::istringstream(node.params.at(0)) >> num)
+		if (isLong(node.params.at(0)) && std::istringstream(node.params.at(0)) >> num)
+		{
 			block.return_.code = num;
-		block.return_.path = node.params.at(1);
+			if (node.params.size() == 2)
+				block.return_.path = node.params.at(1);
+		}
+		else if (node.params.size() == 1)
+		{
+			block.return_.code = FOUND;
+			block.return_.path = node.params.at(0);
+		}
+		else
+			throw std::runtime_error("return: invalid value");
 	}
 }
 
@@ -289,7 +306,6 @@ static void fillWebserver(WebServer &webServer, std::vector<ConfigNode> &tree)
 	for (std::vector<ConfigBlock>::iterator it = block.children.begin(); it != block.children.end(); ++it)
 	{
 		ConfigBlock &children = *it;
-		std::cout << children.type << std::endl;
 		if (children.type == SERVER_BLOCK)
 		{
 			servers.push_back(new Server());
@@ -329,5 +345,4 @@ void ConfigParser::useConfig(std::string &path, WebServer &ws)
 	checkFileAcceptance(configs);
 	parseConfig(configs.fileContent, tree);
 	fillWebserver(ws, tree);
-	std::cout << ws << std::endl;
 }

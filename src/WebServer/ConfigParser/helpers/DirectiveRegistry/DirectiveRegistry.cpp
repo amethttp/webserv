@@ -20,7 +20,7 @@ static std::map<std::string, SDirective> initDirectivesMap()
     directives["upload_path"] = SDirective(1, 1, false);
     directives["cgi"] = SDirective(2, 2, false);
     directives["location"] = SDirective(1, 1, true);
-    directives["return"] = SDirective(2, 2, false);
+    directives["return"] = SDirective(1, 2, false);
     return directives;
 }
 

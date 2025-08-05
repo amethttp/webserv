@@ -6,9 +6,9 @@
 
 int main(int argc, char *argv[])
 {
-
     try
     {
+        signal(SIGPIPE, SIG_IGN);
         WebServer webserver;
         std::string configFile;
         if (argc > 1)
