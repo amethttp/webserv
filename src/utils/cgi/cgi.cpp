@@ -1,6 +1,7 @@
 #include "cgi.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
-bool matchCGI(std::string &path, Location &location, t_cgi &cgi)
+bool matchCGI(const std::string &path, const Location &location, t_cgi &cgi)
 {
 	size_t pos = path.rfind('.');
 	std::map<std::string, std::string>::iterator cgiIt;
@@ -36,6 +37,8 @@ std::string readOutput(int pipefd[2])
 	close(pipefd[1]);
 	while ((bytes_read = read(pipefd[0], buffer, sizeof(buffer))) > 0)
 		output.write(buffer, bytes_read);
+	if (bytes_read == -1)
+		RecoverableException("Couldn't read CGI output");
 	close(pipefd[0]);
 
 	return output.str();
@@ -55,7 +58,7 @@ t_httpCode waitForOutput(pid_t child, int pipefd[2], time_t start, t_Body &body)
 		usleep(100);
 	}
 	if (status < 0)
-		throw (std::runtime_error("WaitPid failed"));
+		throw (RecoverableException("WaitPid failed"));
 	if (WEXITSTATUS(status) != 0)
 		return INTERNAL_SERVER_ERROR;
 

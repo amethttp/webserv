@@ -135,9 +135,19 @@ std::string Connection::getResponseBuffer() const
 	return this->response_.buffer_;
 }
 
-t_Request Connection::getRequest() const
+const t_Request &Connection::getRequest() const
 {
 	return this->request_;
+}
+
+const std::string &Connection::getRequestBuffer() const
+{
+	return this->request_.buffer;
+}
+
+void Connection::clearRequestBuffer()
+{
+	this->request_.buffer.clear();
 }
 
 void Connection::setFd(fd_t fd)
@@ -145,8 +155,9 @@ void Connection::setFd(fd_t fd)
 	this->fd_ = fd;
 }
 
-void Connection::updateLastReceivedPacket()
+void Connection::updateLastReceivedPacket(char *buffer)
 {
+	this->appendToRequestBuffer(buffer);
 	this->lastReceivedPacket_ = std::time(NULL);
 }
 
@@ -175,19 +186,14 @@ bool Connection::shouldClose()
 	return C_KEEP_ALIVE;
 }
 
-void Connection::buildRequest(const char *buffer)
+void Connection::setRequest(t_Request request)
 {
-	Result<t_Request> requestResult = RequestFactory::create(buffer);
-	if (requestResult.isSuccess())
-		this->request_ = requestResult.getValue();
+	this->request_ = request;
 }
 
-void Connection::buildResponse(Server *server, Location *location)
+void Connection::buildResponse(t_HandlingResult &result)
 {
-	HandlingResult handlingResult;
-
-	handlingResult = RequestHandler::handleRequest(request_, *location, *server);
-	this->response_ = ResponseFactory::create(handlingResult);
+	this->response_ = ResponseFactory::create(result);
 }
 
 void Connection::buildResponse(t_httpCode code, t_connection mode)

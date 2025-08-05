@@ -27,25 +27,36 @@ static std::string getRedirectionHTML(t_httpCode code, std::string &uri)
 	return html.str();
 }
 
-static bool checkReturn(Location &location)
+static bool checkBodySize(const Context &ctx)
 {
-	return (location.getReturn().code != 0);
+	return (ctx.getRequest().body.getMessage().size() > ctx.getLocation().getMaxBodySize());
 }
 
-static void setRedirectionResult(t_httpCode code, std::string uri, HandlingResult &res)
+static void setMaxSizeError(t_HandlingResult &result)
+{
+	result.code_ = REQUEST_ENTITY_TOO_LARGE;
+	result.mode_ = C_CLOSE;
+}
+
+static bool checkReturn(const Context &ctx)
+{
+	return (ctx.getLocation().getReturn().code != 0);
+}
+
+static void setRedirectionResult(t_httpCode code, std::string uri, t_HandlingResult &res)
 {
 	res.tempHeaders_.addHeader("Location", uri);
 	res.tempBody_.content = getRedirectionHTML(code, uri);
 	res.tempBody_.type = Connection::getExtensionType(".html");
 }
 
-static void setBodyFromString(std::string str, HandlingResult &res)
+static void setBodyFromString(std::string str, t_HandlingResult &res)
 {
 	res.tempBody_.content = str;
 	res.tempBody_.type = Connection::getExtensionType(".txt");
 }
 
-void RequestHandler::handleReturnDirective(Context &ctx, HandlingResult &res)
+static void handleReturnDirective(const Context &ctx, t_HandlingResult &res)
 {
 	t_httpCode retCode = ctx.getReturn().code;
 	std::string retPath = ctx.getReturn().path;
@@ -61,12 +72,12 @@ void RequestHandler::handleReturnDirective(Context &ctx, HandlingResult &res)
 	res.code_ = retCode;
 }
 
-void RequestHandler::handleExecution(Context &ctx, HandlingResult &res)
+static void handleExecution(const Context &ctx, t_HandlingResult &res)
 {
     res = RequestExecutor::executeRequest(ctx);
 }
 
-static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_page &page)
+static bool matchCustomErrorPage(t_httpCode code, const Location &location, t_error_page &page)
 {
 	std::set<t_error_page> errorPages = location.getErrorPages();
 	bzero(&page, sizeof(page));
@@ -83,25 +94,25 @@ static bool matchCustomErrorPage(t_httpCode code, Location &location, t_error_pa
 	return false;
 }
 
-static void tryCustomErrorPage(Context &ctx, HandlingResult &res)
+static void tryCustomErrorPage(const Context &ctx, t_HandlingResult &res)
 {
     t_error_page errPage;
 
-    if (matchCustomErrorPage(res.code_, ctx.location_, errPage))
+    if (matchCustomErrorPage(res.code_, ctx.getLocation(), errPage))
 	{
-		// config parse that an error page MUST have a URI page 
         res.tempBody_.content = readFileToString(errPage.page);
         res.tempBody_.type = getMIME(errPage.page);
 	}
 }
 
-static void useSession(t_Request &request, Server &server, HandlingResult &result)
+static void useSession(Context &ctx, t_HandlingResult &result)
 {
-	std::cout << "Sessions amount: " << server.getSessions().size() << std::endl;
+	std::cout << "Sessions amount: " << ctx.getServer().getSessions().size() << std::endl;
 	std::string value;
+
 	try
 	{
-		std::vector<std::string> values = split(request.headers.getHeaderValue(COOKIE_REQUEST_KEY), ";");
+		std::vector<std::string> values = split(ctx.getRequest().headers.getHeaderValue(COOKIE_REQUEST_KEY), ";");
 		for (std::vector<std::string>::const_iterator it = values.begin(); it != values.end() && value.empty(); ++it)
 		{
 			if ((*it).find("sessionId=") != std::string::npos)
@@ -113,31 +124,39 @@ static void useSession(t_Request &request, Server &server, HandlingResult &resul
 		std::stringstream ss(value);
 		int sessId;
 		ss >> sessId;
-		Session * sess = server.getSession(sessId);
+		std::cout << "tango " << sessId << std::endl;
+		Session *sess = ctx.getServer().getSession(sessId);
 		std::cout << "Session id: " << sess->getId() << ", desc: " << sess->getDesc() << std::endl;
 	}
 	catch(const std::exception& e)
 	{
 		std::stringstream cookieVal;
 		Session *session = new Session();
-		server.pushSession(session);
+		ctx.pushServerSession(session);
 		cookieVal << "sessionId=" << session->getId() << "; expires=Fri, 31 Dec 9999 23:59:59 GMT; HttpOnly";
 		result.tempHeaders_.addHeader("Set-Cookie", cookieVal.str());
 		std::cout << "------ NEW SESSION: " << session->getId() << std::endl;
 	}
 }
 
-HandlingResult RequestHandler::handleRequest(t_Request &request, Location &location, Server &server)
+t_HandlingResult RequestHandler::handleRequest(Context &ctx)
 {
-    HandlingResult result;
-    Context ctx(request, location, server);
+    t_HandlingResult result;
 
-	if (checkReturn(ctx.location_))
+	if (checkBodySize(ctx))
+	{
+		setMaxSizeError(result);
+	}
+	else if (checkReturn(ctx))
+	{
 		handleReturnDirective(ctx, result);
+	}
 	else
+	{
 		handleExecution(ctx, result);
+	}
     tryCustomErrorPage(ctx, result);
-	useSession(request, server, result);
+	useSession(ctx, result);
 
     return result;
 }

@@ -27,13 +27,11 @@ bool Server::matchesName(std::string &match)
     return false;
 }
 
-// Decide on no locations defined on server
-Location *Server::matchLocation(t_Request request)
+Location *Server::matchLocation(std::string targetRoute) const
 {
     int matchIndex = 0;
     int matchLength = 0;
     int longestMatch = 0;
-    std::string targetRoute = request.requestLine.getTargetPath();
     std::vector<Location *> locations = this->getLocations();
 
     for (size_t i = 0; i < locations.size(); ++i)
@@ -49,7 +47,7 @@ Location *Server::matchLocation(t_Request request)
     return locations[matchIndex];
 }
 
-std::set<int> Server::getPorts()
+std::set<int> Server::getPorts() const
 {
     return this->ports_;
 }
@@ -59,7 +57,7 @@ void Server::setPorts(const std::set<int> &ports)
     this->ports_ = ports;
 }
 
-std::vector<Location *> Server::getLocations()
+std::vector<Location *> Server::getLocations() const
 {
     return this->locations_;
 }
@@ -69,7 +67,7 @@ void Server::setLocations(const std::vector<Location *> &locations)
     this->locations_ = locations;
 }
 
-std::vector<std::string> Server::getNames()
+std::vector<std::string> Server::getNames() const
 {
     return this->names_;
 }
@@ -79,7 +77,7 @@ void Server::setNames(const std::vector<std::string> &names)
     this->names_ = names;
 }
 
-std::string Server::getUploadPath()
+std::string Server::getUploadPath() const
 {
     return this->uploadPath_;
 }
@@ -118,12 +116,12 @@ std::ostream &operator<<(std::ostream &stream, const Server &server)
     return stream;
 }
 
-Session *Server::getSession(int id)
+Session *Server::getSession(int id) const
 {
     return this->sessions_.at(id);
 }
 
-std::map<int, Session *> Server::getSessions()
+std::map<int, Session *> Server::getSessions() const
 {
     return this->sessions_;
 }

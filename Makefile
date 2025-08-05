@@ -88,8 +88,8 @@ vpath %.cpp $(SRC): \
 			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/GET : \
 			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor/Methods/Implemented/POST : \
 			$(SRC)WebServer/Connection/Response/RequestHandler/RequestExecutor : \
-			$(SRC)WebServer/Connection/Response/RequestHandler : \
 			$(SRC)WebServer/Connection/Response/RequestHandler/Result : \
+			$(SRC)WebServer/Connection/Response/RequestHandler : \
 			$(SRC)WebServer/Connection : \
 			$(SRC)WebServer/Server/ServerMapper : \
 			$(SRC)WebServer/Server/Location : \
@@ -99,6 +99,7 @@ vpath %.cpp $(SRC): \
 			$(SRC)utils/HeaderCollection/Header : \
 			$(SRC)utils/HeaderCollection : \
 			$(SRC)utils/cgi : \
+			$(SRC)utils/exceptions : \
 			$(SRC)utils/fileHandler : \
 			$(SRC)utils/numeric : \
 			$(SRC)utils/string : \
@@ -132,7 +133,6 @@ SRCS = Body.cpp \
 		Post.cpp \
 		RequestExecutor.cpp \
 		RequestHandler.cpp \
-		HandlingResult.cpp \
 		Connection.cpp \
 		Location.cpp \
 		Session.cpp \
@@ -141,6 +141,7 @@ SRCS = Body.cpp \
 		Header.cpp \
 		HeaderCollection.cpp \
 		cgi.cpp \
+		Exceptions.cpp \
 		files.cpp \
 		numeric.cpp \
 		string.cpp \

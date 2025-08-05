@@ -6,8 +6,9 @@
 #include "models/ConfigNode.hpp"
 #include "models/Token.hpp"
 #include "utils/string/string.hpp"
-#include "helpers/DirectiveRegistry/DirectiveRegistry.hpp"
 #include "models/ConfigBlock.hpp"
+#include "helpers/DirectiveRegistry/DirectiveRegistry.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 static void checkFileAcceptance(t_configs &configs)
 {
@@ -20,16 +21,16 @@ static void checkFileAcceptance(t_configs &configs)
 			braces--;
 	}
 	if (braces > 0)
-		throw std::runtime_error("Missing some brace to close container");
+		throw FatalException("Missing some brace to close container");
 	else if (braces < 0)
-		throw std::runtime_error("Extra closing brace");
+		throw FatalException("Extra closing brace");
 }
 
 static void checkFileExtension(t_configs &configs)
 {
 	std::string fileExtension = getFileExtension(*configs.path);
 	if (fileExtension != "conf" && fileExtension != "")
-		throw std::runtime_error("Only .conf files are allowed");
+		throw FatalException("Only .conf files are allowed");
 }
 
 static std::vector<Token> tokenize(const std::string &input)
@@ -125,7 +126,7 @@ static void parseConfig(const std::string &input, std::vector<ConfigNode> &confi
 			{
 				std::stringstream what;
 				what << "unexpected semicolon near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			DirectiveRegistry::checkConfigNode(stack.top().current);
 			stack.top().container->push_back(stack.top().current);
@@ -138,7 +139,7 @@ static void parseConfig(const std::string &input, std::vector<ConfigNode> &confi
 			{
 				std::stringstream what;
 				what << "unexpected left brace \"{\" near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			DirectiveRegistry::checkConfigNode(stack.top().current);
 			stack.top().container->push_back(stack.top().current);
@@ -152,13 +153,13 @@ static void parseConfig(const std::string &input, std::vector<ConfigNode> &confi
 			{
 				std::stringstream what;
 				what << "unexpected closing brace \"}\" near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			else if (stack.top().building && !stack.top().current.name.empty())
 			{
 				std::stringstream what;
 				what << "unexpected1 closing brace \"}\" near " << stack.top().current.name;
-				throw std::runtime_error(what.str());
+				throw FatalException(what.str().c_str());
 			}
 			stack.pop();
 			stack.top().building = false;
@@ -169,7 +170,7 @@ static void parseConfig(const std::string &input, std::vector<ConfigNode> &confi
 	{
 		std::stringstream what;
 		what << "missing semicolon near " << stack.top().current.name;
-		throw std::runtime_error(what.str());
+		throw FatalException(what.str().c_str());
 	}
 }
 
@@ -196,12 +197,12 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		block.autoIndex_ = node.params.at(0) == "on";
 	else if (node.name == "index")
 		block.indexList_ = node.params;
-	else if (node.name == "client_max_body_size")
+	else if (node.name == "connection_max_body_size")
 	{
 		// TODO: Split magnitud and check if an integer is sufficient
 		int val;
 		if (std::istringstream(node.params.at(0)) >> val)
-			block.clientMaxBodySize_ = val;
+			block.connectionMaxBodySize_ = val;
 	}
 	else if (node.name == "method")
 	{
@@ -217,7 +218,7 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 		t_error_page err;
 		int num;
 		if (std::istringstream(node.params.at(0)) >> num)
-			err.code = (t_httpCode)num;
+			err.code = num;
 		err.page = node.params.at(1);
 		block.errorPages_.insert(err);
 	}
@@ -225,7 +226,7 @@ static void fillBlockFromNode(const ConfigNode &node, ConfigBlock &block)
 	{
 		int num;
 		if (std::istringstream(node.params.at(0)) >> num)
-			block.return_.code = (t_httpCode)num;
+			block.return_.code = num;
 		block.return_.path = node.params.at(1);
 	}
 }
@@ -262,7 +263,7 @@ static void setLocationFromBlock(Location *location, const ConfigBlock &block)
 	location->setCGIs(block.cgis_);
 	location->setAutoIndex(block.autoIndex_);
 	location->setIndexList(block.indexList_);
-	location->setMaxBodySize(block.clientMaxBodySize_);
+	location->setMaxBodySize(block.connectionMaxBodySize_);
 	location->setMethods(block.methods_);
 	location->setReturn(block.return_);
 	location->setErrorPages(block.errorPages_);

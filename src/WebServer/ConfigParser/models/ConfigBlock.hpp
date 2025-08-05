@@ -22,7 +22,7 @@ struct ConfigBlock
 	std::map<std::string, std::string> cgis_;
 	bool autoIndex_;
 	std::vector<std::string> indexList_;
-	size_t clientMaxBodySize_; // In bytes
+	size_t connectionMaxBodySize_; // In bytes
 	std::set<t_method> methods_;
 	t_return return_;
 	std::set<t_error_page> errorPages_;
@@ -34,7 +34,7 @@ struct ConfigBlock
 ConfigBlock::ConfigBlock()
 {
 	type = CONTEXT_BLOCK;
-	clientMaxBodySize_ = 0;
+	connectionMaxBodySize_ = 0;
 }
 
 std::ostream &operator<<(std::ostream &stream, const ConfigBlock &block)
@@ -55,7 +55,7 @@ std::ostream &operator<<(std::ostream &stream, const ConfigBlock &block)
 		   << "Index list: {";
 	for (std::vector<std::string>::const_iterator it = block.indexList_.begin(); it != block.indexList_.end(); ++it)
 		stream << *it << ", ";
-	stream << "}\nMax body size: " << block.clientMaxBodySize_ << std::endl
+	stream << "}\nMax body size: " << block.connectionMaxBodySize_ << std::endl
 		   << "Methods: {";
 	for (std::set<t_method>::const_iterator it = block.methods_.begin(); it != block.methods_.end(); ++it)
 		stream << (*it) << ", ";

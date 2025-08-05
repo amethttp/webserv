@@ -13,5 +13,5 @@ public:
 	virtual ~AMethod();
 
 	t_method const & getType() const;
-	virtual HandlingResult execute(Context &ctx) = 0;
+	virtual t_HandlingResult execute(const Context &ctx) = 0;
 };

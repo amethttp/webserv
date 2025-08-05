@@ -6,16 +6,18 @@
 #include "WebServer/Connection/Response/Response.hpp"
 #include "utils/HeaderCollection/HeaderCollection.hpp"
 
-class HandlingResult
+typedef struct s_HandlingResult
 {
-public:
 	t_httpCode code_;
 	t_connection mode_;
 	HeaderCollection tempHeaders_;
 	t_Body tempBody_;
 	bool isCGI_;
 
-public:
-	HandlingResult();
-	~HandlingResult();
-};
+	s_HandlingResult()
+	{
+		code_ = 0;
+		isCGI_ = false;
+		mode_ = C_KEEP_ALIVE;
+	}
+} t_HandlingResult;

@@ -1,6 +1,7 @@
-#include "ResponseFactory.hpp"
 #include <sstream>
+#include "ResponseFactory.hpp"
 #include "WebServer/Connection/Connection.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 static void setResponseBuffer(t_Response &response)
 {
@@ -79,7 +80,7 @@ void ResponseFactory::setStatusLine(t_httpCode code, t_Response &response)
 			defaultCode != 400 &&
 			defaultCode != 500)
 		{
-			throw std::runtime_error("Couldn't determine error code");			
+			throw RecoverableException("Couldn't determine error code");			
 		}
 		code = static_cast<t_httpCode>(defaultCode);
 		codeMsg = Connection::getHttpErrorMsg(code);
@@ -88,11 +89,11 @@ void ResponseFactory::setStatusLine(t_httpCode code, t_Response &response)
 	response.statusLine_.setFields(code, codeMsg);
 }
 
-t_Response ResponseFactory::create(HandlingResult &res)
+t_Response ResponseFactory::create(t_HandlingResult &res)
 {
 	t_Response response;
 
-	setStatusLine(res.code_, response); // handling res private/public...
+	setStatusLine(res.code_, response);
 	setResponseBody(res.tempBody_, response);
 	setDefaultHeaders(res.mode_, response);
 	addResultHeaders(res.tempHeaders_, response);

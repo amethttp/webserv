@@ -63,7 +63,7 @@ Result<RequestLine> RequestParser::parseRequestLine()
     hasFailed |= eat(TT_EOF);
 
     if (hasFailed)
-        return Result<RequestLine>::fail(BAD_REQUEST_ERR);
+        return Result<RequestLine>::fail(BAD_REQUEST);
 
     return Result<RequestLine>::ok(requestLine);
 }
@@ -88,7 +88,7 @@ Result<HeaderCollection> RequestParser::parseHeaders()
     hasFailed |= eat(TT_EOF);
 
     if (hasFailed)
-        return Result<HeaderCollection>::fail(BAD_REQUEST_ERR);
+        return Result<HeaderCollection>::fail(BAD_REQUEST);
 
     return Result<HeaderCollection>::ok(headers);
 }
@@ -99,7 +99,7 @@ Result<Body> RequestParser::parseFullBody(const size_t contentLengthSize)
     const std::string bodyMessage = eatOctetStreamToken(contentLengthSize);
 
     if (eat(TT_EOF) == FAIL)
-        return Result<Body>::fail(BAD_REQUEST_ERR);
+        return Result<Body>::fail(BAD_REQUEST);
 
     body.addFragment(bodyMessage);
 
@@ -132,7 +132,7 @@ Result<Body> RequestParser::parseChunkedBody()
     hasFailed |= eat(TT_EOF);
 
     if (hasFailed)
-        return Result<Body>::fail(BAD_REQUEST_ERR);
+        return Result<Body>::fail(BAD_REQUEST);
 
     return Result<Body>::ok(body);
 }

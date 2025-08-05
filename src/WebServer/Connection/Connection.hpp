@@ -36,18 +36,20 @@ public:
 	time_t getLastReceivedPacket() const;
 	t_httpCode getResponseStatus() const;
 	std::string getResponseBuffer() const;
-	t_Request getRequest() const;
+	const t_Request &getRequest() const;
+	const std::string &getRequestBuffer() const;
+	void clearRequestBuffer();
 
 	void setFd(fd_t fd);
 
 	bool hasPendingRequest();
-	void updateLastReceivedPacket();
+	void updateLastReceivedPacket(char *buffer);
 	void appendToRequestBuffer(const char *toAppend);
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 
-	void buildRequest(const char *buffer);
-	void buildResponse(Server *server, Location *location);
+	void setRequest(t_Request request);
+	void buildResponse(t_HandlingResult &result);
 	void buildResponse(t_httpCode code, t_connection mode);
 
 	static std::string getHttpErrorMsg(t_httpCode code);

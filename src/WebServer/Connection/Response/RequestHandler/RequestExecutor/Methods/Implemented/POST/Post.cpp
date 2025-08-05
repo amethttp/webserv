@@ -1,34 +1,35 @@
 #include "Post.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 mPost::mPost()
 {
 }
 
-static t_httpCode postFile(Context &ctx, HandlingResult res)
+static t_httpCode postFile(const Context &ctx, t_HandlingResult res)
 {
-	if (pathExists(ctx.targetPath_))
+	if (pathExists(ctx.getTargetPath()))
 		return CONFLICT;
 
-	// normalizeTrailingSlash(ctx.targetPath_);
-	std::ofstream file(ctx.targetPath_.c_str(), std::ofstream::trunc);
+	// normalizeTrailingSlash(ctx.getTargetPath());
+	std::ofstream file(ctx.getTargetPath().c_str(), std::ofstream::trunc);
 	if (!file.is_open())
 	{
 		file.close();
-		throw (std::runtime_error("Error creating file"));
+		throw (RecoverableException("Error creating file"));
 	}
-	file << ctx.request_.body.getMessage();
-	res.tempHeaders_.addHeader("Content-Location", ctx.targetPath_);
+	file << ctx.getRequest().body.getMessage();
+	res.tempHeaders_.addHeader("Content-Location", ctx.getTargetPath());
 
 	return CREATED;
 }
 
-HandlingResult mPost::execute(Context &ctx)
+t_HandlingResult mPost::execute(const Context &ctx)
 {
-	HandlingResult res;
-
 	int statCheck;
+	t_HandlingResult res;
 
-	statCheck = checkPath(ctx.uploadPath_);
+	res.mode_ = ctx.getConnectionMode();
+	statCheck = checkPath(ctx.getUploadPath());
 	switch (statCheck)
 	{
 		case S_IFDIR:

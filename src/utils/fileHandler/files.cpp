@@ -1,7 +1,8 @@
 #include "files.hpp"
 #include <string>
+#include "utils/exceptions/Exceptions.hpp"
 
-std::string getMIME(std::string &target)
+std::string getMIME(const std::string &target)
 {
 	size_t pos;
 	std::string res = "";
@@ -19,14 +20,14 @@ void normalizeTrailingSlash(std::string &path)
 		path += '/';
 }
 
-bool pathExists(std::string &path)
+bool pathExists(const std::string &path)
 {
 	struct stat st;
 
 	return (stat(path.c_str(), &st) == 0);
 }
 
-int checkPath(std::string &path)
+int checkPath(const std::string &path)
 {
 	struct stat st;
 
@@ -47,19 +48,19 @@ std::string readFileToString(const std::string &path)
 	if (!file.is_open())
 	{
 		file.close();
-		throw(std::runtime_error("Couldn't open file"));
+		throw(RecoverableException("Couldn't open file"));
 	}
 	if (stat(path.c_str(), &st))
 	{
 		file.close();
-		throw(std::runtime_error("Stat operation failed"));
+		throw(RecoverableException("Stat operation failed"));
 	}
 	str.resize(static_cast<size_t>(st.st_size));
 	file.read(&str[0], static_cast<size_t>(st.st_size));
 	if (!file)
 	{
 		file.close();
-		throw(std::runtime_error("Reading operation failed"));
+		throw(RecoverableException("Reading operation failed"));
 	}
 	file.close();
 

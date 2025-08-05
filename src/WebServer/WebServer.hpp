@@ -5,6 +5,7 @@
 #include "utils/epoll.hpp"
 #include "Connection/Connection.hpp"
 #include "Server/Server.hpp"
+#include "utils/Result/Result.hpp"
 
 #define READ_BUFFER_SIZE 4096
 #define TIMEOUT 5000
@@ -31,20 +32,18 @@ private:
 	void disconnectTimedoutConnections(t_epoll &epoll);
 
 	void receiveRequest(Connection *connection, t_epoll &epoll);
-	bool tryBuildRequest(Connection *connection, const char *buffer);
-
-	Server *matchServer(t_Request request);
-	void buildResponse(Connection *connection);
-	void readySendResponse(Connection *connection, t_epoll &epoll);
+	void processRequest(Connection *connection, Result<t_Request> &result);
 	void sendResponse(Connection *connection, t_epoll &epoll);
 
 public:
 	WebServer();
 	~WebServer();
 
+	const std::vector<Server *> &getServers() const;
 	void setServers(std::vector<Server *> &servers);
 
 	void serve();
 
+	static Server *matchServer(const std::vector<Server *> &servers, std::string hostName);
 	friend std::ostream &operator<<(std::ostream &stream, const WebServer &ws);
 };

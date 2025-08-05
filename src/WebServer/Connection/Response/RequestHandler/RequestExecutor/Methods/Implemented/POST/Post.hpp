@@ -10,5 +10,5 @@ public:
 	mPost();
 	~mPost();
 
-	HandlingResult execute(Context &ctx);
+	t_HandlingResult execute(const Context &ctx);
 };

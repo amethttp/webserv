@@ -21,25 +21,25 @@ public:
 	~Server();
 
 	bool matchesName(std::string &match);
-	Location *matchLocation(t_Request request);
+	Location *matchLocation(std::string targetRoute) const;
 
-	std::set<int> getPorts();
+	std::set<int> getPorts() const;
 	void setPorts(const std::set<int> &ports);
 
-	std::vector<Location *> getLocations();
+	std::vector<Location *> getLocations() const;
 	void setLocations(const std::vector<Location *> &locations);
 
-	std::vector<std::string> getNames();
+	std::vector<std::string> getNames() const;
 	void setNames(const std::vector<std::string> &names);
 
-	std::string getUploadPath();
+	std::string getUploadPath() const;
 	void setUploadPath(const std::string &path);
 
 	void setDefaults();
 
 	friend std::ostream &operator<<(std::ostream &stream, const Server &server);
 
-	std::map<int, Session *> getSessions();
-	Session *getSession(int);
+	Session *getSession(int) const;
+	std::map<int, Session *> getSessions() const;
 	void pushSession(Session *session);
 };

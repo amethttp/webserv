@@ -13,4 +13,4 @@
 * Compile with warngings!
 
 
-* Client max body size (error on runtime, and parsing format)
+* connection max body size (error on runtime, and parsing format)

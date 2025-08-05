@@ -3,6 +3,7 @@
 #include <sstream>
 #include "DirectiveRegistry.hpp"
 #include "utils/http/http.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 static std::map<std::string, SDirective> initDirectivesMap()
 {
@@ -14,7 +15,7 @@ static std::map<std::string, SDirective> initDirectivesMap()
     directives["autoindex"] = SDirective(1, 1, false);
     directives["root"] = SDirective(1, 1, false);
     directives["error_page"] = SDirective(2, 2, false);
-    directives["client_max_body_size"] = SDirective(1, 1, false);
+    directives["connection_max_body_size"] = SDirective(1, 1, false);
     directives["method"] = SDirective(1, M_AMOUNT, false);
     directives["upload_path"] = SDirective(1, 1, false);
     directives["cgi"] = SDirective(2, 2, false);
@@ -41,7 +42,7 @@ SDirective DirectiveRegistry::getDirective(std::string &key)
     {
         std::stringstream what;
         what << "Unknown directive \"" << key << "\"";
-        throw std::runtime_error(what.str());
+        throw FatalException(what.str().c_str());
     }
     return directive;
 }
@@ -53,12 +54,12 @@ void DirectiveRegistry::checkConfigNode(ConfigNode &node)
     {
         std::stringstream what;
         what << "directive \"" << node.name << "\" expected a maximum amount of " << directive.argMax << " arguments while " << node.params.size() << " were given";
-        throw std::runtime_error(what.str());
+        throw FatalException(what.str().c_str());
     }
     else if (node.params.size() < directive.argMin)
     {
         std::stringstream what;
         what << "directive \"" << node.name << "\" expected a minimum amount of " << directive.argMin << " arguments while " << node.params.size() << " were given";
-        throw std::runtime_error(what.str());
+        throw FatalException(what.str().c_str());
     }
 }

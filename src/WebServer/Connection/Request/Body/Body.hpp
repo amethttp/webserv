@@ -13,7 +13,7 @@ public:
     Body();
     ~Body();
 
-    std::string getMessage();
+    const std::string &getMessage() const;
     static size_t getChunkSize(const std::string &chunkSize);
 
     void addFragment(const std::string &fragment);

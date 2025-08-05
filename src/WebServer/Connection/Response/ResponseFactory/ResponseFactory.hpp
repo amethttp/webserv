@@ -14,6 +14,6 @@ private:
 	static void addResultHeaders(HeaderCollection &resultHeaders, t_Response &response);
 
 public:
-	static t_Response create(HandlingResult &res);
+	static t_Response create(t_HandlingResult &res);
 	static t_Response create(t_httpCode code, t_connection mode);
 };

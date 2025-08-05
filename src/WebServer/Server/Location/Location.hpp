@@ -13,7 +13,7 @@ typedef struct s_return
 
 	s_return()
 	{
-		code = (t_httpCode) 0;
+		code =  0;
 		path = "";
 	}
 } t_return;
@@ -36,7 +36,7 @@ private:
 	std::map<std::string, std::string> cgis_;
 	bool autoIndex_;
 	std::vector<std::string> indexList_;
-	size_t clientMaxBodySize_; // In bytes
+	size_t connectionMaxBodySize_; // In bytes
 	std::set<t_method> methods_;
 	t_return return_;
 	std::set<t_error_page> errorPages_;
@@ -45,6 +45,7 @@ public:
 	Location();
 	~Location();
 
+	void setDefaults();
 	void setPath(const std::string &path);
 	void setRoot(const std::string &root);
 	void setAutoIndex(bool mode);
@@ -55,15 +56,15 @@ public:
 	void setCGIs(std::map<std::string, std::string> cgis);
 	void setErrorPages(const std::set<t_error_page> errorPages_);
 
-	std::string getPath();
-	std::string getRoot();
-	std::set<t_method> getMethods();
-	std::set<t_error_page> getErrorPages();
-	std::map<std::string, std::string> getCGIs();
-	t_return getReturn();
-	bool getAutoIndex();
-	std::vector<std::string> getIndexList();
-	void setDefaults();
+	std::string getPath() const;
+	std::string getRoot() const;
+	bool getAutoIndex() const;
+	std::vector<std::string> getIndexList() const;
+	std::set<t_method> getMethods() const;
+	t_return getReturn() const;
+	size_t getMaxBodySize() const;
+	std::map<std::string, std::string> getCGIs() const;
+	std::set<t_error_page> getErrorPages() const;
 
 	friend std::ostream &operator<<(std::ostream &, const Location &);
 };

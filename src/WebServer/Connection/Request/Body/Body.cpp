@@ -11,7 +11,7 @@ bool Body::isNotHex(const char c)
     return !std::isxdigit(c);
 }
 
-std::string Body::getMessage()
+const std::string &Body::getMessage() const
 {
     return this->message_;
 }

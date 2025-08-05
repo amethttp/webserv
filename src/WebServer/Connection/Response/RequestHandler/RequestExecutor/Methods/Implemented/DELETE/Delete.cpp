@@ -1,4 +1,5 @@
 #include "Delete.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 mDelete::mDelete()
 {
@@ -7,22 +8,22 @@ mDelete::mDelete()
 static t_httpCode removeFile(const char *path)
 {
 	if (std::remove(path) < 0)
-		throw std::runtime_error("Couldn't remove resource");
+		throw RecoverableException("Couldn't remove resource");
 
 	return NO_CONTENT;
 }
 
-HandlingResult mDelete::execute(Context &ctx)
+t_HandlingResult mDelete::execute(const Context &ctx)
 {
-	HandlingResult res;
-
+	t_HandlingResult res;
 	int statCheck;
 
-	statCheck = checkPath(ctx.targetPath_);
+	res.mode_ = ctx.getConnectionMode();
+	statCheck = checkPath(ctx.getTargetPath());
 	switch (statCheck)
 	{
 		case S_IFREG:
-			res.code_ = removeFile(ctx.targetPath_.c_str());
+			res.code_ = removeFile(ctx.getTargetPath().c_str());
 			break ;
 		case EACCES:
 		case S_IFDIR:

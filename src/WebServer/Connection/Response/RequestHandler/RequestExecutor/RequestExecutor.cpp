@@ -1,11 +1,11 @@
 #include <iostream>
 #include "RequestExecutor.hpp"
 
-HandlingResult RequestExecutor::executeRequest(Context &ctx)
+t_HandlingResult RequestExecutor::executeRequest(const Context &ctx)
 {
 	AMethod *method;
-	HandlingResult result;
-	MethodFactory mFactory(ctx.location_.getMethods());
+	t_HandlingResult result;
+	MethodFactory mFactory(ctx.getLocation().getMethods());
 
 	method = mFactory.create(ctx.getMethod());
 	if (!method)

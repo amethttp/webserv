@@ -60,7 +60,7 @@ std::string Header::getHeaderKey(const std::string &headerString)
     return headerKey;
 }
 
-std::string Header::getHeaderValue(const std::string &headerString)
+std::string Header::getHeaderValue(const std::string &headerString) 
 {
     const size_t headerValueStart = headerString.find(':') + 1;
     const std::string headerValue = headerString.substr(headerValueStart);
