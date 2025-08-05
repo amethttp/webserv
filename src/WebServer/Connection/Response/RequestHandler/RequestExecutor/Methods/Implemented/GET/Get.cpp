@@ -178,9 +178,7 @@ static char **setEnvironment(const Context &ctx)
 	const std::string cookie = "HTTP_COOKIE=" + ctx.getRequest().headers.getHeaderValue("Cookie");
 
 	size_t envSize = 8;
-	char **env = (char **)malloc(sizeof(char *) * (envSize + 1));
-	if (!env)
-		return NULL;
+	char **env = new char*[envSize + 1];
 
 	env[0] = strdup("REQUEST_METHOD=POST");
 	env[1] = strdup(scriptName.c_str());
@@ -199,9 +197,7 @@ static char **setArgs(const Context &ctx, t_cgi &cgi)
 {
 	size_t argvSize = 2;
 
-	char **argv = (char **)malloc(sizeof(char *) * (argvSize + 1));
-	if (!argv)
-		return NULL;
+	char **argv = new char*[argvSize + 1];
 
 	argv[0] = strdup(cgi.second.c_str());
 	argv[1] = strdup(ctx.getTargetPath().c_str());
