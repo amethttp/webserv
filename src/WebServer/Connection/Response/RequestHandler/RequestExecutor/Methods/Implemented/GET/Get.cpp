@@ -1,4 +1,5 @@
 #include "Get.hpp"
+#include "utils/string/string.hpp"
 #include "utils/exceptions/Exceptions.hpp"
 
 mGet::mGet()
@@ -146,13 +147,6 @@ static void run(Context &ctx, t_HandlingResult &res)
 	}
 }
 
-static void freeArr(char **arr)
-{
-	for (size_t i = 0; arr && arr[i]; ++i)
-		free(arr[i]);
-	delete[] arr;
-}
-
 static std::string getHostName(const std::string &hostValue)
 {
 	const size_t portSeparator = hostValue.find(':');
@@ -180,14 +174,14 @@ static char **setEnvironment(const Context &ctx)
 	size_t envSize = 8;
 	char **env = new char*[envSize + 1];
 
-	env[0] = strdup("REQUEST_METHOD=POST");
-	env[1] = strdup(scriptName.c_str());
-	env[2] = strdup(queryString.c_str());
-	env[3] = strdup("SERVER_PROTOCOL=HTTP/1.1");
-	env[4] = strdup("GATEWAY_INTERFACE=CGI/1.1");
-	env[5] = strdup(serverName.c_str());
-	env[6] = strdup(serverPort.c_str());
-	env[7] = strdup(cookie.c_str());
+	env[0] = newCstr("REQUEST_METHOD=POST");
+	env[1] = newCstr(scriptName.c_str());
+	env[2] = newCstr(queryString.c_str());
+	env[3] = newCstr("SERVER_PROTOCOL=HTTP/1.1");
+	env[4] = newCstr("GATEWAY_INTERFACE=CGI/1.1");
+	env[5] = newCstr(serverName.c_str());
+	env[6] = newCstr(serverPort.c_str());
+	env[7] = newCstr(cookie.c_str());
 	env[envSize] = NULL;
 
 	return env;
@@ -199,8 +193,8 @@ static char **setArgs(const Context &ctx, t_cgi &cgi)
 
 	char **argv = new char*[argvSize + 1];
 
-	argv[0] = strdup(cgi.second.c_str());
-	argv[1] = strdup(ctx.getTargetPath().c_str());
+	argv[0] = newCstr(cgi.second.c_str());
+	argv[1] = newCstr(ctx.getTargetPath().c_str());
 	argv[argvSize] = NULL;
 
 	return argv;

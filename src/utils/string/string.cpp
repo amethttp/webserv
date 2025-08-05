@@ -109,3 +109,24 @@ int countMatchingDepth(std::string base, std::string target)
 
 	return i;
 }
+
+char *newCstr(std::string str)
+{
+	char *res;
+
+	res = new char[str.size() + 1];
+	for (size_t i = 0; i < str.size(); ++i)
+	{
+		res[i] = str[i];
+	}
+	res[str.size()] = '\0';
+
+	return res;
+}
+
+void freeArr(char **arr)
+{
+	for (size_t i = 0; arr && arr[i]; ++i)
+		delete[] arr[i];
+	delete[] arr;
+}
