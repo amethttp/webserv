@@ -142,7 +142,7 @@ t_HandlingResult RequestHandler::handleRequest(Context &ctx)
 {
     t_HandlingResult result;
 
-	if (checkBodySize(ctx)) // checkc max bdy size
+	if (checkBodySize(ctx))
 	{
 		setMaxSizeError(result);
 	}

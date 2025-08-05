@@ -1,4 +1,5 @@
 #include "Post.hpp"
+#include "utils/string/string.hpp"
 #include "utils/exceptions/Exceptions.hpp"
 
 mPost::mPost()
@@ -7,11 +8,13 @@ mPost::mPost()
 
 static t_httpCode postFile(const Context &ctx, t_HandlingResult &res)
 {
-	if (pathExists(ctx.getTargetPath()))
+	std::string fullPath = ctx.getUploadPath() + ctx.getRequest().requestLine.getTargetPath();
+	removeDoubleSlashes(fullPath);
+
+	if (pathExists(fullPath))
 		return CONFLICT;
 
-	// normalizeTrailingSlash(ctx.getTargetPath());
-	std::ofstream file(ctx.getTargetPath().c_str(), std::ofstream::trunc);
+	std::ofstream file(fullPath.c_str(), std::ofstream::trunc);
 	if (!file.is_open())
 	{
 		file.close();
