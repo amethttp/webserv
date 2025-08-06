@@ -184,7 +184,10 @@ std::vector<Connection *>::iterator WebServer::disconnectConnection(Connection *
 Server *WebServer::matchServer(const std::vector<Server *> &servers, std::string hostHeader)
 {
 	std::string hostName = HostHeaderValidator::getHostName(hostHeader);
-	std::string hostPort = HostHeaderValidator::getHostPort(hostHeader);
+	std::string hostPort = "80";
+	if (HostHeaderValidator::hasPort(hostHeader))
+		hostPort = HostHeaderValidator::getHostPort(hostHeader);
+
 	for (std::vector<Server *>::const_iterator serverIt = servers.begin(); serverIt != servers.end(); ++serverIt)
 	{
 		if ((*serverIt)->matchesName(hostName) && (*serverIt)->matchesPort(hostPort))
