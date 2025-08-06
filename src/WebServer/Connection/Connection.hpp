@@ -43,8 +43,8 @@ public:
 	void setFd(fd_t fd);
 
 	bool hasPendingRequest();
-	void updateLastReceivedPacket(char *buffer);
-	void appendToRequestBuffer(const char *toAppend);
+	void updateLastReceivedPacket(char *buffer, size_t bytesReceived);
+	void appendToRequestBuffer(const char *toAppend, size_t bytesReceived);
 	void eraseResponse(size_t bytesToErase);
 	bool shouldClose();
 

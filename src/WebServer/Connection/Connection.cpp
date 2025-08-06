@@ -155,15 +155,16 @@ void Connection::setFd(fd_t fd)
 	this->fd_ = fd;
 }
 
-void Connection::updateLastReceivedPacket(char *buffer)
+void Connection::updateLastReceivedPacket(char *buffer, size_t bytesReceived)
 {
-	this->appendToRequestBuffer(buffer);
+	this->appendToRequestBuffer(buffer, bytesReceived);
 	this->lastReceivedPacket_ = std::time(NULL);
 }
 
-void Connection::appendToRequestBuffer(const char *toAppend)
+void Connection::appendToRequestBuffer(const char *toAppend, size_t bytesReceived)
 {
-	this->request_.buffer.append(toAppend);
+	std::string temp = toAppend;
+	this->request_.buffer.append(toAppend, bytesReceived);
 }
 
 bool Connection::hasPendingRequest()

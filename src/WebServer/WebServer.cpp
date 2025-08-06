@@ -234,7 +234,7 @@ void WebServer::receiveRequest(Connection *connection, t_epoll &epoll)
 	bytesReceived = recv(connection->getFd(), buffer, READ_BUFFER_SIZE, 0);
 	if (bytesReceived > 0)
 	{
-		connection->updateLastReceivedPacket(buffer);
+		connection->updateLastReceivedPacket(buffer, bytesReceived);
 		if (!RequestFactory::canCreateAResponse(connection->getRequestBuffer()))
 			return;
 
