@@ -26,12 +26,7 @@ void Context::init(const std::vector<Server *> &servers, const t_Request &reques
 {
 	this->request_ = &request;
 	this->server_ = WebServer::matchServer(servers, this->request_->headers.getHeaderValue(HOST));
-	if (!this->server_)
-		throw RecoverableException("Couldn't match server");
-
 	this->location_ = this->server_->matchLocation(this->request_->requestLine.getTargetPath());
-	if (!this->location_)
-		throw RecoverableException("Couldn't match location");
 
 	routeTarget();
 	fitMethod();
