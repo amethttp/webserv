@@ -56,7 +56,7 @@ CCFLAGS += -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g # -Ofast
 #----DIRS----#
 BIN_DIR = bin/
 SRC = src/
-PROJ_SRC=../../src/
+PROJ_SRC=../../../src/
 SUITES=suites/
 SUITES_DIRECTORIES=$(shell find $(SUITES)* -type d 2>/dev/null | tr '\n' ':')
 INCLUDES = -I$(SRC) -I$(PROJ_SRC)

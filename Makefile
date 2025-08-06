@@ -154,7 +154,7 @@ SRCS = Body.cpp \
 OBJS = $(SRCS:%.cpp=$(BIN_DIR)%.o)
 DEPS = $(OBJS:%.o=%.d)
 
-AMETHTDD=./tests/amethyst/amethtdd
+AMETHTDD=./assets/tests/amethyst/amethtdd
 
 #----- R U L E S -----#
 
@@ -191,19 +191,19 @@ bonusre: fclean bonus
 bre: bonusre
 
 test:
-	cd tests/subject; ./ubuntu_tester "http://localhost:8080"
+	cd assets/tests/subject; ./ubuntu_tester "http://localhost:8080"
 
 tester:
-	$(MAKE) --no-print-directory -C tests/amethyst && $(AMETHTDD)
+	$(MAKE) --no-print-directory -C assets/tests/amethyst && $(AMETHTDD)
 
 testercl:
-	$(MAKE) --no-print-directory -C tests/amethyst clean
+	$(MAKE) --no-print-directory -C assets/tests/amethyst clean
 
 testerfcl:
-	$(MAKE) --no-print-directory -C tests/amethyst fclean
+	$(MAKE) --no-print-directory -C assets/tests/amethyst fclean
 
 testerre:
-	$(MAKE) --no-print-directory -C tests/amethyst re && $(AMETHTDD)
+	$(MAKE) --no-print-directory -C assets/tests/amethyst re && $(AMETHTDD)
 
 .PHONY: all \
 		clean \

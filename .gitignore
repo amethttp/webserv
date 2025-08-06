@@ -39,6 +39,3 @@ amethtdd
 .idea/
 CMakeLists.txt
 cmake-build-debug
-
-# Test files
-tests/
