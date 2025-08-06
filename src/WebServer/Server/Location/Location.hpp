@@ -36,7 +36,7 @@ private:
 	std::map<std::string, std::string> cgis_;
 	bool autoIndex_;
 	std::vector<std::string> indexList_;
-	size_t connectionMaxBodySize_; // In bytes
+	size_t connectionMaxBodySize_;
 	std::set<t_method> methods_;
 	t_return return_;
 	std::set<t_error_page> errorPages_;

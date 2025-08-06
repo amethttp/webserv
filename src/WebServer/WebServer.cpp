@@ -70,10 +70,6 @@ std::vector<fd_t> WebServer::createServerFds()
 		catch(const RecoverableException& e)
 		{
 			std::cerr << e.what() << " || Server: " << *((*serversIt)->getNames().begin()) << std::endl;
-			close(serverFd);
-			delete *serversIt;
-			serversIt = servers_.erase(serversIt);
-			continue;
 		}
 		serversIt++;
 	}

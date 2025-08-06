@@ -82,7 +82,6 @@ static t_httpCode tryAutoIndex(const Context &ctx, t_Body &body)
 		dir = readdir(d);
 		while (dir != NULL)
 		{
-			// if (dir->d_type == DT_REG || dir->d_type == DT_LNK || dir->d_type == DT_UNKNOWN)
 			setIndexNames(dir, anchorName, displayName);
 			appendElementToHTML(html, ctx.getTargetPath(), anchorName, displayName, dir->d_type);
 			dir = readdir(d);
@@ -118,7 +117,6 @@ static bool findIndex(Context &ctx)
 
 static t_httpCode tryIndex(Context &ctx, t_Body &body)
 {
-	// normalizeTrailingSlash(ctx.getTargetPath());
 	if (findIndex(ctx))
 		return getFile(ctx.getTargetPath(), body);
 

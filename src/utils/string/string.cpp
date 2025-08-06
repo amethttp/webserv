@@ -81,7 +81,6 @@ void removeDoubleSlashes(std::string &str)
 			it = str.erase(it);
 }
 
-// Decide if we normalize slashes or not || Nginx default beaviour doesnt do it
 void removeTrailingSlashes(std::string &str)
 {
 	if (*(str.rbegin()) == '/' && str.length() > 1)
