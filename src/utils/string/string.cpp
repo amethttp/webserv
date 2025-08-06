@@ -110,7 +110,7 @@ int countMatchingDepth(std::string base, std::string target)
 	return i;
 }
 
-char *newCstr(std::string str)
+char *newCstr(const std::string &str)
 {
 	char *res;
 

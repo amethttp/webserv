@@ -11,6 +11,7 @@
 #include "Connection/Connection.hpp"
 #include "Connection/Request/RequestFactory/RequestFactory.hpp"
 #include "utils/exceptions/Exceptions.hpp"
+#include "Connection/Request/RequestFactory/RequestValidator/HostHeaderValidator/HostHeaderValidator.hpp"
 
 WebServer::WebServer()
 {
@@ -184,15 +185,16 @@ std::vector<Connection *>::iterator WebServer::disconnectConnection(Connection *
 	return removeConnection(connection);
 }
 
-Server *WebServer::matchServer(const std::vector<Server *> &servers, std::string hostName)
+Server *WebServer::matchServer(const std::vector<Server *> &servers, std::string hostHeader)
 {
+	std::string hostName = HostHeaderValidator::getHostName(hostHeader);
 	for (std::vector<Server *>::const_iterator serverIt = servers.begin(); serverIt != servers.end(); ++serverIt)
 	{
 		if ((*serverIt)->matchesName(hostName))
 			return *serverIt;
 	}
 
-	return *servers.begin();
+	return NULL;
 }
 
 void WebServer::processRequest(Connection *connection, Result<t_Request> &result)
@@ -211,14 +213,17 @@ void WebServer::processRequest(Connection *connection, Result<t_Request> &result
 			connection->buildResponse(handlingResult);
 		}
 		else
-		{
 			connection->buildResponse(result.getError(), C_CLOSE);
-		}
 	}
 	catch(const RecoverableException& e)
 	{
 		std::cerr << e.what() << std::endl;
-		connection->buildResponse(INTERNAL_SERVER_ERROR, C_CLOSE);
+		if (e.what() == (std::string)NO_SERVER_MATCH)
+			connection->buildResponse(BAD_REQUEST, C_CLOSE);
+		else if (e.what() == (std::string)NO_LOCATION_MATCH)
+			connection->buildResponse(NOT_FOUND, C_CLOSE);
+		else
+			connection->buildResponse(INTERNAL_SERVER_ERROR, C_CLOSE);
 	}
 	connection->clearRequestBuffer();
 }

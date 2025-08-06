@@ -16,9 +16,10 @@ private:
 
     static bool hasPort(const std::string &hostValue);
 
+
+public:
     static std::string getHostName(const std::string &hostValue);
     static std::string getHostPort(const std::string &hostValue);
 
-public:
     static bool isValid(const Header &hostHeader);
 };

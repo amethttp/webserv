@@ -10,12 +10,15 @@ Context::Context() : request_(NULL), location_(NULL), server_(NULL)
 
 Context::Context(const t_Request *req, const Location *loc, Server *server) : request_(req), location_(loc), server_(server)
 {
-	this->connectionMode_ = C_KEEP_ALIVE;
+	if (!this->server_)
+		throw RecoverableException("Couldn't match server");
+	if (!this->location_)
+		throw RecoverableException("Couldn't match location");
 
+	this->connectionMode_ = C_KEEP_ALIVE;
 	routeTarget();
 	fitMethod();
 	checkRequestHeaders();
-
 	this->uploadPath_ = this->server_->getUploadPath();
 }
 
@@ -25,12 +28,14 @@ void Context::init(const std::vector<Server *> &servers, const t_Request &reques
 	this->server_ = WebServer::matchServer(servers, this->request_->headers.getHeaderValue(HOST));
 	if (!this->server_)
 		throw RecoverableException("Couldn't match server");
+
 	this->location_ = this->server_->matchLocation(this->request_->requestLine.getTargetPath());
+	if (!this->location_)
+		throw RecoverableException("Couldn't match location");
 
 	routeTarget();
 	fitMethod();
 	checkRequestHeaders();
-
 	this->uploadPath_ = this->server_->getUploadPath();
 }
 

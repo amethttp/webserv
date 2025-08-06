@@ -1,6 +1,7 @@
 #include "Get.hpp"
 #include "utils/string/string.hpp"
 #include "utils/exceptions/Exceptions.hpp"
+#include "WebServer/Connection/Request/RequestFactory/RequestValidator/HostHeaderValidator/HostHeaderValidator.hpp"
 
 mGet::mGet()
 {
@@ -147,28 +148,12 @@ static void run(Context &ctx, t_HandlingResult &res)
 	}
 }
 
-static std::string getHostName(const std::string &hostValue)
-{
-	const size_t portSeparator = hostValue.find(':');
-	const std::string hostName = hostValue.substr(0, portSeparator);
-
-	return hostName;
-}
-
-static std::string getHostPort(const std::string &hostValue)
-{
-	const size_t portSeparator = hostValue.find(':');
-	const std::string hostPort = hostValue.substr(portSeparator + 1);
-
-	return hostPort;
-}
-
 static char **setEnvironment(const Context &ctx)
 {
 	const std::string scriptName = "SCRIPT_NAME=" + ctx.getRequest().requestLine.getTargetPath();
 	const std::string queryString = "QUERY_STRING=" + ctx.getRequest().requestLine.getTargetQuery();
-	const std::string serverName = "SERVER_NAME=" + getHostName(ctx.getRequest().headers.getHeaderValue(HOST));
-	const std::string serverPort = "SERVER_PORT=" + getHostPort(ctx.getRequest().headers.getHeaderValue(HOST));
+	const std::string serverName = "SERVER_NAME=" + HostHeaderValidator::getHostName(ctx.getRequest().headers.getHeaderValue(HOST));
+	const std::string serverPort = "SERVER_PORT=" + HostHeaderValidator::getHostPort(ctx.getRequest().headers.getHeaderValue(HOST));
 	const std::string cookie = "HTTP_COOKIE=" + ctx.getRequest().headers.getHeaderValue("Cookie");
 
 	size_t envSize = 8;

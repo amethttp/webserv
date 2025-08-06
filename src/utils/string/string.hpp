@@ -18,5 +18,5 @@ void removeDoubleSlashes(std::string &str);
 void removeTrailingSlashes(std::string &str);
 int countMatchingDepth(std::string base, std::string target);
 
-char *newCstr(std::string str);
+char *newCstr(const std::string &str);
 void freeArr(char **arr);

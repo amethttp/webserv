@@ -17,7 +17,7 @@ Server::~Server()
     this->sessions_.clear();
 }
 
-bool Server::matchesName(std::string &match)
+bool Server::matchesName(const std::string &match)
 {
     for (std::vector<std::string>::iterator name = this->names_.begin(); name != this->names_.end(); ++name)
     {
@@ -30,7 +30,7 @@ bool Server::matchesName(std::string &match)
 
 Location *Server::matchLocation(std::string targetRoute) const
 {
-    int matchIndex = 0;
+    int matchIndex = -1;
     int matchLength = 0;
     int longestMatch = 0;
     std::vector<Location *> locations = this->getLocations();
@@ -44,6 +44,8 @@ Location *Server::matchLocation(std::string targetRoute) const
             longestMatch = matchLength;
         }
     }
+    if (matchIndex == -1)
+        return NULL;
 
     return locations[matchIndex];
 }

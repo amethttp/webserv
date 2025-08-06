@@ -6,6 +6,9 @@
 #include "WebServer/Server/Server.hpp"
 #include "WebServer/Server/Location/Location.hpp"
 
+#define NO_SERVER_MATCH "Recoverable Exception: <Couldn't match server>"
+#define NO_LOCATION_MATCH "Recoverable Exception: <Couldn't match location>"
+
 class Context
 {
 private:
