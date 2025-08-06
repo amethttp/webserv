@@ -1,5 +1,6 @@
 #include <iostream>
 #include "RequestExecutor.hpp"
+#include "utils/exceptions/Exceptions.hpp"
 
 t_HandlingResult RequestExecutor::executeRequest(Context &ctx)
 {
@@ -15,8 +16,16 @@ t_HandlingResult RequestExecutor::executeRequest(Context &ctx)
 	}
 	else
 	{
-		result = method->execute(ctx);
-		delete method;
+		try
+		{
+			result = method->execute(ctx);
+			delete method;
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << e.what() << std::endl;
+			delete method;
+		}		
 	}
 	
 	return result;

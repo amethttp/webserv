@@ -61,7 +61,10 @@ static char **setEnvironment(const Context &ctx)
 	const std::string queryString = "QUERY_STRING=" + ctx.getRequest().requestLine.getTargetQuery();
 	const std::string serverName = "SERVER_NAME=" + HostHeaderValidator::getHostName(ctx.getRequest().headers.getHeaderValue(HOST));
 	const std::string serverPort = "SERVER_PORT=" + HostHeaderValidator::getHostPort(ctx.getRequest().headers.getHeaderValue(HOST));
-	const std::string cookie = "HTTP_COOKIE=" + ctx.getRequest().headers.getHeaderValue("Cookie");
+	
+	std::string cookie = "";
+	if (ctx.getRequest().headers.contains("Cookie"))
+		cookie = "HTTP_COOKIE=" + ctx.getRequest().headers.getHeaderValue("Cookie");
 
 	size_t envSize = 10;
 	char **env = new char *[envSize + 1];
@@ -121,8 +124,18 @@ static t_httpCode handleCgiOutput(const Context &ctx, t_cgi &cgi, t_Body &body)
 	}
 	else if (child == CHILD_OK)
 	{
-		char **env = setEnvironment(ctx);
-		char **argv = setArgs(ctx, cgi);
+		char **env;
+		char **argv;
+		try
+		{
+			env = setEnvironment(ctx);
+			argv = setArgs(ctx, cgi);
+		}
+		catch(const std::exception& e)
+		{
+			std::cerr << e.what() << std::endl;
+			exit(1);
+		}
 
 		close(outPipe[0]);
 		close(inPipe[1]);
