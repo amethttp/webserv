@@ -212,7 +212,7 @@ void WebServer::processRequest(Connection *connection, Result<t_Request> &result
 		else
 			connection->buildResponse(result.getError(), C_CLOSE);
 	}
-	catch(const RecoverableException& e)
+	catch (const RecoverableException& e)
 	{
 		std::cerr << e.what() << std::endl;
 		if (e.what() == (std::string)NO_SERVER_MATCH)
