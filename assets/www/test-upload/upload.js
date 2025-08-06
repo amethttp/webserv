@@ -16,7 +16,7 @@ const postFile = (file) => {
 	})
 		.then(response => {
 			if (!response.ok) {
-
+				messageLabel.innerHTML = response.status;
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 			return response;
@@ -27,6 +27,5 @@ const postFile = (file) => {
 		})
 		.catch(error => {
 			console.error('Error:', error);
-			messageLabel.innerHTML = JSON.stringify(error);
 		});
 }

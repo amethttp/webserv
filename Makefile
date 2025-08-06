@@ -162,6 +162,7 @@ all:
 	@$(MAKE) --no-print-directory $(NAME)
 
 $(NAME): $(OBJS)
+	mkdir -p assets/www/uploads
 	@printf "$(BLUE)Linking objects and creating program...$(DEF_COLOR)\n"
 	$(CC) $(CCFLAGS) $(OBJS) $(LIBRARIES) $(LIBRARIES_DEPS) -o $(NAME)
 	@echo "$(GREEN)[✓] $(PINK)$(NAME)$(GREEN) created!!!$(DEF_COLOR)"
